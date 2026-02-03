@@ -1,0 +1,434 @@
+import { createBrowserRouter } from "react-router-dom";
+import { Login } from "./pages/Login";
+import { Welcome } from "./pages/User/Welcome";
+import { Main } from "./pages/User/Main";
+import { Main as AdminMain } from "./pages/Admin/Main";
+import { Register } from "./pages/Register";
+import { ProtectedRoute } from "./components/ProtectedRoute.tsx";
+import { AuthProvider } from "./contexts/AuthContext";
+import { FAQAdmin } from "./pages/Admin/FAQ";
+import { FAQForm } from "./pages/Admin/FAQForm";
+import { PracticeAdmin } from "./pages/Admin/Practice";
+import { PracticeForm } from "./pages/Admin/PracticeForm";
+import { ScheduleAdmin } from "./pages/Admin/Schedule";
+import { ScheduleForm } from "./pages/Admin/ScheduleForm";
+import { HealthLabAdmin } from "./pages/Admin/HealthLab";
+import { HealthLabForm } from "./pages/Admin/HealthLabForm";
+import { RelationshipWorkshopAdmin } from "./pages/Admin/RelationshipWorkshop";
+import { RelationshipWorkshopForm } from "./pages/Admin/RelationshipWorkshopForm";
+import { SpiritForgeAdmin } from "./pages/Admin/SpiritForge";
+import { SpiritForgeForm } from "./pages/Admin/SpiritForgeForm";
+import { MastersTowerAdmin } from "./pages/Admin/MastersTower";
+import { MastersTowerForm } from "./pages/Admin/MastersTowerForm";
+import { FemininityGazeboAdmin } from "./pages/Admin/FemininityGazebo";
+import { FemininityGazeboForm } from "./pages/Admin/FemininityGazeboForm";
+import { ConsciousnessLibraryAdmin } from "./pages/Admin/ConsciousnessLibrary";
+import { ConsciousnessLibraryForm } from "./pages/Admin/ConsciousnessLibraryForm";
+import { ProductCatalogAdmin } from "./pages/Admin/ProductCatalog";
+import { ProductCatalogForm } from "./pages/Admin/ProductCatalogForm";
+import { DynamicContentAdmin } from "./pages/Admin/DynamicContent";
+import { DynamicContentForm } from "./pages/Admin/DynamicContentForm";
+import { WelcomeAdmin } from "./pages/Admin/Welcome";
+import { WelcomeForm } from "./pages/Admin/WelcomeForm";
+import { AboutClubAdmin } from "./pages/Admin/AboutClub";
+import { AboutClubForm } from "./pages/Admin/AboutClubForm";
+import { UsersAdmin } from "./pages/Admin/Users";
+import { UserForm } from "./pages/Admin/UserForm";
+import { ProfileAdmin } from "./pages/Admin/Profile";
+import { BroadcastAdmin } from "./pages/Admin/Broadcast";
+import { BroadcastFormAdmin } from "./pages/Admin/BroadcastForm";
+import { ModalNotificationsAdmin } from "./pages/Admin/ModalNotifications";
+import { AdminsAdmin } from "./pages/Admin/Admins";
+import { AdminForm } from "./pages/Admin/AdminForm";
+import { AdminActionLogs } from "./pages/Admin/AdminActionLogs";
+import { RobokassaSuccess } from "./pages/Robokassa/Success";
+import { RobokassaFail } from "./pages/Robokassa/Fail";
+import { ClientPerfomance } from "./pages/User/ClientPerfomance";
+import { ClientRegister } from "./pages/User/ClientRegister";
+import { ClientLogin } from "./pages/User/ClientLogin";
+import { About } from "./pages/User/About";
+import { ClientFAQ } from "./pages/User/ClientFAQ";
+import { ClientHoroscope } from "./pages/User/ClientHoroscope";
+import { ClientHoroscopesList } from "./pages/User/ClientHoroscopesList";
+import { ClientHoroscopeDetail } from "./pages/User/ClientHoroscopeDetail";
+import { ClientTransit } from "./pages/User/ClientTransit";
+import { ClientTransitsList } from "./pages/User/ClientTransitsList";
+import { ClientTransitDetail } from "./pages/User/ClientTransitDetail";
+import { ClientSchumann } from "./pages/User/ClientSchumann";
+import { ClientContactUs } from "./pages/User/ClientContactUs";
+import { ClientMeditationsList } from "./pages/User/ClientMeditationsList";
+import { ClientMeditation } from "./pages/User/ClientMeditation";
+import { ClientPracticesList } from "./pages/User/ClientPracticesList";
+import { ClientPractice } from "./pages/User/ClientPractice";
+import { ClientVideoLessonsList } from "./pages/User/ClientVideoLessonsList";
+import { ClientVideoLesson } from "./pages/User/ClientVideoLesson";
+import { ClientSchedule } from "./pages/User/ClientSchedule";
+import { ClientDiary } from "./pages/User/ClientDiary";
+import { ClientProfile } from "./pages/User/ClientProfile";
+import { TelegramWebAppHandler } from "./components/TelegramWebAppHandler";
+import { BlockedUser } from "./pages/User/BlockedUser";
+import { BlockedBrowser } from "./pages/User/BlockedBrowser";
+import { EaseLaunch } from "./pages/User/EaseLaunch";
+import { TelegramGuard } from "./components/TelegramGuard";
+import { ClientInvitedUsers } from "./pages/User/ClientInvitedUsers.tsx";
+// import { ClientMeditationUnified } from "./pages/User/ClientMeditationUnified";
+
+// Компонент-обертка для всех маршрутов
+const RootLayout = ({ children }: { children: React.ReactNode }) => {
+    return (
+        <AuthProvider>
+            <TelegramWebAppHandler />
+            {children}
+        </AuthProvider>
+    );
+};
+
+export const routes = createBrowserRouter([
+    {
+        path: "/",
+        element: <RootLayout><TelegramGuard><Welcome /></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/main",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><Main /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client-performance",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientPerfomance /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/register",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientRegister /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/login",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientLogin /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/about",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><About /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/faq",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientFAQ /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/horoscope",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientHoroscope /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/horoscopes",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientHoroscopesList /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/horoscope/:id",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientHoroscopeDetail /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/transit",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientTransit /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/transits",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientTransitsList /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/transit/:id",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientTransitDetail /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/schumann",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientSchumann /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/contactus",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientContactUs /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/meditations",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientMeditationsList /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/meditation/:id",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientMeditation /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    // {
+    //     path: "/client/meditation/:id",
+    //     element: <RootLayout><TelegramGuard><ProtectedRoute><ClientMeditationUnified /></ProtectedRoute></TelegramGuard></RootLayout>,
+    // },
+    {
+        path: "/client/practices",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientPracticesList /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/practice/:id",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientPractice /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/video-lessons",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientVideoLessonsList /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/video-lesson/:id",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientVideoLesson /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/schedule",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientSchedule /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/diary",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientDiary /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/profile",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientProfile /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/login",
+        element: <RootLayout><Login /></RootLayout>,
+    },
+    {
+        path: "/register",
+        element: <RootLayout><Register /></RootLayout>,
+    },
+    {
+        path: "/client/ease-launch",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><EaseLaunch /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/blocked-user",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><BlockedUser /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/blocked-browser",
+        element: <RootLayout><BlockedBrowser /></RootLayout>,
+    },
+    {
+        path: "/client/invited-users",
+        element: <RootLayout><ClientInvitedUsers /></RootLayout>,
+    },
+    {
+        path: "/admin",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "client_manager", "manager"]}><AdminMain /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/faq",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><FAQAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/faq/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><FAQForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/faq/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><FAQForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/practice",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><PracticeAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/practice/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><PracticeForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/practice/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><PracticeForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/schedule",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ScheduleAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/schedule/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ScheduleForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/schedule/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ScheduleForm /></ProtectedRoute></RootLayout>,
+    },
+    // ==================== HealthLab (Лаборатория здоровья) ====================
+    {
+        path: "/admin/health-lab",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><HealthLabAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/health-lab/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><HealthLabForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/health-lab/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><HealthLabForm /></ProtectedRoute></RootLayout>,
+    },
+    // ==================== RelationshipWorkshop (Мастерская отношений) ====================
+    {
+        path: "/admin/relationship-workshop",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><RelationshipWorkshopAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/relationship-workshop/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><RelationshipWorkshopForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/relationship-workshop/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><RelationshipWorkshopForm /></ProtectedRoute></RootLayout>,
+    },
+    // ==================== SpiritForge (Кузница Духа) ====================
+    {
+        path: "/admin/spirit-forge",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><SpiritForgeAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/spirit-forge/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><SpiritForgeForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/spirit-forge/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><SpiritForgeForm /></ProtectedRoute></RootLayout>,
+    },
+    // ==================== MastersTower (Башня мастеров) ====================
+    {
+        path: "/admin/masters-tower",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><MastersTowerAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/masters-tower/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><MastersTowerForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/masters-tower/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><MastersTowerForm /></ProtectedRoute></RootLayout>,
+    },
+    // ==================== FemininityGazebo (Беседка женственности) ====================
+    {
+        path: "/admin/femininity-gazebo",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><FemininityGazeboAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/femininity-gazebo/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><FemininityGazeboForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/femininity-gazebo/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><FemininityGazeboForm /></ProtectedRoute></RootLayout>,
+    },
+    // ==================== ConsciousnessLibrary (Библиотека сознания) ====================
+    {
+        path: "/admin/consciousness-library",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ConsciousnessLibraryAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/consciousness-library/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ConsciousnessLibraryForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/consciousness-library/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ConsciousnessLibraryForm /></ProtectedRoute></RootLayout>,
+    },
+    // ==================== ProductCatalog (Каталог продуктов) ====================
+    {
+        path: "/admin/product-catalog",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ProductCatalogAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/product-catalog/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ProductCatalogForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/product-catalog/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ProductCatalogForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/dynamic-content",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><DynamicContentAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/dynamic-content/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><DynamicContentForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/dynamic-content/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><DynamicContentForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/welcome",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><WelcomeAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/welcome/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><WelcomeForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/welcome/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><WelcomeForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/about-club",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><AboutClubAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/about-club/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><AboutClubForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/about-club/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><AboutClubForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/users",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "client_manager", "manager"]}><UsersAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/users/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "client_manager", "manager"]}><UserForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/users/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "client_manager", "manager"]}><UserForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/profile",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "client_manager", "manager"]}><ProfileAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/broadcast",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "client_manager", "manager"]}><BroadcastAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/broadcast/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "client_manager", "manager"]}><BroadcastFormAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/broadcast/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "client_manager", "manager"]}><BroadcastFormAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/modal-notifications",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "client_manager", "manager"]}><ModalNotificationsAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/admins",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin"]}><AdminsAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/admins/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin"]}><AdminForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/admins/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin"]}><AdminForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/action-logs",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin"]}><AdminActionLogs /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/robokassa_callback/success",
+        element: <RootLayout><RobokassaSuccess /></RootLayout>,
+    },
+    {
+        path: "/robokassa_callback/fail",
+        element: <RootLayout><RobokassaFail /></RootLayout>,
+    },
+])

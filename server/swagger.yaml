@@ -1,0 +1,2953 @@
+openapi: 3.0.3
+info:
+  title: TochkaLi API
+  description: |
+    API документация для приложения TochkaLi
+    
+    ## Структура API
+    
+    API разделен на две части:
+    - **Client** - эндпоинты для клиентского приложения (Telegram Web App)
+    - **Admin** - эндпоинты для админ панели
+    
+    ⚠️ **Примечание:** authMiddleware и requireAdmin НЕ используются, все эндпоинты публичные.
+  version: 1.0.0
+  contact:
+    name: API Support
+
+servers:
+  - url: /api
+    description: API сервер
+
+tags:
+  # Клиентская часть
+  - name: Client - Auth
+    description: Авторизация и регистрация пользователей
+  - name: Client - Profile
+    description: Профиль пользователя
+  - name: Client - Content
+    description: Получение контента (гороскопы, медитации, практики, видео уроки)
+  - name: Client - Schedule
+    description: Расписание событий
+  - name: Client - Transit
+    description: Транзиты
+  - name: Client - Diary
+    description: Дневник пользователя
+  - name: Client - VideoProgress
+    description: Прогресс просмотра видео
+  - name: Client - FAQ
+    description: Часто задаваемые вопросы
+  - name: Client - Info
+    description: Информационные страницы (О клубе, Приветствие, Шуман)
+  
+  # Админская часть
+  - name: Admin - Users
+    description: Управление пользователями
+  - name: Admin - FAQ
+    description: Управление FAQ
+  - name: Admin - Horoscope
+    description: Управление гороскопами
+  - name: Admin - Meditation
+    description: Управление медитациями
+  - name: Admin - Practice
+    description: Управление практиками
+  - name: Admin - VideoLesson
+    description: Управление видео уроками
+  - name: Admin - Schedule
+    description: Управление расписанием
+  - name: Admin - Transit
+    description: Управление транзитами
+  - name: Admin - DynamicContent
+    description: Управление динамическим контентом
+  - name: Admin - Welcome
+    description: Управление контентом приветствия
+  - name: Admin - AboutClub
+    description: Управление информацией о клубе
+  - name: Admin - Schumann
+    description: Управление частотой Шумана
+  - name: Admin - Broadcast
+    description: Рассылки пользователям
+  - name: Admin - Upload
+    description: Загрузка файлов
+  - name: Admin - Diary
+    description: Просмотр всех дневников
+  
+  # Системные
+  - name: System - Robokassa
+    description: Webhook для обработки платежей
+
+components:
+  schemas:
+    # ==================== Общие схемы ====================
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+
+    # ==================== User схемы ====================
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "507f1f77bcf86cd799439011"
+        telegramId:
+          type: string
+          example: "123456789"
+        telegramUserName:
+          type: string
+          example: "username"
+        mail:
+          type: string
+          format: email
+          example: "user@example.com"
+        fullName:
+          type: string
+          example: "Иван Иванов"
+        userName:
+          type: string
+        phone:
+          type: string
+          example: "+7 999 999 99 99"
+        role:
+          type: string
+          enum: [user, admin, content_manager, client_manager, manager]
+          example: "user"
+        status:
+          type: string
+          enum: [guest, registered, active, client]
+          example: "active"
+        bonus:
+          type: number
+          example: 10
+        hasPaid:
+          type: boolean
+          example: false
+        subscriptionEndDate:
+          type: string
+          format: date-time
+          nullable: true
+        locatedInRussia:
+          type: boolean
+          example: false
+        notifyPermission:
+          type: boolean
+          example: true
+        emailConfirmed:
+          type: boolean
+          example: false
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserProduct'
+        invitedUser:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UserProduct:
+      type: object
+      properties:
+        productId:
+          type: string
+        type:
+          type: string
+          enum: [subscription, one-time, free]
+        paymentDate:
+          type: string
+          format: date-time
+          nullable: true
+        paymentAmount:
+          type: number
+        invoiceId:
+          type: string
+          nullable: true
+        paymentStatus:
+          type: string
+          enum: [pending, paid, failed]
+
+    # ==================== FAQ схемы ====================
+    FAQ:
+      type: object
+      properties:
+        _id:
+          type: string
+        question:
+          type: string
+          example: "Как начать медитацию?"
+        answer:
+          type: string
+          example: "Найдите тихое место и закройте глаза..."
+        order:
+          type: number
+
+    # ==================== Broadcast схемы ====================
+    Broadcast:
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          type: string
+          example: "Приветственная рассылка"
+          description: Название рассылки (уникальное)
+        imgUrl:
+          type: string
+          nullable: true
+          description: URL изображения
+        content:
+          type: string
+          description: Содержание рассылки (HTML)
+        buttonText:
+          type: string
+          nullable: true
+          description: Текст кнопки
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ==================== Horoscope схемы ====================
+    HoroscopeLine:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+
+    Horoscope:
+      type: object
+      properties:
+        _id:
+          type: string
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        title:
+          type: string
+          example: "Гороскоп на неделю"
+        subtitle:
+          type: string
+        image:
+          type: string
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/HoroscopeLine'
+        accessType:
+          type: string
+          enum: [free, paid, subscription]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ==================== Content схемы ====================
+    ContentItem:
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          type: string
+          example: "Утренняя медитация"
+        shortDescription:
+          type: string
+        fullDescription:
+          type: string
+        imageUrl:
+          type: string
+        videoUrl:
+          type: string
+        ruTubeUrl:
+          type: string
+          description: URL для RuTube (для пользователей из России)
+        accessType:
+          type: string
+          enum: [free, paid, subscription, stars]
+        duration:
+          type: number
+          description: Продолжительность в минутах
+        order:
+          type: number
+        starsRequired:
+          type: number
+          description: Количество бонусов для покупки
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ==================== Schedule схемы ====================
+    Schedule:
+      type: object
+      properties:
+        _id:
+          type: string
+        eventTitle:
+          type: string
+          example: "Вебинар по медитации"
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        eventLink:
+          type: string
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ==================== Transit схемы ====================
+    Transit:
+      type: object
+      properties:
+        _id:
+          type: string
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        title:
+          type: string
+        subtitle:
+          type: string
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/HoroscopeLine'
+        accessType:
+          type: string
+          enum: [free, paid, subscription]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ==================== DynamicContent схемы ====================
+    DynamicContent:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+          example: "main_banner"
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ==================== Welcome схемы ====================
+    Welcome:
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          type: string
+        image:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ==================== AboutClub схемы ====================
+    AboutClub:
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          type: string
+        image:
+          type: string
+        content:
+          type: string
+        list:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ==================== Schumann схемы ====================
+    Schumann:
+      type: object
+      properties:
+        _id:
+          type: string
+        date:
+          type: string
+          format: date-time
+        image:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ==================== Diary схемы ====================
+    Diary:
+      type: object
+      properties:
+        _id:
+          type: string
+        user:
+          type: string
+        discovery:
+          type: string
+          description: Открытие дня
+        achievement:
+          type: string
+          description: Достижение дня
+        gratitude:
+          type: string
+          description: Благодарность дня
+        uselessTask:
+          type: boolean
+          description: Бесполезное задание выполнено
+        wasUselessTaskAchieved:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ==================== VideoProgress схемы ====================
+    VideoProgress:
+      type: object
+      properties:
+        _id:
+          type: string
+        userId:
+          type: string
+        contentType:
+          type: string
+          enum: [meditation, practice, videoLesson]
+        contentId:
+          type: string
+        currentTime:
+          type: number
+          description: Текущая позиция в секундах
+        duration:
+          type: number
+          description: Общая длительность в секундах
+        progress:
+          type: number
+          description: Прогресс в процентах (0-100)
+        completed:
+          type: boolean
+        lastWatched:
+          type: string
+          format: date-time
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT токен авторизации
+
+paths:
+  # ============================================================
+  # КЛИЕНТСКАЯ ЧАСТЬ - AUTH
+  # ============================================================
+  
+  /user/create:
+    post:
+      tags: [Client - Auth]
+      summary: Создать пользователя (Telegram)
+      description: Создает нового пользователя при первом входе через Telegram
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - telegramId
+              properties:
+                telegramId:
+                  type: string
+                  example: "123456789"
+                telegramUserName:
+                  type: string
+                  example: "username"
+                referralTelegramId:
+                  type: string
+                  description: Telegram ID пользователя, который пригласил
+      responses:
+        '200':
+          description: Пользователь создан или уже существует
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  user:
+                    $ref: '#/components/schemas/User'
+                  message:
+                    type: string
+
+  /user/register:
+    post:
+      tags: [Client - Auth]
+      summary: Регистрация пользователя
+      description: Регистрация с ФИО, email и телефоном. Начисляет 10 бонусов.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - fullName
+                - mail
+                - phone
+              properties:
+                fullName:
+                  type: string
+                  example: "Иван Иванов"
+                mail:
+                  type: string
+                  format: email
+                phone:
+                  type: string
+                  example: "+7 999 999 99 99"
+                telegramId:
+                  type: string
+      responses:
+        '200':
+          description: Успешная регистрация
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  accessToken:
+                    type: string
+                  refreshToken:
+                    type: string
+                  userData:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Не все поля заполнены
+
+  /user/login:
+    post:
+      tags: [Client - Auth]
+      summary: Авторизация
+      description: Вход по email и паролю (для админ панели)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  accessToken:
+                    type: string
+                  refreshToken:
+                    type: string
+                  userData:
+                    $ref: '#/components/schemas/User'
+        '404':
+          description: Неверный логин или пароль
+
+  /user/send-mail:
+    post:
+      tags: [Client - Auth]
+      summary: Отправить код подтверждения
+      description: Отправляет 6-значный код на email. Cooldown 60 секунд.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - mail
+              properties:
+                mail:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Письмо отправлено
+        '400':
+          description: Пользователь с такой почтой уже существует
+        '429':
+          description: Повторная отправка возможна через N секунд
+
+  /user/code-confirm:
+    post:
+      tags: [Client - Auth]
+      summary: Подтвердить код
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - mail
+                - code
+              properties:
+                mail:
+                  type: string
+                  format: email
+                code:
+                  type: string
+                  example: "123456"
+      responses:
+        '200':
+          description: Код подтвержден
+        '400':
+          description: Неверный код
+
+  /user/send-mail-recovery:
+    post:
+      tags: [Client - Auth]
+      summary: Код для восстановления пароля
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - mail
+              properties:
+                mail:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Письмо отправлено
+        '429':
+          description: Слишком частые запросы
+
+  /user/telegram/{telegramId}:
+    get:
+      tags: [Client - Auth]
+      summary: Получить пользователя по Telegram ID
+      parameters:
+        - name: telegramId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Пользователь найден
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  user:
+                    $ref: '#/components/schemas/User'
+        '404':
+          description: Пользователь не найден
+
+  /user/me:
+    get:
+      tags: [Client - Auth]
+      summary: Получить текущего пользователя
+      description: Требует userId из токена
+      responses:
+        '200':
+          description: Данные пользователя
+
+  /user/check-session:
+    get:
+      tags: [Client - Auth]
+      summary: Проверить сессию
+      responses:
+        '200':
+          description: Сессия валидна
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  valid:
+                    type: boolean
+                    example: true
+
+  /user/logout:
+    post:
+      tags: [Client - Auth]
+      summary: Выйти из аккаунта
+      description: |
+        Завершает активную сессию и инвалидирует refresh token.
+        Кнопка "Выйти" должна вызывать этот эндпоинт.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Сессия завершена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  # ============================================================
+  # КЛИЕНТСКАЯ ЧАСТЬ - PROFILE
+  # ============================================================
+
+  /user/profile:
+    post:
+      tags: [Client - Profile]
+      summary: Получить профиль пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+              properties:
+                userId:
+                  type: string
+      responses:
+        '200':
+          description: Профиль (с populated invitedUser)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  user:
+                    $ref: '#/components/schemas/User'
+
+  /users/{telegramId}:
+    patch:
+      tags: [Client - Profile]
+      summary: Обновить по Telegram ID
+      parameters:
+        - name: telegramId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                phone:
+                  type: string
+                locatedInRussia:
+                  type: boolean
+                notifyPermission:
+                  type: boolean
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Обновлено
+        '404':
+          description: Не найден
+
+  /user/profile/update:
+    put:
+      tags: [Client - Profile]
+      summary: Обновить профиль
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                phone:
+                  type: string
+      responses:
+        '200':
+          description: Профиль обновлен
+
+  /user/profile/change-password:
+    put:
+      tags: [Client - Profile]
+      summary: Изменить пароль
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - currentPassword
+                - newPassword
+              properties:
+                currentPassword:
+                  type: string
+                newPassword:
+                  type: string
+                  minLength: 6
+      responses:
+        '200':
+          description: Пароль изменен
+        '400':
+          description: Неверный пароль или слишком короткий
+
+  /user/purchase-content:
+    post:
+      tags: [Client - Profile]
+      summary: Купить контент за бонусы
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - contentId
+                - contentType
+              properties:
+                userId:
+                  type: string
+                contentId:
+                  type: string
+                contentType:
+                  type: string
+                  enum: [practice, meditation, video-lesson]
+      responses:
+        '200':
+          description: Контент приобретен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  user:
+                    type: object
+                    properties:
+                      bonus:
+                        type: number
+                      products:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/UserProduct'
+        '400':
+          description: Недостаточно бонусов
+
+  # ============================================================
+  # КЛИЕНТСКАЯ ЧАСТЬ - CONTENT (GET only)
+  # ============================================================
+
+  /horoscope:
+    get:
+      tags: [Client - Content]
+      summary: Все гороскопы
+      responses:
+        '200':
+          description: Список
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Horoscope'
+                  count:
+                    type: number
+
+  /horoscope/current:
+    get:
+      tags: [Client - Content]
+      summary: Текущий гороскоп
+      responses:
+        '200':
+          description: Текущий гороскоп
+        '404':
+          description: Не найден
+
+  /horoscope/{id}:
+    get:
+      tags: [Client - Content]
+      summary: Гороскоп по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Гороскоп
+        '404':
+          description: Не найден
+
+  /meditation:
+    get:
+      tags: [Client - Content]
+      summary: Все медитации
+      parameters:
+        - name: accessType
+          in: query
+          schema:
+            type: string
+            enum: [free, paid, subscription, stars]
+      responses:
+        '200':
+          description: Список
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ContentItem'
+                  count:
+                    type: number
+
+  /meditation/{id}:
+    get:
+      tags: [Client - Content]
+      summary: Медитация по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Медитация
+        '404':
+          description: Не найдена
+
+  /practice:
+    get:
+      tags: [Client - Content]
+      summary: Все практики
+      parameters:
+        - name: accessType
+          in: query
+          schema:
+            type: string
+            enum: [free, paid, subscription, stars]
+      responses:
+        '200':
+          description: Список
+
+  /practice/{id}:
+    get:
+      tags: [Client - Content]
+      summary: Практика по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Практика
+        '404':
+          description: Не найдена
+
+  /video-lesson:
+    get:
+      tags: [Client - Content]
+      summary: Все видео уроки
+      parameters:
+        - name: accessType
+          in: query
+          schema:
+            type: string
+            enum: [free, paid, subscription, stars]
+      responses:
+        '200':
+          description: Список
+
+  /video-lesson/{id}:
+    get:
+      tags: [Client - Content]
+      summary: Видео урок по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Видео урок
+        '404':
+          description: Не найден
+
+  /dynamic-content/name/{name}:
+    get:
+      tags: [Client - Content]
+      summary: Динамический контент по имени
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Контент
+
+  # ============================================================
+  # КЛИЕНТСКАЯ ЧАСТЬ - SCHEDULE
+  # ============================================================
+
+  /schedule:
+    get:
+      tags: [Client - Schedule]
+      summary: Все события
+      parameters:
+        - name: startDate
+          in: query
+          description: DD.MM.YYYY
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          description: DD.MM.YYYY
+          schema:
+            type: string
+        - name: upcoming
+          in: query
+          schema:
+            type: string
+            enum: ['true', 'false']
+      responses:
+        '200':
+          description: Список
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Schedule'
+                  count:
+                    type: number
+        '400':
+          description: Неверный формат даты
+
+  /schedule/{id}:
+    get:
+      tags: [Client - Schedule]
+      summary: Событие по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Событие
+        '404':
+          description: Не найдено
+
+  # ============================================================
+  # КЛИЕНТСКАЯ ЧАСТЬ - TRANSIT
+  # ============================================================
+
+  /transit:
+    get:
+      tags: [Client - Transit]
+      summary: Все транзиты
+      responses:
+        '200':
+          description: Список
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transit'
+                  count:
+                    type: number
+
+  /transit/current:
+    get:
+      tags: [Client - Transit]
+      summary: Текущий транзит
+      responses:
+        '200':
+          description: Транзит
+        '404':
+          description: Не найден
+
+  /transit/{id}:
+    get:
+      tags: [Client - Transit]
+      summary: Транзит по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Транзит
+        '404':
+          description: Не найден
+
+  # ============================================================
+  # КЛИЕНТСКАЯ ЧАСТЬ - FAQ
+  # ============================================================
+
+  /faq:
+    get:
+      tags: [Client - FAQ]
+      summary: Все FAQ
+      responses:
+        '200':
+          description: Список
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  list:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FAQ'
+                  count:
+                    type: number
+
+  /faq/{id}:
+    get:
+      tags: [Client - FAQ]
+      summary: FAQ по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: FAQ
+        '404':
+          description: Не найден
+
+  # ============================================================
+  # КЛИЕНТСКАЯ ЧАСТЬ - INFO
+  # ============================================================
+
+  /welcome:
+    get:
+      tags: [Client - Info]
+      summary: Контент приветствия
+      responses:
+        '200':
+          description: Список
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Welcome'
+                  count:
+                    type: number
+
+  /about-club:
+    get:
+      tags: [Client - Info]
+      summary: Информация о клубе
+      responses:
+        '200':
+          description: Список
+
+  /schumann:
+    get:
+      tags: [Client - Info]
+      summary: Частота Шумана
+      responses:
+        '200':
+          description: Список
+
+  # ============================================================
+  # КЛИЕНТСКАЯ ЧАСТЬ - DIARY
+  # ============================================================
+
+  /diary:
+    post:
+      tags: [Client - Diary]
+      summary: Создать запись
+      description: Начисляет 1 бонус (+1 за uselessTask)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+              properties:
+                userId:
+                  type: string
+                discovery:
+                  type: string
+                achievement:
+                  type: string
+                gratitude:
+                  type: string
+                uselessTask:
+                  type: boolean
+      responses:
+        '201':
+          description: Создано
+        '401':
+          description: userId обязателен
+
+    get:
+      tags: [Admin - Diary]
+      summary: Все записи дневника
+      responses:
+        '200':
+          description: Список
+
+  /diary/my:
+    post:
+      tags: [Client - Diary]
+      summary: Мои записи
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+              properties:
+                userId:
+                  type: string
+      responses:
+        '200':
+          description: Записи пользователя
+
+  /diary/{id}:
+    get:
+      tags: [Client - Diary]
+      summary: Запись по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Запись
+        '404':
+          description: Не найдена
+
+    put:
+      tags: [Client - Diary]
+      summary: Обновить запись
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                discovery:
+                  type: string
+                achievement:
+                  type: string
+                gratitude:
+                  type: string
+                uselessTask:
+                  type: boolean
+      responses:
+        '200':
+          description: Обновлено
+        '404':
+          description: Не найдена
+
+    delete:
+      tags: [Client - Diary]
+      summary: Удалить запись
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Удалено
+        '404':
+          description: Не найдена
+
+  # ============================================================
+  # КЛИЕНТСКАЯ ЧАСТЬ - VIDEO PROGRESS
+  # ============================================================
+
+  /video-progress:
+    post:
+      tags: [Client - VideoProgress]
+      summary: Сохранить прогресс
+      description: При 90%+ начисляется 1 бонус
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - contentType
+                - contentId
+                - currentTime
+                - duration
+              properties:
+                contentType:
+                  type: string
+                  enum: [meditation, practice, videoLesson]
+                contentId:
+                  type: string
+                currentTime:
+                  type: number
+                duration:
+                  type: number
+                userId:
+                  type: string
+      responses:
+        '200':
+          description: Обновлено
+        '201':
+          description: Создано
+
+  /video-progress/{userId}/{contentType}/{contentId}:
+    get:
+      tags: [Client - VideoProgress]
+      summary: Прогресс видео
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: contentType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [meditation, practice, videoLesson]
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Прогресс
+
+  /video-progress/user/{userId}/{contentType}:
+    get:
+      tags: [Client - VideoProgress]
+      summary: Все прогрессы пользователя
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: contentType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [meditation, practice, videoLesson]
+      responses:
+        '200':
+          description: Список прогрессов
+
+  /video-progress/batch/{userId}/{contentType}:
+    post:
+      tags: [Client - VideoProgress]
+      summary: Прогрессы для списка
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: contentType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [meditation, practice, videoLesson]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - contentIds
+              properties:
+                contentIds:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Map {contentId → progress}
+
+  # ============================================================
+  # АДМИНСКАЯ ЧАСТЬ - USERS
+  # ============================================================
+
+  /user/all:
+    get:
+      tags: [Admin - Users]
+      summary: Все пользователи
+      responses:
+        '200':
+          description: Список
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  count:
+                    type: number
+
+  /user/create-by-admin:
+    post:
+      tags: [Admin - Users]
+      summary: Создать пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - fullName
+                - mail
+                - phone
+              properties:
+                fullName:
+                  type: string
+                mail:
+                  type: string
+                phone:
+                  type: string
+                password:
+                  type: string
+                  description: Если пусто - сгенерируется
+                role:
+                  type: string
+                  enum: [user, admin, content_manager, client_manager, manager]
+                status:
+                  type: string
+                  enum: [guest, registered, active, client]
+      responses:
+        '200':
+          description: Создан (с generatedPassword если был сгенерирован)
+        '409':
+          description: Email уже существует
+
+  /user/{id}:
+    get:
+      tags: [Admin - Users]
+      summary: Пользователь по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Пользователь
+        '404':
+          description: Не найден
+
+    put:
+      tags: [Admin - Users]
+      summary: Обновить пользователя
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                phone:
+                  type: string
+                role:
+                  type: string
+                status:
+                  type: string
+                bonus:
+                  type: number
+      responses:
+        '200':
+          description: Обновлен
+        '404':
+          description: Не найден
+
+    delete:
+      tags: [Admin - Users]
+      summary: Удалить пользователя
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Удален
+        '404':
+          description: Не найден
+
+  /user/{id}/activate-subscription:
+    put:
+      tags: [Admin - Users]
+      summary: Активировать подписку
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - subscriptionEndDate
+              properties:
+                subscriptionEndDate:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Активировано
+        '400':
+          description: Дата обязательна
+        '404':
+          description: Не найден
+
+  /user/{id}/deactivate-subscription:
+    put:
+      tags: [Admin - Users]
+      summary: Деактивировать подписку
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Деактивировано
+        '404':
+          description: Не найден
+
+  # ============================================================
+  # АДМИНСКАЯ ЧАСТЬ - FAQ (POST/PUT/DELETE)
+  # ============================================================
+
+  /faq/create:
+    post:
+      tags: [Admin - FAQ]
+      summary: Создать FAQ
+      description: "Реальный путь: POST /faq"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - question
+                - answer
+              properties:
+                question:
+                  type: string
+                answer:
+                  type: string
+                order:
+                  type: number
+      responses:
+        '201':
+          description: Создан
+        '400':
+          description: Поля обязательны
+
+  /faq/{id}/edit:
+    put:
+      tags: [Admin - FAQ]
+      summary: Обновить FAQ
+      description: "Реальный путь: PUT /faq/{id}"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                question:
+                  type: string
+                answer:
+                  type: string
+                order:
+                  type: number
+      responses:
+        '200':
+          description: Обновлен
+        '404':
+          description: Не найден
+
+    delete:
+      tags: [Admin - FAQ]
+      summary: Удалить FAQ
+      description: "Реальный путь: DELETE /faq/{id}"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Удален
+        '404':
+          description: Не найден
+
+  # ============================================================
+  # АДМИНСКАЯ ЧАСТЬ - HOROSCOPE (POST/PUT/DELETE)
+  # ============================================================
+
+  /horoscope/create:
+    post:
+      tags: [Admin - Horoscope]
+      summary: Создать гороскоп
+      description: "Реальный путь: POST /horoscope"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - startDate
+                - endDate
+                - title
+              properties:
+                startDate:
+                  type: string
+                  format: date-time
+                endDate:
+                  type: string
+                  format: date-time
+                title:
+                  type: string
+                subtitle:
+                  type: string
+                image:
+                  type: string
+                lines:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/HoroscopeLine'
+                accessType:
+                  type: string
+                  enum: [free, paid, subscription]
+      responses:
+        '201':
+          description: Создан
+
+  /horoscope/{id}/edit:
+    put:
+      tags: [Admin - Horoscope]
+      summary: Обновить гороскоп
+      description: "Реальный путь: PUT /horoscope/{id}"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startDate:
+                  type: string
+                  format: date-time
+                endDate:
+                  type: string
+                  format: date-time
+                title:
+                  type: string
+                subtitle:
+                  type: string
+                image:
+                  type: string
+                lines:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/HoroscopeLine'
+                accessType:
+                  type: string
+      responses:
+        '200':
+          description: Обновлен
+        '404':
+          description: Не найден
+
+    delete:
+      tags: [Admin - Horoscope]
+      summary: Удалить гороскоп
+      description: "Реальный путь: DELETE /horoscope/{id}"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Удален
+        '404':
+          description: Не найден
+
+  # ============================================================
+  # АДМИНСКАЯ ЧАСТЬ - MEDITATION (POST/PUT/DELETE)
+  # ============================================================
+
+  /meditation/create:
+    post:
+      tags: [Admin - Meditation]
+      summary: Создать медитацию
+      description: "Реальный путь: POST /meditation"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                shortDescription:
+                  type: string
+                fullDescription:
+                  type: string
+                imageUrl:
+                  type: string
+                videoUrl:
+                  type: string
+                ruTubeUrl:
+                  type: string
+                accessType:
+                  type: string
+                  enum: [free, paid, subscription, stars]
+                duration:
+                  type: number
+                order:
+                  type: number
+      responses:
+        '201':
+          description: Создана
+
+  /meditation/{id}/edit:
+    put:
+      tags: [Admin - Meditation]
+      summary: Обновить медитацию
+      description: "Реальный путь: PUT /meditation/{id}"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Обновлена
+
+    delete:
+      tags: [Admin - Meditation]
+      summary: Удалить медитацию
+      description: "Реальный путь: DELETE /meditation/{id}"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Удалена
+
+  # ============================================================
+  # АДМИНСКАЯ ЧАСТЬ - PRACTICE (POST/PUT/DELETE)
+  # ============================================================
+
+  /practice/create:
+    post:
+      tags: [Admin - Practice]
+      summary: Создать практику
+      description: "Реальный путь: POST /practice"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                shortDescription:
+                  type: string
+                fullDescription:
+                  type: string
+                imageUrl:
+                  type: string
+                videoUrl:
+                  type: string
+                ruTubeUrl:
+                  type: string
+                accessType:
+                  type: string
+                duration:
+                  type: number
+                order:
+                  type: number
+      responses:
+        '201':
+          description: Создана
+
+  /practice/{id}/edit:
+    put:
+      tags: [Admin - Practice]
+      summary: Обновить практику
+      description: "Реальный путь: PUT /practice/{id}"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Обновлена
+
+    delete:
+      tags: [Admin - Practice]
+      summary: Удалить практику
+      description: "Реальный путь: DELETE /practice/{id}"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Удалена
+
+  # ============================================================
+  # АДМИНСКАЯ ЧАСТЬ - VIDEO LESSON (POST/PUT/DELETE)
+  # ============================================================
+
+  /video-lesson/create:
+    post:
+      tags: [Admin - VideoLesson]
+      summary: Создать видео урок
+      description: "Реальный путь: POST /video-lesson"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                shortDescription:
+                  type: string
+                fullDescription:
+                  type: string
+                imageUrl:
+                  type: string
+                videoUrl:
+                  type: string
+                ruTubeUrl:
+                  type: string
+                accessType:
+                  type: string
+                duration:
+                  type: number
+                order:
+                  type: number
+      responses:
+        '201':
+          description: Создан
+
+  /video-lesson/{id}/edit:
+    put:
+      tags: [Admin - VideoLesson]
+      summary: Обновить видео урок
+      description: "Реальный путь: PUT /video-lesson/{id}"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Обновлен
+
+    delete:
+      tags: [Admin - VideoLesson]
+      summary: Удалить видео урок
+      description: "Реальный путь: DELETE /video-lesson/{id}"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Удален
+
+  # ============================================================
+  # АДМИНСКАЯ ЧАСТЬ - SCHEDULE (POST/PUT/DELETE)
+  # ============================================================
+
+  /schedule/create:
+    post:
+      tags: [Admin - Schedule]
+      summary: Создать событие
+      description: "Реальный путь: POST /schedule"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                eventTitle:
+                  type: string
+                startDate:
+                  type: string
+                  format: date-time
+                endDate:
+                  type: string
+                  format: date-time
+                eventLink:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Создано
+
+  /schedule/{id}/edit:
+    put:
+      tags: [Admin - Schedule]
+      summary: Обновить событие
+      description: "Реальный путь: PUT /schedule/{id}"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Обновлено
+
+    delete:
+      tags: [Admin - Schedule]
+      summary: Удалить событие
+      description: "Реальный путь: DELETE /schedule/{id}"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Удалено
+
+  # ============================================================
+  # АДМИНСКАЯ ЧАСТЬ - TRANSIT (POST/PUT/DELETE)
+  # ============================================================
+
+  /transit/create:
+    post:
+      tags: [Admin - Transit]
+      summary: Создать транзит
+      description: "Реальный путь: POST /transit"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - startDate
+                - endDate
+                - title
+              properties:
+                startDate:
+                  type: string
+                  format: date-time
+                endDate:
+                  type: string
+                  format: date-time
+                title:
+                  type: string
+                subtitle:
+                  type: string
+                lines:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/HoroscopeLine'
+                accessType:
+                  type: string
+      responses:
+        '201':
+          description: Создан
+
+  /transit/{id}/edit:
+    put:
+      tags: [Admin - Transit]
+      summary: Обновить транзит
+      description: "Реальный путь: PUT /transit/{id}"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Обновлен
+
+    delete:
+      tags: [Admin - Transit]
+      summary: Удалить транзит
+      description: "Реальный путь: DELETE /transit/{id}"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Удален
+
+  # ============================================================
+  # АДМИНСКАЯ ЧАСТЬ - DYNAMIC CONTENT
+  # ============================================================
+
+  /dynamic-content:
+    get:
+      tags: [Admin - DynamicContent]
+      summary: Весь динамический контент
+      responses:
+        '200':
+          description: Список
+
+    post:
+      tags: [Admin - DynamicContent]
+      summary: Создать контент
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - content
+              properties:
+                name:
+                  type: string
+                content:
+                  type: string
+      responses:
+        '201':
+          description: Создан
+
+  /dynamic-content/{id}:
+    get:
+      tags: [Admin - DynamicContent]
+      summary: Контент по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Контент
+
+    put:
+      tags: [Admin - DynamicContent]
+      summary: Обновить контент
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                content:
+                  type: string
+      responses:
+        '200':
+          description: Обновлен
+
+    delete:
+      tags: [Admin - DynamicContent]
+      summary: Удалить контент
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Удален
+
+  # ============================================================
+  # АДМИНСКАЯ ЧАСТЬ - WELCOME (POST/PUT/DELETE)
+  # ============================================================
+
+  /welcome/{id}:
+    get:
+      tags: [Admin - Welcome]
+      summary: Контент по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Контент
+
+    put:
+      tags: [Admin - Welcome]
+      summary: Обновить контент
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                image:
+                  type: string
+                content:
+                  type: string
+      responses:
+        '200':
+          description: Обновлен
+
+    delete:
+      tags: [Admin - Welcome]
+      summary: Удалить контент
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Удален
+
+  /welcome/create:
+    post:
+      tags: [Admin - Welcome]
+      summary: Создать контент
+      description: "Реальный путь: POST /welcome"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - content
+              properties:
+                title:
+                  type: string
+                image:
+                  type: string
+                content:
+                  type: string
+      responses:
+        '201':
+          description: Создан
+
+  # ============================================================
+  # АДМИНСКАЯ ЧАСТЬ - ABOUT CLUB
+  # ============================================================
+
+  /about-club/{id}:
+    get:
+      tags: [Admin - AboutClub]
+      summary: Контент по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Контент
+
+    put:
+      tags: [Admin - AboutClub]
+      summary: Обновить контент
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                image:
+                  type: string
+                content:
+                  type: string
+                list:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Обновлен
+
+    delete:
+      tags: [Admin - AboutClub]
+      summary: Удалить контент
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Удален
+
+  /about-club/create:
+    post:
+      tags: [Admin - AboutClub]
+      summary: Создать контент
+      description: "Реальный путь: POST /about-club"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - content
+              properties:
+                title:
+                  type: string
+                image:
+                  type: string
+                content:
+                  type: string
+                list:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '201':
+          description: Создан
+
+  # ============================================================
+  # АДМИНСКАЯ ЧАСТЬ - SCHUMANN
+  # ============================================================
+
+  /schumann/{id}:
+    get:
+      tags: [Admin - Schumann]
+      summary: Запись по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Запись
+
+    put:
+      tags: [Admin - Schumann]
+      summary: Обновить запись
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  format: date-time
+                image:
+                  type: string
+      responses:
+        '200':
+          description: Обновлена
+
+    delete:
+      tags: [Admin - Schumann]
+      summary: Удалить запись
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Удалена
+
+  /schumann/create:
+    post:
+      tags: [Admin - Schumann]
+      summary: Создать запись
+      description: "Реальный путь: POST /schumann"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - date
+                - image
+              properties:
+                date:
+                  type: string
+                  format: date-time
+                image:
+                  type: string
+      responses:
+        '201':
+          description: Создана
+
+  # ============================================================
+  # АДМИНСКАЯ ЧАСТЬ - BROADCAST
+  # ============================================================
+
+  /broadcast/users:
+    post:
+      tags: [Admin - Broadcast]
+      summary: Получить пользователей для рассылки
+      description: Возвращает только пользователей с telegramId и notifyPermission=true
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [all, guest, registered, active, client]
+                  example: "all"
+                search:
+                  type: string
+                  description: Поиск по имени, username, телефону
+      responses:
+        '200':
+          description: Список пользователей
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  count:
+                    type: number
+
+  /broadcast/send:
+    post:
+      tags: [Admin - Broadcast]
+      summary: Отправить рассылку
+      description: |
+        Отправляет рассылку пользователям. Можно использовать сохраненную рассылку через broadcastId или broadcastTitle,
+        либо указать параметры напрямую (message, imageUrl, buttonText и т.д.)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: HTML текст сообщения (необязательно, если указан broadcastId или broadcastTitle)
+                broadcastId:
+                  type: string
+                  description: ID сохраненной рассылки для использования
+                broadcastTitle:
+                  type: string
+                  description: Название сохраненной рассылки для использования
+                status:
+                  type: string
+                  enum: [all, guest, registered, active, client]
+                  description: Фильтр по статусу пользователей
+                search:
+                  type: string
+                  description: Поиск по имени, username, телефону
+                userIds:
+                  type: array
+                  items:
+                    type: string
+                  description: Массив ID пользователей для выборочной отправки
+                imageUrl:
+                  type: string
+                  description: URL изображения для рассылки
+                parseMode:
+                  type: string
+                  enum: [HTML, Markdown]
+                  default: HTML
+                  description: Режим форматирования текста
+                buttonText:
+                  type: string
+                  description: Текст кнопки
+                buttonUrl:
+                  type: string
+                  description: URL кнопки (будет автоматически сформирован с параметрами пользователя)
+      responses:
+        '200':
+          description: Результат рассылки
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  sent:
+                    type: number
+                  failed:
+                    type: number
+                  total:
+                    type: number
+                  failedUsers:
+                    type: array
+                    items:
+                      type: object
+        '400':
+          description: Ошибка валидации
+        '404':
+          description: Сохраненная рассылка не найдена
+
+  /broadcast/test:
+    post:
+      tags: [Admin - Broadcast]
+      summary: Отправить тестовое сообщение
+      description: Отправляет тестовое сообщение текущему пользователю (админу)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                message:
+                  type: string
+                  description: Текст тестового сообщения
+      responses:
+        '200':
+          description: Сообщение отправлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Нет telegramId или сообщение не указано
+
+  /broadcast:
+    post:
+      tags: [Admin - Broadcast]
+      summary: Создать сохраненную рассылку
+      description: Сохраняет рассылку для последующего переиспользования
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - content
+              properties:
+                title:
+                  type: string
+                  description: Название рассылки (уникальное)
+                  example: "Приветственная рассылка"
+                imgUrl:
+                  type: string
+                  description: URL изображения
+                content:
+                  type: string
+                  description: Содержание рассылки (HTML)
+                buttonText:
+                  type: string
+                  description: Текст кнопки
+      responses:
+        '201':
+          description: Рассылка создана
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Broadcast'
+        '400':
+          description: Ошибка валидации или рассылка с таким названием уже существует
+
+    get:
+      tags: [Admin - Broadcast]
+      summary: Получить все сохраненные рассылки
+      description: Возвращает список всех сохраненных рассылок
+      responses:
+        '200':
+          description: Список рассылок
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Broadcast'
+                  count:
+                    type: number
+
+  /broadcast/{id}:
+    get:
+      tags: [Admin - Broadcast]
+      summary: Получить сохраненную рассылку по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Рассылка найдена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Broadcast'
+        '404':
+          description: Рассылка не найдена
+
+    put:
+      tags: [Admin - Broadcast]
+      summary: Обновить сохраненную рассылку
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: Название рассылки
+                imgUrl:
+                  type: string
+                content:
+                  type: string
+                buttonText:
+                  type: string
+      responses:
+        '200':
+          description: Рассылка обновлена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Broadcast'
+        '404':
+          description: Рассылка не найдена
+        '400':
+          description: Ошибка валидации
+
+    delete:
+      tags: [Admin - Broadcast]
+      summary: Удалить сохраненную рассылку
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Рассылка удалена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Рассылка не найдена
+
+  # ============================================================
+  # АДМИНСКАЯ ЧАСТЬ - SUBSCRIPTION
+  # ============================================================
+
+  /subscription/check-expired:
+    post:
+      tags: [Admin - Users]
+      summary: Проверить истекшие подписки
+      description: Ручной запуск проверки истекших подписок. Требуется роль admin или manager
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Проверка завершена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  updatedCount:
+                    type: number
+                  message:
+                    type: string
+        '403':
+          description: Доступ запрещен. Требуется роль admin или manager
+        '500':
+          description: Ошибка при проверке подписок
+
+  # ============================================================
+  # АДМИНСКАЯ ЧАСТЬ - UPLOAD
+  # ============================================================
+
+  /upload/image:
+    post:
+      tags: [Admin - Upload]
+      summary: Загрузить изображение
+      description: Max 5MB. JPEG, PNG, GIF, WEBP
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Загружено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  imageUrl:
+                    type: string
+                  filename:
+                    type: string
+        '400':
+          description: Ошибка загрузки
+
+  /upload/delete:
+    post:
+      tags: [Admin - Upload]
+      summary: Удалить изображение
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - filename
+              properties:
+                filename:
+                  type: string
+      responses:
+        '200':
+          description: Удалено
+        '404':
+          description: Не найден
+
+  # ============================================================
+  # СИСТЕМНЫЕ - ROBOKASSA
+  # ============================================================
+
+  /robres:
+    post:
+      tags: [System - Robokassa]
+      summary: Webhook оплаты
+      description: ResultURL для Robokassa
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Обработано

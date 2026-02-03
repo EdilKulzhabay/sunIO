@@ -37,7 +37,7 @@ export const RobokassaPayment = ({
       const isTestMode = import.meta.env.VITE_ROBOKASSA_TEST_MODE === '1';
       
       // URL клиентского приложения для Success/Fail страниц
-      const clientUrl = "https://portal.tochkali.com";
+      const clientUrl = import.meta.env.VITE_APP_URL;
       
       // Генерируем уникальный ID счета
       const invoiceId = Date.now();

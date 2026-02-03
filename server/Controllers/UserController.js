@@ -407,7 +407,16 @@ export const login = async (req, res) => {
             });
         }
 
-        const isValidPass = bcrypt.compare(
+        // Проверяем, есть ли у пользователя пароль
+        if (!candidate.password) {
+            console.log("login candidate has no password");
+            return res.status(404).json({
+                success: false,
+                message: "Неверный логин или пароль",
+            });
+        }
+
+        const isValidPass = await bcrypt.compare(
             password,
             candidate.password
         );

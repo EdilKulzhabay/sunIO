@@ -1,8 +1,13 @@
 import VideoProgress from '../Models/VideoProgress.js';
 import User from '../Models/User.js';
-import Meditation from '../Models/Meditation.js';
 import Practice from '../Models/Practice.js';
-import VideoLesson from '../Models/VideoLesson.js';
+import HealthLab from '../Models/HealthLab.js';
+import RelationshipWorkshop from '../Models/RelationshipWorkshop.js';
+import SpiritForge from '../Models/SpiritForge.js';
+import MastersTower from '../Models/MastersTower.js';
+import FemininityGazebo from '../Models/FemininityGazebo.js';
+import ConsciousnessLibrary from '../Models/ConsciousnessLibrary.js';
+import ProductCatalog from '../Models/ProductCatalog.js';
 
 // Сохранение или обновление прогресса просмотра
 export const saveProgress = async (req, res) => {
@@ -238,17 +243,43 @@ export const awardBonusOnPlay = async (req, res) => {
 
         // Получаем контент для проверки allowRepeatBonus
         let content;
-        if (contentType === 'meditation') {
-            content = await Meditation.findById(contentId);
-        } else if (contentType === 'practice') {
-            content = await Practice.findById(contentId);
-        } else if (contentType === 'videoLesson' || contentType === 'video-lesson') {
-            content = await VideoLesson.findById(contentId);
-        } else {
-            return res.status(400).json({
-                success: false,
-                message: 'Неверный тип контента'
-            });
+        switch (contentType) {
+            case 'practice':
+                content = await Practice.findById(contentId);
+                break;
+            case 'health-lab':
+            case 'healthLab':
+                content = await HealthLab.findById(contentId);
+                break;
+            case 'relationship-workshop':
+            case 'relationshipWorkshop':
+                content = await RelationshipWorkshop.findById(contentId);
+                break;
+            case 'spirit-forge':
+            case 'spiritForge':
+                content = await SpiritForge.findById(contentId);
+                break;
+            case 'masters-tower':
+            case 'mastersTower':
+                content = await MastersTower.findById(contentId);
+                break;
+            case 'femininity-gazebo':
+            case 'femininityGazebo':
+                content = await FemininityGazebo.findById(contentId);
+                break;
+            case 'consciousness-library':
+            case 'consciousnessLibrary':
+                content = await ConsciousnessLibrary.findById(contentId);
+                break;
+            case 'product-catalog':
+            case 'productCatalog':
+                content = await ProductCatalog.findById(contentId);
+                break;
+            default:
+                return res.status(400).json({
+                    success: false,
+                    message: 'Неверный тип контента'
+                });
         }
 
         if (!content) {

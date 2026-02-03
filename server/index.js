@@ -171,7 +171,7 @@ app.get("/api/user/check-session", authMiddleware, (req, res) => {
 app.post("/api/user/logout", authMiddleware, UserController.logout);
 
 // Управление пользователями (для client_manager, manager, admin)
-app.post("/api/user/create-by-admin", createUserRateLimit, authMiddleware, UserController.createUserByAdmin);
+app.post("/api/user/create-by-admin", UserController.createUserByAdmin);
 app.get("/api/user/all", UserController.getAllUsers);
 app.get("/api/user/export/excel", UserController.exportUsersToExcel);
 app.get("/api/user/:id", UserController.getUserById);

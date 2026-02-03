@@ -91,7 +91,7 @@ bot.start(async (ctx) => {
           {
             text: '🚀 Открыть Портал .li',
             web_app: {
-                  url: `https://portal.tochkali.com/main/?telegramId=${telegramId}&telegramUserName=${telegramUserName}`
+                  url: `${process.env.APP_URL}/main/?telegramId=${telegramId}&telegramUserName=${telegramUserName}`
             }
           }
         ]]

@@ -279,7 +279,7 @@ export const About = () => {
                                                 }
                                             }
                                             disabled={!familiatizaedWithOffer}
-                                            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#EC1313] hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#C4841D] hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             Купить
                                         </button>
@@ -355,7 +355,7 @@ export const About = () => {
                                                 }
                                             }
                                             disabled={!familiatizaedWithOffer}
-                                            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#EC1313] hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#C4841D] hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             Купить
                                         </button>

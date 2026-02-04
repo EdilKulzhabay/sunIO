@@ -8,6 +8,7 @@ import { ImageUpload } from '../../components/Admin/ImageUpload';
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import api from '../../api';
 import { toast } from 'react-toastify';
+import { REDIRECT_TO_PAGE_OPTIONS } from '../../constants/redirectToPageOptions';
 
 interface ContentItem {
     type: 'video' | 'text' | 'image';
@@ -118,7 +119,15 @@ export const RelationshipWorkshopForm = () => {
                                 </select>
                             </div>
                         </div>
-                        <MyInput label="Ссылка перехода (если задана — при нажатии откроется эта страница вместо контента)" type="text" value={formData.redirectToPage} onChange={(e) => setFormData({ ...formData, redirectToPage: e.target.value })} placeholder="/client/health-lab или /client/relationship-workshop/:id" />
+                        <div className="flex flex-col gap-2">
+                            <label className="text-sm font-medium">Ссылка перехода</label>
+                            <select value={formData.redirectToPage} onChange={(e) => setFormData({ ...formData, redirectToPage: e.target.value })} className="w-full p-2 rounded-md border border-gray-300">
+                                {REDIRECT_TO_PAGE_OPTIONS.map((opt) => (
+                                    <option key={opt.value || 'empty'} value={opt.value}>{opt.title}</option>
+                                ))}
+                            </select>
+                            <p className="text-xs text-gray-500">Если выбрана страница — при нажатии на карточку откроется она вместо страницы контента</p>
+                        </div>
                         <div className="-mt-2"><div className="flex items-center gap-3 pt-6"><input type="checkbox" checked={formData.allowRepeatBonus} onChange={(e) => setFormData({ ...formData, allowRepeatBonus: e.target.checked })} className="h-4 w-4 text-blue-600 border-gray-300 rounded" /><span className="text-sm">Добавление бонусов за повторные просмотры</span></div></div>
                     </div>
 

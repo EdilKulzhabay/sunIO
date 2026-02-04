@@ -8,6 +8,7 @@ import { ImageUpload } from '../../components/Admin/ImageUpload';
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import api from '../../api';
 import { toast } from 'react-toastify';
+import { REDIRECT_TO_PAGE_OPTIONS } from '../../constants/redirectToPageOptions';
 
 interface ContentItem { type: 'video' | 'text' | 'image'; video?: { mainUrl: string; reserveUrl: string; duration: number; }; text?: string; image?: string; }
 interface FormData { title: string; shortDescription: string; imageUrl: string; accessType: string; starsRequired: number; duration: number; order: number; allowRepeatBonus: boolean; location: 'top' | 'bottom'; redirectToPage: string; content: ContentItem[]; }
@@ -61,7 +62,15 @@ export const ConsciousnessLibraryForm = () => {
                         <div className="flex flex-col gap-2"><label className="text-sm font-medium">Тип доступа</label><select value={formData.accessType} onChange={(e) => setFormData({ ...formData, accessType: e.target.value })} className="w-full p-2 rounded-md border border-gray-300"><option value="free">Бесплатно</option><option value="paid">Платно</option><option value="subscription">Подписка</option><option value="stars">Звёзды</option></select></div>
                         {formData.accessType === 'stars' && <MyInput label="Стоимость в звёздах" type="number" value={String(formData.starsRequired)} onChange={(e) => setFormData({ ...formData, starsRequired: Number(e.target.value) || 0 })} min="0" />}
                         <div className="grid grid-cols-2 gap-4"><MyInput label="Порядок" type="number" value={String(formData.order)} onChange={(e) => setFormData({ ...formData, order: Number(e.target.value) || 0 })} min="0" /><div className="flex flex-col gap-2"><label className="text-sm font-medium">Расположение</label><select value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value as FormData['location'] })} className="w-full p-2 rounded-md border border-gray-300"><option value="top">Сверху</option><option value="bottom">Снизу</option></select></div></div>
-                        <MyInput label="Ссылка перехода (если задана — при нажатии откроется эта страница вместо контента)" type="text" value={formData.redirectToPage} onChange={(e) => setFormData({ ...formData, redirectToPage: e.target.value })} placeholder="/client/health-lab или /client/consciousness-library/:id" />
+                        <div className="flex flex-col gap-2">
+                            <label className="text-sm font-medium">Ссылка перехода</label>
+                            <select value={formData.redirectToPage} onChange={(e) => setFormData({ ...formData, redirectToPage: e.target.value })} className="w-full p-2 rounded-md border border-gray-300">
+                                {REDIRECT_TO_PAGE_OPTIONS.map((opt) => (
+                                    <option key={opt.value || 'empty'} value={opt.value}>{opt.title}</option>
+                                ))}
+                            </select>
+                            <p className="text-xs text-gray-500">Если выбрана страница — при нажатии на карточку откроется она вместо страницы контента</p>
+                        </div>
                         <div className="-mt-2"><div className="flex items-center gap-3 pt-6"><input type="checkbox" checked={formData.allowRepeatBonus} onChange={(e) => setFormData({ ...formData, allowRepeatBonus: e.target.checked })} className="h-4 w-4 text-blue-600 border-gray-300 rounded" /><span className="text-sm">Добавление бонусов за повторные просмотры</span></div></div>
                     </div>
                     <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">

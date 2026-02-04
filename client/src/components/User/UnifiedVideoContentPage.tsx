@@ -5,7 +5,21 @@ import { BackNav } from "./BackNav";
 import { SecureKinescopePlayer } from "./SecureKinescopePlayer";
 import { Switch } from "./Switch";
 
-type ContentType = "videoLesson" | "practice" | "meditation";
+type ContentType = 
+    | "videoLesson" 
+    | "practice" 
+    | "meditation"
+    | "health-lab"
+    | "relationship-workshop"
+    | "spirit-forge"
+    | "masters-tower"
+    | "femininity-gazebo"
+    | "consciousness-library"
+    | "product-catalog"
+    | "analysis-health"
+    | "analysis-relationships"
+    | "analysis-realization"
+    | "psychodiagnostics";
 
 interface NormalizedContent {
     title: string;

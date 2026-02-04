@@ -72,12 +72,12 @@ export const ClientConsciousnessLibraryList = () => {
         setStarsContent(responseStars.data.data.content);
     }
 
-    const fetchConsciousnessLibrarys = async () => {
+    const fetchConsciousnessLibraries = async () => {
         try {
             const response = await api.get('/api/consciousness-library');
-            setConsciousnessLibrarys(response.data.data);
+            setConsciousnessLibraries(response.data.data);
         } catch (error) {
-            console.error('Ошибка загрузки мастерской отношений:', error);
+            console.error('Ошибка загрузки библиотеки сознания:', error);
         } finally {
             setLoading(false);
         }
@@ -191,7 +191,7 @@ export const ClientConsciousnessLibraryList = () => {
 
     const handlePurchaseSuccess = async () => {
         await fetchUserData();
-        await fetchConsciousnessLibrarys();
+        await fetchConsciousnessLibraries();
     }
 
     const hasAccessToContent = (contentId: string): boolean => {

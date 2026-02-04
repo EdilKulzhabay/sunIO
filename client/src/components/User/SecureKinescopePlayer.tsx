@@ -8,7 +8,21 @@ interface SecureKinescopePlayerProps {
     title?: string;
     onPosterClick?: () => void;
     showPoster?: boolean;
-    contentType: 'meditation' | 'practice' | 'videoLesson';
+    contentType: 
+        | 'meditation' 
+        | 'practice' 
+        | 'videoLesson'
+        | 'health-lab'
+        | 'relationship-workshop'
+        | 'spirit-forge'
+        | 'masters-tower'
+        | 'femininity-gazebo'
+        | 'consciousness-library'
+        | 'product-catalog'
+        | 'analysis-health'
+        | 'analysis-relationships'
+        | 'analysis-realization'
+        | 'psychodiagnostics';
     contentId: string;
     duration?: number; // Длительность в минутах из данных контента
     onProgressUpdate?: (progress: number, duration?: number) => void; // progress в %, duration в секундах

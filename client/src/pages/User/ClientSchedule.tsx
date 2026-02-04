@@ -285,7 +285,7 @@ export const ClientSchedule = () => {
                             >
                                 <div onClick={() => {}} className="flex items-center justify-between">
                                     <h1 className="text-xl font-medium">{schedule?.eventTitle}</h1>
-                                    {schedule.priority && <div className="w-1.5 h-1.5 bg-[#EC1313] rounded-full" />}
+                                    {schedule.priority && <div className="w-1.5 h-1.5 bg-[#C4841D] rounded-full" />}
                                     {!schedule.priority && <div className="w-1.5 h-1.5 bg-[#FFC293] rounded-full" />}
                                 </div>
                                 <p dangerouslySetInnerHTML={{ __html: schedule?.description || '' }}></p>

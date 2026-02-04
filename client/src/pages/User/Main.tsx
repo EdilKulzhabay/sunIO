@@ -334,7 +334,7 @@ export const Main = () => {
                                 <p className="mb-6 text-gray-300 text-lg" dangerouslySetInnerHTML={{ __html: modalNotification.modalDescription }}></p>
                                 <button
                                     onClick={handleModalButtonClick}
-                                    className="block text-white py-2.5 text-center font-medium rounded-full bg-[#EC1313] w-full"
+                                    className="block text-white py-2.5 text-center font-medium rounded-full bg-[#C4841D] w-full"
                                 >
                                     {modalNotification.modalButtonText}
                                 </button>
@@ -361,7 +361,7 @@ export const Main = () => {
                                 <p className="mb-6 text-gray-300 text-lg" dangerouslySetInnerHTML={{ __html: modalNotification.modalDescription }}></p>
                                 <button
                                     onClick={handleModalButtonClick}
-                                    className="block text-white py-2.5 text-center font-medium rounded-full bg-[#EC1313] w-full"
+                                    className="block text-white py-2.5 text-center font-medium rounded-full bg-[#C4841D] w-full"
                                 >
                                     {modalNotification.modalButtonText}
                                 </button>

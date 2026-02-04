@@ -4,7 +4,7 @@ export const MyLink = ({ to, text, className, color }: { to: string, text: strin
     return (
         <Link 
             to={to} 
-            className={`${color === 'red' ? 'bg-[#EC1313]' : 'bg-white/10'} block text-white py-2.5 text-center font-medium rounded-full ${className}`}
+            className={`${color === 'red' ? 'bg-[#C4841D]' : 'bg-white/10'} block text-white py-2.5 text-center font-medium rounded-full ${className}`}
         >
             {text}
         </Link>

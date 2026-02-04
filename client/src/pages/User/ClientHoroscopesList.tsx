@@ -267,7 +267,7 @@ export const ClientHoroscopesList = () => {
                                 <p className="mt-1 text-sm" dangerouslySetInnerHTML={{ __html: corridorsContent?.['horoscope-corridor-content'] ?? '' }}></p>
                             </div>
                             <a 
-                                className="block bg-[#EC1313] text-white py-2.5 text-center font-medium rounded-full mt-4 w-full" 
+                                className="block bg-[#C4841D] text-white py-2.5 text-center font-medium rounded-full mt-4 w-full" 
                                 href={corridorsContent?.['horoscope-corridor-link'] ?? '#'} 
                                 target="_blank"
                             >
@@ -306,7 +306,7 @@ export const ClientHoroscopesList = () => {
                                 </p>
                             </div>
                             <a 
-                                className="block bg-[#EC1313] text-white py-2.5 text-center font-medium rounded-full mt-4 w-full" 
+                                className="block bg-[#C4841D] text-white py-2.5 text-center font-medium rounded-full mt-4 w-full" 
                                 href="https://tochka.li/signs" 
                                 target="_blank"
                             >

@@ -19,7 +19,11 @@ import {
     Castle,
     Flower2,
     BookOpen,
-    ShoppingBag
+    ShoppingBag,
+    Stethoscope,
+    HeartHandshake,
+    Target,
+    Brain
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -45,6 +49,10 @@ const menuItems = [
     { path: '/admin/femininity-gazebo', label: 'Беседка женственности', icon: Flower2 },
     { path: '/admin/consciousness-library', label: 'Библиотека сознания', icon: BookOpen },
     { path: '/admin/product-catalog', label: 'Каталог продуктов', icon: ShoppingBag },
+    { path: '/admin/analysis-health', label: 'Разборы - Здоровье', icon: Stethoscope },
+    { path: '/admin/analysis-relationships', label: 'Разборы - Отношения', icon: HeartHandshake },
+    { path: '/admin/analysis-realization', label: 'Разборы - Реализация', icon: Target },
+    { path: '/admin/psychodiagnostics', label: 'Психодиагностика', icon: Brain },
 ];
 
 export const AdminLayout = ({ children }: AdminLayoutProps) => {

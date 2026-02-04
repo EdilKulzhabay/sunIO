@@ -1,18 +1,24 @@
 import { AdminLayout } from '../../components/Admin/AdminLayout';
 import { 
     HelpCircle, 
-    Star, 
-    Sunset, 
     Dumbbell, 
-    Video, 
     Calendar, 
-    Sparkles,
     FileText,
     Users,
     User,
     Home,
     Info,
-    Radio
+    Heart,
+    Users2,
+    Flame,
+    Castle,
+    Flower2,
+    BookOpen,
+    ShoppingBag,
+    Stethoscope,
+    HeartHandshake,
+    Target,
+    Brain
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -23,16 +29,22 @@ const mainCards = [
 
 const contentCards = [
     { title: 'FAQ', icon: HelpCircle, path: '/admin/faq', color: 'bg-blue-500', description: 'Вопросы и ответы' },
-    { title: 'Гороскопы', icon: Star, path: '/admin/horoscope', color: 'bg-purple-500', description: 'Антисоциумный гороскоп' },
-    { title: 'Медитации', icon: Sunset, path: '/admin/meditation', color: 'bg-orange-500', description: 'Контент на странице Медитации' },
     { title: 'Практики', icon: Dumbbell, path: '/admin/practice', color: 'bg-green-500', description: 'Контент на странице Практики' },
-    { title: 'Видео', icon: Video, path: '/admin/video-lesson', color: 'bg-red-500', description: 'Контент на странице Видео' },
     { title: 'Расписание', icon: Calendar, path: '/admin/schedule', color: 'bg-indigo-500', description: 'События и вебинары' },
-    { title: 'Транзиты', icon: Sparkles, path: '/admin/transit', color: 'bg-pink-500', description: 'Планетарные транзиты' },
+    { title: 'Лаборатория здоровья', icon: Heart, path: '/admin/health-lab', color: 'bg-rose-500', description: 'Контент Лаборатории здоровья' },
+    { title: 'Мастерская отношений', icon: Users2, path: '/admin/relationship-workshop', color: 'bg-pink-500', description: 'Контент Мастерской отношений' },
+    { title: 'Кузница Духа', icon: Flame, path: '/admin/spirit-forge', color: 'bg-orange-500', description: 'Контент Кузницы Духа' },
+    { title: 'Башня мастеров', icon: Castle, path: '/admin/masters-tower', color: 'bg-stone-600', description: 'Контент Башни мастеров' },
+    { title: 'Беседка женственности', icon: Flower2, path: '/admin/femininity-gazebo', color: 'bg-fuchsia-500', description: 'Контент Беседки женственности' },
+    { title: 'Библиотека сознания', icon: BookOpen, path: '/admin/consciousness-library', color: 'bg-violet-500', description: 'Контент Библиотеки сознания' },
+    { title: 'Каталог продуктов', icon: ShoppingBag, path: '/admin/product-catalog', color: 'bg-emerald-500', description: 'Каталог продуктов' },
+    { title: 'Разборы — Здоровье', icon: Stethoscope, path: '/admin/analysis-health', color: 'bg-red-500', description: 'Разборы по здоровью' },
+    { title: 'Разборы — Отношения', icon: HeartHandshake, path: '/admin/analysis-relationships', color: 'bg-rose-500', description: 'Разборы по отношениям' },
+    { title: 'Разборы — Реализация', icon: Target, path: '/admin/analysis-realization', color: 'bg-amber-500', description: 'Разборы по реализации' },
+    { title: 'Психодиагностика', icon: Brain, path: '/admin/psychodiagnostics', color: 'bg-purple-500', description: 'Психодиагностика' },
     { title: 'Динамический контент', icon: FileText, path: '/admin/dynamic-content', color: 'bg-teal-500', description: 'Управление динамическим контентом' },
     { title: 'Приветствие', icon: Home, path: '/admin/welcome', color: 'bg-amber-500', description: 'Контент на странице Приветствие' },
     { title: 'О клубе', icon: Info, path: '/admin/about-club', color: 'bg-cyan-600', description: 'Контент на странице О клубе' },
-    { title: 'Частота Шумана', icon: Radio, path: '/admin/schumann', color: 'bg-violet-500', description: 'Частоты Шумана' },
 ];
 
 export const Main = () => {

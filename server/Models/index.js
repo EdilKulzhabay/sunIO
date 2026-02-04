@@ -14,6 +14,10 @@ import MastersTower from './MastersTower.js';
 import FemininityGazebo from './FemininityGazebo.js';
 import ConsciousnessLibrary from './ConsciousnessLibrary.js';
 import ProductCatalog from './ProductCatalog.js';
+import AnalysisHealth from './AnalysisHealth.js';
+import AnalysisRelationships from './AnalysisRelationships.js';
+import AnalysisRealization from './AnalysisRealization.js';
+import Psychodiagnostics from './Psychodiagnostics.js';
 
 export {
     User,
@@ -31,5 +35,9 @@ export {
     MastersTower,
     FemininityGazebo,
     ConsciousnessLibrary,
-    ProductCatalog
+    ProductCatalog,
+    AnalysisHealth,
+    AnalysisRelationships,
+    AnalysisRealization,
+    Psychodiagnostics
 };

@@ -30,7 +30,11 @@ import {
     MastersTowerController,
     FemininityGazeboController,
     ConsciousnessLibraryController,
-    ProductCatalogController
+    ProductCatalogController,
+    AnalysisHealthController,
+    AnalysisRelationshipsController,
+    AnalysisRealizationController,
+    PsychodiagnosticsController
 } from "./Controllers/index.js";
 import { authMiddleware } from "./Middlewares/authMiddleware.js";
 import { adminActionLogMiddleware } from "./Middlewares/adminActionLogMiddleware.js";
@@ -259,6 +263,34 @@ app.get("/api/product-catalog", ProductCatalogController.getAll);
 app.get("/api/product-catalog/:id", ProductCatalogController.getById);
 app.put("/api/product-catalog/:id", authMiddleware, ProductCatalogController.update);
 app.delete("/api/product-catalog/:id", authMiddleware, ProductCatalogController.remove);
+
+// ==================== AnalysisHealth (Разборы - Здоровье) маршруты ====================
+app.post("/api/analysis-health", createContentRateLimit, authMiddleware, AnalysisHealthController.create);
+app.get("/api/analysis-health", AnalysisHealthController.getAll);
+app.get("/api/analysis-health/:id", AnalysisHealthController.getById);
+app.put("/api/analysis-health/:id", authMiddleware, AnalysisHealthController.update);
+app.delete("/api/analysis-health/:id", authMiddleware, AnalysisHealthController.remove);
+
+// ==================== AnalysisRelationships (Разборы - Отношения) маршруты ====================
+app.post("/api/analysis-relationships", createContentRateLimit, authMiddleware, AnalysisRelationshipsController.create);
+app.get("/api/analysis-relationships", AnalysisRelationshipsController.getAll);
+app.get("/api/analysis-relationships/:id", AnalysisRelationshipsController.getById);
+app.put("/api/analysis-relationships/:id", authMiddleware, AnalysisRelationshipsController.update);
+app.delete("/api/analysis-relationships/:id", authMiddleware, AnalysisRelationshipsController.remove);
+
+// ==================== AnalysisRealization (Разборы - Реализация) маршруты ====================
+app.post("/api/analysis-realization", createContentRateLimit, authMiddleware, AnalysisRealizationController.create);
+app.get("/api/analysis-realization", AnalysisRealizationController.getAll);
+app.get("/api/analysis-realization/:id", AnalysisRealizationController.getById);
+app.put("/api/analysis-realization/:id", authMiddleware, AnalysisRealizationController.update);
+app.delete("/api/analysis-realization/:id", authMiddleware, AnalysisRealizationController.remove);
+
+// ==================== Psychodiagnostics (Психодиагностика) маршруты ====================
+app.post("/api/psychodiagnostics", createContentRateLimit, authMiddleware, PsychodiagnosticsController.create);
+app.get("/api/psychodiagnostics", PsychodiagnosticsController.getAll);
+app.get("/api/psychodiagnostics/:id", PsychodiagnosticsController.getById);
+app.put("/api/psychodiagnostics/:id", authMiddleware, PsychodiagnosticsController.update);
+app.delete("/api/psychodiagnostics/:id", authMiddleware, PsychodiagnosticsController.remove);
 
 // ==================== Schedule маршруты ====================
 app.post("/api/schedule", createContentRateLimit, authMiddleware, ScheduleController.create);

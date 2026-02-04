@@ -20,3 +20,7 @@ export * as MastersTowerController from "./MastersTowerController.js";
 export * as FemininityGazeboController from "./FemininityGazeboController.js";
 export * as ConsciousnessLibraryController from "./ConsciousnessLibraryController.js";
 export * as ProductCatalogController from "./ProductCatalogController.js";
+export * as AnalysisHealthController from "./AnalysisHealthController.js";
+export * as AnalysisRelationshipsController from "./AnalysisRelationshipsController.js";
+export * as AnalysisRealizationController from "./AnalysisRealizationController.js";
+export * as PsychodiagnosticsController from "./PsychodiagnosticsController.js";

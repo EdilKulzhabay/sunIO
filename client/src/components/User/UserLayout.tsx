@@ -145,7 +145,7 @@ export const UserLayout = ({ children }: UserLayoutProps) => {
         <div 
             className="min-h-screen" 
             style={{ 
-                backgroundColor: '#161616', 
+                backgroundColor: '#031F23', 
                 color: '#ffffff',
                 userSelect: 'none',
                 WebkitUserSelect: 'none',

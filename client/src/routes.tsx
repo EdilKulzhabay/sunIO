@@ -26,6 +26,14 @@ import { ConsciousnessLibraryAdmin } from "./pages/Admin/ConsciousnessLibrary";
 import { ConsciousnessLibraryForm } from "./pages/Admin/ConsciousnessLibraryForm";
 import { ProductCatalogAdmin } from "./pages/Admin/ProductCatalog";
 import { ProductCatalogForm } from "./pages/Admin/ProductCatalogForm";
+import { AnalysisHealthAdmin } from "./pages/Admin/AnalysisHealth";
+import { AnalysisHealthForm } from "./pages/Admin/AnalysisHealthForm";
+import { AnalysisRelationshipsAdmin } from "./pages/Admin/AnalysisRelationships";
+import { AnalysisRelationshipsForm } from "./pages/Admin/AnalysisRelationshipsForm";
+import { AnalysisRealizationAdmin } from "./pages/Admin/AnalysisRealization";
+import { AnalysisRealizationForm } from "./pages/Admin/AnalysisRealizationForm";
+import { PsychodiagnosticsAdmin } from "./pages/Admin/Psychodiagnostics";
+import { PsychodiagnosticsForm } from "./pages/Admin/PsychodiagnosticsForm";
 import { DynamicContentAdmin } from "./pages/Admin/DynamicContent";
 import { DynamicContentForm } from "./pages/Admin/DynamicContentForm";
 import { WelcomeAdmin } from "./pages/Admin/Welcome";
@@ -338,6 +346,58 @@ export const routes = createBrowserRouter([
     {
         path: "/admin/product-catalog/edit/:id",
         element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ProductCatalogForm /></ProtectedRoute></RootLayout>,
+    },
+    // ==================== AnalysisHealth (Разборы - Здоровье) ====================
+    {
+        path: "/admin/analysis-health",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><AnalysisHealthAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/analysis-health/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><AnalysisHealthForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/analysis-health/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><AnalysisHealthForm /></ProtectedRoute></RootLayout>,
+    },
+    // ==================== AnalysisRelationships (Разборы - Отношения) ====================
+    {
+        path: "/admin/analysis-relationships",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><AnalysisRelationshipsAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/analysis-relationships/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><AnalysisRelationshipsForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/analysis-relationships/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><AnalysisRelationshipsForm /></ProtectedRoute></RootLayout>,
+    },
+    // ==================== AnalysisRealization (Разборы - Реализация) ====================
+    {
+        path: "/admin/analysis-realization",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><AnalysisRealizationAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/analysis-realization/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><AnalysisRealizationForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/analysis-realization/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><AnalysisRealizationForm /></ProtectedRoute></RootLayout>,
+    },
+    // ==================== Psychodiagnostics (Психодиагностика) ====================
+    {
+        path: "/admin/psychodiagnostics",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><PsychodiagnosticsAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/psychodiagnostics/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><PsychodiagnosticsForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/psychodiagnostics/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><PsychodiagnosticsForm /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/admin/dynamic-content",

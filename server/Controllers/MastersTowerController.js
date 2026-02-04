@@ -15,6 +15,7 @@ export const create = async (req, res) => {
             order,
             allowRepeatBonus,
             location,
+            redirectToPage,
             content,
         } = req.body;
 
@@ -45,6 +46,7 @@ export const create = async (req, res) => {
             order: Number.isFinite(order) ? order : 0,
             allowRepeatBonus: Boolean(allowRepeatBonus),
             location: location || 'bottom',
+            redirectToPage: redirectToPage || null,
             content: normalizedContent,
         });
 

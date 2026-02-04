@@ -44,7 +44,7 @@ export const ClientSchumann = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen bg-[#161616]">
+            <div className="flex justify-center items-center h-screen bg-[#031F23]">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
             </div>
         );
@@ -53,7 +53,7 @@ export const ClientSchumann = () => {
     return (
         <UserLayout>
             <BackNav title="Частота Шумана" />
-            <div className='px-4 mt-8 pb-10 bg-[#161616]'>
+            <div className='px-4 mt-8 pb-10 bg-[#031F23]'>
                 <p className='' dangerouslySetInnerHTML={{ __html: content?.content }}>
                 </p>
                 <div className='mt-4 space-y-4'>

@@ -14,7 +14,7 @@ export const VideoCard = ({ title, description, image, link, accessType, progres
     }
 
     return (
-        <button onClick={handleClick} className="w-full text-left bg-[#333333] rounded-lg flex gap-x-3 items-stretch cursor-pointer min-h-[120px] md:h-[160px] lg:h-[180px]">
+        <button onClick={handleClick} className="w-full text-left bg-[#114E50] rounded-lg flex gap-x-3 items-stretch cursor-pointer min-h-[120px] md:h-[160px] lg:h-[180px]">
             <div className="basis-[40%] relative flex-shrink-0 overflow-hidden rounded-l-lg">
                 <img 
                     src={`${import.meta.env.VITE_API_URL}${image}`} 

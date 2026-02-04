@@ -8,24 +8,22 @@ import { ClientPurchaseConfirmModal } from "../../components/User/ClientPurchase
 import { ClientInsufficientBonusModal } from "../../components/User/ClientInsufficientBonusModal";
 import inBothDirections from "../../assets/inBothDirections.png";
 
-export const ClientVideoLessonsList = () => {
-    // const navigate = useNavigate();
-    const [videoLessons, setVideoLessons] = useState([]);
+export const ClientAnalysisRealizationList = () => {
+    const [analysisRealizations, setULAnalysisLRealizations] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
     const [isInsufficientBonusModalOpen, setIsInsufficientBonusModalOpen] = useState(false);
     const cardsContainerRef = useRef<HTMLDivElement>(null);
-    const [content, setContent] = useState<string>('');
     const [subscriptionContent, setSubscriptionContent] = useState<string>('');
     const [starsContent, setStarsContent] = useState<string>('');
+    const [content, setContent] = useState<string>('');
     const [accessType, setAccessType] = useState<string>('');
     const [userData, setUserData] = useState<any>(null);
-    const [selectedVideoLesson, setSelectedVideoLesson] = useState<any>(null);
+    const [selectedULAnalysisLRealization, setSelectedULAnalysisLRealization] = useState<any>(null);
     const [progresses, setProgresses] = useState<Record<string, number>>({});
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Проверка на блокировку пользователя
         const userStr = localStorage.getItem('user');
         if (userStr) {
             try {
@@ -39,16 +37,16 @@ export const ClientVideoLessonsList = () => {
             }
         }
 
-        fetchVideoLessons();
+        fetchULAnalysisLRealizations();
         fetchContent();
         fetchUserData();
     }, []);
 
     useEffect(() => {
-        if (videoLessons.length > 0 && userData?._id) {
+        if (analysisRealizations.length > 0 && userData?._id) {
             fetchProgresses();
         }
-    }, [videoLessons, userData]);
+    }, [analysisRealizations, userData]);
 
     const fetchUserData = async () => {
         try {
@@ -56,7 +54,6 @@ export const ClientVideoLessonsList = () => {
             if (user._id) {
                 const response = await api.get(`/api/user/${user._id}`);
                 const userData = response.data.data;
-                // Проверка на блокировку пользователя после получения данных с сервера
                 if (userData && userData.isBlocked && userData.role !== 'admin') {
                     window.location.href = '/client/blocked-user';
                     return;
@@ -66,21 +63,21 @@ export const ClientVideoLessonsList = () => {
         } catch (error) {
             console.error('Ошибка получения данных пользователя:', error);
         }
-    }
+    };
 
     const fetchContent = async () => {
-        const responseSubscription = await api.get('/api/dynamic-content/name/video-subscription');
+        const responseSubscription = await api.get('/api/dynamic-content/name/analysis-realization-subscription');
         setSubscriptionContent(responseSubscription.data.data.content);
-        const responseStars = await api.get('/api/dynamic-content/name/video-stars');
+        const responseStars = await api.get('/api/dynamic-content/name/analysis-realization-stars');
         setStarsContent(responseStars.data.data.content);
     }
 
-    const fetchVideoLessons = async () => {
+    const fetchULAnalysisLRealizations = async () => {
         try {
-            const response = await api.get('/api/video-lesson');
-            setVideoLessons(response.data.data);
+            const response = await api.get('/api/analysis-realization');
+            setULAnalysisLRealizations(response.data.data);
         } catch (error) {
-            console.error('Ошибка загрузки видео-уроков:', error);
+            console.error('Ошибка загрузки мастерской отношений:', error);
         } finally {
             setLoading(false);
         }
@@ -91,10 +88,10 @@ export const ClientVideoLessonsList = () => {
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             if (!user._id) return;
 
-            const contentIds = videoLessons.map((vl: any) => vl._id);
+            const contentIds = analysisRealizations.map((rw: any) => rw._id);
             if (contentIds.length === 0) return;
 
-            const response = await api.post(`/api/video-progress/batch/${user._id}/videoLesson`, {
+            const response = await api.post(`/api/video-progress/batch/${user._id}/analysis-realization`, {
                 contentIds
             });
 
@@ -110,84 +107,67 @@ export const ClientVideoLessonsList = () => {
         }
     }
 
-    const handleLockedVideoLessonClick = (videoLesson: any) => {
-        const accessType = videoLesson.accessType;
+    const handleLockedULAnalysisLRealizationClick = (analysisRealization: any) => {
+        const accessType = analysisRealization.accessType;
         
-        // Проверяем, есть ли уже доступ к контенту
-        if (hasAccessToContent(videoLesson._id)) {
-            // Если есть доступ, ничего не делаем (контент уже доступен)
+        if (hasAccessToContent(analysisRealization._id)) {
             return;
         }
         
-        // Если это контент за бонусы (stars)
         if (accessType === 'stars') {
-            // Проверяем, зарегистрирован ли клиент
             if (!userData?.emailConfirmed) {
-                // Если не зарегистрирован, показываем стандартное модальное окно
                 setAccessType(accessType);
                 setContent(starsContent);
                 setIsModalOpen(true);
                 return;
             }
 
-            // Если зарегистрирован, проверяем бонусы
-            const starsRequired = videoLesson.starsRequired || 0;
+            const starsRequired = analysisRealization.starsRequired || 0;
             if (userData.bonus < starsRequired) {
-                // Недостаточно бонусов, показываем модальное окно о недостатке бонусов
-                setSelectedVideoLesson(videoLesson);
+                setSelectedULAnalysisLRealization(analysisRealization);
                 setIsInsufficientBonusModalOpen(true);
                 return;
             }
 
-            // Достаточно бонусов, показываем модальное окно подтверждения покупки
-            setSelectedVideoLesson(videoLesson);
+            setSelectedULAnalysisLRealization(analysisRealization);
             setIsPurchaseModalOpen(true);
             return;
         }
 
-        // Для subscription показываем стандартное модальное окно
         setAccessType(accessType);
         if (accessType === 'subscription') {
             setContent(subscriptionContent);
         }
         setIsModalOpen(true);
     }
-    const handleLockedVideoLessonClickSubscription = (videoLesson: any) => {
-        const accessType = videoLesson.accessType;
+    
+    const handleLockedULAnalysisLRealizationClickSubscription = (analysisRealization: any) => {
+        const accessType = analysisRealization.accessType;
         
-        // Проверяем, есть ли уже доступ к контенту
         if (hasAccessToContentSubscription()) {
-            // Если есть доступ, ничего не делаем (контент уже доступен)
             return;
         }
         
-        // Если это контент за бонусы (stars)
         if (accessType === 'stars') {
-            // Проверяем, зарегистрирован ли клиент
             if (!userData?.emailConfirmed) {
-                // Если не зарегистрирован, показываем стандартное модальное окно
                 setAccessType(accessType);
                 setContent(starsContent);
                 setIsModalOpen(true);
                 return;
             }
 
-            // Если зарегистрирован, проверяем бонусы
-            const starsRequired = videoLesson.starsRequired || 0;
+            const starsRequired = analysisRealization.starsRequired || 0;
             if (userData.bonus < starsRequired) {
-                // Недостаточно бонусов, показываем модальное окно о недостатке бонусов
-                setSelectedVideoLesson(videoLesson);
+                setSelectedULAnalysisLRealization(analysisRealization);
                 setIsInsufficientBonusModalOpen(true);
                 return;
             }
 
-            // Достаточно бонусов, показываем модальное окно подтверждения покупки
-            setSelectedVideoLesson(videoLesson);
+            setSelectedULAnalysisLRealization(analysisRealization);
             setIsPurchaseModalOpen(true);
             return;
         }
 
-        // Для subscription показываем стандартное модальное окно
         setAccessType(accessType);
         if (accessType === 'subscription') {
             setContent(subscriptionContent);
@@ -201,21 +181,19 @@ export const ClientVideoLessonsList = () => {
 
     const handleClosePurchaseModal = () => {
         setIsPurchaseModalOpen(false);
-        setSelectedVideoLesson(null);
+        setSelectedULAnalysisLRealization(null);
     }
 
     const handleCloseInsufficientBonusModal = () => {
         setIsInsufficientBonusModalOpen(false);
-        setSelectedVideoLesson(null);
+        setSelectedULAnalysisLRealization(null);
     }
 
     const handlePurchaseSuccess = async () => {
-        // Обновляем данные пользователя после покупки
         await fetchUserData();
-        await fetchVideoLessons();
+        await fetchULAnalysisLRealizations();
     }
 
-    // Проверка доступа к контенту
     const hasAccessToContent = (contentId: string): boolean => {
         if (!userData?.products) return false;
         return userData.products.some(
@@ -248,7 +226,7 @@ export const ClientVideoLessonsList = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen bg-[#161616]">
+            <div className="flex justify-center items-center h-screen bg-[#031F23]">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
             </div>
         );
@@ -257,9 +235,9 @@ export const ClientVideoLessonsList = () => {
     return (
         <div>
             <UserLayout>
-                <div className="flex items-center justify-between p-4">
+            <div className="flex items-center justify-between p-4">
                     <div className="flex items-center">
-                        <h1 className="text-2xl font-semibold ml-4">Видео уроки</h1>
+                        <h1 className="text-2xl font-semibold ml-4">Разборы — Реализация</h1>
                     </div>
                     <div className="md:hidden">
                         <button 
@@ -275,75 +253,58 @@ export const ClientVideoLessonsList = () => {
                     </div>
                 </div>
 
-                <div className="px-4 mt-2 pb-10 bg-[#161616]">
+                <div className="px-4 mt-2 pb-10 bg-[#031F23]">
                     <div ref={cardsContainerRef} className="flex overflow-x-auto gap-4 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                        {videoLessons.length > 0 ? (
-                            videoLessons.filter((videoLesson: any) => videoLesson.location === 'top').sort((a: any, b: any) => a.order - b.order).map((videoLesson: any) => (
+                        {analysisRealizations.length > 0 ? (
+                            analysisRealizations.filter((analysisRealization: any) => analysisRealization.location === 'top').sort((a: any, b: any) => a.order - b.order).map((analysisRealization: any) => (
                                 <div 
-                                    key={videoLesson._id} 
+                                    key={analysisRealization._id} 
                                     data-card
                                     className="flex-shrink-0 w-[45vw] sm:w-[35vw] lg:w-[25vw] h-[210px] sm:h-[275px] lg:h-[330px]"
                                 >
                                     <MiniVideoCard 
-                                        title={videoLesson.title} 
-                                        image={videoLesson.imageUrl} 
-                                        link={`/client/video-lesson/${videoLesson._id}`} 
-                                        progress={progresses[videoLesson._id] || 0} 
-                                        accessType={hasAccessToContentSubscription() ? 'free' : videoLesson.accessType}
-                                        onLockedClick={hasAccessToContentSubscription() ? undefined : (videoLesson.accessType !== 'free' ? () => handleLockedVideoLessonClickSubscription(videoLesson) : undefined)}
-                                        duration={videoLesson?.duration || 0}
+                                        title={analysisRealization.title} 
+                                        image={analysisRealization.imageUrl} 
+                                        link={analysisRealization.redirectToPage?.trim() || `/client/analysis-realization/${analysisRealization._id}`} 
+                                        progress={progresses[analysisRealization._id] || 0} 
+                                        accessType={hasAccessToContentSubscription() ? 'free' : analysisRealization.accessType}
+                                        onLockedClick={hasAccessToContentSubscription() ? undefined : (analysisRealization.accessType !== 'free' ? () => handleLockedULAnalysisLRealizationClickSubscription(analysisRealization) : undefined)}
+                                        duration={analysisRealization?.duration || 0}
                                     />
                                 </div>
                             ))
                         ) : (
-                            <p className="text-center text-gray-500">Нет видео уроков</p>
+                            <p className="text-center text-gray-500">Нет контента</p>
                         )}
                     </div>
 
                     <div className="mt-4 space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
-                        { videoLessons.length > 0 ? (
+                        { analysisRealizations.length > 0 ? (
                             <>
                                 {
-                                    videoLessons.filter((videoLesson: any) => videoLesson.location === 'bottom').sort((a: any, b: any) => a.order - b.order).map((videoLesson: any) => (
+                                    analysisRealizations.filter((analysisRealization: any) => analysisRealization.location === 'bottom').sort((a: any, b: any) => a.order - b.order).map((analysisRealization: any) => (
                                         <VideoCard 
-                                            key={videoLesson._id} 
-                                            title={videoLesson.title} 
-                                            description={videoLesson.shortDescription} 
-                                            image={videoLesson.imageUrl} 
-                                            link={`/client/video-lesson/${videoLesson._id}`} 
-                                            accessType={hasAccessToContent(videoLesson._id) ? 'free' : videoLesson.accessType} 
-                                            progress={progresses[videoLesson._id] || 0} 
-                                            onLockedClick={hasAccessToContent(videoLesson._id) ? undefined : (videoLesson.accessType !== 'free' ? () => handleLockedVideoLessonClick(videoLesson) : undefined)} 
-                                            starsRequired={videoLesson?.starsRequired || 0}
-                                            duration={videoLesson?.duration || 0}
+                                            key={analysisRealization._id} 
+                                            title={analysisRealization.title} 
+                                            description={analysisRealization.shortDescription} 
+                                            image={analysisRealization.imageUrl} 
+                                            link={analysisRealization.redirectToPage?.trim() || `/client/analysis-realization/${analysisRealization._id}`} 
+                                            accessType={hasAccessToContent(analysisRealization._id) ? 'free' : analysisRealization.accessType} 
+                                            progress={progresses[analysisRealization._id] || 0} 
+                                            onLockedClick={hasAccessToContent(analysisRealization._id) ? undefined : (analysisRealization.accessType !== 'free' ? () => handleLockedULAnalysisLRealizationClick(analysisRealization) : undefined)} 
+                                            starsRequired={analysisRealization?.starsRequired || 0}
+                                            duration={analysisRealization?.duration || 0}
                                         />
                                     ))
                                 }
-                                {/* {
-                                    videoLessons.filter((videoLesson: any) => videoLesson.accessType === 'free').map((videoLesson: any) => (
-                                        <VideoCard 
-                                            key={videoLesson._id} 
-                                            title={videoLesson.title} 
-                                            description={videoLesson.shortDescription} 
-                                            image={videoLesson.imageUrl} 
-                                            link={`/client/video-lesson/${videoLesson._id}`} 
-                                            accessType={hasAccessToContent(videoLesson._id) ? 'free' : videoLesson.accessType} 
-                                            progress={progresses[videoLesson._id] || 0} 
-                                            onLockedClick={hasAccessToContent(videoLesson._id) ? undefined : (videoLesson.accessType !== 'free' ? () => handleLockedVideoLessonClick(videoLesson) : undefined)} 
-                                            starsRequired={videoLesson?.starsRequired || 0}
-                                            duration={videoLesson?.duration || 0}
-                                        />
-                                    ))
-                                } */}
                             </>
                         ) : (
-                            <p className="text-center text-gray-500 lg:col-span-2">Нет видео уроков</p>
+                            <p className="text-center text-gray-500 lg:col-span-2">Нет контента</p>
                         )}
                     </div>
                 </div>
             </UserLayout>
 
-            {/* Модальное окно для платных видео уроков */}
             <ClientSubscriptionDynamicModal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
@@ -351,31 +312,28 @@ export const ClientVideoLessonsList = () => {
                 accessType={accessType}
             />
 
-            {/* Модальное окно подтверждения покупки */}
-            {selectedVideoLesson && (
+            {selectedULAnalysisLRealization && (
                 <ClientPurchaseConfirmModal
                     isOpen={isPurchaseModalOpen}
                     onClose={handleClosePurchaseModal}
-                    contentId={selectedVideoLesson._id}
-                    contentType="video-lesson"
-                    contentTitle={selectedVideoLesson.title}
-                    starsRequired={selectedVideoLesson.starsRequired || 0}
+                    contentId={selectedULAnalysisLRealization._id}
+                    contentType="analysis-realization"
+                    contentTitle={selectedULAnalysisLRealization.title}
+                    starsRequired={selectedULAnalysisLRealization.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     onPurchaseSuccess={handlePurchaseSuccess}
                 />
             )}
 
-            {/* Модальное окно недостаточного количества бонусов */}
-            {selectedVideoLesson && (
+            {selectedULAnalysisLRealization && (
                 <ClientInsufficientBonusModal
                     isOpen={isInsufficientBonusModalOpen}
                     onClose={handleCloseInsufficientBonusModal}
-                    starsRequired={selectedVideoLesson.starsRequired || 0}
+                    starsRequired={selectedULAnalysisLRealization.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
-                    contentTitle={selectedVideoLesson.title}
+                    contentTitle={selectedULAnalysisLRealization.title}
                 />
             )}
         </div>
     )
 }
-

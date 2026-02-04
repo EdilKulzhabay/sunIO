@@ -161,7 +161,7 @@ export const ClientTransitsList = () => {
     return (
         <UserLayout>
             <BackNav title="Все транзиты" />
-            <div className="px-4 mt-2 pb-10 bg-[#161616]">
+            <div className="px-4 mt-2 pb-10 bg-[#031F23]">
                 {loading ? (
                     <div className="text-center py-8">
                         <p className="text-white/60">Загрузка...</p>
@@ -179,7 +179,7 @@ export const ClientTransitsList = () => {
                                     key={transit._id}
                                     ref={isActive ? activeTransitRef : null}
                                     onClick={() => handleTransitClick(transit)}
-                                    className="bg-[#333333] rounded-lg p-4 cursor-pointer hover:bg-[#3a3a3a] transition-colors"
+                                    className="bg-[#114E50] rounded-lg p-4 cursor-pointer hover:bg-[#3a3a3a] transition-colors"
                                 >
                                     <div className="flex items-start justify-between">
                                         <div className="flex-1">

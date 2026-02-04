@@ -10,13 +10,13 @@ import api from '../../api';
 import { toast } from 'react-toastify';
 
 interface ContentItem { type: 'video' | 'text' | 'image'; video?: { mainUrl: string; reserveUrl: string; duration: number; }; text?: string; image?: string; }
-interface FormData { title: string; shortDescription: string; imageUrl: string; accessType: string; starsRequired: number; duration: number; order: number; allowRepeatBonus: boolean; location: 'top' | 'bottom'; content: ContentItem[]; }
+interface FormData { title: string; shortDescription: string; imageUrl: string; accessType: string; starsRequired: number; duration: number; order: number; allowRepeatBonus: boolean; location: 'top' | 'bottom'; redirectToPage: string; content: ContentItem[]; }
 
 export const FemininityGazeboForm = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const [loading, setLoading] = useState(false);
-    const [formData, setFormData] = useState<FormData>({ title: '', shortDescription: '', imageUrl: '', accessType: 'free', starsRequired: 0, duration: 0, order: 0, allowRepeatBonus: false, location: 'bottom', content: [] });
+    const [formData, setFormData] = useState<FormData>({ title: '', shortDescription: '', imageUrl: '', accessType: 'free', starsRequired: 0, duration: 0, order: 0, allowRepeatBonus: false, location: 'bottom', redirectToPage: '', content: [] });
 
     useEffect(() => { if (id) fetchItem(); }, [id]);
 
@@ -31,7 +31,7 @@ export const FemininityGazeboForm = () => {
                 const resolvedType: ContentItem['type'] = hasVideo ? 'video' : hasText ? 'text' : hasImage ? 'image' : 'video';
                 return { type: resolvedType, video: { mainUrl: item?.video?.mainUrl || '', reserveUrl: item?.video?.reserveUrl || '', duration: item?.video?.duration || 0 }, text: item?.text || '', image: item?.image || '' };
             });
-            setFormData({ title: data.title || '', shortDescription: data.shortDescription || '', imageUrl: data.imageUrl || '', content: mappedContent, accessType: data.accessType || 'free', starsRequired: data.starsRequired ?? 0, duration: data.duration ?? 0, order: data.order ?? 0, allowRepeatBonus: data.allowRepeatBonus ?? false, location: data.location || 'bottom' });
+            setFormData({ title: data.title || '', shortDescription: data.shortDescription || '', imageUrl: data.imageUrl || '', content: mappedContent, accessType: data.accessType || 'free', starsRequired: data.starsRequired ?? 0, duration: data.duration ?? 0, order: data.order ?? 0, allowRepeatBonus: data.allowRepeatBonus ?? false, location: data.location || 'bottom', redirectToPage: data.redirectToPage || '' });
         } catch (error) { toast.error('Ошибка загрузки данных'); navigate('/admin/femininity-gazebo'); }
     };
 
@@ -61,6 +61,7 @@ export const FemininityGazeboForm = () => {
                         <div className="flex flex-col gap-2"><label className="text-sm font-medium">Тип доступа</label><select value={formData.accessType} onChange={(e) => setFormData({ ...formData, accessType: e.target.value })} className="w-full p-2 rounded-md border border-gray-300"><option value="free">Бесплатно</option><option value="paid">Платно</option><option value="subscription">Подписка</option><option value="stars">Звёзды</option></select></div>
                         {formData.accessType === 'stars' && <MyInput label="Стоимость в звёздах" type="number" value={String(formData.starsRequired)} onChange={(e) => setFormData({ ...formData, starsRequired: Number(e.target.value) || 0 })} min="0" />}
                         <div className="grid grid-cols-2 gap-4"><MyInput label="Порядок" type="number" value={String(formData.order)} onChange={(e) => setFormData({ ...formData, order: Number(e.target.value) || 0 })} min="0" /><div className="flex flex-col gap-2"><label className="text-sm font-medium">Расположение</label><select value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value as FormData['location'] })} className="w-full p-2 rounded-md border border-gray-300"><option value="top">Сверху</option><option value="bottom">Снизу</option></select></div></div>
+                        <MyInput label="Ссылка перехода (если задана — при нажатии откроется эта страница вместо контента)" type="text" value={formData.redirectToPage} onChange={(e) => setFormData({ ...formData, redirectToPage: e.target.value })} placeholder="/client/health-lab или /client/femininity-gazebo/:id" />
                         <div className="-mt-2"><div className="flex items-center gap-3 pt-6"><input type="checkbox" checked={formData.allowRepeatBonus} onChange={(e) => setFormData({ ...formData, allowRepeatBonus: e.target.checked })} className="h-4 w-4 text-blue-600 border-gray-300 rounded" /><span className="text-sm">Добавление бонусов за повторные просмотры</span></div></div>
                     </div>
                     <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">

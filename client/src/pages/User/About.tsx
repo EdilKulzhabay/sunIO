@@ -84,7 +84,7 @@ export const About = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen bg-[#161616]">
+            <div className="flex justify-center items-center h-screen bg-[#031F23]">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
             </div>
         );
@@ -92,7 +92,7 @@ export const About = () => {
     
     return (
         <UserLayout>
-            <div className='bg-[#161616]'>
+            <div className='bg-[#031F23]'>
                 <div className='relative lg:w-[700px] lg:mx-auto'>
                     {content?.image && (
                         <img 
@@ -126,7 +126,7 @@ export const About = () => {
                         }}
                     />
                 </div>
-                <div className='px-4 pb-10 bg-[#161616] z-20'>
+                <div className='px-4 pb-10 bg-[#031F23] z-20'>
                     <div className='relative lg:w-[700px] lg:mx-auto z-20'>
                         <h1 className="text-2xl font-bold mt-4">{content?.title}</h1>
                         <p className="mt-4" dangerouslySetInnerHTML={{ __html: content?.content }} />
@@ -157,7 +157,7 @@ export const About = () => {
 
                             {/* Modal - снизу на мобильных */}
                             <div 
-                                className="relative z-50 px-4 pt-6 pb-8 inline-block w-full bg-[#333333] rounded-t-[24px] text-left text-white overflow-hidden shadow-xl transform transition-all"
+                                className="relative z-50 px-4 pt-6 pb-8 inline-block w-full bg-[#114E50] rounded-t-[24px] text-left text-white overflow-hidden shadow-xl transform transition-all"
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <button
@@ -192,7 +192,7 @@ export const About = () => {
 
                             {/* Modal - по центру на десктопе */}
                             <div 
-                                className="relative p-8 inline-block align-middle bg-[#333333] rounded-lg text-left text-white overflow-hidden shadow-xl transform transition-all"
+                                className="relative p-8 inline-block align-middle bg-[#114E50] rounded-lg text-left text-white overflow-hidden shadow-xl transform transition-all"
                                 style={{ maxWidth: '500px', width: '100%' }}
                                 onClick={(e) => e.stopPropagation()}
                             >
@@ -231,7 +231,7 @@ export const About = () => {
                             />
 
                             <div 
-                                className="relative z-50 px-4 pt-6 pb-8 inline-block w-full bg-[#333333] rounded-t-[24px] text-left text-white overflow-hidden shadow-xl transform transition-all"
+                                className="relative z-50 px-4 pt-6 pb-8 inline-block w-full bg-[#114E50] rounded-t-[24px] text-left text-white overflow-hidden shadow-xl transform transition-all"
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <button
@@ -307,7 +307,7 @@ export const About = () => {
                             />
 
                             <div 
-                                className="relative p-8 inline-block align-middle bg-[#333333] rounded-lg text-left text-white overflow-hidden shadow-xl transform transition-all"
+                                className="relative p-8 inline-block align-middle bg-[#114E50] rounded-lg text-left text-white overflow-hidden shadow-xl transform transition-all"
                                 style={{ maxWidth: '500px', width: '100%' }}
                                 onClick={(e) => e.stopPropagation()}
                             >

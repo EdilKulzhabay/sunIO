@@ -30,6 +30,7 @@ interface FormData {
     order: number;
     allowRepeatBonus: boolean;
     location: 'top' | 'bottom';
+    redirectToPage: string;
     content: ContentItem[];
 }
 
@@ -47,6 +48,7 @@ export const HealthLabForm = () => {
         order: 0,
         allowRepeatBonus: false,
         location: 'bottom',
+        redirectToPage: '',
         content: [],
     });
 
@@ -88,6 +90,7 @@ export const HealthLabForm = () => {
                 order: data.order ?? 0,
                 allowRepeatBonus: data.allowRepeatBonus ?? false,
                 location: data.location || 'bottom',
+                redirectToPage: data.redirectToPage || '',
             });
         } catch (error) {
             toast.error('Ошибка загрузки данных');
@@ -216,6 +219,8 @@ export const HealthLabForm = () => {
                                 </select>
                             </div>
                         </div>
+
+                        <MyInput label="Ссылка перехода (если задана — при нажатии откроется эта страница вместо контента)" type="text" value={formData.redirectToPage} onChange={(e) => setFormData({ ...formData, redirectToPage: e.target.value })} placeholder="/client/relationship-workshop или /client/health-lab/:id" />
 
                         <div className="-mt-2">
                             <div className="flex items-center gap-3 pt-6">

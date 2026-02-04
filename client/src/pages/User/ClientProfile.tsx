@@ -229,7 +229,7 @@ export const ClientProfile = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen bg-[#161616]">
+            <div className="flex justify-center items-center h-screen bg-[#031F23]">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
             </div>
         );
@@ -240,7 +240,7 @@ export const ClientProfile = () => {
             <UserLayout>
                 <BackNav title="Приглашённые друзья" />
                 <div 
-                    className="px-4 mt-2 pb-10 bg-[#161616] flex flex-col justify-between"
+                    className="px-4 mt-2 pb-10 bg-[#031F23] flex flex-col justify-between"
                     style={{ minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom)}px` }}
                 >
                     <div className="flex-1">
@@ -253,7 +253,7 @@ export const ClientProfile = () => {
                                 style={{ display: 'none' }}
                             />
                             <div 
-                                className="w-[60px] h-[60px] bg-[#333333] rounded-full flex items-center justify-center cursor-pointer relative"
+                                className="w-[60px] h-[60px] bg-[#114E50] rounded-full flex items-center justify-center cursor-pointer relative"
                                 onClick={handlePhotoClick}
                             >
                                 {uploadingPhoto ? (
@@ -283,7 +283,7 @@ export const ClientProfile = () => {
                             </div>
                         </div>
 
-                        <div className="flex items-start gap-x-3 mt-4 bg-[#333333] rounded-lg p-4">
+                        <div className="flex items-start gap-x-3 mt-4 bg-[#114E50] rounded-lg p-4">
                             <div className="shrink-0 cursor-pointer" onClick={() => setIsBonusPolicyModalOpen(true)}>
                                 <img src={profileStar} alt="star" className="w-8 h-8 object-cover" />
                             </div>
@@ -299,7 +299,7 @@ export const ClientProfile = () => {
                         </div>
 
                         <div 
-                            className="mt-4 bg-[#333333] rounded-lg p-4 space-y-2"
+                            className="mt-4 bg-[#114E50] rounded-lg p-4 space-y-2"
                             onClick={() => {
                                 if (userData?.hasPaid && userData?.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date()) {
                                     console.log('Подписка активна');
@@ -320,7 +320,7 @@ export const ClientProfile = () => {
                         </div>
 
                         {userData?.invitedUser && (
-                            <div className="mt-4 bg-[#333333] rounded-lg p-4 space-y-2">
+                            <div className="mt-4 bg-[#114E50] rounded-lg p-4 space-y-2">
                                 <div className="text-xl font-medium">Вас пригласил</div>
                                 <div>
                                     {userData.invitedUser.telegramUserName 
@@ -335,7 +335,7 @@ export const ClientProfile = () => {
                             </div>
                         )}
 
-                        <div  className="mt-4 bg-[#333333] rounded-lg p-4 space-y-2 cursor-pointer">
+                        <div  className="mt-4 bg-[#114E50] rounded-lg p-4 space-y-2 cursor-pointer">
                             <div className="flex items-center justify-between">
                                 <div className="text-xl font-medium">Пригласи друга по ссылке</div>
                                 <div className="text-lg font-medium">
@@ -365,14 +365,14 @@ export const ClientProfile = () => {
                                 href="https://t.me/tochka_li"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="basis-1/2 bg-[#333333] rounded-lg p-4 flex items-center gap-x-2.5"
+                                className="basis-1/2 bg-[#114E50] rounded-lg p-4 flex items-center gap-x-2.5"
                             >
                                 <div className="font-medium text-sm">Телеграм канал проекта .li</div>
                                 <img src={linkArrow} alt="linkArrow" className="w-5 h-5 object-cover shrink-0" />
                             </a>
                             <Link
                                 to="/about"
-                                className="basis-1/2 bg-[#333333] rounded-lg p-4 flex items-center gap-x-2.5"
+                                className="basis-1/2 bg-[#114E50] rounded-lg p-4 flex items-center gap-x-2.5"
                             >
                                 <div className="font-medium text-sm">Телеграм канал клуба .li</div>
                                 <img src={linkArrow} alt="linkArrow" className="w-5 h-5 object-cover shrink-0" />
@@ -426,7 +426,7 @@ export const ClientProfile = () => {
 
                         {/* Modal - снизу на мобильных */}
                         <div 
-                            className="relative z-50 px-4 pt-6 pb-8 inline-block w-full bg-[#333333] rounded-t-[24px] text-left text-white overflow-hidden shadow-xl transform transition-all max-h-[90vh] overflow-y-auto"
+                            className="relative z-50 px-4 pt-6 pb-8 inline-block w-full bg-[#114E50] rounded-t-[24px] text-left text-white overflow-hidden shadow-xl transform transition-all max-h-[90vh] overflow-y-auto"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <button
@@ -490,7 +490,7 @@ export const ClientProfile = () => {
 
                         {/* Modal - по центру на десктопе */}
                         <div 
-                            className="relative p-8 inline-block align-middle bg-[#333333] rounded-lg text-left text-white overflow-hidden shadow-xl transform transition-all max-h-[90vh] overflow-y-auto"
+                            className="relative p-8 inline-block align-middle bg-[#114E50] rounded-lg text-left text-white overflow-hidden shadow-xl transform transition-all max-h-[90vh] overflow-y-auto"
                             style={{ maxWidth: '500px', width: '100%' }}
                             onClick={(e) => e.stopPropagation()}
                         >

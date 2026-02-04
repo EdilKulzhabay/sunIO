@@ -218,7 +218,7 @@ export const ClientInvitedUsers = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen bg-[#161616]">
+            <div className="flex justify-center items-center h-screen bg-[#031F23]">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
             </div>
         );
@@ -229,7 +229,7 @@ export const ClientInvitedUsers = () => {
             <UserLayout>
                 <BackNav title="Профиль" />
                 <div 
-                    className="px-4 mt-2 pb-10 bg-[#161616] flex flex-col justify-between"
+                    className="px-4 mt-2 pb-10 bg-[#031F23] flex flex-col justify-between"
                     style={{ minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom)}px` }}
                 >
                     <div className="flex-1">
@@ -242,7 +242,7 @@ export const ClientInvitedUsers = () => {
                                 style={{ display: 'none' }}
                             />
                             <div 
-                                className="w-[60px] h-[60px] bg-[#333333] rounded-full flex items-center justify-center cursor-pointer relative"
+                                className="w-[60px] h-[60px] bg-[#114E50] rounded-full flex items-center justify-center cursor-pointer relative"
                                 onClick={handlePhotoClick}
                             >
                                 {uploadingPhoto ? (
@@ -272,7 +272,7 @@ export const ClientInvitedUsers = () => {
                             </div>
                         </div>
 
-                        <div className="flex items-start gap-x-3 mt-4 bg-[#333333] rounded-lg p-4">
+                        <div className="flex items-start gap-x-3 mt-4 bg-[#114E50] rounded-lg p-4">
                             <div className="shrink-0 cursor-pointer" onClick={() => setIsBonusPolicyModalOpen(true)}>
                                 <img src={profileStar} alt="star" className="w-8 h-8 object-cover" />
                             </div>
@@ -349,7 +349,7 @@ export const ClientInvitedUsers = () => {
 
                         {/* Modal - снизу на мобильных */}
                         <div 
-                            className="relative z-50 px-4 pt-6 pb-8 inline-block w-full bg-[#333333] rounded-t-[24px] text-left text-white overflow-hidden shadow-xl transform transition-all max-h-[90vh] overflow-y-auto"
+                            className="relative z-50 px-4 pt-6 pb-8 inline-block w-full bg-[#114E50] rounded-t-[24px] text-left text-white overflow-hidden shadow-xl transform transition-all max-h-[90vh] overflow-y-auto"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <button
@@ -413,7 +413,7 @@ export const ClientInvitedUsers = () => {
 
                         {/* Modal - по центру на десктопе */}
                         <div 
-                            className="relative p-8 inline-block align-middle bg-[#333333] rounded-lg text-left text-white overflow-hidden shadow-xl transform transition-all max-h-[90vh] overflow-y-auto"
+                            className="relative p-8 inline-block align-middle bg-[#114E50] rounded-lg text-left text-white overflow-hidden shadow-xl transform transition-all max-h-[90vh] overflow-y-auto"
                             style={{ maxWidth: '500px', width: '100%' }}
                             onClick={(e) => e.stopPropagation()}
                         >

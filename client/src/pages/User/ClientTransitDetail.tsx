@@ -85,7 +85,7 @@ export const ClientTransitDetail = () => {
     return (
         <UserLayout>
             <BackNav title="Описание транзитов" />
-            <div className="px-4 mt-2 pb-10 bg-[#161616]">
+            <div className="px-4 mt-2 pb-10 bg-[#031F23]">
                 <div className="mt-4">
                     <p className="text-xl font-semibold">
                         {formatDateRangeReadable(transit.startDate, transit.endDate)}

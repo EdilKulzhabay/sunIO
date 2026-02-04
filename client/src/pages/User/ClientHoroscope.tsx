@@ -82,7 +82,7 @@ export const ClientHoroscope = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen bg-[#161616]">
+            <div className="flex justify-center items-center h-screen bg-[#031F23]">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
             </div>
         );
@@ -91,7 +91,7 @@ export const ClientHoroscope = () => {
     return (
         <UserLayout>
             <div 
-                className="flex flex-col justify-between bg-[#161616]"
+                className="flex flex-col justify-between bg-[#031F23]"
                 style={{ minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom)}px` }}
             >
                 <div className="">

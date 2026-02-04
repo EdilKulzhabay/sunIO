@@ -38,7 +38,7 @@ export const BlockedBrowser = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen bg-[#161616]">
+            <div className="flex justify-center items-center h-screen bg-[#031F23]">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
             </div>
         );
@@ -67,7 +67,7 @@ export const BlockedBrowser = () => {
                 </p>
             </div>
 
-            <div className='bg-[#161616] rounded-lg p-4 pl-0'>
+            <div className='bg-[#031F23] rounded-lg p-4 pl-0'>
                 <div className='text-white text-lg mb-4'>
                     <p className='mb-2'>Как открыть приложение:</p>
                     <ol className='list-decimal list-inside space-y-1 ml-2'>

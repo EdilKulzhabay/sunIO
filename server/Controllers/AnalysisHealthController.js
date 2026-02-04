@@ -5,7 +5,7 @@ import { addAdminAction } from "../utils/addAdminAction.js";
 export const create = async (req, res) => {
     try {
         const user = req.user;
-        const { title, shortDescription, imageUrl, accessType, starsRequired, duration, order, allowRepeatBonus, location, content } = req.body;
+        const { title, shortDescription, imageUrl, accessType, starsRequired, duration, order, allowRepeatBonus, location, redirectToPage, content } = req.body;
 
         if (!title) {
             return res.status(400).json({ success: false, message: "Название обязательно" });
@@ -20,7 +20,7 @@ export const create = async (req, res) => {
         const item = new AnalysisHealth({
             title, shortDescription: shortDescription || '', imageUrl: imageUrl || '', accessType: accessType || 'free',
             starsRequired: Number.isFinite(starsRequired) ? starsRequired : 0, duration: Number.isFinite(duration) ? duration : 0,
-            order: Number.isFinite(order) ? order : 0, allowRepeatBonus: Boolean(allowRepeatBonus), location: location || 'bottom', content: normalizedContent,
+            order: Number.isFinite(order) ? order : 0, allowRepeatBonus: Boolean(allowRepeatBonus), location: location || 'bottom', redirectToPage: redirectToPage || null, content: normalizedContent,
         });
 
         await item.save();

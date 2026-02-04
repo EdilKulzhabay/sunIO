@@ -1,12 +1,12 @@
 import { UnifiedVideoContentPage } from "../../components/User/UnifiedVideoContentPage";
 import { useParams } from "react-router-dom";
 
-export const ClientVideoLesson = () => {
+export const ClientConsciousnessLibrary = () => {
     const { id } = useParams();
     return (
         <UnifiedVideoContentPage
-            contentType="videoLesson"
-            fetchPath={`/api/video-lesson/`}
+            contentType="consciousness-library"
+            fetchPath={`/api/consciousness-library/`}
             id={id || ''}
         />
     );

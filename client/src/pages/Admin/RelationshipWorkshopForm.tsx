@@ -26,6 +26,7 @@ interface FormData {
     order: number;
     allowRepeatBonus: boolean;
     location: 'top' | 'bottom';
+    redirectToPage: string;
     content: ContentItem[];
 }
 
@@ -34,7 +35,7 @@ export const RelationshipWorkshopForm = () => {
     const { id } = useParams();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState<FormData>({
-        title: '', shortDescription: '', imageUrl: '', accessType: 'free', starsRequired: 0, duration: 0, order: 0, allowRepeatBonus: false, location: 'bottom', content: [],
+        title: '', shortDescription: '', imageUrl: '', accessType: 'free', starsRequired: 0, duration: 0, order: 0, allowRepeatBonus: false, location: 'bottom', redirectToPage: '', content: [],
     });
 
     useEffect(() => { if (id) fetchItem(); }, [id]);
@@ -50,7 +51,7 @@ export const RelationshipWorkshopForm = () => {
                 const resolvedType: ContentItem['type'] = hasVideo ? 'video' : hasText ? 'text' : hasImage ? 'image' : 'video';
                 return { type: resolvedType, video: { mainUrl: item?.video?.mainUrl || '', reserveUrl: item?.video?.reserveUrl || '', duration: item?.video?.duration || 0 }, text: item?.text || '', image: item?.image || '' };
             });
-            setFormData({ title: data.title || '', shortDescription: data.shortDescription || '', imageUrl: data.imageUrl || '', content: mappedContent, accessType: data.accessType || 'free', starsRequired: data.starsRequired ?? 0, duration: data.duration ?? 0, order: data.order ?? 0, allowRepeatBonus: data.allowRepeatBonus ?? false, location: data.location || 'bottom' });
+            setFormData({ title: data.title || '', shortDescription: data.shortDescription || '', imageUrl: data.imageUrl || '', content: mappedContent, accessType: data.accessType || 'free', starsRequired: data.starsRequired ?? 0, duration: data.duration ?? 0, order: data.order ?? 0, allowRepeatBonus: data.allowRepeatBonus ?? false, location: data.location || 'bottom', redirectToPage: data.redirectToPage || '' });
         } catch (error) { toast.error('Ошибка загрузки данных'); navigate('/admin/relationship-workshop'); }
     };
 
@@ -117,6 +118,7 @@ export const RelationshipWorkshopForm = () => {
                                 </select>
                             </div>
                         </div>
+                        <MyInput label="Ссылка перехода (если задана — при нажатии откроется эта страница вместо контента)" type="text" value={formData.redirectToPage} onChange={(e) => setFormData({ ...formData, redirectToPage: e.target.value })} placeholder="/client/health-lab или /client/relationship-workshop/:id" />
                         <div className="-mt-2"><div className="flex items-center gap-3 pt-6"><input type="checkbox" checked={formData.allowRepeatBonus} onChange={(e) => setFormData({ ...formData, allowRepeatBonus: e.target.checked })} className="h-4 w-4 text-blue-600 border-gray-300 rounded" /><span className="text-sm">Добавление бонусов за повторные просмотры</span></div></div>
                     </div>
 

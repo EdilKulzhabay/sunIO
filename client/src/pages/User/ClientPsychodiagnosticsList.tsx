@@ -8,23 +8,22 @@ import { ClientPurchaseConfirmModal } from "../../components/User/ClientPurchase
 import { ClientInsufficientBonusModal } from "../../components/User/ClientInsufficientBonusModal";
 import inBothDirections from "../../assets/inBothDirections.png";
 
-export const ClientMeditationsList = () => {
-    const [meditations, setMeditations] = useState([]);
+export const ClientPsychodiagnosticsList = () => {
+    const [psychodiagnosticss, setULPsychodiagnosticss] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
     const [isInsufficientBonusModalOpen, setIsInsufficientBonusModalOpen] = useState(false);
+    const cardsContainerRef = useRef<HTMLDivElement>(null);
     const [subscriptionContent, setSubscriptionContent] = useState<string>('');
     const [starsContent, setStarsContent] = useState<string>('');
     const [content, setContent] = useState<string>('');
-    const cardsContainerRef = useRef<HTMLDivElement>(null);
     const [accessType, setAccessType] = useState<string>('');
     const [userData, setUserData] = useState<any>(null);
-    const [selectedMeditation, setSelectedMeditation] = useState<any>(null);
+    const [selectedULPsychodiagnostics, setSelectedULPsychodiagnostics] = useState<any>(null);
     const [progresses, setProgresses] = useState<Record<string, number>>({});
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Проверка на блокировку пользователя
         const userStr = localStorage.getItem('user');
         if (userStr) {
             try {
@@ -38,16 +37,16 @@ export const ClientMeditationsList = () => {
             }
         }
 
-        fetchMeditations();
+        fetchULPsychodiagnosticss();
         fetchContent();
         fetchUserData();
     }, []);
 
     useEffect(() => {
-        if (meditations.length > 0 && userData?._id) {
+        if (psychodiagnosticss.length > 0 && userData?._id) {
             fetchProgresses();
         }
-    }, [meditations, userData]);
+    }, [psychodiagnosticss, userData]);
 
     const fetchUserData = async () => {
         try {
@@ -55,7 +54,6 @@ export const ClientMeditationsList = () => {
             if (user._id) {
                 const response = await api.get(`/api/user/${user._id}`);
                 const userData = response.data.data;
-                // Проверка на блокировку пользователя после получения данных с сервера
                 if (userData && userData.isBlocked && userData.role !== 'admin') {
                     window.location.href = '/client/blocked-user';
                     return;
@@ -68,18 +66,18 @@ export const ClientMeditationsList = () => {
     };
 
     const fetchContent = async () => {
-        const responseSubscription = await api.get('/api/dynamic-content/name/meditation-subscription');
+        const responseSubscription = await api.get('/api/dynamic-content/name/psychodiagnostics-subscription');
         setSubscriptionContent(responseSubscription.data.data.content);
-        const responseStars = await api.get('/api/dynamic-content/name/meditation-stars');
+        const responseStars = await api.get('/api/dynamic-content/name/psychodiagnostics-stars');
         setStarsContent(responseStars.data.data.content);
     }
 
-    const fetchMeditations = async () => {
+    const fetchULPsychodiagnosticss = async () => {
         try {
-            const response = await api.get('/api/meditation');
-            setMeditations(response.data.data);
+            const response = await api.get('/api/psychodiagnostics');
+            setULPsychodiagnosticss(response.data.data);
         } catch (error) {
-            console.error('Ошибка загрузки медитаций:', error);
+            console.error('Ошибка загрузки мастерской отношений:', error);
         } finally {
             setLoading(false);
         }
@@ -90,10 +88,10 @@ export const ClientMeditationsList = () => {
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             if (!user._id) return;
 
-            const contentIds = meditations.map((m: any) => m._id);
+            const contentIds = psychodiagnosticss.map((rw: any) => rw._id);
             if (contentIds.length === 0) return;
 
-            const response = await api.post(`/api/video-progress/batch/${user._id}/meditation`, {
+            const response = await api.post(`/api/video-progress/batch/${user._id}/psychodiagnostics`, {
                 contentIds
             });
 
@@ -109,85 +107,67 @@ export const ClientMeditationsList = () => {
         }
     }
 
-    const handleLockedMeditationClick = (meditation: any) => {
-        const accessType = meditation.accessType;
+    const handleLockedULPsychodiagnosticsClick = (psychodiagnostics: any) => {
+        const accessType = psychodiagnostics.accessType;
         
-        // Проверяем, есть ли уже доступ к контенту
-        if (hasAccessToContent(meditation._id)) {
-            // Если есть доступ, ничего не делаем (контент уже доступен)
+        if (hasAccessToContent(psychodiagnostics._id)) {
             return;
         }
         
-        // Если это контент за бонусы (stars)
         if (accessType === 'stars') {
-            // Проверяем, зарегистрирован ли клиент
             if (!userData?.emailConfirmed) {
-                // Если не зарегистрирован, показываем стандартное модальное окно
                 setAccessType(accessType);
                 setContent(starsContent);
                 setIsModalOpen(true);
                 return;
             }
 
-            // Если зарегистрирован, проверяем бонусы
-            const starsRequired = meditation.starsRequired || 0;
+            const starsRequired = psychodiagnostics.starsRequired || 0;
             if (userData.bonus < starsRequired) {
-                // Недостаточно бонусов, показываем модальное окно о недостатке бонусов
-                setSelectedMeditation(meditation);
+                setSelectedULPsychodiagnostics(psychodiagnostics);
                 setIsInsufficientBonusModalOpen(true);
                 return;
             }
 
-            // Достаточно бонусов, показываем модальное окно подтверждения покупки
-            setSelectedMeditation(meditation);
+            setSelectedULPsychodiagnostics(psychodiagnostics);
             setIsPurchaseModalOpen(true);
             return;
         }
 
-        // Для subscription показываем стандартное модальное окно
         setAccessType(accessType);
         if (accessType === 'subscription') {
             setContent(subscriptionContent);
         }
         setIsModalOpen(true);
     }
-
-    const handleLockedMeditationClickSubscription = (meditation: any) => {
-        const accessType = meditation.accessType;
+    
+    const handleLockedULPsychodiagnosticsClickSubscription = (psychodiagnostics: any) => {
+        const accessType = psychodiagnostics.accessType;
         
-        // Проверяем, есть ли уже доступ к контенту
         if (hasAccessToContentSubscription()) {
-            // Если есть доступ, ничего не делаем (контент уже доступен)
             return;
         }
         
-        // Если это контент за бонусы (stars)
         if (accessType === 'stars') {
-            // Проверяем, зарегистрирован ли клиент
             if (!userData?.emailConfirmed) {
-                // Если не зарегистрирован, показываем стандартное модальное окно
                 setAccessType(accessType);
                 setContent(starsContent);
                 setIsModalOpen(true);
                 return;
             }
 
-            // Если зарегистрирован, проверяем бонусы
-            const starsRequired = meditation.starsRequired || 0;
+            const starsRequired = psychodiagnostics.starsRequired || 0;
             if (userData.bonus < starsRequired) {
-                // Недостаточно бонусов, показываем модальное окно о недостатке бонусов
-                setSelectedMeditation(meditation);
+                setSelectedULPsychodiagnostics(psychodiagnostics);
                 setIsInsufficientBonusModalOpen(true);
                 return;
             }
 
-            // Достаточно бонусов, показываем модальное окно подтверждения покупки
-            setSelectedMeditation(meditation);
+            setSelectedULPsychodiagnostics(psychodiagnostics);
             setIsPurchaseModalOpen(true);
             return;
         }
 
-        // Для subscription показываем стандартное модальное окно
         setAccessType(accessType);
         if (accessType === 'subscription') {
             setContent(subscriptionContent);
@@ -201,21 +181,19 @@ export const ClientMeditationsList = () => {
 
     const handleClosePurchaseModal = () => {
         setIsPurchaseModalOpen(false);
-        setSelectedMeditation(null);
+        setSelectedULPsychodiagnostics(null);
     }
 
     const handleCloseInsufficientBonusModal = () => {
         setIsInsufficientBonusModalOpen(false);
-        setSelectedMeditation(null);
+        setSelectedULPsychodiagnostics(null);
     }
 
     const handlePurchaseSuccess = async () => {
-        // Обновляем данные пользователя после покупки
         await fetchUserData();
-        await fetchMeditations();
+        await fetchULPsychodiagnosticss();
     }
 
-    // Проверка доступа к контенту
     const hasAccessToContent = (contentId: string): boolean => {
         if (!userData?.products) return false;
         return userData.products.some(
@@ -248,7 +226,7 @@ export const ClientMeditationsList = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen bg-[#161616]">
+            <div className="flex justify-center items-center h-screen bg-[#031F23]">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
             </div>
         );
@@ -257,9 +235,9 @@ export const ClientMeditationsList = () => {
     return (
         <div>
             <UserLayout>
-                <div className="flex items-center justify-between p-4">
+            <div className="flex items-center justify-between p-4">
                     <div className="flex items-center">
-                        <h1 className="text-2xl font-semibold ml-4">Медитации</h1>
+                        <h1 className="text-2xl font-semibold ml-4">Психодиагностика</h1>
                     </div>
                     <div className="md:hidden">
                         <button 
@@ -275,71 +253,58 @@ export const ClientMeditationsList = () => {
                     </div>
                 </div>
 
-                <div className="px-4 mt-2 pb-10 bg-[#161616]">
+                <div className="px-4 mt-2 pb-10 bg-[#031F23]">
                     <div ref={cardsContainerRef} className="flex overflow-x-auto gap-4 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                        {meditations.length > 0 ? (
-                            meditations.filter((meditation: any) => meditation.location === 'top').sort((a: any, b: any) => a.order - b.order).map((meditation: any) => (
+                        {psychodiagnosticss.length > 0 ? (
+                            psychodiagnosticss.filter((psychodiagnostics: any) => psychodiagnostics.location === 'top').sort((a: any, b: any) => a.order - b.order).map((psychodiagnostics: any) => (
                                 <div 
-                                    key={meditation._id} 
+                                    key={psychodiagnostics._id} 
                                     data-card
                                     className="flex-shrink-0 w-[45vw] sm:w-[35vw] lg:w-[25vw] h-[210px] sm:h-[275px] lg:h-[330px]"
                                 >
                                     <MiniVideoCard 
-                                        title={meditation.title} 
-                                        image={meditation.imageUrl} 
-                                        link={`/client/meditation/${meditation._id}`} 
-                                        progress={progresses[meditation._id] || 0} 
-                                        accessType={hasAccessToContentSubscription() ? 'free' : meditation.accessType}
-                                        onLockedClick={hasAccessToContentSubscription() ? undefined : (meditation.accessType !== 'free' ? () => handleLockedMeditationClickSubscription(meditation) : undefined)}
-                                        duration={meditation?.duration || 0}
+                                        title={psychodiagnostics.title} 
+                                        image={psychodiagnostics.imageUrl} 
+                                        link={psychodiagnostics.redirectToPage?.trim() || `/client/psychodiagnostics/${psychodiagnostics._id}`} 
+                                        progress={progresses[psychodiagnostics._id] || 0} 
+                                        accessType={hasAccessToContentSubscription() ? 'free' : psychodiagnostics.accessType}
+                                        onLockedClick={hasAccessToContentSubscription() ? undefined : (psychodiagnostics.accessType !== 'free' ? () => handleLockedULPsychodiagnosticsClickSubscription(psychodiagnostics) : undefined)}
+                                        duration={psychodiagnostics?.duration || 0}
                                     />
                                 </div>
                             ))
                         ) : (
-                            <p className="text-center text-gray-500">Нет медитаций</p>
+                            <p className="text-center text-gray-500">Нет контента</p>
                         )}
                     </div>
 
                     <div className="mt-4 space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
-                        { meditations.length > 0 ? (
+                        { psychodiagnosticss.length > 0 ? (
                             <>
-                            {meditations.filter((meditation: any) => meditation.location === 'bottom').sort((a: any, b: any) => a.order - b.order).map((meditation: any) => (
-                                <VideoCard 
-                                    key={meditation._id} 
-                                    title={meditation.title} 
-                                    description={meditation.shortDescription} 
-                                    image={meditation.imageUrl} 
-                                    link={`/client/meditation/${meditation._id}`} 
-                                    accessType={hasAccessToContent(meditation._id) ? 'free' : meditation.accessType} 
-                                    progress={progresses[meditation._id] || 0} 
-                                    onLockedClick={hasAccessToContent(meditation._id) ? undefined : (meditation.accessType !== 'free' ? () => handleLockedMeditationClick(meditation) : undefined)} 
-                                    starsRequired={meditation?.starsRequired || 0}
-                                    duration={meditation?.duration || 0}
-                                />
-                            ))}
-                            {/* {meditations.filter((meditation: any) => meditation.location === 'bottom' && meditation.accessType === 'free').map((meditation: any) => (
-                                <VideoCard 
-                                    key={meditation._id} 
-                                    title={meditation.title} 
-                                    description={meditation.shortDescription} 
-                                    image={meditation.imageUrl} 
-                                    link={`/client/meditation/${meditation._id}`} 
-                                    accessType={hasAccessToContent(meditation._id) ? 'free' : meditation.accessType} 
-                                    progress={progresses[meditation._id] || 0} 
-                                    onLockedClick={hasAccessToContent(meditation._id) ? undefined : (meditation.accessType !== 'free' ? () => handleLockedMeditationClick(meditation) : undefined)} 
-                                    starsRequired={meditation?.starsRequired || 0}
-                                    duration={meditation?.duration || 0}
-                                />
-                            ))} */}
+                                {
+                                    psychodiagnosticss.filter((psychodiagnostics: any) => psychodiagnostics.location === 'bottom').sort((a: any, b: any) => a.order - b.order).map((psychodiagnostics: any) => (
+                                        <VideoCard 
+                                            key={psychodiagnostics._id} 
+                                            title={psychodiagnostics.title} 
+                                            description={psychodiagnostics.shortDescription} 
+                                            image={psychodiagnostics.imageUrl} 
+                                            link={psychodiagnostics.redirectToPage?.trim() || `/client/psychodiagnostics/${psychodiagnostics._id}`} 
+                                            accessType={hasAccessToContent(psychodiagnostics._id) ? 'free' : psychodiagnostics.accessType} 
+                                            progress={progresses[psychodiagnostics._id] || 0} 
+                                            onLockedClick={hasAccessToContent(psychodiagnostics._id) ? undefined : (psychodiagnostics.accessType !== 'free' ? () => handleLockedULPsychodiagnosticsClick(psychodiagnostics) : undefined)} 
+                                            starsRequired={psychodiagnostics?.starsRequired || 0}
+                                            duration={psychodiagnostics?.duration || 0}
+                                        />
+                                    ))
+                                }
                             </>
                         ) : (
-                            <p className="text-center text-gray-500 lg:col-span-2">Нет медитаций</p>
+                            <p className="text-center text-gray-500 lg:col-span-2">Нет контента</p>
                         )}
                     </div>
                 </div>
             </UserLayout>
 
-            {/* Модальное окно для платных медитаций */}
             <ClientSubscriptionDynamicModal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
@@ -347,28 +312,26 @@ export const ClientMeditationsList = () => {
                 accessType={accessType}
             />
 
-            {/* Модальное окно подтверждения покупки */}
-            {selectedMeditation && (
+            {selectedULPsychodiagnostics && (
                 <ClientPurchaseConfirmModal
                     isOpen={isPurchaseModalOpen}
                     onClose={handleClosePurchaseModal}
-                    contentId={selectedMeditation._id}
-                    contentType="meditation"
-                    contentTitle={selectedMeditation.title}
-                    starsRequired={selectedMeditation.starsRequired || 0}
+                    contentId={selectedULPsychodiagnostics._id}
+                    contentType="psychodiagnostics"
+                    contentTitle={selectedULPsychodiagnostics.title}
+                    starsRequired={selectedULPsychodiagnostics.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     onPurchaseSuccess={handlePurchaseSuccess}
                 />
             )}
 
-            {/* Модальное окно недостаточного количества бонусов */}
-            {selectedMeditation && (
+            {selectedULPsychodiagnostics && (
                 <ClientInsufficientBonusModal
                     isOpen={isInsufficientBonusModalOpen}
                     onClose={handleCloseInsufficientBonusModal}
-                    starsRequired={selectedMeditation.starsRequired || 0}
+                    starsRequired={selectedULPsychodiagnostics.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
-                    contentTitle={selectedMeditation.title}
+                    contentTitle={selectedULPsychodiagnostics.title}
                 />
             )}
         </div>

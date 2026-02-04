@@ -7,7 +7,19 @@ interface ClientPurchaseConfirmModalProps {
     isOpen: boolean;
     onClose: () => void;
     contentId: string;
-    contentType: 'practice' | 'meditation' | 'video-lesson';
+    contentType:
+        | 'practice'
+        | 'health-lab'
+        | 'relationship-workshop'
+        | 'spirit-forge'
+        | 'masters-tower'
+        | 'femininity-gazebo'
+        | 'consciousness-library'
+        | 'product-catalog'
+        | 'analysis-health'
+        | 'analysis-relationships'
+        | 'analysis-realization'
+        | 'psychodiagnostics';
     contentTitle: string;
     starsRequired: number;
     userBonus: number;
@@ -63,7 +75,7 @@ export const ClientPurchaseConfirmModal = ({
 
                 {/* Modal - снизу на мобильных */}
                 <div 
-                    className="relative z-50 px-4 pt-6 pb-8 inline-block w-full bg-[#333333] rounded-t-[24px] text-left text-white overflow-hidden shadow-xl transform transition-all"
+                    className="relative z-50 px-4 pt-6 pb-8 inline-block w-full bg-[#114E50] rounded-t-[24px] text-left text-white overflow-hidden shadow-xl transform transition-all"
                     onClick={(e) => e.stopPropagation()}
                 >
                     <button
@@ -113,7 +125,7 @@ export const ClientPurchaseConfirmModal = ({
 
                 {/* Modal - по центру на десктопе */}
                 <div 
-                    className="relative p-8 inline-block align-middle bg-[#333333] rounded-lg text-left text-white overflow-hidden shadow-xl transform transition-all"
+                    className="relative p-8 inline-block align-middle bg-[#114E50] rounded-lg text-left text-white overflow-hidden shadow-xl transform transition-all"
                     style={{ maxWidth: '500px', width: '100%' }}
                     onClick={(e) => e.stopPropagation()}
                 >

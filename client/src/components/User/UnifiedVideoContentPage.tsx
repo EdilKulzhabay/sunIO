@@ -287,7 +287,7 @@ export const UnifiedVideoContentPage = ({
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen bg-[#161616]">
+            <div className="flex justify-center items-center h-screen bg-[#031F23]">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
             </div>
         );
@@ -295,7 +295,7 @@ export const UnifiedVideoContentPage = ({
 
     if (!content) {
         return (
-            <div className="flex justify-center items-center h-screen bg-[#161616] text-white">
+            <div className="flex justify-center items-center h-screen bg-[#031F23] text-white">
                 Контент не найден
             </div>
         );
@@ -305,7 +305,7 @@ export const UnifiedVideoContentPage = ({
         <div>
             <UserLayout>
                 <BackNav title={content.title} />
-                <div className="px-4 mt-4 pb-10 bg-[#161616]">
+                <div className="px-4 mt-4 pb-10 bg-[#031F23]">
                     <p dangerouslySetInnerHTML={{ __html: content.shortDescription }}></p>
                     {content.content.length > 0 && content.content.map((item: any, index: number) => {
                         const itemKey = item?._id || `item-${index}`;

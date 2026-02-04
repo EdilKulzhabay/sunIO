@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 
 const ContactUsBlock = ({ title, content, isLink = false, link = '' }: { title: string, content: string, isLink?: boolean, link?: string }) => {
     return (
-        <div className="bg-[#333333] rounded-lg p-4">
+        <div className="bg-[#114E50] rounded-lg p-4">
             <p className="text-sm text-white/40">{title}</p>
             <p className="mt-1 text-lg font-medium">{isLink ? <a href={link} target="_blank" rel="noopener noreferrer" className="text-white">{content}</a> : content}</p>
         </div>
@@ -49,7 +49,7 @@ export const ClientContactUs = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen bg-[#161616]">
+            <div className="flex justify-center items-center h-screen bg-[#031F23]">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
             </div>
         );
@@ -59,7 +59,7 @@ export const ClientContactUs = () => {
         <div>
             <UserLayout>
                 <BackNav title="Связаться с нами" />
-                <div className='px-4 mt-8 pb-5 flex flex-col justify-between min-h-screen bg-[#161616]'>
+                <div className='px-4 mt-8 pb-5 flex flex-col justify-between min-h-screen bg-[#031F23]'>
                     <div>
                         <div className="space-y-3">
                             <ContactUsBlock title="E-mail" content="support@tochka.li" isLink={true} link="mailto:support@tochka.li" />

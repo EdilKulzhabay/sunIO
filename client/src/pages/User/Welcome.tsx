@@ -117,8 +117,8 @@ export const Welcome = () => {
 
     return (
         <UserLayout>
-            <div className='bg-[#161616]'>
-                <div className='lg:w-[700px] lg:mx-auto bg-[#161616]'>
+            <div className='bg-[#031F23]'>
+                <div className='lg:w-[700px] lg:mx-auto bg-[#031F23]'>
                     <div className='relative'>
                         {content?.image && (
                             <div className="relative flex justify-center items-center">
@@ -154,7 +154,7 @@ export const Welcome = () => {
                             }}
                         />
                     </div>
-                    <div className='px-4 pt-4 pb-10 bg-[#161616]'>
+                    <div className='px-4 pt-4 pb-10 bg-[#031F23]'>
                         <div 
                             className={`relative lg:w-[700px] lg:mx-auto z-20`}
                         >

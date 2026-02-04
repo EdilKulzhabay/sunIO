@@ -246,7 +246,7 @@ export const ClientSchedule = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen bg-[#161616]">
+            <div className="flex justify-center items-center h-screen bg-[#031F23]">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
             </div>
         );
@@ -255,7 +255,7 @@ export const ClientSchedule = () => {
     return (
         <UserLayout>
             <BackNav title="Расписание" />
-            <div className="px-4 mt-2 pb-10 bg-[#161616] lg:flex lg:gap-x-4">
+            <div className="px-4 mt-2 pb-10 bg-[#031F23] lg:flex lg:gap-x-4">
                 <div className="lg:basis-1/3">
                     <DateRangeCalendar 
                         onDateRangeSelect={handleDateRangeSelect}
@@ -280,7 +280,7 @@ export const ClientSchedule = () => {
                         {schedules.length > 0 && schedules.map((schedule: any) => (
                             <div 
                                 key={schedule._id}
-                                className="bg-[#333333] rounded-lg p-4 cursor-pointer hover:bg-[#3a3a3a] transition-colors"
+                                className="bg-[#114E50] rounded-lg p-4 cursor-pointer hover:bg-[#3a3a3a] transition-colors"
                                 onClick={() => handleScheduleClick(schedule)}
                             >
                                 <div onClick={() => {}} className="flex items-center justify-between">
@@ -307,7 +307,7 @@ export const ClientSchedule = () => {
 
                             {/* Modal - снизу на мобильных */}
                             <div 
-                                className="relative z-50 px-4 pt-6 pb-8 inline-block w-full bg-[#333333] rounded-t-[24px] text-left text-white overflow-hidden shadow-xl transform transition-all"
+                                className="relative z-50 px-4 pt-6 pb-8 inline-block w-full bg-[#114E50] rounded-t-[24px] text-left text-white overflow-hidden shadow-xl transform transition-all"
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <button
@@ -404,7 +404,7 @@ export const ClientSchedule = () => {
 
                             {/* Modal - снизу на мобильных */}
                             <div 
-                                className="relative z-50 w-1/3 px-4 pt-6 pb-8 inline-block  bg-[#333333] rounded-[24px] text-left text-white overflow-hidden shadow-xl transform transition-all"
+                                className="relative z-50 w-1/3 px-4 pt-6 pb-8 inline-block  bg-[#114E50] rounded-[24px] text-left text-white overflow-hidden shadow-xl transform transition-all"
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <button

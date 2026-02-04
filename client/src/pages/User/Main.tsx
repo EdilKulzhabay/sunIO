@@ -21,7 +21,7 @@ import redUser from "../../assets/redUser.png"
 //     return (
 //         <Link 
 //             to={link} 
-//             className="min-h-24 flex items-center bg-[#333333] relative rounded-lg p-4 overflow-hidden"
+//             className="min-h-24 flex items-center bg-[#114E50] relative rounded-lg p-4 overflow-hidden"
 //             style={{
 //                 backgroundImage: `url(${img})`,
 //                 backgroundSize: 'cover',
@@ -38,7 +38,7 @@ const SmallCard = ({ title, link }: { title: string, link: string }) => {
     return (
         <Link 
             to={link} 
-            className="min-h-24 flex items-center bg-[#333333] relative rounded-lg p-4 overflow-hidden"
+            className="min-h-24 flex items-center bg-[#114E50] relative rounded-lg p-4 overflow-hidden"
         >
             <p className="text-xl font-medium" dangerouslySetInnerHTML={{ __html: title }}></p>
         </Link>
@@ -47,7 +47,7 @@ const SmallCard = ({ title, link }: { title: string, link: string }) => {
 
 const LargeCard = ({ title, link, image, content }: { title: string, link: string, image: string, content: string }) => {
     return (
-        <Link to={link} className="flex items-center bg-[#333333] rounded-lg p-4 gap-x-4">
+        <Link to={link} className="flex items-center bg-[#114E50] rounded-lg p-4 gap-x-4">
             <div className="w-[98px] h-[98px] flex items-center justify-center rounded-full bg-white/10 shrink-0">
                 <img src={image} alt={title} className="w-[50px] h-[50px] object-cover" />
             </div>
@@ -326,7 +326,7 @@ export const Main = () => {
                         />
                         {/* Modal - снизу на мобильных */}
                         <div 
-                            className="relative z-50 px-4 pt-6 pb-8 inline-block w-full bg-[#333333] rounded-t-[24px] text-left text-white overflow-hidden shadow-xl transform transition-all"
+                            className="relative z-50 px-4 pt-6 pb-8 inline-block w-full bg-[#114E50] rounded-t-[24px] text-left text-white overflow-hidden shadow-xl transform transition-all"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="mt-4">
@@ -351,7 +351,7 @@ export const Main = () => {
 
                         {/* Modal - по центру на десктопе */}
                         <div 
-                            className="relative p-8 inline-block align-middle bg-[#333333] rounded-lg text-left text-white overflow-hidden shadow-xl transform transition-all"
+                            className="relative p-8 inline-block align-middle bg-[#114E50] rounded-lg text-left text-white overflow-hidden shadow-xl transform transition-all"
                             style={{ maxWidth: '500px', width: '100%' }}
                             onClick={(e) => e.stopPropagation()}
                         >
@@ -371,7 +371,7 @@ export const Main = () => {
                 </div>
             )}
 
-            <div className="px-4 pb-10 bg-[#161616]">
+            <div className="px-4 pb-10 bg-[#031F23]">
                 <div className="flex items-center justify-between pt-5 pb-4">
                     <div className="cursor-pointer" onClick={() => navigate('/client/contactus')}>
                         <img src={logo} alt="logo" className="w-6 h-6" />
@@ -405,8 +405,8 @@ export const Main = () => {
                 </div>
                 <div className="mt-4 space-y-3">
                     <LargeCard 
-                        title="Видео" 
-                        link="/client/video-lessons" 
+                        title="Лаборатория здоровья" 
+                        link="/client/health-lab" 
                         image={mainVideo} 
                         content="Популярные видео и эксклюзивный контент от экспертов, которые знакомят с Проектом «Точки»"
                     />
@@ -417,8 +417,8 @@ export const Main = () => {
                         content="Эффективные инструменты управления энергией и подсознанием на каждый день"
                     />
                     <LargeCard 
-                        title="Медитации" 
-                        link="/client/meditations" 
+                        title="Мастерская отношений" 
+                        link="/client/relationship-workshop" 
                         image={mainMeditation} 
                         content="Разрешение внутренних конфликтов, соединение со своей энергией и запуск процессов изменений"
                     />

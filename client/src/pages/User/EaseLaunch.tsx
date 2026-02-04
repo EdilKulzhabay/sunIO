@@ -44,7 +44,7 @@ export const EaseLaunch = () => {
                 </div>
             </div>
             
-            <div className='bg-[#161616]'>
+            <div className='bg-[#031F23]'>
                 <a 
                     href="https://drive.google.com/file/d/1PGDJqtSnqy-18dgNsw3pnWMNtvMAcXAf/view?usp=share_link"
                     target="_blank"

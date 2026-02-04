@@ -248,7 +248,7 @@ export const ClientPracticesList = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen bg-[#161616]">
+            <div className="flex justify-center items-center h-screen bg-[#031F23]">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
             </div>
         );
@@ -275,7 +275,7 @@ export const ClientPracticesList = () => {
                     </div>
                 </div>
 
-                <div className="px-4 mt-2 pb-10 bg-[#161616]">
+                <div className="px-4 mt-2 pb-10 bg-[#031F23]">
                     <div ref={cardsContainerRef} className="flex overflow-x-auto gap-4 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
                         {practices.length > 0 ? (
                             practices.filter((practice: any) => practice.location === 'top').sort((a: any, b: any) => a.order - b.order).map((practice: any) => (
@@ -287,7 +287,7 @@ export const ClientPracticesList = () => {
                                     <MiniVideoCard 
                                         title={practice.title} 
                                         image={practice.imageUrl} 
-                                        link={`/client/practice/${practice._id}`} 
+                                        link={practice.redirectToPage?.trim() || `/client/practice/${practice._id}`} 
                                         progress={progresses[practice._id] || 0} 
                                         accessType={hasAccessToContentSubscription() ? 'free' : practice.accessType}
                                         onLockedClick={hasAccessToContentSubscription() ? undefined : (practice.accessType !== 'free' ? () => handleLockedPracticeClickSubscription(practice) : undefined)}
@@ -310,7 +310,7 @@ export const ClientPracticesList = () => {
                                             title={practice.title} 
                                             description={practice.shortDescription} 
                                             image={practice.imageUrl} 
-                                            link={`/client/practice/${practice._id}`} 
+                                            link={practice.redirectToPage?.trim() || `/client/practice/${practice._id}`} 
                                             accessType={hasAccessToContent(practice._id) ? 'free' : practice.accessType} 
                                             progress={progresses[practice._id] || 0} 
                                             onLockedClick={hasAccessToContent(practice._id) ? undefined : (practice.accessType !== 'free' ? () => handleLockedPracticeClick(practice) : undefined)} 
@@ -326,7 +326,7 @@ export const ClientPracticesList = () => {
                                             title={practice.title} 
                                             description={practice.shortDescription} 
                                             image={practice.imageUrl} 
-                                            link={`/client/practice/${practice._id}`} 
+                                            link={practice.redirectToPage?.trim() || `/client/practice/${practice._id}`} 
                                             accessType={hasAccessToContent(practice._id) ? 'free' : practice.accessType} 
                                             progress={progresses[practice._id] || 0} 
                                             onLockedClick={hasAccessToContent(practice._id) ? undefined : (practice.accessType !== 'free' ? () => handleLockedPracticeClick(practice) : undefined)} 

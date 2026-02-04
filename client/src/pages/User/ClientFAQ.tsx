@@ -69,7 +69,7 @@ export const ClientFAQ = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen bg-[#161616]">
+            <div className="flex justify-center items-center h-screen bg-[#031F23]">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
             </div>
         );
@@ -77,10 +77,10 @@ export const ClientFAQ = () => {
 
     return (
         <UserLayout>
-            <div className="flex flex-col bg-[#161616]">
+            <div className="flex flex-col bg-[#031F23]">
                 <BackNav title="Часто задаваемые вопросы" />
                 <div 
-                    className="flex flex-col justify-between mt-2 px-4 pb-10 flex-1 bg-[#161616]"
+                    className="flex flex-col justify-between mt-2 px-4 pb-10 flex-1 bg-[#031F23]"
                     style={{ minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom)}px` }}
                 >
                     <div className="">

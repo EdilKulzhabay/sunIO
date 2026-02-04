@@ -41,6 +41,11 @@ const AnalysisRealizationSchema = new mongoose.Schema(
       enum: ['top', 'bottom'],
       default: 'bottom',
     },
+    redirectToPage: {
+      type: String,
+      trim: true,
+      default: null,
+    },
     content: [
       {
         video: {

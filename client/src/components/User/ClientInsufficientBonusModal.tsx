@@ -33,7 +33,7 @@ export const BonusPolicyModal = ({ isOpen, onClose }: { isOpen: boolean; onClose
 
                 {/* Modal - снизу на мобильных */}
                 <div 
-                    className="relative z-50 px-4 pt-6 pb-8 inline-block w-full bg-[#333333] rounded-t-[24px] text-left text-white overflow-hidden shadow-xl transform transition-all max-h-[90vh] overflow-y-auto"
+                    className="relative z-50 px-4 pt-6 pb-8 inline-block w-full bg-[#114E50] rounded-t-[24px] text-left text-white overflow-hidden shadow-xl transform transition-all max-h-[90vh] overflow-y-auto"
                     onClick={(e) => e.stopPropagation()}
                 >
                     <button
@@ -80,7 +80,7 @@ export const BonusPolicyModal = ({ isOpen, onClose }: { isOpen: boolean; onClose
 
                 {/* Modal - по центру на десктопе */}
                 <div 
-                    className="relative p-8 inline-block align-middle bg-[#333333] rounded-lg text-left text-white overflow-hidden shadow-xl transform transition-all max-h-[90vh] overflow-y-auto"
+                    className="relative p-8 inline-block align-middle bg-[#114E50] rounded-lg text-left text-white overflow-hidden shadow-xl transform transition-all max-h-[90vh] overflow-y-auto"
                     style={{ maxWidth: '600px', width: '100%' }}
                     onClick={(e) => e.stopPropagation()}
                 >
@@ -167,7 +167,7 @@ export const ClientInsufficientBonusModal = ({
 
                 {/* Modal - снизу на мобильных */}
                 <div 
-                    className="relative z-50 px-4 pt-6 pb-8 inline-block w-full bg-[#333333] rounded-t-[24px] text-left text-white overflow-hidden shadow-xl transform transition-all"
+                    className="relative z-50 px-4 pt-6 pb-8 inline-block w-full bg-[#114E50] rounded-t-[24px] text-left text-white overflow-hidden shadow-xl transform transition-all"
                     onClick={(e) => e.stopPropagation()}
                 >
                     <button
@@ -216,7 +216,7 @@ export const ClientInsufficientBonusModal = ({
 
                 {/* Modal - по центру на десктопе */}
                 <div 
-                    className="relative p-8 inline-block align-middle bg-[#333333] rounded-lg text-left text-white overflow-hidden shadow-xl transform transition-all"
+                    className="relative p-8 inline-block align-middle bg-[#114E50] rounded-lg text-left text-white overflow-hidden shadow-xl transform transition-all"
                     style={{ maxWidth: '500px', width: '100%' }}
                     onClick={(e) => e.stopPropagation()}
                 >

@@ -329,7 +329,7 @@ export const ClientDiary = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen bg-[#161616]">
+            <div className="flex justify-center items-center h-screen bg-[#031F23]">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
             </div>
         );
@@ -340,7 +340,7 @@ export const ClientDiary = () => {
             <UserLayout>
                 <BackNav title="Дневник" />
                 <div 
-                    className="px-4 mt-2 pb-10 bg-[#161616]" 
+                    className="px-4 mt-2 pb-10 bg-[#031F23]" 
                     data-diary-page
                     style={{
                         userSelect: 'text',
@@ -353,7 +353,7 @@ export const ClientDiary = () => {
                     <p className="mt-4" dangerouslySetInnerHTML={{ __html: content?.content }}>
                     </p>
 
-                    <div className="mt-4 bg-[#333333] p-4 rounded-lg">
+                    <div className="mt-4 bg-[#114E50] p-4 rounded-lg">
                         <div className="flex items-center justify-between">
                             <h2 className="text-lg font-medium">
                                 {(() => {
@@ -477,7 +477,7 @@ export const ClientDiary = () => {
                         </div>
                     </div>
 
-                    <div className="mt-4 bg-[#333333] p-4 rounded-lg">
+                    <div className="mt-4 bg-[#114E50] p-4 rounded-lg">
                         <div className="flex items-center justify-between">
                             <h2 className="text-xl font-medium">Сегодня</h2>
                             <button onClick={handleToggleDiaryToday}>
@@ -571,7 +571,7 @@ export const ClientDiary = () => {
                     {diaries.length > 0 && (
                         <div className="mt-3">
                             {diaries.map((diary: any) => (
-                                <div key={diary._id} className="mt-4 bg-[#333333] p-4 rounded-lg">
+                                <div key={diary._id} className="mt-4 bg-[#114E50] p-4 rounded-lg">
                                     <div className="flex items-center justify-between">
                                         <h2 className="text-xl font-medium">
                                             {diary.createdAt.split('T')[0] === new Date().toISOString().split('T')[0] ? 'Сегодня' : new Date(diary.createdAt).toLocaleDateString('ru-RU', { day: '2-digit', month: 'long', year: 'numeric' })}

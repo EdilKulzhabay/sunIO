@@ -197,7 +197,7 @@ export const DateRangeCalendar = ({
     }
 
     return (
-        <div className="bg-[#333333] rounded-lg p-4 text-white">
+        <div className="bg-[#114E50] rounded-lg p-4 text-white">
             {/* Заголовок с навигацией */}
             <div className="flex items-center justify-between mb-4">
                 <button

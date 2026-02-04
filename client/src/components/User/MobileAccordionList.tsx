@@ -26,7 +26,7 @@ const AccordionItem = ({ title, content, isOpen, onToggle }: any) => {
             </button>
             <div
                 ref={contentRef}
-                className="transition-all duration-500 ease-in-out overflow-hidden bg-[#333333] rounded-xl mt-1 px-4"
+                className="transition-all duration-500 ease-in-out overflow-hidden bg-[#114E50] rounded-xl mt-1 px-4"
                 style={{ maxHeight }}
             >
                 <div className="py-2.5" dangerouslySetInnerHTML={{ __html: content }} />

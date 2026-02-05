@@ -34,7 +34,8 @@ import {
     AnalysisHealthController,
     AnalysisRelationshipsController,
     AnalysisRealizationController,
-    PsychodiagnosticsController
+    PsychodiagnosticsController,
+    BegginingJourneyController
 } from "./Controllers/index.js";
 import { authMiddleware } from "./Middlewares/authMiddleware.js";
 import { adminActionLogMiddleware } from "./Middlewares/adminActionLogMiddleware.js";
@@ -291,6 +292,13 @@ app.get("/api/psychodiagnostics", PsychodiagnosticsController.getAll);
 app.get("/api/psychodiagnostics/:id", PsychodiagnosticsController.getById);
 app.put("/api/psychodiagnostics/:id", authMiddleware, PsychodiagnosticsController.update);
 app.delete("/api/psychodiagnostics/:id", authMiddleware, PsychodiagnosticsController.remove);
+
+// ==================== BegginingJourney (Начало путешествия) маршруты ====================
+app.post("/api/beggining-journey", createContentRateLimit, authMiddleware, BegginingJourneyController.create);
+app.get("/api/beggining-journey", BegginingJourneyController.get);
+app.get("/api/beggining-journey/all", BegginingJourneyController.getAll);
+app.put("/api/beggining-journey/:id", authMiddleware, BegginingJourneyController.update);
+app.delete("/api/beggining-journey/:id", authMiddleware, BegginingJourneyController.remove);
 
 // ==================== Schedule маршруты ====================
 app.post("/api/schedule", createContentRateLimit, authMiddleware, ScheduleController.create);

@@ -18,7 +18,8 @@ import {
     Stethoscope,
     HeartHandshake,
     Target,
-    Brain
+    Brain,
+    Compass
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -45,6 +46,7 @@ const contentCards = [
     { title: 'Динамический контент', icon: FileText, path: '/admin/dynamic-content', color: 'bg-teal-500', description: 'Управление динамическим контентом' },
     { title: 'Приветствие', icon: Home, path: '/admin/welcome', color: 'bg-amber-500', description: 'Контент на странице Приветствие' },
     { title: 'О клубе', icon: Info, path: '/admin/about-club', color: 'bg-cyan-600', description: 'Контент на странице О клубе' },
+    { title: 'Начало путешествия', icon: Compass, path: '/admin/beggining-journey', color: 'bg-sky-500', description: 'Контент начала путешествия' },
 ];
 
 export const Main = () => {

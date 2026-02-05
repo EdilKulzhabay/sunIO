@@ -132,7 +132,7 @@ export const Welcome = () => {
                         <div 
                             className="absolute inset-0 z-10 lg:hidden"
                             style={{
-                                background: 'linear-gradient(to top, #000000 0%, #00000000 70%)',
+                                background: 'linear-gradient(to top, #3B3B3B00 80%, #3B3B3B 99%)',
                             }}
                         />
                         <div 

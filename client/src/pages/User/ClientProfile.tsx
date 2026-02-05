@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../api";
 import profile from "../../assets/profile.png";
-import profileStar from "../../assets/profileStar.png";
+import sun from "../../assets/sun.png";
 import copyLink from "../../assets/copyLink.png";
 import edit from "../../assets/edit.png";
 import linkArrow from "../../assets/linkArrow.png";
@@ -285,15 +285,15 @@ export const ClientProfile = () => {
 
                         <div className="flex items-start gap-x-3 mt-4 bg-[#114E50] rounded-lg p-4">
                             <div className="shrink-0 cursor-pointer" onClick={() => setIsBonusPolicyModalOpen(true)}>
-                                <img src={profileStar} alt="star" className="w-8 h-8 object-cover" />
+                                <img src={sun} alt="sun" className="w-10 h-10 object-cover" />
                             </div>
                             <div className="w-full">
                                 <div className="flex items-center justify-between w-full">
-                                    <div className="text-xl font-medium">Звёзды</div>
+                                    <div className="text-xl font-medium">Солнца</div>
                                     <div className="text-xl font-medium">{userData?.bonus}</div>
                                 </div>
                                 <div className="mt-1">
-                                За выполнение бесполезного упражнения, ведение дневника и приглашение друзей. Звёзды обмениваются на эксклюзивный контент, который нельзя купить за деньги
+                                Начисляются за выполнение заданий, ведение дневника осознаний, просмотр контента и приглашение друзей. Солнца обмениваются на эксклюзивный контент, который нельзя купить за деньги
                                 </div>
                             </div>
                         </div>
@@ -308,14 +308,14 @@ export const ClientProfile = () => {
                                 }
                             }}
                         >
-                            <div className="text-xl font-medium">Статус подписки на клуб .li</div>
+                            <div className="text-xl font-medium">Подписка на Мастерскую Энергий</div>
                             {userData?.hasPaid && userData?.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date() ? (
                                 <div>
                                     Ваша подписка действует до{' '}
                                     {userData?.subscriptionEndDate ? new Date(userData.subscriptionEndDate).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }) : ''}
                                 </div>
                             ) : (
-                                <div>У вас нет подписки на клуб .li</div>
+                                <div>У вас нет подписки на клуб</div>
                             )}
                         </div>
 
@@ -398,9 +398,9 @@ export const ClientProfile = () => {
                     {!userData?.emailConfirmed && (
                         <Link 
                             to="/client/register"
-                            className="w-full block border mt-4 border-[#FFC293] text-[#FFC293] py-2.5 text-center font-medium rounded-full"
+                            className="w-full block mt-4 bg-white/10 text-[#FFFFFF] py-2.5 text-center font-medium rounded-full"
                         >
-                            Пройти регистрацию
+                            Регистрация
                         </Link>
                     )}
                     <div className="mt-3">

@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import api from '../../api';
 import { useAuth } from '../../contexts/AuthContext';
 import perfomanceInst from '../../assets/perfomanceInst.png';
+import sunWithHands from '../../assets/sunWithHands.png';
 
 export const ClientPerfomance = () => {
     const [fullName, setFullName] = useState('');
@@ -62,6 +63,7 @@ export const ClientPerfomance = () => {
         if (!telegramId) {
             toast.error('Ошибка: не найден telegramId');
             setError(true);
+            navigate('/client/connect-error');
             return;
         }
 
@@ -87,10 +89,12 @@ export const ClientPerfomance = () => {
                 navigate('/main');
             } else {
                 toast.error('Ошибка обновления данных');
+                navigate('/client/connect-error');
             }
         } catch (error: any) {
             console.error('Ошибка обновления пользователя:', error);
             toast.error(error.response?.data?.message || 'Ошибка обновления данных');
+            navigate('/client/connect-error');
         } finally {
             setLoading(false);
         }
@@ -124,7 +128,9 @@ export const ClientPerfomance = () => {
             }}
             className='min-h-screen px-4 pb-6 flex flex-col justify-between lg:justify-start'
         >
-            <div style={{ height: `${screenHeight/3}px` }}></div>
+            <div style={{ height: `${screenHeight/3}px` }} className='flex justify-center items-end'>
+                <img src={sunWithHands} alt="Sun with Hands" className='object-cover h-[175px] w-[175px] mb-10' />
+            </div>
             {error && (
                 <div className='flex-1 lg:flex-0 lg:w-[700px] lg:mx-auto'>
                     <h1 className='text-[48px] font-semibold text-white leading-12'>Ошибка подключения</h1>

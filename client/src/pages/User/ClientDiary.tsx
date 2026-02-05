@@ -338,7 +338,7 @@ export const ClientDiary = () => {
     return (
         <div>
             <UserLayout>
-                <BackNav title="Дневник" />
+                <BackNav title="Осознания" />
                 <div 
                     className="px-4 mt-2 pb-10 bg-[#031F23]" 
                     data-diary-page

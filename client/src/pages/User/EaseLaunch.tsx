@@ -2,6 +2,7 @@ import bgGar from '../../assets/bgGar.png';
 import { MyLink } from '../../components/User/MyLink';
 import easeLaunch from '../../assets/easeLaunch.png';
 import { useState, useEffect } from 'react';
+import logo from '../../assets/logo.png';
 
 export const EaseLaunch = () => {
     const [screenHeight, setScreenHeight] = useState<number>(0);
@@ -35,7 +36,9 @@ export const EaseLaunch = () => {
             }}
             className='min-h-screen px-4 pb-6 flex flex-col justify-between'
         >
-            <div style={{ height: `${screenHeight/3}px` }}></div>
+            <div style={{ height: `${screenHeight/3}px` }}>
+                <img src={logo} alt="logo" className='w-[104px] h-[40px] mt-10' />
+            </div>
             <div className='flex-1'>
                 <h1 className='text-[48px] font-semibold text-white leading-12'>Удобство запуска</h1>
                 <p className='text-white'>Для удобства последующих запусков Приложения его можно добавить на экран Домой телефона</p>

@@ -40,6 +40,8 @@ import { WelcomeAdmin } from "./pages/Admin/Welcome";
 import { WelcomeForm } from "./pages/Admin/WelcomeForm";
 import { AboutClubAdmin } from "./pages/Admin/AboutClub";
 import { AboutClubForm } from "./pages/Admin/AboutClubForm";
+import { BegginingJourneyAdmin } from "./pages/Admin/BegginingJourney";
+import { BegginingJourneyForm } from "./pages/Admin/BegginingJourneyForm";
 import { UsersAdmin } from "./pages/Admin/Users";
 import { UserForm } from "./pages/Admin/UserForm";
 import { ProfileAdmin } from "./pages/Admin/Profile";
@@ -97,6 +99,9 @@ import { BlockedBrowser } from "./pages/User/BlockedBrowser";
 import { EaseLaunch } from "./pages/User/EaseLaunch";
 import { TelegramGuard } from "./components/TelegramGuard";
 import { ClientInvitedUsers } from "./pages/User/ClientInvitedUsers.tsx";
+import { ClientNavigator } from "./pages/User/ClientNavigator";
+import { ClientBegginingJourney } from "./pages/User/ClientBegginingJourney";
+import { ClientConnectError } from "./pages/User/ClientConnectError";
 
 // Компонент-обертка для всех маршрутов
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
@@ -274,8 +279,16 @@ export const routes = createBrowserRouter([
         element: <RootLayout><TelegramGuard><ProtectedRoute><ClientDiary /></ProtectedRoute></TelegramGuard></RootLayout>,
     },
     {
+        path: "/client/navigator",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientNavigator /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
         path: "/client/profile",
         element: <RootLayout><TelegramGuard><ProtectedRoute><ClientProfile /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/beggining-journey",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientBegginingJourney /></ProtectedRoute></TelegramGuard></RootLayout>,
     },
     {
         path: "/login",
@@ -296,6 +309,10 @@ export const routes = createBrowserRouter([
     {
         path: "/client/blocked-browser",
         element: <RootLayout><BlockedBrowser /></RootLayout>,
+    },
+    {
+        path: "/client/connect-error",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientConnectError /></ProtectedRoute></TelegramGuard></RootLayout>,
     },
     {
         path: "/client/invited-users",
@@ -519,6 +536,18 @@ export const routes = createBrowserRouter([
     {
         path: "/admin/about-club/edit/:id",
         element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><AboutClubForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/beggining-journey",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><BegginingJourneyAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/beggining-journey/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><BegginingJourneyForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/beggining-journey/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><BegginingJourneyForm /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/admin/users",

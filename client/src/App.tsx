@@ -47,6 +47,7 @@ function App() {
                 pauseOnFocusLoss
                 draggable
                 pauseOnHover
+                style={{ top: '30px' }}
             />
         </>
     )

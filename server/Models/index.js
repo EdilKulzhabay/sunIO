@@ -18,6 +18,7 @@ import AnalysisHealth from './AnalysisHealth.js';
 import AnalysisRelationships from './AnalysisRelationships.js';
 import AnalysisRealization from './AnalysisRealization.js';
 import Psychodiagnostics from './Psychodiagnostics.js';
+import BegginingJourney from './BegginingJourney.js';
 
 export {
     User,
@@ -39,5 +40,6 @@ export {
     AnalysisHealth,
     AnalysisRelationships,
     AnalysisRealization,
-    Psychodiagnostics
+    Psychodiagnostics,
+    BegginingJourney
 };

@@ -1,12 +1,11 @@
 import bgGar from '../../assets/bgGar.png';
-import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { RedButton } from '../../components/User/RedButton';
 import sunWithHands from '../../assets/sunWithHands.png';
+import connectErrorImage from '../../assets/connectErrorImage.png';
 
-export const BlockedUser = () => {
+export const ClientConnectError = () => {
     const [screenHeight, setScreenHeight] = useState<number>(0);
-    const navigate = useNavigate();
     useEffect(() => {
         const updateScreenHeight = () => {
             // window.innerHeight - высота окна браузера в пикселях (это то же самое, что h-screen)
@@ -38,8 +37,9 @@ export const BlockedUser = () => {
                 <img src={sunWithHands} alt="Sun with Hands" className='object-cover h-[175px] w-[175px] mb-10' />
             </div>
             <div className='flex-1'>
-                <h1 className='text-[48px] font-semibold text-white leading-12'>Доступ заблокирован</h1>
-                <p className='text-white'>Администратор заблокировал Вам доступ к приложению за нарушение правил пользования</p>
+                <h1 className='text-[48px] font-semibold text-white leading-12'>Ошибка подключения</h1>
+                <p className='text-white mt-2'>Вам необходимо закрыть приложение и открыть заново через кнопку Открыть Солнце в диалоге с Telegram-ботом</p>
+                <img src={connectErrorImage} alt="Connect Error Image" className='w-[80%] h-auto object-cover mt-4 rounded-lg' />
             </div>
 
             <div className='bg-[#031F23]'>
@@ -50,8 +50,8 @@ export const BlockedUser = () => {
                     Связаться с нами
                 </Link> */}
                 <RedButton
-                    text="Связаться с нами"
-                    onClick={() => {navigate('/client/contactus')}}
+                    text="Закрыть"
+                    onClick={() => {window.close()}}
                     className='w-full mt-4'
                 />
             </div>

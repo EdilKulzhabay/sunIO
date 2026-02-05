@@ -7,14 +7,15 @@ import logo from "../../assets/logo.png"
 import users from "../../assets/users.png"
 import faq from "../../assets/faq.png"
 import user from "../../assets/user.png"
-import mainVideo from "../../assets/mainVideo.png"
-import mainPractice from "../../assets/mainPractice.png"
-import mainMeditation from "../../assets/mainMeditation.png"
-// import main1 from "../../assets/main1.png"
-// import main2 from "../../assets/main2.png"
-// import main3 from "../../assets/main3.png"
-// import main4 from "../../assets/main4.png"
+// import mainVideo from "../../assets/mainVideo.png"
+// import mainPractice from "../../assets/mainPractice.png"
+// import mainMeditation from "../../assets/mainMeditation.png"
+import main1 from "../../assets/main1.png"
+import main2 from "../../assets/main2.png"
+import main3 from "../../assets/main3.png"
+import main4 from "../../assets/main4.png"
 import redUser from "../../assets/redUser.png"
+import { ClientSchedule } from "./ClientSchedule"
 
 
 // const SmallCard = ({ title, link, img }: { title: string, link: string, img: string }) => {
@@ -34,30 +35,36 @@ import redUser from "../../assets/redUser.png"
 //     )
 // }
 
-const SmallCard = ({ title, link }: { title: string, link: string }) => {
+const SmallCard = ({ title, link, img }: { title: string, link: string, img: string }) => {
     return (
         <Link 
             to={link} 
             className="min-h-24 flex items-center bg-[#114E50] relative rounded-lg p-4 overflow-hidden"
+            style={{
+                backgroundImage: `url(${img})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'right',
+                backgroundRepeat: 'no-repeat',
+            }}
         >
             <p className="text-xl font-medium" dangerouslySetInnerHTML={{ __html: title }}></p>
         </Link>
     )
 }
 
-const LargeCard = ({ title, link, image, content }: { title: string, link: string, image: string, content: string }) => {
-    return (
-        <Link to={link} className="flex items-center bg-[#114E50] rounded-lg p-4 gap-x-4">
-            <div className="w-[98px] h-[98px] flex items-center justify-center rounded-full bg-white/10 shrink-0">
-                <img src={image} alt={title} className="w-[50px] h-[50px] object-cover" />
-            </div>
-            <div className="">
-                <p className="text-xl font-medium">{title}</p>
-                <p className="text-sm mt-1" dangerouslySetInnerHTML={{ __html: content }}></p>    
-            </div>
-        </Link>
-    )
-}
+// const LargeCard = ({ title, link, image, content }: { title: string, link: string, image: string, content: string }) => {
+//     return (
+//         <Link to={link} className="flex items-center bg-[#114E50] rounded-lg p-4 gap-x-4">
+//             <div className="w-[98px] h-[98px] flex items-center justify-center rounded-full bg-white/10 shrink-0">
+//                 <img src={image} alt={title} className="w-[50px] h-[50px] object-cover" />
+//             </div>
+//             <div className="">
+//                 <p className="text-xl font-medium">{title}</p>
+//                 <p className="text-sm mt-1" dangerouslySetInnerHTML={{ __html: content }}></p>    
+//             </div>
+//         </Link>
+//     )
+// }
 
 interface ModalNotification {
     modalTitle: string;
@@ -374,7 +381,7 @@ export const Main = () => {
             <div className="px-4 pb-10 bg-[#031F23]">
                 <div className="flex items-center justify-between pt-5 pb-4">
                     <div className="cursor-pointer" onClick={() => navigate('/client/contactus')}>
-                        <img src={logo} alt="logo" className="w-6 h-6" />
+                        <img src={logo} alt="logo" className="w-[104px] h-[40px]" />
                     </div>
                     <div className="flex items-center gap-6">
                         {userData?.hasPaid && userData?.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date() ? (
@@ -398,12 +405,15 @@ export const Main = () => {
                 </div>
                 <h1 className="mt-1 text-2xl font-bold">Добро пожаловать, {userName ? userName : ""}!</h1>
                 <div className="grid grid-cols-2 gap-4 mt-5">
-                    <SmallCard title="Дневник" link="/client/diary" />
-                    <SmallCard title="Расписание" link="/client/schedule" />
-                    <SmallCard title={`Транзиты`} link="/client/transit" />
-                    <SmallCard title={`Гороскоп`} link="/client/horoscope" />
+                    <SmallCard title="Навигатор" link="/client/navigator" img={main1} />
+                    <SmallCard title="Задания" link="/client/schedule" img={main2} />
+                    <SmallCard title={`Осознания`} link="/client/diary" img={main3} />
+                    <SmallCard title={`Практики`} link="/client/practices" img={main4} />
                 </div>
-                <div className="mt-4 space-y-3">
+
+                <ClientSchedule />
+
+                {/* <div className="mt-4 space-y-3">
                     <LargeCard 
                         title="Лаборатория здоровья" 
                         link="/client/health-lab" 
@@ -422,7 +432,7 @@ export const Main = () => {
                         image={mainMeditation} 
                         content="Разрешение внутренних конфликтов, соединение со своей энергией и запуск процессов изменений"
                     />
-                </div>
+                </div> */}
             </div>
         </UserLayout>
     )

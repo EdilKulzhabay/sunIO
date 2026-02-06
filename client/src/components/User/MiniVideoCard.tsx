@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom';
 import lock from '../../assets/lock.png';
+import needMoney from '../../assets/needMoney.png';
 
 export const MiniVideoCard = ({ title, image, link, progress, accessType, onLockedClick, duration }: { title: string, image: string, link: string, progress: number, accessType: string, onLockedClick?: () => void, duration?: number }) => {
     return (
         <>
         {accessType === 'free' ? (
-            <Link to={link} className="rounded-lg w-full h-full flex flex-col">
+            <Link to={link} className="rounded-xl bg-[#114E50] w-full h-full flex flex-col">
                 <div className="relative h-[98px] sm:h-[142px] lg:h-[197px]">
                     <img src={`${import.meta.env.VITE_API_URL}${image}`} alt={title} className="w-full h-full rounded-lg object-cover" />
                 </div>
@@ -36,7 +37,7 @@ export const MiniVideoCard = ({ title, image, link, progress, accessType, onLock
                 </div>
             </Link>
         ) : (
-            <button onClick={onLockedClick} className="rounded-lg w-full h-full flex-1 flex flex-col">
+            <button onClick={onLockedClick} className="rounded-xl bg-[#114E50] w-full h-full flex-1 flex flex-col">
                 <div className="relative h-[98px] sm:h-[142px] lg:h-[197px]">
                     <img src={`${import.meta.env.VITE_API_URL}${image}`} alt={title} className="w-full h-full rounded-lg object-cover" />
                     <div className="absolute inset-0 bg-black/40 rounded-lg" />
@@ -47,7 +48,7 @@ export const MiniVideoCard = ({ title, image, link, progress, accessType, onLock
                     />
                 </div>
 
-                <div className='w-full p-4 pt-3 text-left flex-1 flex flex-col'>
+                <div className='w-full p-4 pt-3 text-left flex-1 flex flex-col rounded-xl'>
                     <p
                         className="font-medium line-clamp-2 min-h-[44px]"
                         style={{
@@ -61,13 +62,24 @@ export const MiniVideoCard = ({ title, image, link, progress, accessType, onLock
                     >
                         {title}
                     </p>
-                    <div className="mt-auto">
-                        <div className='w-full flex items-center justify-between'>
-                            <p className='text-sm font-medium'>{progress}%</p>
-                            <p className='text-sm font-medium'>{duration} мин.</p>
+                    <div className="mt-auto flex items-center gap-x-3">
+                        <div className='w-[60%]'>
+                            <div className='w-full flex items-center justify-between'>
+                                <p className='text-sm font-medium'>{progress}%</p>
+                                <p className='text-sm font-medium'>{duration} мин.</p>
+                            </div>
+                            <div className='w-full h-1.5 bg-white/40 rounded-full mt-1'>
+                                <div className='h-full bg-white rounded-full' style={{ width: `${progress}%` }} />
+                            </div>
                         </div>
-                        <div className='w-full h-1.5 bg-white/40 rounded-full mt-1'>
-                            <div className='h-full bg-white rounded-full' style={{ width: `${progress}%` }} />
+                        <div className='self-stretch flex-1'>
+                            <div className='flex h-full w-full items-center justify-center border border-[#00C5AE] rounded-full'>
+                                <img
+                                    src={needMoney}
+                                    alt="needMoney"
+                                    className="w-[14px] h-[14px] "
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

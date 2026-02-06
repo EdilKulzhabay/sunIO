@@ -35,7 +35,8 @@ import {
     AnalysisRelationshipsController,
     AnalysisRealizationController,
     PsychodiagnosticsController,
-    BegginingJourneyController
+    BegginingJourneyController,
+    NavigatorDescriptionsController
 } from "./Controllers/index.js";
 import { authMiddleware } from "./Middlewares/authMiddleware.js";
 import { adminActionLogMiddleware } from "./Middlewares/adminActionLogMiddleware.js";
@@ -299,6 +300,14 @@ app.get("/api/beggining-journey", BegginingJourneyController.get);
 app.get("/api/beggining-journey/all", BegginingJourneyController.getAll);
 app.put("/api/beggining-journey/:id", authMiddleware, BegginingJourneyController.update);
 app.delete("/api/beggining-journey/:id", authMiddleware, BegginingJourneyController.remove);
+
+// ==================== NavigatorDescriptions (Описания навигатора) маршруты ====================
+app.post("/api/navigator-descriptions", createContentRateLimit, authMiddleware, NavigatorDescriptionsController.create);
+app.get("/api/navigator-descriptions", NavigatorDescriptionsController.getAll);
+app.get("/api/navigator-descriptions/:id", NavigatorDescriptionsController.getById);
+app.get("/api/navigator-descriptions/name/:name", NavigatorDescriptionsController.getByName);
+app.put("/api/navigator-descriptions/:id", authMiddleware, NavigatorDescriptionsController.update);
+app.delete("/api/navigator-descriptions/:id", authMiddleware, NavigatorDescriptionsController.remove);
 
 // ==================== Schedule маршруты ====================
 app.post("/api/schedule", createContentRateLimit, authMiddleware, ScheduleController.create);

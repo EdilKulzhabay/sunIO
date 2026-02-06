@@ -240,7 +240,7 @@ export const ClientProfile = () => {
             <UserLayout>
                 <BackNav title="Приглашённые друзья" />
                 <div 
-                    className="px-4 mt-2 pb-10 bg-[#031F23] flex flex-col justify-between"
+                    className="px-4 pb-10 bg-[#031F23] flex flex-col justify-between"
                     style={{ minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom)}px` }}
                 >
                     <div className="flex-1">
@@ -347,7 +347,7 @@ export const ClientProfile = () => {
                                     className="break-all"
                                 >
                                     {userData?.telegramId 
-                                        ? `t.me/io_tochkali_bot?start=${userData.telegramId}`
+                                        ? `t.me/io_sun_bot?start=${userData.telegramId}`
                                         : 'Загрузка...'
                                     }
                                 </div>
@@ -362,21 +362,23 @@ export const ClientProfile = () => {
 
                         <div className="mt-4 flex items-center gap-x-2">
                             <a
-                                href="https://t.me/tochka_li"
+                                href="https://t.me/io_center"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="basis-1/2 bg-[#114E50] rounded-lg p-4 flex items-center gap-x-2.5"
+                                className="basis-1/2 bg-[#114E50] rounded-lg p-4 pr-2 flex items-center justify-between"
                             >
-                                <div className="font-medium text-sm">Телеграм канал проекта .li</div>
+                                <div className="font-medium text-sm">Телеграм канал</div>
                                 <img src={linkArrow} alt="linkArrow" className="w-5 h-5 object-cover shrink-0" />
                             </a>
-                            <Link
-                                to="/about"
-                                className="basis-1/2 bg-[#114E50] rounded-lg p-4 flex items-center gap-x-2.5"
+                            <a
+                                href="https://t.me/+UWaWd3xq3erdWnny"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="basis-1/2 bg-[#114E50] rounded-lg p-4 pr-2 flex items-center justify-between"
                             >
-                                <div className="font-medium text-sm">Телеграм канал клуба .li</div>
+                                <div className="font-medium text-sm">Телеграм чат</div>
                                 <img src={linkArrow} alt="linkArrow" className="w-5 h-5 object-cover shrink-0" />
-                            </Link>
+                            </a>
                         </div>
 
                         <div className="mt-4 flex items-center justify-between">

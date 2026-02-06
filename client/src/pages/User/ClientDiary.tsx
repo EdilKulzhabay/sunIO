@@ -340,7 +340,7 @@ export const ClientDiary = () => {
             <UserLayout>
                 <BackNav title="Осознания" />
                 <div 
-                    className="px-4 mt-2 pb-10 bg-[#031F23]" 
+                    className="px-4 -mt-2 pb-10 bg-[#031F23]" 
                     data-diary-page
                     style={{
                         userSelect: 'text',
@@ -350,7 +350,7 @@ export const ClientDiary = () => {
                         WebkitTouchCallout: 'default'
                     }}
                 >
-                    <p className="mt-4" dangerouslySetInnerHTML={{ __html: content?.content }}>
+                    <p dangerouslySetInnerHTML={{ __html: content?.content }}>
                     </p>
 
                     <div className="mt-4 bg-[#114E50] p-4 rounded-lg">
@@ -491,13 +491,13 @@ export const ClientDiary = () => {
                         {isOpenToday && (
                             <div className="mt-3 space-y-3">
                                 <div className="p-2 border border-white/40 rounded-lg">
-                                    <p className="text-sm font-medium">Открытия</p>
+                                    <p className="text-sm font-medium">Осознания</p>
                                     <textarea 
                                         name="discovery"
                                         value={diary.discovery}
                                         onChange={handleChange}
                                         className="w-full mt-1 bg-transparent text-white focus:outline-none focus:border-white/80 overflow-y-scroll"
-                                        placeholder="Что нового вы открыли для себя сегодня?"
+                                        placeholder="Что нового Вы осознали сегодня?"
                                         rows={1}
                                         style={{
                                             minHeight: "2.5rem",
@@ -531,13 +531,13 @@ export const ClientDiary = () => {
                                     />
                                 </div>
                                 <div className="p-2 border border-white/40 rounded-lg">
-                                    <p className="text-sm font-medium">Благодарности</p>
+                                    <p className="text-sm font-medium">Цели и задачи</p>
                                     <textarea 
                                         name="gratitude" 
                                         value={diary.gratitude} 
                                         onChange={handleChange} 
                                         className="w-full mt-1 bg-transparent text-white focus:outline-none focus:border-white/80 overflow-y-scroll" 
-                                        placeholder="Кому и за что вы благодарны сегодня?"
+                                        placeholder="Какие цели Вы запланировали сегодня?"
                                         rows={1}
                                         style={{
                                             minHeight: "2.5rem",
@@ -551,7 +551,7 @@ export const ClientDiary = () => {
                                     />
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <p className="text-sm font-medium">Бесполезное упражнение</p>
+                                    <p className="text-sm font-medium">Выбранное упражнение</p>
                                     <Switch
                                         checked={diary.uselessTask}
                                         onChange={() => setDiary({ ...diary, uselessTask: !diary.uselessTask })}
@@ -587,7 +587,7 @@ export const ClientDiary = () => {
                                     {diary.isOpen && (
                                         <div className="mt-3 space-y-3">
                                             <div className="p-2 border border-white/40 rounded-lg max-h-[100px] overflow-y-scroll">
-                                                <p className="text-sm font-medium">Открытия</p>
+                                                <p className="text-sm font-medium">Осознания</p>
                                                 <p className="mt-1.5">{diary.discovery}</p>
                                             </div>
                                             <div className="p-2 border border-white/40 rounded-lg max-h-[100px] overflow-y-scroll">
@@ -595,11 +595,11 @@ export const ClientDiary = () => {
                                                 <p className="mt-1.5">{diary.achievement}</p>
                                             </div>
                                             <div className="p-2 border border-white/40 rounded-lg max-h-[100px] overflow-y-scroll">
-                                                <p className="text-sm font-medium">Благодарности</p>
+                                                <p className="text-sm font-medium">Цели и задачи</p>
                                                 <p className="mt-1.5">{diary.gratitude}</p>
                                             </div>
                                             <div className="flex items-center justify-between">
-                                                <p className="text-sm font-medium">Бесполезное упражнение</p>
+                                                <p className="text-sm font-medium">Выбранное упражнение</p>
                                                 <div className={`px-2 py-1 rounded ${diary.uselessTask ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'}`}>
                                                     {diary.uselessTask ? 'Да' : 'Нет'}
                                                 </div>

@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api";
 import profile from "../../assets/profile.png";
-import profileStar from "../../assets/profileStar.png";
+import sun from "../../assets/sun.png";
 import edit from "../../assets/edit.png";
 import { X } from 'lucide-react';
 import { toast } from "react-toastify";
@@ -229,7 +229,7 @@ export const ClientInvitedUsers = () => {
             <UserLayout>
                 <BackNav title="Профиль" />
                 <div 
-                    className="px-4 mt-2 pb-10 bg-[#031F23] flex flex-col justify-between"
+                    className="px-4 pb-10 bg-[#031F23] flex flex-col justify-between"
                     style={{ minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom)}px` }}
                 >
                     <div className="flex-1">
@@ -274,15 +274,15 @@ export const ClientInvitedUsers = () => {
 
                         <div className="flex items-start gap-x-3 mt-4 bg-[#114E50] rounded-lg p-4">
                             <div className="shrink-0 cursor-pointer" onClick={() => setIsBonusPolicyModalOpen(true)}>
-                                <img src={profileStar} alt="star" className="w-8 h-8 object-cover" />
+                                <img src={sun} alt="sun" className="w-10 h-10 object-cover" />
                             </div>
                             <div className="w-full">
                                 <div className="flex items-center justify-between w-full">
-                                    <div className="text-xl font-medium">Звёзды</div>
+                                    <div className="text-xl font-medium">Солнца</div>
                                     <div className="text-xl font-medium">{userData?.bonus}</div>
                                 </div>
                                 <div className="mt-1">
-                                За выполнение бесполезного упражнения, ведение дневника и приглашение друзей. Звёзды обмениваются на эксклюзивный контент, который нельзя купить за деньги
+                                Начисляются за выполнение заданий, ведение дневника осознаний, просмотр контента и приглашение друзей. Солнца обмениваются на эксклюзивный контент, который нельзя купить за деньги
                                 </div>
                             </div>
                         </div>

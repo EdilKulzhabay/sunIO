@@ -19,7 +19,8 @@ import {
     HeartHandshake,
     Target,
     Brain,
-    Compass
+    Compass,
+    Navigation
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -47,6 +48,7 @@ const contentCards = [
     { title: 'Приветствие', icon: Home, path: '/admin/welcome', color: 'bg-amber-500', description: 'Контент на странице Приветствие' },
     { title: 'О клубе', icon: Info, path: '/admin/about-club', color: 'bg-cyan-600', description: 'Контент на странице О клубе' },
     { title: 'Начало путешествия', icon: Compass, path: '/admin/beggining-journey', color: 'bg-sky-500', description: 'Контент начала путешествия' },
+    { title: 'Описания навигатора', icon: Navigation, path: '/admin/navigator-descriptions', color: 'bg-blue-600', description: 'Управление описаниями навигатора' },
 ];
 
 export const Main = () => {

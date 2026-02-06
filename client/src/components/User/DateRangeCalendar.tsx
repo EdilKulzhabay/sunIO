@@ -283,12 +283,12 @@ export const DateRangeCalendar = ({
                                 ${inRange ? 'bg-white/20' : ''}
                                 ${selected ? 'bg-white/40 text-white font-semibold' : ''}
                                 ${!selected && !today ? 'hover:bg-white/10' : ''}
+                                ${today && !selected && !borderColor ? 'bg-white/40' : ''}
                             `}
                         >
                             <div className={`
                                     w-6 h-6  rounded-full text-sm transition-colors relative flex flex-col items-center justify-center
                                     ${borderColor ? 'border' : ''}
-                                    ${today && !selected && !borderColor ? 'border border-[#FFC293]' : ''}
                                 `}
                                 style={borderColor ? { borderColor: borderColor } : undefined}
                             >

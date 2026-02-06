@@ -42,6 +42,8 @@ import { AboutClubAdmin } from "./pages/Admin/AboutClub";
 import { AboutClubForm } from "./pages/Admin/AboutClubForm";
 import { BegginingJourneyAdmin } from "./pages/Admin/BegginingJourney";
 import { BegginingJourneyForm } from "./pages/Admin/BegginingJourneyForm";
+import { NavigatorDescriptionsAdmin } from "./pages/Admin/NavigatorDescriptions";
+import { NavigatorDescriptionsForm } from "./pages/Admin/NavigatorDescriptionsForm";
 import { UsersAdmin } from "./pages/Admin/Users";
 import { UserForm } from "./pages/Admin/UserForm";
 import { ProfileAdmin } from "./pages/Admin/Profile";
@@ -548,6 +550,18 @@ export const routes = createBrowserRouter([
     {
         path: "/admin/beggining-journey/edit/:id",
         element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><BegginingJourneyForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/navigator-descriptions",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><NavigatorDescriptionsAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/navigator-descriptions/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><NavigatorDescriptionsForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/navigator-descriptions/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><NavigatorDescriptionsForm /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/admin/users",

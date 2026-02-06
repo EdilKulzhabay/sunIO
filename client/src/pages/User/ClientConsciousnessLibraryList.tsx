@@ -242,7 +242,7 @@ export const ClientConsciousnessLibraryList = () => {
                     <div className="md:hidden">
                         <button 
                             onClick={scrollRight}
-                            className="flex items-center justify-center w-8 h-8 border border-[#FFC293] rounded-full cursor-pointer hover:bg-[#FFB070] transition-colors"
+                            className="flex items-center justify-center w-8 h-8 border border-[#00C5AE] rounded-full cursor-pointer hover:bg-[#00C5AE] transition-colors"
                         >
                             <img 
                                 src={inBothDirections}

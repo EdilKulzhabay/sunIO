@@ -92,7 +92,7 @@ export const ClientFAQ = () => {
                     </div>
                     <div className="mt-4">
                         <a 
-                            href="https://drive.google.com/file/d/1PGDJqtSnqy-18dgNsw3pnWMNtvMAcXAf/view?usp=share_link"
+                            href="https://drive.google.com/file/d/1AI8UwHC_BIZ3Rwi6MaP9Z04T-J6xFR03/view?usp=sharing"
                             target="_blank"
                             className='w-full mt-4 bg-white/10 block text-white py-2.5 text-center font-medium rounded-full'
                         >Открыть инструкцию</a>

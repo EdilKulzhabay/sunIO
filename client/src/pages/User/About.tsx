@@ -55,17 +55,17 @@ export const About = () => {
         setModalOpen(true);
     }
 
-    const handleSkip = () => {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        const windowWidth = window.innerWidth;
-        if ((!user || !user.fullName || user.fullName.trim() === '') && windowWidth < 1024) {
-            navigate("/client/ease-launch");
-        } else if ((!user || !user.fullName || user.fullName.trim() === '') && windowWidth >= 1024) {
-            navigate("/client-performance");
-        } else {
-            navigate("/main");
-        }
-    }
+    // const handleSkip = () => {
+    //     const user = JSON.parse(localStorage.getItem('user') || '{}');
+    //     const windowWidth = window.innerWidth;
+    //     if ((!user || !user.fullName || user.fullName.trim() === '') && windowWidth < 1024) {
+    //         navigate("/client/ease-launch");
+    //     } else if ((!user || !user.fullName || user.fullName.trim() === '') && windowWidth >= 1024) {
+    //         navigate("/client-performance");
+    //     } else {
+    //         navigate("/main");
+    //     }
+    // }
 
     useEffect(() => {
         setLoading(true);
@@ -136,12 +136,12 @@ export const About = () => {
                                 <MobileAccordionList items={content?.list} />
                             </div>
                         )}
-                        <button 
+                        {/* <button 
                             className='bg-white/10 block text-white py-2.5 text-center font-medium rounded-full w-full mt-4 cursor-pointer'
                             onClick={handleSkip}
                         >
                             Пропустить
-                        </button>
+                        </button> */}
                         <RedButton text="Вступить в клуб" onClick={handleJoinClub} className='w-full mt-4 cursor-pointer'/>
                     </div>
                 </div>

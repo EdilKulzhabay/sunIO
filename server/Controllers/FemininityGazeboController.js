@@ -79,10 +79,25 @@ export const getAll = async (req, res) => {
 
         const items = await FemininityGazebo.find(filter).sort({ order: 1, createdAt: -1 });
 
+        // Вычисляем duration как сумму всех duration из массива content
+        const itemsWithCalculatedDuration = items.map(item => {
+            const totalDuration = Array.isArray(item.content) 
+                ? item.content.reduce((sum, contentItem) => {
+                    const duration = Number.isFinite(contentItem?.video?.duration) ? contentItem.video.duration : 0;
+                    return sum + duration;
+                }, 0)
+                : 0;
+            
+            return {
+                ...item.toObject(),
+                duration: totalDuration
+            };
+        });
+
         res.json({
             success: true,
-            data: items,
-            count: items.length,
+            data: itemsWithCalculatedDuration,
+            count: itemsWithCalculatedDuration.length,
         });
     } catch (error) {
         console.log("Ошибка в FemininityGazeboController.getAll:", error);

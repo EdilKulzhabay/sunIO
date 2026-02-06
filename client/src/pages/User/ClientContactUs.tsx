@@ -59,14 +59,18 @@ export const ClientContactUs = () => {
         <div>
             <UserLayout>
                 <BackNav title="Связаться с нами" />
-                <div className='px-4 mt-8 pb-5 flex flex-col justify-between min-h-screen bg-[#031F23]'>
+                <div className='px-4 pb-5 flex flex-col justify-between min-h-screen bg-[#031F23]'>
                     <div>
                         <div className="space-y-3">
-                            <ContactUsBlock title="E-mail" content="support@tochka.li" isLink={true} link="mailto:support@tochka.li" />
-                            <ContactUsBlock title="Telegram" content="t.me/tochkaliteam" isLink={true} link="https://t.me/tochkaliteam" />
-                            <ContactUsBlock title="Website" content="tochka.li" isLink={true} link="https://tochka.li" />
-                            <ContactUsBlock title="YouTube *" content="youtube.com/@tochkali" isLink={true} link="https://youtube.com/@tochkali" />
-                            <ContactUsBlock title="Instagram *" content="instagram.com/nurlan_muratkali" isLink={true} link="https://instagram.com/nurlan_muratkali" />
+                            <ContactUsBlock title="Официальный сайт" content="www.исцелениеосознанием.рф" isLink={true} link="https://www.xn--80ajaabkdcdysfdbla7bh1g.xn--p1ai/" />
+                            <ContactUsBlock title="E-mail службы заботы" content="manager@psylife.io" isLink={true} link="mailto:manager@psylife.io" />
+                            <ContactUsBlock title="Telegram службы зоботы" content="t.me/io_care_service" isLink={true} link="https://t.me/io_care_service" />
+                            <ContactUsBlock title="WhatsApp службы зоботы *" content="wa.me/9166559655" isLink={true} link="https://wa.me/9166559655" />
+                            <ContactUsBlock title="Instagram Константина Павлова *" content="instagram.com/io_konstantin" isLink={true} link="https://instagram.com/io_konstantin" />
+                            <ContactUsBlock title="Instagram Марины Павловой *" content="instagram.com/io_aromarina" isLink={true} link="https://instagram.com/io_aromarina" />
+                            <ContactUsBlock title="YouTube канал *" content="youtube.com/@io_konstantin" isLink={true} link="https://youtube.com/@io_konstantin" />
+                            <ContactUsBlock title="RuTube канал" content="rutube.ru/channel/45394247" isLink={true} link="https://rutube.ru/channel/45394247" />
+                            <ContactUsBlock title="Страница ВКонтакте" content="vk.com/io_konstantin" isLink={true} link="https://vk.com/io_konstantin" />
                         </div>
                         <div className="mt-3 ">
                             <p className="text-white/60" dangerouslySetInnerHTML={{ __html: text ? text : '* Запрещённые в РФ социальные сети' }} />

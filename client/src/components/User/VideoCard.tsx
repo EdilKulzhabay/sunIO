@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import lock from '../../assets/lock.png';
 import arrowRight from '../../assets/arrowRight.png';
 import star from '../../assets/star.png';
+import needMoney from '../../assets/needMoney.png';
 
 export const VideoCard = ({ title, description, image, link, accessType, progress, onLockedClick, starsRequired, duration }: { title: string, description: string, image: string, link: string, accessType: string, progress: number, onLockedClick?: () => void, starsRequired?: number, duration?: number }) => {
     const navigate = useNavigate();
@@ -60,22 +61,31 @@ export const VideoCard = ({ title, description, image, link, accessType, progres
                     </div>
 
                     {accessType === 'free' && (
-                        <div className="w-[55%] flex items-center justify-center px-3 py-1.5 border border-[#FFC293] rounded-full cursor-pointer">
-                            <p className="text-[12px] text-[#FFC293]">Посмотреть</p>
+                        <div className="w-[55%] flex items-center justify-center px-3 py-1.5 border border-[#00C5AE] rounded-full cursor-pointer">
+                            <p className="text-[12px] text-[#00C5AE]">Перейти</p>
                             <img
                                 src={arrowRight}
                                 alt="arrow-right"
-                                className="w-[12px] h-[12px] ml-px"
+                                className="w-[14px] h-[14px] ml-2"
                             />
                         </div>
                     )}
                     {accessType === 'stars' && (
-                        <div className="w-[55%] flex items-center justify-center px-3 py-1.5 border border-[#FFC293] rounded-full cursor-pointer">
-                            <p className="text-[12px] text-[#FFC293]">{starsRequired}</p>
+                        <div className="w-[55%] flex items-center justify-center px-3 py-1.5 border border-[#00C5AE] rounded-full cursor-pointer">
+                            <p className="text-[12px] text-[#00C5AE]">{starsRequired}</p>
                             <img
                                 src={star}
                                 alt="star"
-                                className="w-[12px] h-[12px] ml-2"
+                                className="w-[14px] h-[14px] ml-3"
+                            />
+                        </div>
+                    )}
+                    {accessType === 'subscription' && (
+                        <div className="w-[55%] flex items-center justify-center px-3 py-1.5 border border-[#00C5AE] rounded-full cursor-pointer">
+                            <img
+                                src={needMoney}
+                                alt="needMoney"
+                                className="w-[14px] h-[14px]"
                             />
                         </div>
                     )}

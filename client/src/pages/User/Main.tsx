@@ -7,6 +7,7 @@ import logo from "../../assets/logo.png"
 import users from "../../assets/users.png"
 import faq from "../../assets/faq.png"
 import user from "../../assets/user.png"
+import productsCatalog from "../../assets/productsCatalog.png"
 // import mainVideo from "../../assets/mainVideo.png"
 // import mainPractice from "../../assets/mainPractice.png"
 // import mainMeditation from "../../assets/mainMeditation.png"
@@ -391,6 +392,9 @@ export const Main = () => {
                                 <img src={users} alt="users" className="w-6 h-6" />
                             </Link>
                         )}
+                        <Link to="/client/product-catalog">
+                            <img src={productsCatalog} alt="productsCatalog" className="w-6 h-6" />
+                        </Link>
                         <Link to="/client/faq">
                             <img src={faq} alt="faq" className="w-6 h-6" />
                         </Link>

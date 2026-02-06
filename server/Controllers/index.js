@@ -25,3 +25,4 @@ export * as AnalysisRelationshipsController from "./AnalysisRelationshipsControl
 export * as AnalysisRealizationController from "./AnalysisRealizationController.js";
 export * as PsychodiagnosticsController from "./PsychodiagnosticsController.js";
 export * as BegginingJourneyController from "./BegginingJourneyController.js";
+export * as NavigatorDescriptionsController from "./NavigatorDescriptionsController.js";

@@ -41,7 +41,23 @@ export const getAll = async (req, res) => {
         if (accessType) filter.accessType = accessType;
 
         const items = await AnalysisHealth.find(filter).sort({ order: 1, createdAt: -1 });
-        res.json({ success: true, data: items, count: items.length });
+        
+        // Вычисляем duration как сумму всех duration из массива content
+        const itemsWithCalculatedDuration = items.map(item => {
+            const totalDuration = Array.isArray(item.content) 
+                ? item.content.reduce((sum, contentItem) => {
+                    const duration = Number.isFinite(contentItem?.video?.duration) ? contentItem.video.duration : 0;
+                    return sum + duration;
+                }, 0)
+                : 0;
+            
+            return {
+                ...item.toObject(),
+                duration: totalDuration
+            };
+        });
+        
+        res.json({ success: true, data: itemsWithCalculatedDuration, count: itemsWithCalculatedDuration.length });
     } catch (error) {
         console.log("Ошибка в AnalysisHealthController.getAll:", error);
         res.status(500).json({ success: false, message: "Ошибка при получении записей", error: error.message });

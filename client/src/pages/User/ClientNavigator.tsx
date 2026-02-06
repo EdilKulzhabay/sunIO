@@ -212,7 +212,7 @@ export const ClientNavigator = () => {
                                 href={selectedContent.link}
                                 target="_blank"
                             >
-                                <p dangerouslySetInnerHTML={{ __html: selectedContent.link || "Перейти" }}></p>
+                                <p>Перейти</p>
                             </a>
                         </div>
                     </div>

@@ -7,6 +7,7 @@ import { RichTextEditor } from '../../components/Admin/RichTextEditor';
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import api from '../../api';
 import { toast } from 'react-toastify';
+import { REDIRECT_TO_PAGE_OPTIONS } from '../../constants/redirectToPageOptions';
 
 interface ContentItem {
     title: string;
@@ -147,14 +148,19 @@ export const NavigatorDescriptionsForm = () => {
                             />
                         </div>
 
-                        <MyInput
-                            label="Ссылка"
-                            type="text"
-                            value={formData.link}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, link: e.target.value })}
-                            placeholder="Введите ссылку"
-                            required
-                        />
+                        <div className="flex flex-col gap-2">
+                            <label className="text-sm font-medium">Ссылка перехода</label>
+                            <select 
+                                value={formData.link} 
+                                onChange={(e) => setFormData({ ...formData, link: e.target.value })} 
+                                className="w-full p-2 rounded-md border border-gray-300"
+                            >
+                                {REDIRECT_TO_PAGE_OPTIONS.map((opt) => (
+                                    <option key={opt.value || 'empty'} value={opt.value}>{opt.title}</option>
+                                ))}
+                            </select>
+                            <p className="text-xs text-gray-500">Если выбрана страница — при нажатии на карточку откроется она вместо страницы контента</p>
+                        </div>
 
                         {/* Список элементов контента */}
                         <div className="space-y-4">

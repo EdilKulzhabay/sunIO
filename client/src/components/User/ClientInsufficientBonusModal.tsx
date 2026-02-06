@@ -45,7 +45,6 @@ export const BonusPolicyModal = ({ isOpen, onClose }: { isOpen: boolean; onClose
                     
                     <div className="">
                         <div className='flex items-center gap-x-3 mb-4'>
-                            <img src={star} alt="star icon" className='w-6 h-6' />
                             <h3 className="text-xl font-bold">Как это работает?</h3>
                         </div>
                         
@@ -62,7 +61,7 @@ export const BonusPolicyModal = ({ isOpen, onClose }: { isOpen: boolean; onClose
                         </p>
                         <button
                             onClick={onClose}
-                            className="w-full px-4 py-3 bg-red-600 rounded-xl hover:bg-red-700 transition-colors"
+                            className="w-full px-4 py-3 bg-[#C4841D] rounded-xl hover:bg-[#C4841D] transition-colors"
                         >
                             Понятно
                         </button>

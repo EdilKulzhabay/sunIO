@@ -194,15 +194,15 @@ export const ClientNavigator = () => {
                                 <X size={24} />
                             </button>
                             <div 
-                                className="[&_h3]:text-xl [&_h3]:font-bold [&_h3]:mb-2 [&_div]:mb-2 [&_span]:font-bold" 
+                                className="font-medium text-xl text-white" 
                                 dangerouslySetInnerHTML={{ __html: selectedContent.title || "" }} 
                             />
-                            <div className="mt-4" dangerouslySetInnerHTML={{ __html: selectedContent.description }}></div>
+                            <div className="mt-4 text-sm" dangerouslySetInnerHTML={{ __html: selectedContent.description }}></div>
                             <div className="">
                                 {selectedContent.content.map((item: ContentItem) => (
-                                    <div key={item.title} className="mb-2">
-                                        <p className="mt-3" dangerouslySetInnerHTML={{ __html: item.title }}></p>
-                                        <p className="mt-1" dangerouslySetInnerHTML={{ __html: item.description }}></p>
+                                    <div key={item.title} className="">
+                                        <p className="mt-3 font-medium text-md text-white" dangerouslySetInnerHTML={{ __html: item.title }}></p>
+                                        <p className="mt-1 text-sm" dangerouslySetInnerHTML={{ __html: item.description }}></p>
                                     </div>
                                 ))}
                             </div>
@@ -210,7 +210,6 @@ export const ClientNavigator = () => {
                             <a 
                                 className="block bg-[#C4841D] text-white py-2.5 text-center font-medium rounded-full mt-4 w-full" 
                                 href={selectedContent.link}
-                                target="_blank"
                             >
                                 <p>Перейти</p>
                             </a>

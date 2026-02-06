@@ -156,12 +156,7 @@ export const ClientNavigator = () => {
                             <img src={navigatorFemininityGazebo} alt={""} className="object-cover w-full h-full" />
                         </button>
                         <button onClick={() => {
-                            if (showDescription) {
-                                setIsModalOpen(true)
-                                setSelectedContent(descriptions.find((item: NavigatorDescription) => item.name === "beggining-journey") || null)
-                            } else {
-                                navigate("/client/beggining-journey")
-                            }
+                            navigate("/client/beggining-journey")
                         }} className="absolute top-[72%] left-[22%] w-[99px] h-[61px] z-20">
                             <img src={navigatorBegginingJourney} alt={""} className="object-cover w-full h-full" />
                         </button>
@@ -200,8 +195,25 @@ export const ClientNavigator = () => {
                             </button>
                             <div 
                                 className="[&_h3]:text-xl [&_h3]:font-bold [&_h3]:mb-2 [&_div]:mb-2 [&_span]:font-bold" 
-                                dangerouslySetInnerHTML={{ __html: selectedContent.eventTitle || 'Добавить в календарь' }} 
+                                dangerouslySetInnerHTML={{ __html: selectedContent.title || "" }} 
                             />
+                            <div className="mt-4" dangerouslySetInnerHTML={{ __html: selectedContent.description }}></div>
+                            <div className="">
+                                {selectedContent.content.map((item: ContentItem) => (
+                                    <div key={item.title} className="mb-2">
+                                        <p className="mt-3" dangerouslySetInnerHTML={{ __html: item.title }}></p>
+                                        <p className="mt-1" dangerouslySetInnerHTML={{ __html: item.description }}></p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <a 
+                                className="block bg-[#C4841D] text-white py-2.5 text-center font-medium rounded-full mt-4 w-full" 
+                                href={selectedContent.link}
+                                target="_blank"
+                            >
+                                <p dangerouslySetInnerHTML={{ __html: selectedContent.link || "Перейти" }}></p>
+                            </a>
                         </div>
                     </div>
                     {/* Десктопная версия: модальное окно по центру */}

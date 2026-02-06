@@ -84,12 +84,12 @@ bot.start(async (ctx) => {
   try {
     await executeUserOperation(async () => {
       return await ctx.reply(
-    `Портал .li активирован.\nЖми кнопку запуска👇`,
+    `Солнце активировано.\nЖми кнопку запуска 👇`,
     {
       reply_markup: {
         inline_keyboard: [[
           {
-            text: '🚀 Открыть Портал .li',
+            text: '☀️ Открыть Солнце',
             web_app: {
                   url: `${process.env.APP_URL}/main/?telegramId=${telegramId}&telegramUserName=${telegramUserName}`
             }

@@ -104,6 +104,7 @@ import { ClientInvitedUsers } from "./pages/User/ClientInvitedUsers.tsx";
 import { ClientNavigator } from "./pages/User/ClientNavigator";
 import { ClientBegginingJourney } from "./pages/User/ClientBegginingJourney";
 import { ClientConnectError } from "./pages/User/ClientConnectError";
+import { ClientTasks } from "./pages/User/ClientTasks";
 
 // Компонент-обертка для всех маршрутов
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
@@ -291,6 +292,10 @@ export const routes = createBrowserRouter([
     {
         path: "/client/beggining-journey",
         element: <RootLayout><TelegramGuard><ProtectedRoute><ClientBegginingJourney /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/tasks",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientTasks /></ProtectedRoute></TelegramGuard></RootLayout>,
     },
     {
         path: "/login",

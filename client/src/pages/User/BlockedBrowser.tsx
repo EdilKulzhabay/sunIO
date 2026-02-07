@@ -75,7 +75,7 @@ export const BlockedBrowser = () => {
                     <p className='mb-2'>Как открыть приложение:</p>
                     <ol className='list-decimal list-inside space-y-1 ml-2'>
                         <li>Откройте Telegram</li>
-                        <li>Найдите бота <a href={content?.link?.content} target='_blank' className='text-red-500'>{content?.title?.content}</a></li>
+                        <li>Найдите бота <a href={content?.link?.content} target='_blank' className='text-[#C4841D]'>{content?.title?.content}</a></li>
                         <li>Нажмите кнопку {content?.buttonText?.content}</li>
                     </ol>
                 </div>

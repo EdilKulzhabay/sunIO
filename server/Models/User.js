@@ -173,6 +173,22 @@ const UserSchema = new mongoose.Schema({
             },
         },
     ],
+    bodyActivation: {
+        type: Boolean,
+        default: false,
+    },
+    heartActivation: {
+        type: Boolean,
+        default: false,
+    },
+    healingFamily: {
+        type: Boolean,
+        default: false,
+    },
+    awakeningSpirit: {
+        type: Boolean,
+        default: false,
+    },
 }, {
     timestamps: true
 });

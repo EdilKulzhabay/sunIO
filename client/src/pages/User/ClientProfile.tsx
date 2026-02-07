@@ -474,7 +474,7 @@ export const ClientProfile = () => {
                                         setIsEditNameModalOpen(false);
                                     }}
                                     disabled={updatingName}
-                                    className="w-full px-4 py-3 bg-red-600 rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full px-4 py-3 bg-[#C4841D] rounded-xl hover:bg-[#C4841D] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {updatingName ? 'Сохранение...' : 'Подтвердить'}
                                 </button>
@@ -539,7 +539,7 @@ export const ClientProfile = () => {
                                         setIsEditNameModalOpen(false);
                                     }}
                                     disabled={updatingName}
-                                    className="w-full px-4 py-3 bg-red-600 rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full px-4 py-3 bg-[#C4841D] rounded-xl hover:bg-[#C4841D] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {updatingName ? 'Сохранение...' : 'Подтвердить'}
                                 </button>

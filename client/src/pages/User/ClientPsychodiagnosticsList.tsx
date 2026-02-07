@@ -270,6 +270,7 @@ export const ClientPsychodiagnosticsList = () => {
                                         accessType={hasAccessToContentSubscription() ? 'free' : psychodiagnostics.accessType}
                                         onLockedClick={hasAccessToContentSubscription() ? undefined : (psychodiagnostics.accessType !== 'free' ? () => handleLockedULPsychodiagnosticsClickSubscription(psychodiagnostics) : undefined)}
                                         duration={psychodiagnostics?.duration || 0}
+                                        starsRequired={psychodiagnostics?.starsRequired || 0}
                                     />
                                 </div>
                             ))

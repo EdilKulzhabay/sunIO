@@ -157,6 +157,7 @@ app.get("/api/user/telegram/:telegramId", UserController.getUserByTelegramId);
 app.post("/api/user/invited-users", UserController.getInvitedUsers);
 app.post("/api/user/invited-users-count", UserController.getInvitedUsersCount);
 app.post("/api/user/add-bonus-to-inviter", UserController.addBonusToInviter);
+app.post("/api/user/transfer-bonus", UserController.transferBonus);
 
 app.get("/api/user/me", authMiddleware, async (req, res) => {
     try {

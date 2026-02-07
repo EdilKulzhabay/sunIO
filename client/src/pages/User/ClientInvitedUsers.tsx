@@ -27,6 +27,9 @@ export const ClientInvitedUsers = () => {
     const [updatingName, setUpdatingName] = useState(false);
     const [invitedUsers, setInvitedUsers] = useState<any>([]);
     const [content, setContent] = useState<string>('');
+    const [sunCount, setSunCount] = useState("");
+    const [selectedUser, setSelectedUser] = useState<any>(null);
+    const [transferringBonus, setTransferringBonus] = useState(false);
     
     useEffect(() => {
         fetchContent();
@@ -216,6 +219,45 @@ export const ClientInvitedUsers = () => {
         };
     }, []);
 
+    const handleShareSunClick = async () => {
+        const amount = Number(sunCount);
+        if (!selectedUser) {
+            toast.error('Выберите пользователя, которому хотите передать солнца');
+            return;
+        }
+        if (!Number.isInteger(amount) || amount <= 0) {
+            toast.error('Укажите корректное количество солнц');
+            return;
+        }
+        const currentBonus = userData?.bonus ?? 0;
+        if (amount > currentBonus) {
+            toast.error(`Недостаточно солнц. У вас: ${currentBonus}`);
+            return;
+        }
+        setTransferringBonus(true);
+        try {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const response = await api.post('/api/user/transfer-bonus', {
+                userId: user._id,
+                recipientTelegramId: selectedUser,
+                amount,
+            });
+            if (response.data.success) {
+                toast.success(response.data.message || 'Солнца успешно переданы');
+                setSunCount('');
+                setSelectedUser(null);
+                await fetchUserData();
+            } else {
+                toast.error(response.data.message || 'Ошибка при передаче солнц');
+            }
+        } catch (err: any) {
+            const msg = err.response?.data?.message || 'Ошибка при передаче солнц';
+            toast.error(msg);
+        } finally {
+            setTransferringBonus(false);
+        }
+    }
+
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen bg-[#031F23]">
@@ -227,7 +269,7 @@ export const ClientInvitedUsers = () => {
     return (
         <div>
             <UserLayout>
-                <BackNav title="Профиль" />
+                <BackNav title="Приглашённые друзья" />
                 <div 
                     className="px-4 pb-10 bg-[#031F23] flex flex-col justify-between"
                     style={{ minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom)}px` }}
@@ -287,6 +329,20 @@ export const ClientInvitedUsers = () => {
                             </div>
                         </div>
 
+                        <div className="mt-4">
+                            <p className="text-white">Сколькими Солнцами хотите поделиться?</p>
+                        </div>
+
+                        <div className="mt-3">
+                            <input 
+                                className="block w-full py-2.5 px-3 border border-white/40 rounded-xl text-left text-white font-medium hover:bg-white/10 transition-colors outline-none focus:outline-none" 
+                                type="number"
+                                onWheel={(e) => e.currentTarget.blur()}
+                                value={sunCount}
+                                onChange={(e) => setSunCount(e.target.value)}
+                            />
+                        </div>
+
                         {content && (
                             <div className="mt-4">
                                 <p className="text-white" dangerouslySetInnerHTML={{ __html: content }} />
@@ -299,34 +355,41 @@ export const ClientInvitedUsers = () => {
                                     {invitedUsers.map((user: any) => {
                                         if (user.telegramUserName) {
                                             return (
-                                                <a
-                                                    href={`https://t.me/${user.telegramUserName}`}
-                                                    target="_blank"
+                                                <button
+                                                    onClick={() => setSelectedUser(user.telegramId)}
                                                     key={user.telegramId}
                                                     className="block w-full py-2.5 px-3 border border-white/40 rounded-xl text-left text-white font-medium hover:bg-white/10 transition-colors"
                                                 >
                                                     {user.telegramUserName && `@${user.telegramUserName}`}
                                                     {user.telegramUserName && user.fullName && ', '}
                                                     {user.fullName && `${user.fullName}`}
-                                                </a>
+                                                </button>
                                             )
                                         } else {
                                             return (
-                                                <div
+                                                <button
+                                                    onClick={() => setSelectedUser(user.telegramId)}
                                                     key={user.telegramId}
                                                     className="block w-full py-2.5 px-3 border border-white/40 rounded-xl text-left text-white font-medium hover:bg-white/10 transition-colors"
                                                 >
                                                     {user.telegramUserName && `@${user.telegramUserName}`}
                                                     {user.telegramUserName && user.fullName && ', '}
                                                     {user.fullName && `${user.fullName}`}
-                                                </div>
+                                                </button>
                                             )
                                         }
                                     })}
                                 </div>
                             </div>
                         )}
-
+                        <div className="mt-4">
+                            <button
+                                onClick={() => handleShareSunClick()}
+                                disabled={transferringBonus}
+                                className="bg-[#C4841D] text-white py-2.5 text-center font-medium rounded-full mt-4 w-full disabled:opacity-60 disabled:cursor-not-allowed">
+                                <p>{transferringBonus ? 'Отправка...' : 'Поделиться Солнцем'}</p>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </UserLayout>

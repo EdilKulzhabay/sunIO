@@ -270,6 +270,7 @@ export const ClientRelationshipWorkshopList = () => {
                                         accessType={hasAccessToContentSubscription() ? 'free' : relationshipWorkshop.accessType}
                                         onLockedClick={hasAccessToContentSubscription() ? undefined : (relationshipWorkshop.accessType !== 'free' ? () => handleLockedRelationshipWorkshopClickSubscription(relationshipWorkshop) : undefined)}
                                         duration={relationshipWorkshop?.duration || 0}
+                                        starsRequired={relationshipWorkshop?.starsRequired || 0}
                                     />
                                 </div>
                             ))

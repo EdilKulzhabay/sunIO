@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import lock from '../../assets/lock.png';
-import needMoney from '../../assets/needMoney.png';
+import star from '../../assets/star.png';
 
-export const MiniVideoCard = ({ title, image, link, progress, accessType, onLockedClick, duration }: { title: string, image: string, link: string, progress: number, accessType: string, onLockedClick?: () => void, duration?: number }) => {
+export const MiniVideoCard = ({ title, image, link, progress, accessType, onLockedClick, duration, starsRequired }: { title: string, image: string, link: string, progress: number, accessType: string, onLockedClick?: () => void, duration?: number, starsRequired?: number }) => {
     return (
         <>
         {accessType === 'free' ? (
@@ -63,7 +63,7 @@ export const MiniVideoCard = ({ title, image, link, progress, accessType, onLock
                         {title}
                     </p>
                     <div className="mt-auto flex items-center gap-x-3">
-                        <div className='w-[60%]'>
+                        <div className='w-[50%]'>
                             <div className='w-full flex items-center justify-between'>
                                 <p className='text-sm font-medium'>{progress}%</p>
                                 <p className='text-sm font-medium'>{duration} мин.</p>
@@ -73,11 +73,12 @@ export const MiniVideoCard = ({ title, image, link, progress, accessType, onLock
                             </div>
                         </div>
                         <div className='self-stretch flex-1'>
-                            <div className='flex h-full w-full items-center justify-center border border-[#00C5AE] rounded-full'>
+                            <div className='flex h-full w-full items-center justify-center gap-x-2 border border-[#00C5AE] rounded-full'>
+                                <p className='text-sm font-medium text-[#00C5AE]'>{starsRequired}</p>
                                 <img
-                                    src={needMoney}
-                                    alt="needMoney"
-                                    className="w-[14px] h-[14px] "
+                                    src={star}
+                                    alt="star"
+                                    className="w-[14px] h-[14px]"
                                 />
                             </div>
                         </div>

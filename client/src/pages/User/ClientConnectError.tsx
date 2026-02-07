@@ -1,6 +1,6 @@
 import bgGar from '../../assets/bgGar.png';
 import { useState, useEffect } from 'react';
-import { RedButton } from '../../components/User/RedButton';
+// import { RedButton } from '../../components/User/RedButton';
 import sunWithHands from '../../assets/sunWithHands.png';
 import connectErrorImage from '../../assets/connectErrorImage.png';
 
@@ -49,11 +49,11 @@ export const ClientConnectError = () => {
                 >
                     Связаться с нами
                 </Link> */}
-                <RedButton
+                {/* <RedButton
                     text="Закрыть"
                     onClick={() => {window.close()}}
                     className='w-full mt-4'
-                />
+                /> */}
             </div>
         </div>
     );

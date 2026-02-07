@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
     port: 465,
     secure: true,
     auth: {
-        user: "tg-app@tochka.li",
+        user: "manager@psylife.io",
         pass: process.env.MailSMTP,
     },
 });
@@ -1812,4 +1812,49 @@ export const addBonusToInviter = async (req, res) => {
         res.status(500).json({ success: false, message: 'Ошибка при добавлении бонуса тому, кто пригласил' });
     }
 }
-  
+
+/** Передать солнца (бонус) приглашённому пользователю */
+export const transferBonus = async (req, res) => {
+    try {
+        const { userId, recipientTelegramId, amount } = req.body;
+        const amountNum = parseInt(amount, 10);
+        if (!userId || !recipientTelegramId || !Number.isInteger(amountNum) || amountNum <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Укажите получателя и корректное количество солнц',
+            });
+        }
+        const sender = await User.findById(userId);
+        if (!sender) {
+            return res.status(404).json({ success: false, message: 'Пользователь не найден' });
+        }
+        const recipient = await User.findOne({ telegramId: String(recipientTelegramId) });
+        if (!recipient) {
+            return res.status(404).json({ success: false, message: 'Получатель не найден' });
+        }
+        if (recipient.invitedUser?.toString() !== sender._id.toString()) {
+            return res.status(403).json({
+                success: false,
+                message: 'Можно передавать солнца только приглашённым вами пользователям',
+            });
+        }
+        if ((sender.bonus || 0) < amountNum) {
+            return res.status(400).json({
+                success: false,
+                message: `Недостаточно солнц. У вас: ${sender.bonus || 0}`,
+            });
+        }
+        sender.bonus = (sender.bonus || 0) - amountNum;
+        recipient.bonus = (recipient.bonus || 0) + amountNum;
+        await sender.save();
+        await recipient.save();
+        res.json({
+            success: true,
+            message: 'Солнца успешно переданы',
+            bonus: sender.bonus,
+        });
+    } catch (error) {
+        console.error('Ошибка в transferBonus:', error);
+        res.status(500).json({ success: false, message: 'Ошибка при передаче солнц' });
+    }
+};

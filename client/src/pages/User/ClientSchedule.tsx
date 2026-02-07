@@ -108,15 +108,15 @@ export const ClientSchedule = () => {
             if (borderColor) {
                 borderMap[key] = borderColor;
             }
-            if (dotMap[key] !== '#EC1313') {
+            if (dotMap[key] !== '#00C5AE') {
                 dotMap[key] = dotColor;
             }
         };
 
         calendarSchedules.forEach((schedule: any) => {
             const isSubscribed = subscribedIds.has(schedule._id);
-            const borderColor = isSubscribed ? (schedule.priority ? '#EC1313' : '#FFC293') : null;
-            const dotColor = schedule.priority ? '#EC1313' : '#FFC293';
+            const borderColor = isSubscribed ? (schedule.priority ? '#00C5AE' : '#FFC293') : null;
+            const dotColor = schedule.priority ? '#00C5AE' : '#FFC293';
 
             if (schedule.startDate && schedule.endDate) {
                 const start = new Date(schedule.startDate);

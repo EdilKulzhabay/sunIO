@@ -270,6 +270,7 @@ export const ClientFemininityGazeboList = () => {
                                         accessType={hasAccessToContentSubscription() ? 'free' : femininityGazebo.accessType}
                                         onLockedClick={hasAccessToContentSubscription() ? undefined : (femininityGazebo.accessType !== 'free' ? () => handleLockedFemininityGazeboClickSubscription(femininityGazebo) : undefined)}
                                         duration={femininityGazebo?.duration || 0}
+                                        starsRequired={femininityGazebo?.starsRequired || 0}
                                     />
                                 </div>
                             ))

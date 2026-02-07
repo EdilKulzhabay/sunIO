@@ -86,7 +86,7 @@ export const ClientPerfomance = () => {
                 await api.post('/api/user/add-bonus-to-inviter', {
                     telegramId: telegramId
                 });
-                navigate('/main');
+                navigate('/client/beggining-journey');
             } else {
                 toast.error('Ошибка обновления данных');
                 navigate('/client/connect-error');

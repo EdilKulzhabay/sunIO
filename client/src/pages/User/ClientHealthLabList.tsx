@@ -292,6 +292,7 @@ export const ClientHealthLabList = () => {
                                         accessType={hasAccessToContentSubscription() ? 'free' : healthLab.accessType}
                                         onLockedClick={hasAccessToContentSubscription() ? undefined : (healthLab.accessType !== 'free' ? () => handleLockedHealthLabClickSubscription(healthLab) : undefined)}
                                         duration={healthLab?.duration || 0}
+                                        starsRequired={healthLab?.starsRequired || 0}
                                     />
                                 </div>
                             ))

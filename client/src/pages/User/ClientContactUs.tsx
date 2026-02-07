@@ -13,7 +13,6 @@ const ContactUsBlock = ({ title, content, isLink = false, link = '' }: { title: 
 };
 
 export const ClientContactUs = () => {
-    const [content, setContent] = useState<string>('');
     const [text, setText] = useState<string>('');
     const [loading, setLoading] = useState(true);
     useEffect(() => {
@@ -36,8 +35,8 @@ export const ClientContactUs = () => {
 
     const fetchContent = async () => {
         try {
-            const response = await api.get('/api/dynamic-content/name/version');
-            setContent(response.data.data?.content ? response.data.data.content : '');
+            // const response = await api.get('/api/dynamic-content/name/version');
+            // setContent(response.data.data?.content ? response.data.data.content : '');
             const responseText = await api.get('/api/dynamic-content/name/contact-us-text');
             setText(responseText.data.data?.content ? responseText.data.data.content : '');
         } catch (error) {
@@ -62,7 +61,7 @@ export const ClientContactUs = () => {
                 <div className='px-4 pb-5 flex flex-col justify-between min-h-screen bg-[#031F23]'>
                     <div>
                         <div className="space-y-3">
-                            <ContactUsBlock title="Официальный сайт" content="www.исцелениеосознанием.рф" isLink={true} link="https://www.xn--80ajaabkdcdysfdbla7bh1g.xn--p1ai/" />
+                            <ContactUsBlock title="Официальный сайт" content="www.исцелениеосознанием.рф" isLink={true} link="https://psylife.io/main" />
                             <ContactUsBlock title="E-mail службы заботы" content="manager@psylife.io" isLink={true} link="mailto:manager@psylife.io" />
                             <ContactUsBlock title="Telegram службы зоботы" content="t.me/io_care_service" isLink={true} link="https://t.me/io_care_service" />
                             <ContactUsBlock title="WhatsApp службы зоботы *" content="wa.me/9166559655" isLink={true} link="https://wa.me/9166559655" />
@@ -76,7 +75,6 @@ export const ClientContactUs = () => {
                             <p className="text-white/60" dangerouslySetInnerHTML={{ __html: text ? text : '* Запрещённые в РФ социальные сети' }} />
                         </div>
                     </div>
-                    <div className="text-center text-white/60 mt-3">Версия приложения {content ? content : ''}</div>
                 </div>
             </UserLayout>
         </div>

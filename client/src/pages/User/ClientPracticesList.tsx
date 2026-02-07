@@ -292,6 +292,7 @@ export const ClientPracticesList = () => {
                                         accessType={hasAccessToContentSubscription() ? 'free' : practice.accessType}
                                         onLockedClick={hasAccessToContentSubscription() ? undefined : (practice.accessType !== 'free' ? () => handleLockedPracticeClickSubscription(practice) : undefined)}
                                         duration={practice?.duration || 0}
+                                        starsRequired={practice?.starsRequired || 0}
                                     />
                                 </div>
                             ))

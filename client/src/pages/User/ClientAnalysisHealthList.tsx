@@ -270,6 +270,7 @@ export const ClientAnalysisHealthList = () => {
                                         accessType={hasAccessToContentSubscription() ? 'free' : analysisHealth.accessType}
                                         onLockedClick={hasAccessToContentSubscription() ? undefined : (analysisHealth.accessType !== 'free' ? () => handleLockedULAnalysisLHealthClickSubscription(analysisHealth) : undefined)}
                                         duration={analysisHealth?.duration || 0}
+                                        starsRequired={analysisHealth?.starsRequired || 0}
                                     />
                                 </div>
                             ))

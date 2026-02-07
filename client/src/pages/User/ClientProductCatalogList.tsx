@@ -270,6 +270,7 @@ export const ClientProductCatalogList = () => {
                                         accessType={hasAccessToContentSubscription() ? 'free' : productCatalog.accessType}
                                         onLockedClick={hasAccessToContentSubscription() ? undefined : (productCatalog.accessType !== 'free' ? () => handleLockedULProductLCatalogClickSubscription(productCatalog) : undefined)}
                                         duration={productCatalog?.duration || 0}
+                                        starsRequired={productCatalog?.starsRequired || 0}
                                     />
                                 </div>
                             ))

@@ -97,7 +97,7 @@ export const ClientProfile = () => {
 
     const copyReferralLink = async () => {
         if (userData?.telegramId) {
-            const referralLink = `t.me/io_tochkali_bot?start=${userData.telegramId}`;
+            const referralLink = `t.me/io_sun_bot?start=${userData.telegramId}`;
             try {
                 await navigator.clipboard.writeText(referralLink);
                 setLinkCopied(true);
@@ -238,7 +238,7 @@ export const ClientProfile = () => {
     return (
         <div>
             <UserLayout>
-                <BackNav title="Приглашённые друзья" />
+                <BackNav title="Профиль" />
                 <div 
                     className="px-4 pb-10 bg-[#031F23] flex flex-col justify-between"
                     style={{ minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom)}px` }}

@@ -270,6 +270,7 @@ export const ClientSpiritForgeList = () => {
                                         accessType={hasAccessToContentSubscription() ? 'free' : spiritForge.accessType}
                                         onLockedClick={hasAccessToContentSubscription() ? undefined : (spiritForge.accessType !== 'free' ? () => handleLockedSpiritForgeClickSubscription(spiritForge) : undefined)}
                                         duration={spiritForge?.duration || 0}
+                                        starsRequired={spiritForge?.starsRequired || 0}
                                     />
                                 </div>
                             ))

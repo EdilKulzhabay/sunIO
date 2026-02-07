@@ -408,7 +408,7 @@ export const Main = () => {
                     </div>
                 </div>
                 <h1 className="mt-1 text-2xl font-bold">Добро пожаловать, {userName ? userName : ""}!</h1>
-                <div className="grid grid-cols-2 gap-4 mt-5">
+                <div className="grid grid-cols-2 gap-3 mt-5">
                     <SmallCard title="Навигатор" link="/client/navigator" img={main1} />
                     <SmallCard title="Задания" link="/client/schedule" img={main2} />
                     <SmallCard title={`Осознания`} link="/client/diary" img={main3} />

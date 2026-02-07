@@ -270,6 +270,7 @@ export const ClientAnalysisRealizationList = () => {
                                         accessType={hasAccessToContentSubscription() ? 'free' : analysisRealization.accessType}
                                         onLockedClick={hasAccessToContentSubscription() ? undefined : (analysisRealization.accessType !== 'free' ? () => handleLockedULAnalysisLRealizationClickSubscription(analysisRealization) : undefined)}
                                         duration={analysisRealization?.duration || 0}
+                                        starsRequired={analysisRealization?.starsRequired || 0}
                                     />
                                 </div>
                             ))

@@ -52,8 +52,8 @@ export const VideoCard = ({ title, description, image, link, accessType, progres
                 <div className="mt-auto pt-2 flex items-center justify-between flex-shrink-0">
                     <div className='w-[40%]'>
                         <div className='flex items-center justify-between'>
-                            <p className='text-[10px] font-medium'>{progress}%</p>
-                            <p className='text-[10px] font-medium'>{duration} мин.</p>
+                            <p className='text-sm font-medium'>{progress}%</p>
+                            <p className='text-sm font-medium'>{duration} мин.</p>
                         </div>
                         <div className='w-full h-1.5 bg-white/40 rounded-full mt-1'>
                             <div className='h-full bg-white rounded-full' style={{ width: `${progress}%` }} />

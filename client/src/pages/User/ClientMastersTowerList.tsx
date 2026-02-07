@@ -270,6 +270,7 @@ export const ClientMastersTowerList = () => {
                                         accessType={hasAccessToContentSubscription() ? 'free' : mastersTower.accessType}
                                         onLockedClick={hasAccessToContentSubscription() ? undefined : (mastersTower.accessType !== 'free' ? () => handleLockedMastersTowerClickSubscription(mastersTower) : undefined)}
                                         duration={mastersTower?.duration || 0}
+                                        starsRequired={mastersTower?.starsRequired || 0}
                                     />
                                 </div>
                             ))

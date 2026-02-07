@@ -270,6 +270,7 @@ export const ClientConsciousnessLibraryList = () => {
                                         accessType={hasAccessToContentSubscription() ? 'free' : consciousnessLibrary.accessType}
                                         onLockedClick={hasAccessToContentSubscription() ? undefined : (consciousnessLibrary.accessType !== 'free' ? () => handleLockedConsciousnessLibraryClickSubscription(consciousnessLibrary) : undefined)}
                                         duration={consciousnessLibrary?.duration || 0}
+                                        starsRequired={consciousnessLibrary?.starsRequired || 0}
                                     />
                                 </div>
                             ))

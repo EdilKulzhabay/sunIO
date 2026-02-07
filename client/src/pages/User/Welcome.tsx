@@ -118,7 +118,7 @@ export const Welcome = () => {
     return (
         <UserLayout>
             <div className='bg-[#031F23]'>
-                <div className='lg:w-[700px] lg:mx-auto bg-[#031F23]'>
+                <div className='-mt-5 lg:w-[700px] lg:mx-auto bg-[#031F23]'>
                     <div className='relative'>
                         {content?.image && (
                             <div className="relative flex justify-center items-center">

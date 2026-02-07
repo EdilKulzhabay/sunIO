@@ -267,7 +267,7 @@ export const ClientAnalysisRelationshipsList = () => {
                                         image={analysisRelationships.imageUrl} 
                                         link={analysisRelationships.redirectToPage?.trim() || `/client/analysis-relationships/${analysisRelationships._id}`} 
                                         progress={progresses[analysisRelationships._id] || 0} 
-                                        accessType={hasAccessToContentSubscription() ? 'free' : analysisRelationships.accessType}
+                                        accessType={hasAccessToContent(analysisRelationships._id) ? 'free' : analysisRelationships.accessType} 
                                         onLockedClick={hasAccessToContentSubscription() ? undefined : (analysisRelationships.accessType !== 'free' ? () => handleLockedULAnalysisLRelationshipsClickSubscription(analysisRelationships) : undefined)}
                                         duration={analysisRelationships?.duration || 0}
                                         starsRequired={analysisRelationships?.starsRequired || 0}

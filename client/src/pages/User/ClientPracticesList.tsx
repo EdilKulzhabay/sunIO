@@ -289,7 +289,7 @@ export const ClientPracticesList = () => {
                                         image={practice.imageUrl} 
                                         link={practice.redirectToPage?.trim() || `/client/practice/${practice._id}`} 
                                         progress={progresses[practice._id] || 0} 
-                                        accessType={hasAccessToContentSubscription() ? 'free' : practice.accessType}
+                                        accessType={hasAccessToContent(practice._id) ? 'free' : practice.accessType} 
                                         onLockedClick={hasAccessToContentSubscription() ? undefined : (practice.accessType !== 'free' ? () => handleLockedPracticeClickSubscription(practice) : undefined)}
                                         duration={practice?.duration || 0}
                                         starsRequired={practice?.starsRequired || 0}

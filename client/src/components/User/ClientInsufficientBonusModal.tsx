@@ -196,7 +196,7 @@ export const ClientInsufficientBonusModal = ({
                             </button>
                             <button
                                 onClick={handleMoreInfoClick}
-                                className="flex-1 px-4 py-3 bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+                                className="flex-1 px-4 py-3 bg-[#C4841D] rounded-lg hover:bg-[#C4841D] transition-colors"
                             >
                                 Подробнее
                             </button>
@@ -246,7 +246,7 @@ export const ClientInsufficientBonusModal = ({
                             </button>
                             <button
                                 onClick={handleMoreInfoClick}
-                                className="flex-1 px-6 py-3 bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+                                className="flex-1 px-6 py-3 bg-[#C4841D] rounded-lg hover:bg-[#C4841D] transition-colors"
                             >
                                 Подробнее
                             </button>

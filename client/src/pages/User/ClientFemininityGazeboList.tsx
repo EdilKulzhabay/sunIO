@@ -267,7 +267,7 @@ export const ClientFemininityGazeboList = () => {
                                         image={femininityGazebo.imageUrl} 
                                         link={femininityGazebo.redirectToPage?.trim() || `/client/femininity-gazebo/${femininityGazebo._id}`} 
                                         progress={progresses[femininityGazebo._id] || 0} 
-                                        accessType={hasAccessToContentSubscription() ? 'free' : femininityGazebo.accessType}
+                                        accessType={hasAccessToContent(femininityGazebo._id) ? 'free' : femininityGazebo.accessType} 
                                         onLockedClick={hasAccessToContentSubscription() ? undefined : (femininityGazebo.accessType !== 'free' ? () => handleLockedFemininityGazeboClickSubscription(femininityGazebo) : undefined)}
                                         duration={femininityGazebo?.duration || 0}
                                         starsRequired={femininityGazebo?.starsRequired || 0}

@@ -267,7 +267,7 @@ export const ClientAnalysisHealthList = () => {
                                         image={analysisHealth.imageUrl} 
                                         link={analysisHealth.redirectToPage?.trim() || `/client/analysis-health/${analysisHealth._id}`} 
                                         progress={progresses[analysisHealth._id] || 0} 
-                                        accessType={hasAccessToContentSubscription() ? 'free' : analysisHealth.accessType}
+                                        accessType={hasAccessToContent(analysisHealth._id) ? 'free' : analysisHealth.accessType} 
                                         onLockedClick={hasAccessToContentSubscription() ? undefined : (analysisHealth.accessType !== 'free' ? () => handleLockedULAnalysisLHealthClickSubscription(analysisHealth) : undefined)}
                                         duration={analysisHealth?.duration || 0}
                                         starsRequired={analysisHealth?.starsRequired || 0}

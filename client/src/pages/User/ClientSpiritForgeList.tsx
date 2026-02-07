@@ -267,7 +267,7 @@ export const ClientSpiritForgeList = () => {
                                         image={spiritForge.imageUrl} 
                                         link={spiritForge.redirectToPage?.trim() || `/client/spirit-forge/${spiritForge._id}`} 
                                         progress={progresses[spiritForge._id] || 0} 
-                                        accessType={hasAccessToContentSubscription() ? 'free' : spiritForge.accessType}
+                                        accessType={hasAccessToContent(spiritForge._id) ? 'free' : spiritForge.accessType} 
                                         onLockedClick={hasAccessToContentSubscription() ? undefined : (spiritForge.accessType !== 'free' ? () => handleLockedSpiritForgeClickSubscription(spiritForge) : undefined)}
                                         duration={spiritForge?.duration || 0}
                                         starsRequired={spiritForge?.starsRequired || 0}

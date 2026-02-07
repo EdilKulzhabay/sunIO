@@ -267,7 +267,7 @@ export const ClientRelationshipWorkshopList = () => {
                                         image={relationshipWorkshop.imageUrl} 
                                         link={relationshipWorkshop.redirectToPage?.trim() || `/client/relationship-workshop/${relationshipWorkshop._id}`} 
                                         progress={progresses[relationshipWorkshop._id] || 0} 
-                                        accessType={hasAccessToContentSubscription() ? 'free' : relationshipWorkshop.accessType}
+                                        accessType={hasAccessToContent(relationshipWorkshop._id) ? 'free' : relationshipWorkshop.accessType} 
                                         onLockedClick={hasAccessToContentSubscription() ? undefined : (relationshipWorkshop.accessType !== 'free' ? () => handleLockedRelationshipWorkshopClickSubscription(relationshipWorkshop) : undefined)}
                                         duration={relationshipWorkshop?.duration || 0}
                                         starsRequired={relationshipWorkshop?.starsRequired || 0}

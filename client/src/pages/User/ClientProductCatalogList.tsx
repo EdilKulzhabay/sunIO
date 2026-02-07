@@ -267,7 +267,7 @@ export const ClientProductCatalogList = () => {
                                         image={productCatalog.imageUrl} 
                                         link={productCatalog.redirectToPage?.trim() || `/client/product-catalog/${productCatalog._id}`} 
                                         progress={progresses[productCatalog._id] || 0} 
-                                        accessType={hasAccessToContentSubscription() ? 'free' : productCatalog.accessType}
+                                        accessType={hasAccessToContent(productCatalog._id) ? 'free' : productCatalog.accessType} 
                                         onLockedClick={hasAccessToContentSubscription() ? undefined : (productCatalog.accessType !== 'free' ? () => handleLockedULProductLCatalogClickSubscription(productCatalog) : undefined)}
                                         duration={productCatalog?.duration || 0}
                                         starsRequired={productCatalog?.starsRequired || 0}

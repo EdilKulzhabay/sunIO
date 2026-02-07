@@ -267,7 +267,7 @@ export const ClientPsychodiagnosticsList = () => {
                                         image={psychodiagnostics.imageUrl} 
                                         link={psychodiagnostics.redirectToPage?.trim() || `/client/psychodiagnostics/${psychodiagnostics._id}`} 
                                         progress={progresses[psychodiagnostics._id] || 0} 
-                                        accessType={hasAccessToContentSubscription() ? 'free' : psychodiagnostics.accessType}
+                                        accessType={hasAccessToContent(psychodiagnostics._id) ? 'free' : psychodiagnostics.accessType} 
                                         onLockedClick={hasAccessToContentSubscription() ? undefined : (psychodiagnostics.accessType !== 'free' ? () => handleLockedULPsychodiagnosticsClickSubscription(psychodiagnostics) : undefined)}
                                         duration={psychodiagnostics?.duration || 0}
                                         starsRequired={psychodiagnostics?.starsRequired || 0}

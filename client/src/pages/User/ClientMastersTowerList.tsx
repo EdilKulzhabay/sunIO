@@ -267,7 +267,7 @@ export const ClientMastersTowerList = () => {
                                         image={mastersTower.imageUrl} 
                                         link={mastersTower.redirectToPage?.trim() || `/client/masters-tower/${mastersTower._id}`} 
                                         progress={progresses[mastersTower._id] || 0} 
-                                        accessType={hasAccessToContentSubscription() ? 'free' : mastersTower.accessType}
+                                        accessType={hasAccessToContent(mastersTower._id) ? 'free' : mastersTower.accessType} 
                                         onLockedClick={hasAccessToContentSubscription() ? undefined : (mastersTower.accessType !== 'free' ? () => handleLockedMastersTowerClickSubscription(mastersTower) : undefined)}
                                         duration={mastersTower?.duration || 0}
                                         starsRequired={mastersTower?.starsRequired || 0}

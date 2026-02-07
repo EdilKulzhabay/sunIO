@@ -289,7 +289,7 @@ export const ClientHealthLabList = () => {
                                         image={healthLab.imageUrl} 
                                         link={healthLab.redirectToPage?.trim() || `/client/health-lab/${healthLab._id}`} 
                                         progress={progresses[healthLab._id] || 0} 
-                                        accessType={hasAccessToContentSubscription() ? 'free' : healthLab.accessType}
+                                        accessType={hasAccessToContent(healthLab._id) ? 'free' : healthLab.accessType} 
                                         onLockedClick={hasAccessToContentSubscription() ? undefined : (healthLab.accessType !== 'free' ? () => handleLockedHealthLabClickSubscription(healthLab) : undefined)}
                                         duration={healthLab?.duration || 0}
                                         starsRequired={healthLab?.starsRequired || 0}

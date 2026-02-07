@@ -267,7 +267,7 @@ export const ClientConsciousnessLibraryList = () => {
                                         image={consciousnessLibrary.imageUrl} 
                                         link={consciousnessLibrary.redirectToPage?.trim() || `/client/consciousness-library/${consciousnessLibrary._id}`} 
                                         progress={progresses[consciousnessLibrary._id] || 0} 
-                                        accessType={hasAccessToContentSubscription() ? 'free' : consciousnessLibrary.accessType}
+                                        accessType={hasAccessToContent(consciousnessLibrary._id) ? 'free' : consciousnessLibrary.accessType} 
                                         onLockedClick={hasAccessToContentSubscription() ? undefined : (consciousnessLibrary.accessType !== 'free' ? () => handleLockedConsciousnessLibraryClickSubscription(consciousnessLibrary) : undefined)}
                                         duration={consciousnessLibrary?.duration || 0}
                                         starsRequired={consciousnessLibrary?.starsRequired || 0}

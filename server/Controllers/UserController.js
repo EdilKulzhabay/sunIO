@@ -290,6 +290,7 @@ export const createUser = async (req, res) => {
             telegramUserName,
             status: 'anonym',
             invitedUser: invitedUser,
+            profilePhotoUrl,
         });
 
         const user = await doc.save();

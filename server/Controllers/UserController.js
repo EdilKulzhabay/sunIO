@@ -1848,6 +1848,15 @@ export const transferBonus = async (req, res) => {
         recipient.bonus = (recipient.bonus || 0) + amountNum;
         await sender.save();
         await recipient.save();
+
+        const notification = {
+            modalTitle: "С вами поделились Солнцем!",
+            modalDescription: `${sender.telegramUserName && `@${sender.telegramUserName}`} ${sender.fullName && `, ${sender.fullName}`} отправил вам\n${amountNum} шт.`,
+            modalButtonText: "Принимаю с благодарностью!",
+            modalButtonLink: undefined,
+        }
+
+        await User.findByIdAndUpdate(recipient._id, { $push: { modalNotifications: notification } });
         res.json({
             success: true,
             message: 'Солнца успешно переданы',

@@ -26,19 +26,18 @@ export const ClientInvitedUsers = () => {
     const [lastName, setLastName] = useState('');
     const [updatingName, setUpdatingName] = useState(false);
     const [invitedUsers, setInvitedUsers] = useState<any>([]);
-    const [content, setContent] = useState<string>('');
     const [sunCount, setSunCount] = useState("");
     const [selectedUser, setSelectedUser] = useState<any>(null);
     const [transferringBonus, setTransferringBonus] = useState(false);
     
-    useEffect(() => {
-        fetchContent();
-    }, []);
+    // useEffect(() => {
+    //     fetchContent();
+    // }, []);
 
-    const fetchContent = async () => {
-        const response = await api.get('/api/dynamic-content/name/invited-users');
-        setContent(response.data.data?.content ? response.data.data.content : '');
-    }
+    // const fetchContent = async () => {
+    //     const response = await api.get('/api/dynamic-content/name/invited-users');
+    //     setContent(response.data.data?.content ? response.data.data.content : '');
+    // }
     useEffect(() => {
         // Проверка на блокировку пользователя
         const userStr = localStorage.getItem('user');
@@ -343,11 +342,15 @@ export const ClientInvitedUsers = () => {
                             />
                         </div>
 
-                        {content && (
+                        {/* {content && (
                             <div className="mt-4">
                                 <p className="text-white" dangerouslySetInnerHTML={{ __html: content }} />
                             </div>
-                        )}
+                        )} */}
+
+                        <div className="mt-4">
+                            <p className="text-white">Поделиться с</p>
+                        </div>
 
                         {invitedUsers.length > 0 && (
                             <div className="mt-4">
@@ -358,11 +361,18 @@ export const ClientInvitedUsers = () => {
                                                 <button
                                                     onClick={() => setSelectedUser(user.telegramId)}
                                                     key={user.telegramId}
-                                                    className="block w-full py-2.5 px-3 border border-white/40 rounded-xl text-left text-white font-medium hover:bg-white/10 transition-colors"
+                                                    className="flex items-center justify-between w-full py-2.5 px-3 border border-white/40 rounded-xl text-left text-white font-medium hover:bg-white/10 transition-colors"
                                                 >
-                                                    {user.telegramUserName && `@${user.telegramUserName}`}
-                                                    {user.telegramUserName && user.fullName && ', '}
-                                                    {user.fullName && `${user.fullName}`}
+                                                    <div>
+                                                        {user.telegramUserName && `@${user.telegramUserName}`}
+                                                        {user.telegramUserName && user.fullName && ', '}
+                                                        {user.fullName && `${user.fullName}`}
+                                                    </div>
+                                                    <div className={`w-4 h-4 flex items-center justify-center border ${selectedUser === user.telegramId ? 'border-[#C4841D]' : 'border-white/40'} rounded-full`}>
+                                                        {selectedUser === user.telegramId && (
+                                                            <div className="w-[6px] h-[6px] bg-[#C4841D] rounded-full"></div>
+                                                        )}
+                                                    </div>
                                                 </button>
                                             )
                                         } else {

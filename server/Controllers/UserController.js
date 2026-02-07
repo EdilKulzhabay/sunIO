@@ -1312,23 +1312,42 @@ export const purchaseContent = async (req, res) => {
 
         // Импортируем модели контента
         const Practice = (await import("../Models/Practice.js")).default;
-        const Meditation = (await import("../Models/Meditation.js")).default;
-        const VideoLesson = (await import("../Models/VideoLesson.js")).default;
+        const HealthLab = (await import("../Models/HealthLab.js")).default;
+        const RelationshipWorkshop = (await import("../Models/RelationshipWorkshop.js")).default;
+        const SpiritForge = (await import("../Models/SpiritForge.js")).default;
+        const MastersTower = (await import("../Models/MastersTower.js")).default;
+        const FemininityGazebo = (await import("../Models/FemininityGazebo.js")).default;
+        const ConsciousnessLibrary = (await import("../Models/ConsciousnessLibrary.js")).default;
+        const ProductCatalog = (await import("../Models/ProductCatalog.js")).default;
+        const AnalysisHealth = (await import("../Models/AnalysisHealth.js")).default;
+        const AnalysisRelationships = (await import("../Models/AnalysisRelationships.js")).default;
+        const AnalysisRealization = (await import("../Models/AnalysisRealization.js")).default;
+        const Psychodiagnostics = (await import("../Models/Psychodiagnostics.js")).default;
+
+        const contentModels = {
+            'practice': Practice,
+            'health-lab': HealthLab,
+            'relationship-workshop': RelationshipWorkshop,
+            'spirit-forge': SpiritForge,
+            'masters-tower': MastersTower,
+            'femininity-gazebo': FemininityGazebo,
+            'consciousness-library': ConsciousnessLibrary,
+            'product-catalog': ProductCatalog,
+            'analysis-health': AnalysisHealth,
+            'analysis-relationships': AnalysisRelationships,
+            'analysis-realization': AnalysisRealization,
+            'psychodiagnostics': Psychodiagnostics,
+        };
 
         // Получаем контент в зависимости от типа
-        let content;
-        if (contentType === 'practice') {
-            content = await Practice.findById(contentId);
-        } else if (contentType === 'meditation') {
-            content = await Meditation.findById(contentId);
-        } else if (contentType === 'video-lesson') {
-            content = await VideoLesson.findById(contentId);
-        } else {
+        const Model = contentModels[contentType];
+        if (!Model) {
             return res.status(400).json({
                 success: false,
                 message: "Неверный тип контента",
             });
         }
+        const content = await Model.findById(contentId);
 
         if (!content) {
             return res.status(404).json({

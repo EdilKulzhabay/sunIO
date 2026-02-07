@@ -106,7 +106,7 @@ export const ClientPurchaseConfirmModal = ({
                             <button
                                 onClick={handlePurchase}
                                 disabled={loading}
-                                className="flex-1 px-4 py-3 bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                                className="flex-1 px-4 py-3 bg-[#C4841D] rounded-lg hover:bg-[#C4841D] transition-colors disabled:opacity-50"
                             >
                                 {loading ? 'Покупка...' : 'Купить'}
                             </button>
@@ -157,7 +157,7 @@ export const ClientPurchaseConfirmModal = ({
                             <button
                                 onClick={handlePurchase}
                                 disabled={loading}
-                                className="flex-1 px-6 py-3 bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                                className="flex-1 px-6 py-3 bg-[#C4841D] rounded-lg hover:bg-[#C4841D] transition-colors disabled:opacity-50"
                             >
                                 {loading ? 'Покупка...' : 'Купить'}
                             </button>

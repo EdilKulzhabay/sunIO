@@ -189,6 +189,10 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    showNavigatorDescriptions: {
+        type: Boolean,
+        default: true,
+    },
 }, {
     timestamps: true
 });

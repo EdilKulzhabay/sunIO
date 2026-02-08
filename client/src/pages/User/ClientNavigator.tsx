@@ -33,6 +33,7 @@ interface NavigatorDescription {
 export const ClientNavigator = () => {
     const navigate = useNavigate();
     const [content, setContent] = useState<any>(null);
+    const [userData, setUserData] = useState<any>(null);
     const [descriptions, setDescriptions] = useState<NavigatorDescription[]>([])
     const [showDescription, setShowDescription] = useState(true);
     const [selectedContent, setSelectedContent] = useState<NavigatorDescription | null>(null);
@@ -48,14 +49,31 @@ export const ClientNavigator = () => {
         }
     };
 
+    const fetchUserData = async () => {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const response = await api.get(`/api/user/${user._id}`);
+        if (response.data.success) {
+            setUserData(response.data.data);
+            setShowDescription(response.data.data.showNavigatorDescriptions);
+        }
+    }
+
     useEffect(() => {
         fetchContent();
+        fetchUserData();
     }, []);
 
     const closeModal = () => {
         setIsModalOpen(false);
         setSelectedContent(null);
     };
+
+    const updateShowDescription = async () => {
+        const response = await api.put(`/api/user/${userData._id}`, { showNavigatorDescriptions: !showDescription });
+        if (response.data.success) {
+            setShowDescription(!showDescription);
+        }
+    }
 
     return (
         <UserLayout>
@@ -166,7 +184,9 @@ export const ClientNavigator = () => {
                             <div className="">Показывать описание</div>
                             <Switch
                                 checked={showDescription}
-                                onChange={() => { setShowDescription(!showDescription); }} 
+                                onChange={() => { 
+                                    updateShowDescription();
+                                }} 
                             />
                         </div>
                     </div>

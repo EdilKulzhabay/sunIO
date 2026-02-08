@@ -10,7 +10,20 @@ const VideoProgressSchema = new mongoose.Schema(
     },
     contentType: {
       type: String,
-      enum: ['meditation', 'practice', 'videoLesson'],
+      enum: [
+        'practice',
+        'health-lab',
+        'relationship-workshop',
+        'spirit-forge',
+        'masters-tower',
+        'femininity-gazebo',
+        'consciousness-library',
+        'product-catalog',
+        'analysis-health',
+        'analysis-relationships',
+        'analysis-realization',
+        'psychodiagnostics',
+      ],
       required: true,
     },
     contentId: {

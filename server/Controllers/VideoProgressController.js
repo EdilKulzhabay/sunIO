@@ -8,6 +8,10 @@ import MastersTower from '../Models/MastersTower.js';
 import FemininityGazebo from '../Models/FemininityGazebo.js';
 import ConsciousnessLibrary from '../Models/ConsciousnessLibrary.js';
 import ProductCatalog from '../Models/ProductCatalog.js';
+import AnalysisHealth from '../Models/AnalysisHealth.js';
+import AnalysisRelationships from '../Models/AnalysisRelationships.js';
+import AnalysisRealization from '../Models/AnalysisRealization.js';
+import Psychodiagnostics from '../Models/Psychodiagnostics.js';
 
 // Сохранение или обновление прогресса просмотра
 export const saveProgress = async (req, res) => {
@@ -274,6 +278,21 @@ export const awardBonusOnPlay = async (req, res) => {
             case 'product-catalog':
             case 'productCatalog':
                 content = await ProductCatalog.findById(contentId);
+                break;
+            case 'analysis-health':
+            case 'analysisHealth':
+                content = await AnalysisHealth.findById(contentId);
+                break;
+            case 'analysis-relationships':
+            case 'analysisRelationships':
+                content = await AnalysisRelationships.findById(contentId);
+                break;
+            case 'analysis-realization':
+            case 'analysisRealization':
+                content = await AnalysisRealization.findById(contentId);
+                break;
+            case 'psychodiagnostics':
+                content = await Psychodiagnostics.findById(contentId);
                 break;
             default:
                 return res.status(400).json({

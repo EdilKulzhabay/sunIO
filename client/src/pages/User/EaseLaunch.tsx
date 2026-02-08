@@ -40,11 +40,12 @@ export const EaseLaunch = () => {
                 <img src={logo} alt="logo" className='w-[104px] h-[40px] mt-10' />
             </div>
             <div className='flex-1'>
-                <h1 className='text-[48px] font-semibold text-white leading-12'>Удобство запуска</h1>
-                <p className='text-white'>Для удобства последующих запусков Приложения его можно добавить на экран Домой телефона</p>
+                <h1 className='text-[48px] font-semibold text-white leading-12'>Важная информация</h1>
+                <p className='text-white'>Для удобства запусков приложения Солнце его нужно добавить на экран телефона, нажав на три точки в правом верхнем углу экрана. Сделайте это прямо сейчас!</p>
                 <div className='mt-4'>
                     <img src={easeLaunch} alt="Ease Launch" className='w-full h-auto object-cover sm:w-3/4 sm:mx-auto' />
                 </div>
+                <p className='text-white mt-4'>Подробная инструкция по созданию ярлыка Приложения содержится в Инструкции ниже.</p>
             </div>
             
             <div className='bg-[#031F23]'>

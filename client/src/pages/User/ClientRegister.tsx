@@ -196,7 +196,7 @@ export const ClientRegister = () => {
             className='min-h-screen px-4 pb-6 flex flex-col justify-between lg:justify-start'
         >
             <div style={{ height: `${screenHeight/3}px` }} className='flex justify-center items-end'>
-                <img src={sunWithHands} alt="Sun with Hands" className='object-cover h-[175px] w-[175px] mb-10' />
+                <img src={sunWithHands} alt="Sun with Hands" className='object-cover h-[175px] w-[175px] mb-5' />
             </div>
             <div className='flex-1 lg:flex-0 lg:w-[700px] lg:mx-auto'>
                 <h1 className='text-[48px] font-semibold text-white leading-12'>Регистрация пользователя</h1>
@@ -264,7 +264,7 @@ export const ClientRegister = () => {
                     />
                 ) : (
                     <RedButton
-                        text="Отправить код"
+                        text="Зарегистрироваться"
                         onClick={handleSendCode}
                         className='w-full mt-4'
                         disabled={sendingCode || !email.trim()}

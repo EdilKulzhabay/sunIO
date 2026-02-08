@@ -93,7 +93,7 @@ export const About = () => {
     return (
         <UserLayout>
             <div className='bg-[#031F23]'>
-                <div className='relative lg:w-[700px] lg:mx-auto'>
+                <div className='relative lg:w-[700px] lg:mx-auto -mt-3'>
                     {content?.image && (
                         <img 
                             src={`${import.meta.env.VITE_API_URL}${content?.image}`} 
@@ -102,27 +102,27 @@ export const About = () => {
                         />
                     )}
                     <div 
-                        className="absolute inset-0"
+                        className="absolute inset-0 z-20 lg:hidden"
                         style={{
-                            background: 'linear-gradient(to bottom, #161616 0%, #16161600 30%)',
+                            background: 'linear-gradient(to top, #031F2300 70%, #031F23 99%)',
                         }}
                     />
                     <div 
-                        className="absolute inset-0"
+                        className="absolute inset-0 z-20 lg:hidden"
                         style={{
-                            background: 'linear-gradient(to bottom, #16161600 70%, #161616 100%)',
+                            background: 'linear-gradient(to bottom, #031F2300 60%, #031F23 100%)',
                         }}
                     />
                     <div 
-                        className="absolute inset-0 z-10 hidden lg:block"
+                        className="absolute inset-0 z-20 hidden lg:block"
                         style={{
-                            background: 'linear-gradient(to right, #16161600 70%, #161616 100%)',
+                            background: 'linear-gradient(to right, #031F2300 70%, #031F23 100%)',
                         }}
                     />
                     <div 
-                        className="absolute inset-0 z-10 hidden lg:block"
+                        className="absolute inset-0 z-20 hidden lg:block"
                         style={{
-                            background: 'linear-gradient(to left, #16161600 70%, #161616 100%)',
+                            background: 'linear-gradient(to left, #031F2300 70%, #031F23 100%)',
                         }}
                     />
                 </div>
@@ -170,7 +170,7 @@ export const About = () => {
                                 <div className="mt-4">
                                     <h3 className="text-xl font-bold mb-4">Вступить в клуб</h3>
                                     <p className="mb-6 text-gray-300">
-                                        Функционал оплаты членства в клубе ещё не готов. Для вступления в клубе свяжитесь с нами
+                                    Клуб доступен только для выпускников 4-х дневных тренингов. Свяжитесь с нами и мы поможем вам стать частью нашего Сообщества
                                     </p>
                                     <MyLink 
                                         to="/client/contactus" 
@@ -206,7 +206,7 @@ export const About = () => {
                                 <div className="mt-4">
                                     <h3 className="text-2xl font-bold mb-4">Вступить в клуб</h3>
                                     <p className="mb-6 text-gray-300 text-lg">
-                                        Функционал оплаты членства в клубе ещё не готов. Для вступления в клубе свяжитесь с нами
+                                    Клуб доступен только для выпускников 4-х дневных тренингов. Свяжитесь с нами и мы поможем вам стать частью нашего Сообщества
                                     </p>
                                     <MyLink 
                                         to="/client/contactus" 
@@ -219,161 +219,6 @@ export const About = () => {
                         </div>
                     </div>
                 )}
-                {/* {showPaymentModal && (
-                    <div className="fixed inset-0 z-50 overflow-y-auto">
-                        <div className="flex items-end justify-center min-h-screen sm:hidden">
-                            <div 
-                                className="fixed inset-0 bg-black/60 transition-opacity z-20"
-                                onClick={() => {
-                                    setShowPaymentModal(false);
-                                    setFamiliatizaedWithOffer(false);
-                                }}
-                            />
-
-                            <div 
-                                className="relative z-50 px-4 pt-6 pb-8 inline-block w-full bg-[#114E50] rounded-t-[24px] text-left text-white overflow-hidden shadow-xl transform transition-all"
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                <button
-                                    onClick={() => {
-                                        setShowPaymentModal(false);
-                                        setFamiliatizaedWithOffer(false);
-                                    }}
-                                    className="absolute top-6 right-5 cursor-pointer"
-                                >
-                                    <X size={24} />
-                                </button>
-                                
-                                <div className="pb-8">
-                                    <h3 className="text-xl font-bold mb-4">Оплата подписки</h3>
-                                    <p className="mb-6 text-gray-300">
-                                        Ознакомьтесь с публичной офертой на приобретение подписки
-                                    </p>
-                                    <div className="pt-4 border-t border-gray-600 flex gap-3">
-                                        <button
-                                            onClick={() => {
-                                                if (window.Telegram?.WebApp?.openLink) {
-                                                        window.Telegram.WebApp.openLink("https://xn--80ajaabkdcdysfdbla7bh1g.xn--p1ai/oferta");
-                                                    } else {
-                                                        // Fallback для обычного браузера
-                                                        window.open("https://xn--80ajaabkdcdysfdbla7bh1g.xn--p1ai/oferta", '_blank');
-                                                    }
-                                                    setShowPaymentModal(false);
-                                                }
-                                            }
-                                            className="flex-1 px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            Оферта
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                if (paymentUrl) {
-                                                    if (window.Telegram?.WebApp?.openLink) {
-                                                            window.Telegram.WebApp.openLink(paymentUrl);
-                                                        } else {
-                                                            // Fallback для обычного браузера
-                                                            window.open(paymentUrl, '_blank');
-                                                        }
-                                                        setShowPaymentModal(false);
-                                                    }
-                                                }
-                                            }
-                                            disabled={!familiatizaedWithOffer}
-                                            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#C4841D] hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            Купить
-                                        </button>
-                                    </div>
-                                    <div className="mt-4 flex items-center gap-3">
-                                        <Switch
-                                            checked={familiatizaedWithOffer}
-                                            onChange={() => setFamiliatizaedWithOffer(!familiatizaedWithOffer)}
-                                        />
-                                        <label className="text-sm text-gray-300 cursor-pointer" onClick={() => setFamiliatizaedWithOffer(!familiatizaedWithOffer)}>
-                                            Ознакомлен с публичной офертой
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="hidden sm:flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center">
-                            <div 
-                                className="fixed inset-0 bg-black/60 transition-opacity"
-                                onClick={() => {
-                                    setShowPaymentModal(false);
-                                    setFamiliatizaedWithOffer(false);
-                                }}
-                            />
-
-                            <div 
-                                className="relative p-8 inline-block align-middle bg-[#114E50] rounded-lg text-left text-white overflow-hidden shadow-xl transform transition-all"
-                                style={{ maxWidth: '500px', width: '100%' }}
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                <button
-                                    onClick={() => {
-                                        setShowPaymentModal(false);
-                                        setFamiliatizaedWithOffer(false);
-                                    }}
-                                    className="absolute top-8 right-8 cursor-pointer"
-                                >
-                                    <X size={32} />
-                                </button>
-                                
-                                <div className="pb-8">
-                                    <h3 className="text-2xl font-bold mb-4">Оплата подписки</h3>
-                                    <p className="mb-6 text-gray-300 text-lg">
-                                        Ознакомьтесь с публичной офертой на приобретение подписки
-                                    </p>
-                                    <div className="pt-4 border-t border-gray-600 flex gap-3">
-                                        <button
-                                            onClick={() => {
-                                                if (window.Telegram?.WebApp?.openLink) {
-                                                        window.Telegram.WebApp.openLink("https://xn--80ajaabkdcdysfdbla7bh1g.xn--p1ai/oferta");
-                                                    } else {
-                                                        // Fallback для обычного браузера
-                                                        window.open("https://xn--80ajaabkdcdysfdbla7bh1g.xn--p1ai/oferta", '_blank');
-                                                    }
-                                                }
-                                            }
-                                            className="flex-1 px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            Оферта
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                if (paymentUrl) {
-                                                    if (window.Telegram?.WebApp?.openLink) {
-                                                            window.Telegram.WebApp.openLink(paymentUrl);
-                                                        } else {
-                                                            // Fallback для обычного браузера
-                                                            window.open(paymentUrl, '_blank');
-                                                        }
-                                                        setShowPaymentModal(false);
-                                                    }
-                                                }
-                                            }
-                                            disabled={!familiatizaedWithOffer}
-                                            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#C4841D] hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            Купить
-                                        </button>
-                                    </div>
-                                    <div className="mt-4 flex items-center gap-3">
-                                        <Switch
-                                            checked={familiatizaedWithOffer}
-                                            onChange={() => setFamiliatizaedWithOffer(!familiatizaedWithOffer)}
-                                        />
-                                        <label className="text-sm text-gray-300 cursor-pointer" onClick={() => setFamiliatizaedWithOffer(!familiatizaedWithOffer)}>
-                                            Ознакомлен с публичной офертой
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )} */}
             </div>
         </UserLayout>
     )

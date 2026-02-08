@@ -115,8 +115,8 @@ export const ClientSchedule = () => {
 
         calendarSchedules.forEach((schedule: any) => {
             const isSubscribed = subscribedIds.has(schedule._id);
-            const borderColor = isSubscribed ? (schedule.priority ? '#00C5AE' : '#FFC293') : null;
-            const dotColor = schedule.priority ? '#00C5AE' : '#FFC293';
+            const borderColor = isSubscribed ? (schedule.priority ? '#00C5AE' : '#C4841D') : null;
+            const dotColor = schedule.priority ? '#00C5AE' : '#C4841D';
 
             if (schedule.startDate && schedule.endDate) {
                 const start = new Date(schedule.startDate);
@@ -263,7 +263,7 @@ export const ClientSchedule = () => {
             </div>
             <div className="lg:basis-2/3">
                 <div className="mt-6 lg:mt-0 flex items-center justify-between">
-                    <div className="text-white/60">{new Date().toLocaleDateString('ru-RU', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
+                    <div className="text-white/60">{new Date().toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })}</div>
                     <div className="flex items-center gap-x-3">
                         <div className="text-white/60">Все меропрития</div>
                         <Switch
@@ -281,8 +281,8 @@ export const ClientSchedule = () => {
                         >
                             <div onClick={() => {}} className="flex items-center justify-between">
                                 <h1 className="text-xl font-medium">{schedule?.eventTitle}</h1>
-                                {schedule.priority && <div className="w-1.5 h-1.5 bg-[#C4841D] rounded-full" />}
-                                {!schedule.priority && <div className="w-1.5 h-1.5 bg-[#FFC293] rounded-full" />}
+                                {schedule.priority && <div className="w-1.5 h-1.5 bg-[#00C5AE] rounded-full" />}
+                                {!schedule.priority && <div className="w-1.5 h-1.5 bg-[#C4841D] rounded-full" />}
                             </div>
                             <p dangerouslySetInnerHTML={{ __html: schedule?.description || '' }}></p>
                         </div>
@@ -369,7 +369,7 @@ export const ClientSchedule = () => {
                                         closeModal();
                                     }
                                 }}
-                                className="mt-4 w-full block border px-4 border-[#FFC293] text-[#FFC293] py-2.5 text-center font-medium rounded-full">
+                                className="mt-4 w-full block border px-4 border-[#C4841D] text-[#C4841D] py-2.5 text-center font-medium rounded-full">
                                 Добавить в календарь Google
                             </button>
                             <RedButton 
@@ -466,7 +466,7 @@ export const ClientSchedule = () => {
                                         closeModal();
                                     }
                                 }}
-                                className="mt-4 w-full block border px-4 border-[#FFC293] text-[#FFC293] py-2.5 text-center font-medium rounded-full">
+                                className="mt-4 w-full block border px-4 border-[#C4841D] text-[#C4841D] py-2.5 text-center font-medium rounded-full">
                                 Добавить в календарь Google
                             </button>
                             <RedButton 

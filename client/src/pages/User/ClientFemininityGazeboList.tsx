@@ -66,9 +66,9 @@ export const ClientFemininityGazeboList = () => {
     };
 
     const fetchContent = async () => {
-        const responseSubscription = await api.get('/api/dynamic-content/name/femininity-gazebo-subscription');
+        const responseSubscription = await api.get('/api/dynamic-content/name/content-suns');
         setSubscriptionContent(responseSubscription.data.data.content);
-        const responseStars = await api.get('/api/dynamic-content/name/femininity-gazebo-stars');
+        const responseStars = await api.get('/api/dynamic-content/name/content-suns');
         setStarsContent(responseStars.data.data.content);
     }
 

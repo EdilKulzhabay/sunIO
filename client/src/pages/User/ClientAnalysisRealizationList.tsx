@@ -66,9 +66,9 @@ export const ClientAnalysisRealizationList = () => {
     };
 
     const fetchContent = async () => {
-        const responseSubscription = await api.get('/api/dynamic-content/name/analysis-realization-subscription');
+        const responseSubscription = await api.get('/api/dynamic-content/name/content-suns');
         setSubscriptionContent(responseSubscription.data.data.content);
-        const responseStars = await api.get('/api/dynamic-content/name/analysis-realization-stars');
+        const responseStars = await api.get('/api/dynamic-content/name/content-suns');
         setStarsContent(responseStars.data.data.content);
     }
 

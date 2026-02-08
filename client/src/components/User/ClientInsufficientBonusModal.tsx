@@ -14,11 +14,11 @@ export const BonusPolicyModal = ({ isOpen, onClose }: { isOpen: boolean; onClose
     if (!isOpen) return null;
 
     const policies = [
-        { id: 1, title: 'Регистрация в приложении', subtitle: '10 звёзд' },
-        { id: 2, title: 'Приглашение участника по ссылке', subtitle: '2 звёзды' },
-        { id: 3, title: 'Заполнение дневника', subtitle: '2 звёзды (1 звёзда за дневник, 1 звёзда за упражнение)' },
-        { id: 4, title: 'Просмотр бесплатного контента', subtitle: '1 звёзда за просмотр каждой единицы контента' },
-        { id: 5, title: 'Регистрация в клубе .li', subtitle: '10 звёзд' },
+        { id: 1, title: 'Регистрация в приложении', subtitle: '10 Солнц' },
+        { id: 2, title: 'Приглашение друга по ссылке', subtitle: '2 Солнца' },
+        { id: 3, title: 'Заполнение дневника осознаний', subtitle: '2 Солнца (1 Солнце за дневник, 1 Солнце за упражнение)' },
+        { id: 4, title: 'Просмотр контента', subtitle: 'Солнца за просмотр каждой единицы контента' },
+        { id: 5, title: 'Участие в клубе Мастерская энергий', subtitle: '10 солнц за каждый уровень активации' },
     ];
 
     return (
@@ -57,7 +57,7 @@ export const BonusPolicyModal = ({ isOpen, onClose }: { isOpen: boolean; onClose
                             ))}
                         </div>
                         <p className="text-sm text-gray-400 italic mb-6">
-                            Возможность списания звёзд на продукты только для зарегистрированных пользователей.
+                            Возможность списания Солнц на продукты только для зарегистрированных пользователей.
                         </p>
                         <button
                             onClick={onClose}
@@ -105,7 +105,7 @@ export const BonusPolicyModal = ({ isOpen, onClose }: { isOpen: boolean; onClose
                             ))}
                         </div>
                         <p className="text-base text-gray-400 italic mb-6">
-                            Возможность списания звёзд на продукты только для зарегистрированных пользователей.
+                            Возможность списания Солнц на продукты только для зарегистрированных пользователей.
                         </p>
                         <button
                             onClick={onClose}
@@ -177,15 +177,15 @@ export const ClientInsufficientBonusModal = ({
                     </button>
                     
                     <div className="">
-                        <h3 className="text-xl font-bold mb-4">Недостаточно звёзд</h3>
+                        <h3 className="text-xl font-bold mb-4">Недостаточно Солнц</h3>
                         <div className="mb-4">
                             <p className="mb-2">Вы хотите приобрести контент:</p>
                             <p className="mb-4">{contentTitle}</p>
-                            <p className="font-semibold text-lg mb-2">Стоимость в звёздах: {starsRequired}</p>
-                            <p className="font-semibold text-lg mb-4">У вас есть звёзд: {userBonus}</p>
+                            <p className="font-semibold text-lg mb-2">Стоимость в Солнцах: {starsRequired}</p>
+                            <p className="font-semibold text-lg mb-4">У вас есть Солнца: {userBonus}</p>
                         </div>
                         <p className="mb-4 text-gray-300">
-                            Вы можете получить дополнительные звёзды, выполняя задания. Немного терпения.
+                            Вы можете получить дополнительные Солнца, выполняя задания. Немного терпения.
                         </p>
                         <div className="flex gap-3 mt-6">
                             <button
@@ -227,15 +227,15 @@ export const ClientInsufficientBonusModal = ({
                     </button>
                     
                     <div className="">
-                        <h3 className="text-2xl font-bold mb-4">Недостаточно звёзд</h3>
+                        <h3 className="text-2xl font-bold mb-4">Недостаточно Солнц</h3>
                         <div className="mb-6">
                             <p className="mb-2">Вы хотите приобрести контент:</p>
                             <p className="mb-4">{contentTitle}</p>
-                            <p className="font-semibold text-lg mb-2">Стоимость звёзд: {starsRequired}</p>
-                            <p className="font-semibold text-lg mb-4">У вас есть звёзд: {userBonus}</p>
+                            <p className="font-semibold text-lg mb-2">Стоимость Солнц: {starsRequired}</p>
+                            <p className="font-semibold text-lg mb-4">У вас есть Солнца: {userBonus}</p>
                         </div>
                         <p className="mb-6 text-gray-300">
-                            Вы можете получить дополнительные звёзды, выполняя задания. Немного терпения.
+                            Вы можете получить дополнительные Солнца, выполняя задания. Немного терпения.
                         </p>
                         <div className="flex gap-4 mt-8">
                             <button

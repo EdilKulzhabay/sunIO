@@ -66,9 +66,9 @@ export const ClientConsciousnessLibraryList = () => {
     };
 
     const fetchContent = async () => {
-        const responseSubscription = await api.get('/api/dynamic-content/name/consciousness-library-subscription');
+        const responseSubscription = await api.get('/api/dynamic-content/name/content-suns');
         setSubscriptionContent(responseSubscription.data.data.content);
-        const responseStars = await api.get('/api/dynamic-content/name/consciousness-library-stars');
+        const responseStars = await api.get('/api/dynamic-content/name/content-suns');
         setStarsContent(responseStars.data.data.content);
     }
 

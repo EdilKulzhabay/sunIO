@@ -91,9 +91,9 @@ export const ClientPurchaseConfirmModal = ({
                         <p className="mb-2">Вы хотите приобрести контент:</p>
                         <p className="font-semibold mb-4">{contentTitle}</p>
                         <div className="mb-4">
-                            <p className="mb-1">Стоимость звёзд: <span className="font-bold">{starsRequired}</span></p>
-                            <p className="mb-1">У вас есть звёзд: <span className="font-bold">{userBonus}</span></p>
-                            <p className="text-sm text-gray-300">После покупки у вас останется звёзд: <span className="font-bold">{userBonus - starsRequired}</span></p>
+                            <p className="mb-1">Стоимость Солнц: <span className="font-bold">{starsRequired}</span></p>
+                            <p className="mb-1">У вас есть Солнца: <span className="font-bold">{userBonus}</span></p>
+                            <p className="text-sm text-gray-300">После покупки у вас останется Солнца: <span className="font-bold">{userBonus - starsRequired}</span></p>
                         </div>
                         <div className="flex gap-3 mt-6">
                             <button
@@ -142,9 +142,9 @@ export const ClientPurchaseConfirmModal = ({
                         <p className="mb-2">Вы хотите приобрести контент:</p>
                         <p className="font-semibold mb-4 text-lg">{contentTitle}</p>
                         <div className="mb-6">
-                            <p className="mb-2">Стоимость звёзд: <span className="font-bold text-xl">{starsRequired}</span></p>
-                            <p className="mb-2">У вас есть звёзд: <span className="font-bold text-xl">{userBonus}</span></p>
-                            <p className="text-sm text-gray-300">После покупки у вас останется звёзд: <span className="font-bold">{userBonus - starsRequired}</span></p>
+                            <p className="mb-2">Стоимость Солнц: <span className="font-bold text-xl">{starsRequired}</span></p>
+                            <p className="mb-2">У вас есть Солнца: <span className="font-bold text-xl">{userBonus}</span></p>
+                            <p className="text-sm text-gray-300">После покупки у вас останется Солнца: <span className="font-bold">{userBonus - starsRequired}</span></p>
                         </div>
                         <div className="flex gap-4 mt-8">
                             <button

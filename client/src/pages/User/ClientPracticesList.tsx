@@ -278,7 +278,7 @@ export const ClientPracticesList = () => {
                 <div className="px-4 mt-2 pb-10 bg-[#031F23]">
                     <div ref={cardsContainerRef} className="flex overflow-x-auto gap-4 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
                         {practices.length > 0 ? (
-                            practices.filter((practice: any) => practice.location === 'top').sort((a: any, b: any) => a.order - b.order).map((practice: any) => (
+                            practices.filter((practice: any) => practice.location === 'top' && practice.visibility).sort((a: any, b: any) => a.order - b.order).map((practice: any) => (
                                 <div 
                                     key={practice._id} 
                                     data-card
@@ -305,7 +305,7 @@ export const ClientPracticesList = () => {
                         { practices.length > 0 ? (
                             <>
                                 {
-                                    practices.filter((practice: any) => practice.location === 'bottom').sort((a: any, b: any) => a.order - b.order).map((practice: any) => (
+                                    practices.filter((practice: any) => practice.location === 'bottom' && practice.visibility).sort((a: any, b: any) => a.order - b.order).map((practice: any) => (
                                         <VideoCard 
                                             key={practice._id} 
                                             title={practice.title} 

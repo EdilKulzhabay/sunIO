@@ -339,14 +339,14 @@ export const UnifiedVideoContentPage = ({
                                             href={lb.linkButtonLink}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="inline-block px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
+                                            className="block w-full text-center py-2 bg-[#C4841D] text-white font-medium rounded-full hover:cursor-pointer transition-colors"
                                         >
                                             {lb.linkButtonText}
                                         </a>
                                     ) : (
                                         <Link
                                             to={lb.linkButtonLink}
-                                            className="inline-block px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
+                                            className="block w-full text-center py-2 bg-[#C4841D] text-white font-medium rounded-full hover:cursor-pointer transition-colors"
                                         >
                                             {lb.linkButtonText}
                                         </Link>

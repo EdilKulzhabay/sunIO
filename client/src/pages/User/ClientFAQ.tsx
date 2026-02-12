@@ -16,7 +16,7 @@ export const ClientFAQ = () => {
     const fetchDinamycLink = async () => {
         const response = await api.get(`/api/dynamic-content/name/faq-download-instruction`);
         if (response.data.success) {
-            setDinamycLink(response.data.data);
+            setDinamycLink(response.data.data.content);
         }
     }
 

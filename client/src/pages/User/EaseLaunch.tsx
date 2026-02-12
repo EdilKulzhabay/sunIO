@@ -12,7 +12,7 @@ export const EaseLaunch = () => {
     const fetchDinamycLink = async () => {
         const response = await api.get(`/api/dynamic-content/name/ease-launch-download-instruction`);
         if (response.data.success) {
-            setDinamycLink(response.data.data);
+            setDinamycLink(response.data.data.content);
         }
     }
 

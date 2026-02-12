@@ -17,7 +17,7 @@ import { toast } from "react-toastify";
 export const ClientProfile = () => {
     const [userData, setUserData] = useState<any>(null);
     const [notifications, setNotifications] = useState(true);
-    const [locatedInRussia, setLocatedInRussia] = useState(false);
+    const [locatedInRussia, setLocatedInRussia] = useState(true);
     const [linkCopied, setLinkCopied] = useState(false);
     const navigate = useNavigate();
     const [screenHeight, setScreenHeight] = useState(0);
@@ -33,7 +33,15 @@ export const ClientProfile = () => {
     const [lastName, setLastName] = useState('');
     const [updatingName, setUpdatingName] = useState(false);
     const [invitedUsersCount, setInvitedUsersCount] = useState(0);
-    
+    const [pointsAwardingPolicy, setPointsAwardingPolicy] = useState<any>(null);
+
+    const fetchPointsAwardingPolicy = async () => {
+        const response = await api.get('/api/points-awarding-policy');
+        if (response.data.success) {
+            setPointsAwardingPolicy(response.data.data[0]);
+        }
+    }
+
     useEffect(() => {
         // Проверка на блокировку пользователя
         const userStr = localStorage.getItem('user');
@@ -50,6 +58,7 @@ export const ClientProfile = () => {
         }
 
         fetchUserData();
+        fetchPointsAwardingPolicy();
     }, [navigate]);
 
     useEffect(() => {
@@ -356,7 +365,7 @@ export const ClientProfile = () => {
                                 </button>
                             </div>
                             {linkCopied && (
-                                <div className="text-sm text-[#EC1313] mt-1">Ссылка скопирована!</div>
+                                <div className="text-sm text-[#C4841D] mt-1">Ссылка скопирована!</div>
                             )}
                         </div>
 
@@ -412,6 +421,7 @@ export const ClientProfile = () => {
             </UserLayout>
             <BonusPolicyModal 
                 isOpen={isBonusPolicyModalOpen} 
+                pointsAwardingPolicy={pointsAwardingPolicy || null}
                 onClose={() => setIsBonusPolicyModalOpen(false)} 
             />
             

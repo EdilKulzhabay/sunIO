@@ -190,7 +190,7 @@ export const VideoContentForm = ({ contentType, title, listRoute }: VideoContent
                                     <option value="free">Бесплатно</option>
                                     <option value="paid">Платно</option>
                                     <option value="subscription">Подписка</option>
-                                    <option value="stars">Звёзды</option>
+                                    <option value="stars">Баллы</option>
                                 </select>
                             </div>
                         </div>
@@ -209,7 +209,7 @@ export const VideoContentForm = ({ contentType, title, listRoute }: VideoContent
 
                         {formData.accessType === 'stars' && (
                             <MyInput
-                                label="Количество звёзд для доступа"
+                                label="Количество баллов для доступа"
                                 type="text"
                                 value={formData.starsRequired.toString()}
                                 onChange={(e) => setFormData({ ...formData, starsRequired: parseInt(e.target.value) || 0 })}
@@ -226,7 +226,7 @@ export const VideoContentForm = ({ contentType, title, listRoute }: VideoContent
                                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                             />
                             <label htmlFor="allowRepeatBonus" className="text-sm font-medium text-gray-700">
-                                Повторное добавление звёзд за просмотры
+                                Повторное добавление баллов за просмотры
                             </label>
                         </div>
 

@@ -160,7 +160,7 @@ export const Welcome = () => {
                         >
                             <h1 className="text-2xl font-bold">{content?.title}</h1>
                             <p className="mt-4" dangerouslySetInnerHTML={{ __html: content?.content }} />
-                            <MyLink to="/client/ease-launch" text="Далее" className='w-full mt-4' color='red'/>
+                            <MyLink to="/client-performance" text="Далее" className='w-full mt-4' color='red'/>
                         </div>
                     </div>
                 </div>

@@ -9,8 +9,10 @@ import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import api from '../../api';
 import { toast } from 'react-toastify';
 import { REDIRECT_TO_PAGE_OPTIONS } from '../../constants/redirectToPageOptions';
+import { ContentLinkButtonEditor } from '../../components/Admin/ContentLinkButtonEditor';
+import type { LinkButtonValue } from '../../components/Admin/ContentLinkButtonEditor';
 
-interface ContentItem { type: 'video' | 'text' | 'image'; video?: { mainUrl: string; reserveUrl: string; duration: number; }; text?: string; image?: string; }
+interface ContentItem { type: 'video' | 'text' | 'image'; video?: { mainUrl: string; reserveUrl: string; duration: number; }; text?: string; image?: string; linkButton?: LinkButtonValue | null; visibility?: boolean; }
 interface FormData { title: string; shortDescription: string; imageUrl: string; accessType: string; starsRequired: number; duration: number; order: number; allowRepeatBonus: boolean; location: 'top' | 'bottom'; redirectToPage: string; content: ContentItem[]; }
 
 export const PsychodiagnosticsForm = () => {
@@ -30,7 +32,16 @@ export const PsychodiagnosticsForm = () => {
                 const hasText = Boolean(item?.text);
                 const hasImage = Boolean(item?.image);
                 const resolvedType: ContentItem['type'] = hasVideo ? 'video' : hasText ? 'text' : hasImage ? 'image' : 'video';
-                return { type: resolvedType, video: { mainUrl: item?.video?.mainUrl || '', reserveUrl: item?.video?.reserveUrl || '', duration: item?.video?.duration || 0 }, text: item?.text || '', image: item?.image || '' };
+                return {
+                    type: resolvedType,
+                    video: { mainUrl: item?.video?.mainUrl || '', reserveUrl: item?.video?.reserveUrl || '', duration: item?.video?.duration || 0 },
+                    text: item?.text || '',
+                    image: item?.image || '',
+                    linkButton: item?.linkButton?.linkButtonText || item?.linkButton?.linkButtonLink
+                        ? { linkButtonText: item?.linkButton?.linkButtonText || null, linkButtonLink: item?.linkButton?.linkButtonLink || null, linkButtonType: item?.linkButton?.linkButtonType || 'internal' }
+                        : null,
+                    visibility: item?.visibility !== false,
+                };
             });
             setFormData({ title: data.title || '', shortDescription: data.shortDescription || '', imageUrl: data.imageUrl || '', content: mappedContent, accessType: data.accessType || 'free', starsRequired: data.starsRequired ?? 0, duration: data.duration ?? 0, order: data.order ?? 0, allowRepeatBonus: data.allowRepeatBonus ?? false, location: data.location || 'bottom', redirectToPage: data.redirectToPage || '' });
         } catch (error) { toast.error('Ошибка загрузки данных'); navigate('/admin/psychodiagnostics'); }
@@ -39,7 +50,9 @@ export const PsychodiagnosticsForm = () => {
     const handleVideoChange = (index: number, field: 'mainUrl' | 'reserveUrl' | 'duration', value: string | number) => { setFormData(prev => { const newContent = [...prev.content]; newContent[index] = { ...newContent[index], video: { ...newContent[index].video!, [field]: value } }; return { ...prev, content: newContent }; }); };
     const handleContentChange = (index: number, field: 'text' | 'image', value: string) => { setFormData(prev => { const newContent = [...prev.content]; newContent[index] = { ...newContent[index], [field]: value }; return { ...prev, content: newContent }; }); };
     const handleTypeChange = (index: number, newType: ContentItem['type']) => { setFormData(prev => { const newContent = [...prev.content]; newContent[index] = { ...newContent[index], type: newType }; return { ...prev, content: newContent }; }); };
-    const addContentItem = (type: ContentItem['type']) => { setFormData(prev => ({ ...prev, content: [...prev.content, { type, video: { mainUrl: '', reserveUrl: '', duration: 0 }, text: '', image: '' }] })); };
+    const addContentItem = (type: ContentItem['type']) => { setFormData(prev => ({ ...prev, content: [...prev.content, { type, video: { mainUrl: '', reserveUrl: '', duration: 0 }, text: '', image: '', linkButton: null, visibility: true }] })); };
+    const handleVisibilityChange = (index: number, value: boolean) => { setFormData(prev => { const newContent = [...prev.content]; newContent[index] = { ...newContent[index], visibility: value }; return { ...prev, content: newContent }; }); };
+    const handleLinkButtonChange = (index: number, value: LinkButtonValue | null) => { setFormData(prev => { const newContent = [...prev.content]; newContent[index] = { ...newContent[index], linkButton: value }; return { ...prev, content: newContent }; }); };
     const removeContentItem = (index: number) => { setFormData(prev => { const newContent = [...prev.content]; newContent.splice(index, 1); return { ...prev, content: newContent }; }); };
     const moveContentItem = (fromIndex: number, toIndex: number) => { setFormData(prev => { if (toIndex < 0 || toIndex >= prev.content.length) return prev; const newContent = [...prev.content]; const [movedItem] = newContent.splice(fromIndex, 1); newContent.splice(toIndex, 0, movedItem); return { ...prev, content: newContent }; }); };
 
@@ -59,8 +72,8 @@ export const PsychodiagnosticsForm = () => {
                         <MyInput label="Название" type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} placeholder="Введите название" />
                         <MyInput label="Краткое описание" type="text" value={formData.shortDescription} onChange={(e) => setFormData({ ...formData, shortDescription: e.target.value })} placeholder="Введите краткое описание" />
                         <ImageUpload value={formData.imageUrl} onChange={(url) => setFormData({ ...formData, imageUrl: url })} label="Обложка" />
-                        <div className="flex flex-col gap-2"><label className="text-sm font-medium">Тип доступа</label><select value={formData.accessType} onChange={(e) => setFormData({ ...formData, accessType: e.target.value })} className="w-full p-2 rounded-md border border-gray-300"><option value="free">Бесплатно</option><option value="paid">Платно</option><option value="subscription">Подписка</option><option value="stars">Звёзды</option></select></div>
-                        {formData.accessType === 'stars' && <MyInput label="Стоимость в звёздах" type="number" value={String(formData.starsRequired)} onChange={(e) => setFormData({ ...formData, starsRequired: Number(e.target.value) || 0 })} min="0" />}
+                        <div className="flex flex-col gap-2"><label className="text-sm font-medium">Тип доступа</label><select value={formData.accessType} onChange={(e) => setFormData({ ...formData, accessType: e.target.value })} className="w-full p-2 rounded-md border border-gray-300"><option value="free">Бесплатно</option><option value="paid">Платно</option><option value="subscription">Подписка</option><option value="stars">Баллы</option></select></div>
+                        {formData.accessType === 'stars' && <MyInput label="Стоимость в баллах" type="number" value={String(formData.starsRequired)} onChange={(e) => setFormData({ ...formData, starsRequired: Number(e.target.value) || 0 })} min="0" />}
                         <div className="grid grid-cols-2 gap-4"><MyInput label="Порядок" type="number" value={String(formData.order)} onChange={(e) => setFormData({ ...formData, order: Number(e.target.value) || 0 })} min="0" /><div className="flex flex-col gap-2"><label className="text-sm font-medium">Расположение</label><select value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value as FormData['location'] })} className="w-full p-2 rounded-md border border-gray-300"><option value="top">Сверху</option><option value="bottom">Снизу</option></select></div></div>
                         <div className="flex flex-col gap-2">
                             <label className="text-sm font-medium">Ссылка перехода</label>
@@ -81,9 +94,11 @@ export const PsychodiagnosticsForm = () => {
                                     <div className="flex items-center justify-between mb-3"><span className="text-sm font-medium text-gray-700">Элемент {index + 1}</span><div className="flex items-center gap-2"><button type="button" onClick={() => moveContentItem(index, index - 1)} disabled={index === 0} className="px-2 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">Вверх</button><button type="button" onClick={() => moveContentItem(index, index + 1)} disabled={index === formData.content.length - 1} className="px-2 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">Вниз</button><button type="button" onClick={() => removeContentItem(index)} className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"><Trash2 size={16} /></button></div></div>
                                     <div className="space-y-3">
                                         <div className="flex flex-col gap-2"><label className="text-sm font-medium">Тип контента</label><select value={item.type} onChange={(e) => handleTypeChange(index, e.target.value as ContentItem['type'])} className="w-full p-2 rounded-md border border-gray-300"><option value="video">Видео</option><option value="text">Текст</option><option value="image">Изображение</option></select></div>
+                                        <div className="flex flex-col gap-2"><label className="text-sm font-medium">Видимость</label><select value={item.visibility !== false ? 'true' : 'false'} onChange={(e) => handleVisibilityChange(index, e.target.value === 'true')} className="w-full p-2 rounded-md border border-gray-300"><option value="true">Показывать</option><option value="false">Скрывать</option></select></div>
                                         {item.type === 'video' && (<><MyInput label="Основная ссылка на видео" type="text" value={item.video?.mainUrl || ''} onChange={(e) => handleVideoChange(index, 'mainUrl', e.target.value)} placeholder="https://..." /><MyInput label="Резервная ссылка на видео" type="text" value={item.video?.reserveUrl || ''} onChange={(e) => handleVideoChange(index, 'reserveUrl', e.target.value)} placeholder="https://..." /><MyInput label="Длительность видео (мин)" type="number" value={String(item.video?.duration || 0)} onChange={(e) => handleVideoChange(index, 'duration', Number(e.target.value) || 0)} min="0" /></>)}
                                         {item.type === 'image' && <ImageUpload value={item.image || ''} onChange={(url) => handleContentChange(index, 'image', url)} label="Изображение" />}
                                         {item.type === 'text' && <div><label className="block text-sm font-medium mb-2">Текст</label><RichTextEditor value={item.text || ''} onChange={(value) => handleContentChange(index, 'text', value)} placeholder="Введите текст" height="200px" /></div>}
+                                        <ContentLinkButtonEditor value={item.linkButton ?? null} onChange={(v) => handleLinkButtonChange(index, v)} onClear={item.linkButton ? () => handleLinkButtonChange(index, null) : undefined} />
                                     </div>
                                 </div>
                             ))}

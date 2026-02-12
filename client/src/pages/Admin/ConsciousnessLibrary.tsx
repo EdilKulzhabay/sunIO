@@ -29,7 +29,7 @@ export const ConsciousnessLibraryAdmin = () => {
         { key: 'title', label: 'Название' },
         { key: 'order', label: 'Порядок' },
         { key: 'accessType', label: 'Доступ' },
-        { key: 'allowRepeatBonus', label: 'Повторные звёзды', render: (value: boolean) => value ? 'Да' : 'Нет' },
+        { key: 'allowRepeatBonus', label: 'Повторные баллы', render: (value: boolean) => value ? 'Да' : 'Нет' },
     ];
 
     return (

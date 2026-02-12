@@ -56,7 +56,7 @@ export const BlockedBrowser = () => {
             className='min-h-screen px-4 pb-6 flex flex-col'
         >
             <div style={{ height: `${screenHeight/3}px` }} className='flex justify-center items-end'>
-                <img src={sunWithHands} alt="Sun with Hands" className='object-cover h-[175px] w-[175px] mb-10' />
+                <img src={sunWithHands} alt="Sun with Hands" className='object-cover h-[175px] w-[175px] mb-5' />
             </div>
             <div className=''>
                 <h1 className='text-[48px] font-semibold text-white leading-12 mb-4'>

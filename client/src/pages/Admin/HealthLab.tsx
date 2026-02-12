@@ -49,7 +49,7 @@ export const HealthLabAdmin = () => {
         { key: 'accessType', label: 'Доступ' },
         { 
             key: 'allowRepeatBonus', 
-            label: 'Повторные звёзды',
+            label: 'Повторные баллы',
             render: (value: boolean) => value ? 'Да' : 'Нет'
         },
     ];

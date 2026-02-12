@@ -10,6 +10,7 @@ export const MyInput = ({ label, type, value, placeholder, onChange, required, m
                 placeholder={placeholder}
                 required={required}
                 min={min}
+                onWheel={type === 'number' ? (e) => e.currentTarget.blur() : undefined}
             />
         </div>
     )

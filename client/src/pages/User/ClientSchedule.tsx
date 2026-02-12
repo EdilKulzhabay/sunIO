@@ -1,5 +1,5 @@
 import { DateRangeCalendar } from "../../components/User/DateRangeCalendar";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import api from "../../api";
 import { Switch } from "../../components/User/Switch";
 import { X } from 'lucide-react';
@@ -9,13 +9,14 @@ import { RedButton } from "../../components/User/RedButton";
 
 export const ClientSchedule = () => {
     const [userData, setUserData] = useState<any>(null);
-    const [startDate, setStartDate] = useState<Date | null>(null);
-    const [endDate, setEndDate] = useState<Date | null>(null);
     const [schedules, setSchedules] = useState<any>([]);
     const [calendarSchedules, setCalendarSchedules] = useState<any[]>([]);
     const [eventDateBorders, setEventDateBorders] = useState<Record<string, string>>({});
     const [eventDateDots, setEventDateDots] = useState<Record<string, string>>({});
+    const [dateToSchedules, setDateToSchedules] = useState<Record<string, any[]>>({});
+    const [selectedDateFromCalendar, setSelectedDateFromCalendar] = useState<Date | null>(null);
     const [showAllEvents, setShowAllEvents] = useState(false);
+    const scheduleRefsMap = useRef<Map<string, HTMLDivElement>>(new Map());
     const [selectedSchedule, setSelectedSchedule] = useState<any>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -29,7 +30,6 @@ export const ClientSchedule = () => {
 
     useEffect(() => {
         const userStr = localStorage.getItem('user');
-        console.log(startDate, endDate);
         if (userStr) {
             const id = JSON.parse(userStr)._id;
             fetchUserData(id);
@@ -44,9 +44,15 @@ export const ClientSchedule = () => {
         return `${day}.${month}.${year}`; // DD.MM.YYYY
     };
 
-    const handleDateRangeSelect = (start: Date | null, end: Date | null) => {
-        setStartDate(start);
-        setEndDate(end);
+    const [scrollToScheduleId, setScrollToScheduleId] = useState<string | null>(null);
+
+    const handleDateClick = (date: Date) => {
+        const key = date.toISOString().split('T')[0];
+        const schedulesForDate = dateToSchedules[key] || [];
+        setSelectedDateFromCalendar(date);
+        if (schedulesForDate.length > 0) {
+            setScrollToScheduleId(schedulesForDate[0]._id);
+        }
     };
 
     // Загружаем все события при монтировании компонента
@@ -102,14 +108,15 @@ export const ClientSchedule = () => {
 
         const borderMap: Record<string, string> = {};
         const dotMap: Record<string, string> = {};
+        const dateToSchedulesMap: Record<string, any[]> = {};
 
-        const markDate = (date: Date, borderColor: string | null, dotColor: string) => {
+        const markDate = (date: Date, schedule: any, borderColor: string | null, dotColor: string) => {
             const key = date.toISOString().split('T')[0];
-            if (borderColor) {
-                borderMap[key] = borderColor;
-            }
-            if (dotMap[key] !== '#00C5AE') {
-                dotMap[key] = dotColor;
+            if (borderColor) borderMap[key] = borderColor;
+            if (dotMap[key] !== '#00C5AE') dotMap[key] = dotColor;
+            if (!dateToSchedulesMap[key]) dateToSchedulesMap[key] = [];
+            if (!dateToSchedulesMap[key].some((s: any) => s._id === schedule._id)) {
+                dateToSchedulesMap[key].push(schedule);
             }
         };
 
@@ -123,20 +130,21 @@ export const ClientSchedule = () => {
                 const end = new Date(schedule.endDate);
                 start.setHours(0, 0, 0, 0);
                 end.setHours(0, 0, 0, 0);
-                getDatesBetween(start, end).forEach((date) => markDate(date, borderColor, dotColor));
+                getDatesBetween(start, end).forEach((date) => markDate(date, schedule, borderColor, dotColor));
             } else if (schedule.startDate) {
                 const start = new Date(schedule.startDate);
                 start.setHours(0, 0, 0, 0);
-                markDate(start, borderColor, dotColor);
+                markDate(start, schedule, borderColor, dotColor);
             } else if (schedule.endDate) {
                 const end = new Date(schedule.endDate);
                 end.setHours(0, 0, 0, 0);
-                markDate(end, borderColor, dotColor);
+                markDate(end, schedule, borderColor, dotColor);
             }
         });
 
         setEventDateBorders(borderMap);
         setEventDateDots(dotMap);
+        setDateToSchedules(dateToSchedulesMap);
     }, [calendarSchedules, userData]);
 
     // Функция для получения всех дат между startDate и endDate
@@ -157,7 +165,7 @@ export const ClientSchedule = () => {
 
     useEffect(() => {
         fetchSchedules();
-    }, [showAllEvents]);
+    }, [showAllEvents, selectedDateFromCalendar, dateToSchedules]);
 
     const fetchSchedules = async () => {
         try {
@@ -172,16 +180,12 @@ export const ClientSchedule = () => {
                 if (showAllEvents) {
                     setSchedules(response.data.data);
                 } else {
-                    // Получаем все schedule с priority === true
                     const prioritySchedules = response.data.data.filter((schedule: any) => schedule.priority === true);
-                    // Получаем те, у которых priority === false и дата события не больше недели от today
                     const oneWeekLater = new Date(today);
                     oneWeekLater.setDate(today.getDate() + 7);
 
                     const normalSchedules = response.data.data.filter((schedule: any) => {
                         if (schedule.priority === true) return false;
-                        
-                        // Проверяем startDate, endDate, eventDate на попадание в диапазон
                         const datesToCheck: (string | undefined)[] = [schedule.startDate, schedule.endDate];
                         return datesToCheck.some(dateString => {
                             if (!dateString) return false;
@@ -191,8 +195,19 @@ export const ClientSchedule = () => {
                         });
                     });
 
-                    // Сортируем по дате (startDate)
-                    const allSchedules = [...prioritySchedules, ...normalSchedules];
+                    let allSchedules = [...prioritySchedules, ...normalSchedules];
+                    // Добавляем события с выбранной даты в календаре (даже если далеко и не приоритетные)
+                    if (selectedDateFromCalendar) {
+                        const dateKey = selectedDateFromCalendar.toISOString().split('T')[0];
+                        const clickedDateSchedules = dateToSchedules[dateKey] || [];
+                        const existingIds = new Set(allSchedules.map((s: any) => s._id));
+                        clickedDateSchedules.forEach((s: any) => {
+                            if (!existingIds.has(s._id)) {
+                                allSchedules.push(s);
+                                existingIds.add(s._id);
+                            }
+                        });
+                    }
                     allSchedules.sort((a: any, b: any) => {
                         const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
                         const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
@@ -224,6 +239,15 @@ export const ClientSchedule = () => {
         toast.success('Ссылка на событие скопирована!');
     }
 
+    useEffect(() => {
+        if (!scrollToScheduleId) return;
+        const el = scheduleRefsMap.current.get(scrollToScheduleId);
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setScrollToScheduleId(null);
+        }
+    }, [scrollToScheduleId, schedules]);
+
     const handleParticipatingChange = async () => {
         if (userData) {
             const scheduleId = selectedSchedule._id;
@@ -254,18 +278,17 @@ export const ClientSchedule = () => {
         <div className="mt-3 pb-10 lg:flex lg:gap-x-4">
             <div className="lg:basis-1/3">
                 <DateRangeCalendar 
-                    onDateRangeSelect={handleDateRangeSelect}
-                    selectedStartDate={null}
-                    selectedEndDate={null}
+                    onDateClick={handleDateClick}
                     eventDateBorders={eventDateBorders}
                     eventDateDots={eventDateDots}
+                    selectedDate={selectedDateFromCalendar}
                 />
             </div>
             <div className="lg:basis-2/3">
                 <div className="mt-6 lg:mt-0 flex items-center justify-between">
                     <div className="text-white/60">{new Date().toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })}</div>
                     <div className="flex items-center gap-x-3">
-                        <div className="text-white/60">Все меропрития</div>
+                        <div className="text-white/60">Все мероприятия</div>
                         <Switch
                             checked={showAllEvents}
                             onChange={() => setShowAllEvents(!showAllEvents)}
@@ -276,6 +299,7 @@ export const ClientSchedule = () => {
                     {schedules.length > 0 && schedules.map((schedule: any) => (
                         <div 
                             key={schedule._id}
+                            ref={(el) => { if (el) scheduleRefsMap.current.set(schedule._id, el); else scheduleRefsMap.current.delete(schedule._id); }}
                             className="bg-[#114E50] rounded-lg p-4 cursor-pointer hover:bg-[#3a3a3a] transition-colors"
                             onClick={() => handleScheduleClick(schedule)}
                         >
@@ -313,12 +337,12 @@ export const ClientSchedule = () => {
                                 <X size={24} />
                             </button>
                             <div 
-                                className="[&_h3]:text-xl [&_h3]:font-bold [&_h3]:mb-2 [&_div]:mb-2 [&_span]:font-bold" 
+                                className="text-lg" 
                                 dangerouslySetInnerHTML={{ __html: selectedSchedule.eventTitle || 'Добавить в календарь' }} 
                             />
                             <div className="mt-4">
                                 {selectedSchedule.description && (
-                                    <p className="mb-2" dangerouslySetInnerHTML={{ __html: selectedSchedule.description || '' }}></p>
+                                    <p className="mb-2 text-[15px]" dangerouslySetInnerHTML={{ __html: selectedSchedule.description || '' }}></p>
                                 )}
                                 {selectedSchedule.startDate && (
                                     <p className="text-sm text-white/60">
@@ -410,12 +434,12 @@ export const ClientSchedule = () => {
                                 <X size={24} />
                             </button>
                             <div 
-                                className="[&_h3]:text-xl [&_h3]:font-bold [&_h3]:mb-2 [&_div]:mb-2 [&_span]:font-bold" 
+                                className="text-lg" 
                                 dangerouslySetInnerHTML={{ __html: selectedSchedule.eventTitle || 'Добавить в календарь' }} 
                             />
                             <div className="mt-4">
                                 {selectedSchedule.description && (
-                                    <p className="mb-2" dangerouslySetInnerHTML={{ __html: selectedSchedule.description || '' }}></p>
+                                    <p className="mb-2 text-[15px]" dangerouslySetInnerHTML={{ __html: selectedSchedule.description || '' }}></p>
                                 )}
                                 {selectedSchedule.startDate && (
                                     <p className="text-sm text-white/60">

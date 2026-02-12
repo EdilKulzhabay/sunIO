@@ -20,7 +20,8 @@ import {
     Target,
     Brain,
     Compass,
-    Navigation
+    Navigation,
+    Gift
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -49,6 +50,7 @@ const contentCards = [
     { title: 'О клубе', icon: Info, path: '/admin/about-club', color: 'bg-cyan-600', description: 'Контент на странице О клубе' },
     { title: 'Начало путешествия', icon: Compass, path: '/admin/beggining-journey', color: 'bg-sky-500', description: 'Контент начала путешествия' },
     { title: 'Описания навигатора', icon: Navigation, path: '/admin/navigator-descriptions', color: 'bg-blue-600', description: 'Управление описаниями навигатора' },
+    { title: 'Политика начисления баллов', icon: Gift, path: '/admin/points-awarding-policy', color: 'bg-amber-600', description: 'Политика начисления баллов' },
 ];
 
 export const Main = () => {

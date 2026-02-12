@@ -44,7 +44,7 @@ const parseDateTimeLocal = (dateTimeString) => {
 export const create = async (req, res) => {
     try {
         const user = req.user;
-        const { eventTitle, startDate, endDate, eventLink, googleCalendarLink, appleCalendarLink, description } = req.body;
+        const { eventTitle, startDate, endDate, eventLink, googleCalendarLink, appleCalendarLink, description, priority } = req.body;
 
         // if (!eventTitle || !startDate || !endDate || !description) {
         //     return res.status(400).json({
@@ -80,6 +80,7 @@ export const create = async (req, res) => {
             googleCalendarLink,
             appleCalendarLink,
             description,
+            priority: priority === true || priority === 'true',
         });
 
         await schedule.save();

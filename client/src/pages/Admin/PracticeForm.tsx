@@ -9,6 +9,8 @@ import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import api from '../../api';
 import { toast } from 'react-toastify';
 import { REDIRECT_TO_PAGE_OPTIONS } from '../../constants/redirectToPageOptions';
+import { ContentLinkButtonEditor } from '../../components/Admin/ContentLinkButtonEditor';
+import type { LinkButtonValue } from '../../components/Admin/ContentLinkButtonEditor';
 
 interface ContentItem {
     type: 'video' | 'text' | 'image';
@@ -19,6 +21,8 @@ interface ContentItem {
     };
     text?: string;
     image?: string;
+    linkButton?: LinkButtonValue | null;
+    visibility?: boolean;
 }
 
 interface FormData {
@@ -85,6 +89,14 @@ export const PracticeForm = () => {
                     },
                     text: item?.text || '',
                     image: item?.image || '',
+                    linkButton: item?.linkButton?.linkButtonText || item?.linkButton?.linkButtonLink
+                        ? {
+                            linkButtonText: item?.linkButton?.linkButtonText || null,
+                            linkButtonLink: item?.linkButton?.linkButtonLink || null,
+                            linkButtonType: item?.linkButton?.linkButtonType || 'internal',
+                        }
+                        : null,
+                    visibility: item?.visibility !== false,
                 };
             });
             setFormData({
@@ -149,10 +161,28 @@ export const PracticeForm = () => {
                 type, 
                 video: { mainUrl: '', reserveUrl: '', duration: 0 },
                 text: '', 
-                image: '' 
+                image: '',
+                linkButton: null,
+                visibility: true,
             }]
         }));
         setShowTypePicker(false);
+    };
+
+    const handleLinkButtonChange = (index: number, value: LinkButtonValue | null) => {
+        setFormData(prev => {
+            const newContent = [...prev.content];
+            newContent[index] = { ...newContent[index], linkButton: value };
+            return { ...prev, content: newContent };
+        });
+    };
+
+    const handleVisibilityChange = (index: number, value: boolean) => {
+        setFormData(prev => {
+            const newContent = [...prev.content];
+            newContent[index] = { ...newContent[index], visibility: value };
+            return { ...prev, content: newContent };
+        });
     };
 
     const removeContentItem = (index: number) => {
@@ -246,13 +276,13 @@ export const PracticeForm = () => {
                                 <option value="free">Бесплатно</option>
                                 <option value="paid">Платно</option>
                                 <option value="subscription">Подписка</option>
-                                <option value="stars">Звёзды</option>
+                                <option value="stars">Баллы</option>
                             </select>
                         </div>
 
                         {formData.accessType === 'stars' && (
                             <MyInput
-                                label="Стоимость в звёздах"
+                                label="Стоимость в баллах"
                                 type="number"
                                 value={String(formData.starsRequired)}
                                 onChange={(e) => setFormData({ ...formData, starsRequired: Number(e.target.value) || 0 })}
@@ -364,6 +394,18 @@ export const PracticeForm = () => {
                                             </select>
                                         </div>
 
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-sm font-medium">Видимость</label>
+                                            <select
+                                                value={item.visibility !== false ? 'true' : 'false'}
+                                                onChange={(e) => handleVisibilityChange(index, e.target.value === 'true')}
+                                                className="w-full p-2 rounded-md border border-gray-300"
+                                            >
+                                                <option value="true">Показывать</option>
+                                                <option value="false">Скрывать</option>
+                                            </select>
+                                        </div>
+
                                         {item.type === 'video' && (
                                             <>
                                                 <MyInput
@@ -409,6 +451,12 @@ export const PracticeForm = () => {
                                                 />
                                             </div>
                                         )}
+
+                                        <ContentLinkButtonEditor
+                                            value={item.linkButton ?? null}
+                                            onChange={(v) => handleLinkButtonChange(index, v)}
+                                            onClear={item.linkButton ? () => handleLinkButtonChange(index, null) : undefined}
+                                        />
                                     </div>
                                 </div>
                             ))}

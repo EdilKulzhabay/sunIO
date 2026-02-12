@@ -129,7 +129,7 @@ export const ClientPerfomance = () => {
             className='min-h-screen px-4 pb-6 flex flex-col justify-between lg:justify-start'
         >
             <div style={{ height: `${screenHeight/3}px` }} className='flex justify-center items-end'>
-                <img src={sunWithHands} alt="Sun with Hands" className='object-cover h-[175px] w-[175px] mb-10' />
+                <img src={sunWithHands} alt="Sun with Hands" className='object-cover h-[175px] w-[175px] mb-5' />
             </div>
             {error && (
                 <div className='flex-1 lg:flex-0 lg:w-[700px] lg:mx-auto'>

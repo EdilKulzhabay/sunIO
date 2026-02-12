@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import api from "../../api";
 import { UserLayout } from "./UserLayout";
 import { BackNav } from "./BackNav";
@@ -119,13 +120,17 @@ const getRuTubeEmbedUrl = (url: string): string => {
     return url;
 };
 
-const defaultNormalizeContent = (data: any): NormalizedContent => ({
-    title: data?.title || "",
-    shortDescription: data?.shortDescription || "",
-    content: data?.content || [],
-    duration: data?.duration || 0,
-    accessType: data?.accessType || "subscription",
-});
+const defaultNormalizeContent = (data: any): NormalizedContent => {
+    const rawContent = data?.content || [];
+    const content = rawContent.filter((item: any) => item?.visibility !== false);
+    return {
+        title: data?.title || "",
+        shortDescription: data?.shortDescription || "",
+        content,
+        duration: data?.duration || 0,
+        accessType: data?.accessType || "subscription",
+    };
+};
 
 export const UnifiedVideoContentPage = ({
     contentType,
@@ -324,15 +329,50 @@ export const UnifiedVideoContentPage = ({
                     {content.content.length > 0 && content.content.map((item: any, index: number) => {
                         const itemKey = item?._id || `item-${index}`;
                         const videoKey = `${id}-${itemKey}`;
-                        
+                        const lb = item?.linkButton;
+                        const hasLinkButton = lb?.linkButtonText && lb?.linkButtonLink;
+
+                        const renderLinkButton = () =>
+                            hasLinkButton ? (
+                                <div className="mt-4">
+                                    {lb.linkButtonType === "external" ? (
+                                        <a
+                                            href={lb.linkButtonLink}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-block px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
+                                        >
+                                            {lb.linkButtonText}
+                                        </a>
+                                    ) : (
+                                        <Link
+                                            to={lb.linkButtonLink}
+                                            className="inline-block px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
+                                        >
+                                            {lb.linkButtonText}
+                                        </Link>
+                                    )}
+                                </div>
+                            ) : null;
+
                         // Текстовый контент
                         if (item.text !== null && item.text !== undefined && item.text !== "") {
-                            return <p key={itemKey} className="mt-6" dangerouslySetInnerHTML={{ __html: item.text }}></p>
+                            return (
+                                <div key={itemKey}>
+                                    <p className="mt-6" dangerouslySetInnerHTML={{ __html: item.text }}></p>
+                                    {renderLinkButton()}
+                                </div>
+                            );
                         }
-                        
+
                         // Изображение
                         if (item.image !== null && item.image !== undefined && item.image !== "") {
-                            return <img key={itemKey} src={`${import.meta.env.VITE_API_URL}${item.image}`} alt={item.title} className="mt-6" />
+                            return (
+                                <div key={itemKey}>
+                                    <img src={`${import.meta.env.VITE_API_URL}${item.image}`} alt={content.title} className="mt-6" />
+                                    {renderLinkButton()}
+                                </div>
+                            );
                         }
                         
                         // Видео контент (новая структура: item.video.mainUrl, item.video.reserveUrl, item.video.duration)
@@ -352,8 +392,9 @@ export const UnifiedVideoContentPage = ({
 
                         if (videoInfo.type === "kinescope") {
                             return (
-                                <div key={itemKey} className="mt-6 w-full">
-                                    <SecureKinescopePlayer
+                                <div key={itemKey}>
+                                    <div className="mt-6 w-full">
+                                        <SecureKinescopePlayer
                                         videoId={videoInfo.id}
                                         title={`${content.title} - ${index + 1}`}
                                         showPoster={false}
@@ -366,6 +407,8 @@ export const UnifiedVideoContentPage = ({
                                         onDurationChange={createKinescopeDurationHandler(videoKey)}
                                         disableProgressSave={true}
                                     />
+                                    </div>
+                                    {renderLinkButton()}
                                 </div>
                             );
                         }
@@ -375,7 +418,8 @@ export const UnifiedVideoContentPage = ({
                             if (!rutubeEmbedUrl || !videoInfo.id || videoInfo.id === "private" || videoInfo.id.length === 0) {
                                 if (originalVideoInfo.type === "youtube") {
                                     return (
-                                        <div key={itemKey} className="mt-6">
+                                        <div key={itemKey}>
+                                        <div className="mt-6">
                                             <div className="relative w-full rounded-lg overflow-hidden" style={{ paddingBottom: "56.25%" }}>
                                                 <iframe
                                                     src={`${getYouTubeEmbedUrl(mainUrl)}?enablejsapi=1`}
@@ -387,13 +431,16 @@ export const UnifiedVideoContentPage = ({
                                                 />
                                             </div>
                                         </div>
+                                        {renderLinkButton()}
+                                        </div>
                                     );
                                 }
                                 return null;
                             }
 
                             return (
-                                <div key={itemKey} className="mt-6">
+                                <div key={itemKey}>
+                                <div className="mt-6">
                                     <div className="relative w-full rounded-lg overflow-hidden" style={{ paddingBottom: "56.25%" }}>
                                         <iframe
                                             src={rutubeEmbedUrl}
@@ -405,12 +452,15 @@ export const UnifiedVideoContentPage = ({
                                         />
                                     </div>
                                 </div>
+                                {renderLinkButton()}
+                                </div>
                             );
                         }
 
                         // YouTube по умолчанию
                         return (
-                            <div key={itemKey} className="mt-6">
+                            <div key={itemKey}>
+                            <div className="mt-6">
                                 <div className="relative w-full rounded-lg overflow-hidden" style={{ paddingBottom: "56.25%" }}>
                                     <iframe
                                         src={`${getYouTubeEmbedUrl(videoUrl)}?enablejsapi=1`}
@@ -421,6 +471,8 @@ export const UnifiedVideoContentPage = ({
                                         onLoad={() => handleYouTubeRuTubeLoad(videoKey, videoDurationSeconds)}
                                     />
                                 </div>
+                            </div>
+                            {renderLinkButton()}
                             </div>
                         );
                     })}

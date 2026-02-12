@@ -13,6 +13,7 @@ export const About = () => {
     const [content, setContent] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
+    const [dinamycContent, setDinamycContent] = useState<any>(null);
     // const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
     // const [showPaymentModal, setShowPaymentModal] = useState(false);
     // const [familiatizaedWithOffer, setFamiliatizaedWithOffer] = useState(false);
@@ -67,6 +68,13 @@ export const About = () => {
     //     }
     // }
 
+    const fetchDinamycContent = async () => {
+        const response = await api.get(`/api/dynamic-content/name/about-club`);
+        if (response.data.success) {
+            setDinamycContent(response.data.data);
+        }
+    }
+
     useEffect(() => {
         setLoading(true);
         const fetchContent = async () => {
@@ -80,6 +88,7 @@ export const About = () => {
             }
         }
         fetchContent();
+        fetchDinamycContent();
     }, []);
 
     if (loading) {
@@ -130,7 +139,7 @@ export const About = () => {
                     <div className='relative lg:w-[700px] lg:mx-auto z-20'>
                         <h1 className="text-2xl font-bold mt-4">{content?.title}</h1>
                         <p className="mt-4" dangerouslySetInnerHTML={{ __html: content?.content }} />
-                        <h2 className="text-xl font-medium mt-8">Что входит в подписку</h2>
+                        <h2 className="text-xl font-medium mt-4">Что входит в подписку</h2>
                         {content?.list.length > 0 && (
                             <div className='mt-4'>
                                 <MobileAccordionList items={content?.list} />
@@ -167,10 +176,9 @@ export const About = () => {
                                     <X size={24} />
                                 </button>
                                 
-                                <div className="mt-4">
+                                <div className="">
                                     <h3 className="text-xl font-bold mb-4">Вступить в клуб</h3>
-                                    <p className="mb-6 text-gray-300">
-                                    Клуб доступен только для выпускников 4-х дневных тренингов. Свяжитесь с нами и мы поможем вам стать частью нашего Сообщества
+                                    <p className="mb-6 text-gray-300" dangerouslySetInnerHTML={{ __html: dinamycContent?.content }}>
                                     </p>
                                     <MyLink 
                                         to="/client/contactus" 

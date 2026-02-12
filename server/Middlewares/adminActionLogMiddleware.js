@@ -56,6 +56,7 @@ export const adminActionLogMiddleware = (req, res, next) => {
             { prefix: '/api/dynamic-content', label: 'динамический контент' },
             { prefix: '/api/welcome', label: 'контент приветствия' },
             { prefix: '/api/about-club', label: 'информацию о клубе' },
+            { prefix: '/api/points-awarding-policy', label: 'политику начисления баллов' },
             { prefix: '/api/schumann', label: 'частоту Шумана' },
             { prefix: '/api/broadcast', label: 'рассылку' },
             { prefix: '/api/purpose-energy', label: 'энергию предназначения' },

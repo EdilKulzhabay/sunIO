@@ -405,8 +405,8 @@ export const ClientInvitedUsers = () => {
             </UserLayout>
 
             <BonusPolicyModal
-                isOpen={isBonusPolicyModalOpen} 
-                onClose={() => setIsBonusPolicyModalOpen(false)} 
+                isOpen={isBonusPolicyModalOpen}
+                onClose={() => setIsBonusPolicyModalOpen(false)}
             />
             
             {/* Модальное окно для редактирования имени */}

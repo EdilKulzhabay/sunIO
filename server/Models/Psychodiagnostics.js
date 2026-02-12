@@ -75,6 +75,12 @@ const PsychodiagnosticsSchema = new mongoose.Schema(
           trim: true,
           default: null,
         },
+        linkButton: {
+          linkButtonText: { type: String, trim: true, default: null },
+          linkButtonLink: { type: String, trim: true, default: null },
+          linkButtonType: { type: String, enum: ['internal', 'external'], default: 'internal' },
+        },
+        visibility: { type: Boolean, default: true },
       }
     ]
   },

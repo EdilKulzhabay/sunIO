@@ -497,7 +497,7 @@ export const ClientDiary = () => {
                                         value={diary.discovery}
                                         onChange={handleChange}
                                         className="w-full mt-1 bg-transparent text-white focus:outline-none focus:border-white/80 overflow-y-scroll"
-                                        placeholder="Что нового Вы осознали сегодня?"
+                                        placeholder="Какие осознания были сегодня?"
                                         rows={1}
                                         style={{
                                             minHeight: "2.5rem",
@@ -517,7 +517,7 @@ export const ClientDiary = () => {
                                         value={diary.achievement} 
                                         onChange={handleChange} 
                                         className="w-full mt-1 bg-transparent text-white focus:outline-none focus:border-white/80 overflow-y-scroll" 
-                                        placeholder="Что нового вы достигли сегодня?"
+                                        placeholder="Чего удалось достичь сегодня?"
                                         rows={1}
                                         style={{
                                             minHeight: "2.5rem",
@@ -537,7 +537,7 @@ export const ClientDiary = () => {
                                         value={diary.gratitude} 
                                         onChange={handleChange} 
                                         className="w-full mt-1 bg-transparent text-white focus:outline-none focus:border-white/80 overflow-y-scroll" 
-                                        placeholder="Какие цели Вы запланировали сегодня?"
+                                        placeholder="Какие цели хочу реализовать?"
                                         rows={1}
                                         style={{
                                             minHeight: "2.5rem",

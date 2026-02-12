@@ -195,6 +195,10 @@ export const ClientTasks = () => {
                             <p className="mt-1 text-center text-white whitespace-pre-line">Пробуждение <br /> Духа</p>
                         </div>
                     </div>
+
+                    <div className="mt-6">
+                        <p className="text-white">Позже здесь появятся задания, которые помогут вам пройти по оптимальному пути Активации.</p>
+                    </div>
                 </div>
             </UserLayout>
         </div>

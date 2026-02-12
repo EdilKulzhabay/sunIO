@@ -6,51 +6,54 @@ import { Plus } from 'lucide-react';
 import api from '../../api';
 import { toast } from 'react-toastify';
 
-export const PracticeAdmin = () => {
+export const PointsAwardingPolicyAdmin = () => {
     const navigate = useNavigate();
-    const [practices, setPractices] = useState([]);
+    const [policies, setPolicies] = useState([]);
 
     useEffect(() => {
-        fetchPractices();
+        fetchPolicies();
     }, []);
 
-    const fetchPractices = async () => {
+    const fetchPolicies = async () => {
         try {
-            const response = await api.get('/api/practice');
-            setPractices(response.data.data);
+            const response = await api.get('/api/points-awarding-policy');
+            setPolicies(response.data.data);
         } catch (error: any) {
-            toast.error('Ошибка загрузки практик');
+            toast.error('Ошибка загрузки политик');
         }
     };
 
     const handleCreate = () => {
-        navigate('/admin/practice/create');
+        navigate('/admin/points-awarding-policy/create');
     };
 
     const handleEdit = (item: any) => {
-        navigate(`/admin/practice/edit/${item._id}`);
+        navigate(`/admin/points-awarding-policy/edit/${item._id}`);
     };
 
     const handleDelete = async (item: any) => {
-        if (!confirm('Вы уверены, что хотите удалить эту практику?')) return;
+        if (!confirm('Вы уверены, что хотите удалить эту политику?')) return;
 
         try {
-            await api.delete(`/api/practice/${item._id}`);
-            toast.success('Практика удалена');
-            fetchPractices();
+            await api.delete(`/api/points-awarding-policy/${item._id}`);
+            toast.success('Политика удалена');
+            fetchPolicies();
         } catch (error: any) {
             toast.error('Ошибка удаления');
         }
     };
 
     const columns = [
-        { key: 'title', label: 'Название' },
-        { key: 'order', label: 'Порядок' },
-        { key: 'accessType', label: 'Доступ' },
-        { 
-            key: 'allowRepeatBonus', 
-            label: 'Повторные баллы',
-            render: (value: boolean) => value ? 'Да' : 'Нет'
+        { key: 'title', label: 'Заголовок' },
+        {
+            key: 'list',
+            label: 'Элементов в списке',
+            render: (value: any[]) => value ? value.length : 0
+        },
+        {
+            key: 'createdAt',
+            label: 'Создан',
+            render: (value: string) => new Date(value).toLocaleDateString('ru-RU')
         },
     ];
 
@@ -58,19 +61,19 @@ export const PracticeAdmin = () => {
         <AdminLayout>
             <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-bold text-gray-900">Практики</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Политика начисления баллов</h1>
                     <button
                         onClick={handleCreate}
                         className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
                         <Plus size={20} />
-                        Добавить практику
+                        Добавить политику
                     </button>
                 </div>
 
                 <AdminTable
                     columns={columns}
-                    data={practices}
+                    data={policies}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                 />
@@ -78,4 +81,3 @@ export const PracticeAdmin = () => {
         </AdminLayout>
     );
 };
-

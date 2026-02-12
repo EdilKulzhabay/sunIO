@@ -253,7 +253,7 @@ export const UserForm = () => {
                         />
 
                         <MyInput
-                            label="Количество бонусов (Звёзды)"
+                            label="Количество бонусов (Баллы)"
                             type="text"
                             value={formData.bonus.toString()}
                             onChange={(e) => {
@@ -401,13 +401,13 @@ export const UserForm = () => {
                     {/* Активации */}
                     {id && (
                         <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
-                            <h2 className="text-xl font-semibold text-gray-900">Активации</h2>
+                            <h2 className="text-xl font-semibold text-gray-900">Пройденные программы</h2>
                             
                             {([
                                 { key: 'bodyActivation' as const, label: 'Активация тела' },
-                                { key: 'heartActivation' as const, label: 'Активация сердца' },
-                                { key: 'healingFamily' as const, label: 'Исцеление рода' },
-                                { key: 'awakeningSpirit' as const, label: 'Пробуждение духа' },
+                                { key: 'heartActivation' as const, label: 'Активация здоровья' },
+                                { key: 'healingFamily' as const, label: 'Исцеление Рода' },
+                                { key: 'awakeningSpirit' as const, label: 'Пробуждение Духа' },
                             ]).map(({ key, label }) => (
                                 <label key={key} className="flex items-center gap-3 cursor-pointer">
                                     <input

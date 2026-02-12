@@ -237,7 +237,7 @@ export const ClientAnalysisRealizationList = () => {
             <UserLayout>
             <div className="flex items-center justify-between p-4">
                     <div className="flex items-center">
-                        <h1 className="text-2xl font-semibold ml-4">Разборы — Реализация</h1>
+                        <h1 className="text-2xl font-semibold ml-2">Разборы — Реализация</h1>
                     </div>
                     <div className="md:hidden">
                         <button 

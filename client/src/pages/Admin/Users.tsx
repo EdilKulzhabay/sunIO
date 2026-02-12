@@ -229,7 +229,7 @@ export const UsersAdmin = () => {
         },
         { 
             key: 'bonus', 
-            label: 'Звёзды',
+            label: 'Баллы',
             sortable: true
         },
         { 
@@ -392,7 +392,7 @@ export const UsersAdmin = () => {
                             }`}
                         >
                             <ArrowUpDown size={16} />
-                            Звёзды
+                            Баллы
                             {sortField === 'bonus' && (sortDirection === 'asc' ? ' ↑' : ' ↓')}
                         </button>
                         <button

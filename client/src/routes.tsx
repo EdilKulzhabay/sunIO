@@ -44,6 +44,8 @@ import { BegginingJourneyAdmin } from "./pages/Admin/BegginingJourney";
 import { BegginingJourneyForm } from "./pages/Admin/BegginingJourneyForm";
 import { NavigatorDescriptionsAdmin } from "./pages/Admin/NavigatorDescriptions";
 import { NavigatorDescriptionsForm } from "./pages/Admin/NavigatorDescriptionsForm";
+import { PointsAwardingPolicyAdmin } from "./pages/Admin/PointsAwardingPolicy";
+import { PointsAwardingPolicyForm } from "./pages/Admin/PointsAwardingPolicyForm";
 import { UsersAdmin } from "./pages/Admin/Users";
 import { UserForm } from "./pages/Admin/UserForm";
 import { ProfileAdmin } from "./pages/Admin/Profile";
@@ -567,6 +569,18 @@ export const routes = createBrowserRouter([
     {
         path: "/admin/navigator-descriptions/edit/:id",
         element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><NavigatorDescriptionsForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/points-awarding-policy",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><PointsAwardingPolicyAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/points-awarding-policy/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><PointsAwardingPolicyForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/points-awarding-policy/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><PointsAwardingPolicyForm /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/admin/users",

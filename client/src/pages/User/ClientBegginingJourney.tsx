@@ -106,7 +106,7 @@ export const ClientBegginingJourney = () => {
                     <div>
                         <RedButton 
                             text={'Далее'} 
-                            onClick={() => navigate('/main')} 
+                            onClick={() => navigate('/client/ease-launch')} 
                             className='w-full mt-4'
                         />
                     </div>

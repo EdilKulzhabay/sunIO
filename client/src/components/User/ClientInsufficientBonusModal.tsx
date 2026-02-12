@@ -1,6 +1,7 @@
 import { X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import star from '../../assets/star.png';
+import api from '../../api';
 
 interface ClientInsufficientBonusModalProps {
     isOpen: boolean;
@@ -10,10 +11,10 @@ interface ClientInsufficientBonusModalProps {
     contentTitle: string;
 }
 
-export const BonusPolicyModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+export const BonusPolicyModal = ({ isOpen, onClose, pointsAwardingPolicy }: { isOpen: boolean; onClose: () => void; pointsAwardingPolicy?: any }) => {
     if (!isOpen) return null;
 
-    const policies = [
+    const policies = pointsAwardingPolicy?.list || [
         { id: 1, title: 'Регистрация в приложении', subtitle: '10 Солнц' },
         { id: 2, title: 'Приглашение друга по ссылке', subtitle: '2 Солнца' },
         { id: 3, title: 'Заполнение дневника осознаний', subtitle: '2 Солнца (1 Солнце за дневник, 1 Солнце за упражнение)' },
@@ -45,11 +46,11 @@ export const BonusPolicyModal = ({ isOpen, onClose }: { isOpen: boolean; onClose
                     
                     <div className="">
                         <div className='flex items-center gap-x-3 mb-4'>
-                            <h3 className="text-xl font-bold">Как это работает?</h3>
+                            <h3 className="text-xl font-bold">{pointsAwardingPolicy?.title || 'Как это работает?'}</h3>
                         </div>
                         
                         <div className="space-y-4 mb-6">
-                            {policies.map((policy) => (
+                            {policies.map((policy: any) => (
                                 <div key={policy.id} className="">
                                     <p className="text-white font-medium">{policy.title}</p>
                                     <p className='mt-1 text-sm'>{policy.subtitle}</p>
@@ -93,11 +94,11 @@ export const BonusPolicyModal = ({ isOpen, onClose }: { isOpen: boolean; onClose
                     <div className="mt-4">
                     <div className='flex items-center gap-x-3 mb-5'>
                             <img src={star} alt="star icon" className='w-6 h-6' />
-                            <h3 className="text-2xl font-bold">Как это работает?</h3>
+                            <h3 className="text-2xl font-bold">{pointsAwardingPolicy?.title || 'Как это работает?'}</h3>
                         </div>
                         
                         <div className="space-y-4 mb-6">
-                            {policies.map((policy) => (
+                            {policies.map((policy: any) => (
                                 <div key={policy.id} className="">
                                     <p className="text-white font-medium text-lg">{policy.title}</p>
                                     <p className='mt-1'>{policy.subtitle}</p>
@@ -128,6 +129,17 @@ export const ClientInsufficientBonusModal = ({
     contentTitle,
 }: ClientInsufficientBonusModalProps) => {
     const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
+    const [pointsAwardingPolicy, setPointsAwardingPolicy] = useState<any>(null);
+    const fetchPointsAwardingPolicy = async () => {
+        const response = await api.get('/api/points-awarding-policy');
+        if (response.data.success) {
+            setPointsAwardingPolicy(response.data.data[0]);
+        }
+    }
+
+    useEffect(() => {
+        fetchPointsAwardingPolicy();
+    }, []);
 
     // Сбрасываем состояние второго модального окна при закрытии основного
     useEffect(() => {
@@ -153,7 +165,7 @@ export const ClientInsufficientBonusModal = ({
 
     return (
         <>
-            <BonusPolicyModal isOpen={isPolicyModalOpen} onClose={handlePolicyModalClose} />
+            <BonusPolicyModal isOpen={isPolicyModalOpen} onClose={handlePolicyModalClose} pointsAwardingPolicy={pointsAwardingPolicy || null} />
             {isOpen && !isPolicyModalOpen && (
             <div className="fixed inset-0 z-50 overflow-y-auto">
             {/* Мобильная версия: модальное окно снизу */}

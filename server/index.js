@@ -36,7 +36,8 @@ import {
     AnalysisRealizationController,
     PsychodiagnosticsController,
     BegginingJourneyController,
-    NavigatorDescriptionsController
+    NavigatorDescriptionsController,
+    PointsAwardingPolicyController
 } from "./Controllers/index.js";
 import { authMiddleware } from "./Middlewares/authMiddleware.js";
 import { adminActionLogMiddleware } from "./Middlewares/adminActionLogMiddleware.js";
@@ -339,6 +340,13 @@ app.get("/api/about-club", AboutClubController.getAll);
 app.get("/api/about-club/:id", AboutClubController.getById);
 app.put("/api/about-club/:id", authMiddleware, AboutClubController.update);
 app.delete("/api/about-club/:id", authMiddleware, AboutClubController.remove);
+
+// ==================== PointsAwardingPolicy маршруты ====================
+app.post("/api/points-awarding-policy", createContentRateLimit, authMiddleware, PointsAwardingPolicyController.create);
+app.get("/api/points-awarding-policy", PointsAwardingPolicyController.getAll);
+app.get("/api/points-awarding-policy/:id", PointsAwardingPolicyController.getById);
+app.put("/api/points-awarding-policy/:id", authMiddleware, PointsAwardingPolicyController.update);
+app.delete("/api/points-awarding-policy/:id", authMiddleware, PointsAwardingPolicyController.remove);
 
 // ==================== Broadcast маршруты ====================
 app.post("/api/broadcast/users", BroadcastController.getFilteredUsers);

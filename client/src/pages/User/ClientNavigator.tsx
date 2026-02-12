@@ -7,6 +7,7 @@ import navigatorMobile from "../../assets/navigatorMobile.jpg"
 import navigatorDesktop from "../../assets/navigatorDesktop.png"
 import { Switch } from "../../components/User/Switch"
 import { useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import navigatorConsciousnessLibrary from "../../assets/navigatorConsciousnessLibrary.png"
 import navigatorRelationshipWorkshop from "../../assets/navigatorRelationshipWorkshop.png"
 import navigatorSpiritForge from "../../assets/navigatorSpiritForge.png"
@@ -278,16 +279,16 @@ export const ClientNavigator = () => {
                                 ))}
                             </div>
 
-                            <a 
+                            <Link
                                 className="block bg-[#C4841D] text-white py-2.5 text-center font-medium rounded-full mt-4 w-full" 
-                                href={selectedContent.link}
+                                to={selectedContent.link}
                             >
                                 <p>Перейти</p>
-                            </a>
+                            </Link>
                         </div>
                     </div>
                 </div>
             )}
-        </UserLayout>
+        </UserLayout>  
     )
 }

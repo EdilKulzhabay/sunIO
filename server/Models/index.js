@@ -20,6 +20,7 @@ import AnalysisRealization from './AnalysisRealization.js';
 import Psychodiagnostics from './Psychodiagnostics.js';
 import BegginingJourney from './BegginingJourney.js';
 import NavigatorDescriptions from './NavigatorDescriptions.js';
+import PointsAwardingPolicy from './PointsAwardingPolicy.js';
 
 export {
     User,
@@ -43,5 +44,6 @@ export {
     AnalysisRealization,
     Psychodiagnostics,
     BegginingJourney,
-    NavigatorDescriptions
+    NavigatorDescriptions,
+    PointsAwardingPolicy
 };

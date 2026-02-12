@@ -3,9 +3,18 @@ import { MyLink } from '../../components/User/MyLink';
 import easeLaunch from '../../assets/easeLaunch.png';
 import { useState, useEffect } from 'react';
 import logo from '../../assets/logo.png';
+import api from '../../api';
 
 export const EaseLaunch = () => {
     const [screenHeight, setScreenHeight] = useState<number>(0);
+    const [dinamycLink, setDinamycLink] = useState<string>('');
+
+    const fetchDinamycLink = async () => {
+        const response = await api.get(`/api/dynamic-content/name/ease-launch-download-instruction`);
+        if (response.data.success) {
+            setDinamycLink(response.data.data);
+        }
+    }
 
     useEffect(() => {
         const updateScreenHeight = () => {
@@ -17,6 +26,7 @@ export const EaseLaunch = () => {
 
         // Получаем высоту при монтировании компонента
         updateScreenHeight();
+        fetchDinamycLink();
 
         // Обновляем при изменении размера окна
         window.addEventListener('resize', updateScreenHeight);
@@ -50,7 +60,7 @@ export const EaseLaunch = () => {
             
             <div className='bg-[#031F23]'>
                 <a 
-                    href="https://drive.google.com/file/d/1AI8UwHC_BIZ3Rwi6MaP9Z04T-J6xFR03/view?usp=sharing"
+                    href={dinamycLink || 'https://drive.google.com/file/d/1mvJtPzDEQQCcDBlbiFNgLb2U2ArlcPZp/view?usp=sharing'}
                     target="_blank"
                     className='w-full mt-4 bg-white/10 block text-white py-2.5 text-center font-medium rounded-full'
                 >Открыть инструкцию</a>

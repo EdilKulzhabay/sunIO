@@ -50,7 +50,7 @@ export const VideoCard = ({ title, description, image, link, accessType, progres
                     </p>
                 </div>
                 <div className="mt-auto pt-2 flex items-center justify-between flex-shrink-0">
-                    <div className='w-[40%]'>
+                    <div className='w-[50%]'>
                         <div className='flex items-center justify-between'>
                             <p className='text-sm font-medium'>{progress}%</p>
                             <p className='text-sm font-medium'>{duration} мин.</p>
@@ -61,7 +61,7 @@ export const VideoCard = ({ title, description, image, link, accessType, progres
                     </div>
 
                     {accessType === 'free' && (
-                        <div className="w-[55%] flex items-center justify-center px-3 py-1.5 border border-[#00C5AE] rounded-full cursor-pointer">
+                        <div className="w-[45%] flex items-center justify-center px-3 py-1.5 border border-[#00C5AE] rounded-full cursor-pointer">
                             <p className="text-[12px] text-[#00C5AE]">Перейти</p>
                             <img
                                 src={arrowRight}
@@ -71,7 +71,7 @@ export const VideoCard = ({ title, description, image, link, accessType, progres
                         </div>
                     )}
                     {accessType === 'stars' && (
-                        <div className="w-[55%] flex items-center justify-center px-3 py-1.5 border border-[#00C5AE] rounded-full cursor-pointer">
+                        <div className="w-[45%] flex items-center justify-center px-3 py-1.5 border border-[#00C5AE] rounded-full cursor-pointer">
                             <p className="text-[12px] text-[#00C5AE]">{starsRequired}</p>
                             <img
                                 src={star}
@@ -81,7 +81,7 @@ export const VideoCard = ({ title, description, image, link, accessType, progres
                         </div>
                     )}
                     {accessType === 'subscription' && (
-                        <div className="w-[55%] flex items-center justify-center px-3 py-1.5 border border-[#00C5AE] rounded-full cursor-pointer">
+                        <div className="w-[45%] flex items-center justify-center px-3 py-1.5 border border-[#00C5AE] rounded-full cursor-pointer">
                             <img
                                 src={needMoney}
                                 alt="needMoney"

@@ -11,6 +11,14 @@ export const ClientFAQ = () => {
     const [safeAreaTop, setSafeAreaTop] = useState(0);
     const [safeAreaBottom, setSafeAreaBottom] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [dinamycLink, setDinamycLink] = useState<string>('');
+
+    const fetchDinamycLink = async () => {
+        const response = await api.get(`/api/dynamic-content/name/faq-download-instruction`);
+        if (response.data.success) {
+            setDinamycLink(response.data.data);
+        }
+    }
 
     useEffect(() => {
         // Проверка на блокировку пользователя
@@ -28,6 +36,7 @@ export const ClientFAQ = () => {
         }
 
         fetchFaqs();
+        fetchDinamycLink();
     }, []);
 
     useEffect(() => {
@@ -92,7 +101,7 @@ export const ClientFAQ = () => {
                     </div>
                     <div className="mt-4">
                         <a 
-                            href="https://drive.google.com/file/d/1AI8UwHC_BIZ3Rwi6MaP9Z04T-J6xFR03/view?usp=sharing"
+                            href={dinamycLink || 'https://drive.google.com/file/d/1AI8UwHC_BIZ3Rwi6MaP9Z04T-J6xFR03/view?usp=drive_link'}
                             target="_blank"
                             className='w-full mt-4 bg-white/10 block text-white py-2.5 text-center font-medium rounded-full'
                         >Открыть инструкцию</a>

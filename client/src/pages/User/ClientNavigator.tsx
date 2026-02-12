@@ -238,12 +238,12 @@ export const ClientNavigator = () => {
                                 ))}
                             </div>
 
-                            <a 
+                            <Link
                                 className="block bg-[#C4841D] text-white py-2.5 text-center font-medium rounded-full mt-4 w-full" 
-                                href={selectedContent.link}
+                                to={selectedContent.link}
                             >
                                 <p>Перейти</p>
-                            </a>
+                            </Link>
                         </div>
                     </div>
                     {/* Десктопная версия: модальное окно по центру */}

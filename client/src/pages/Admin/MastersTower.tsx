@@ -13,7 +13,7 @@ export const MastersTowerAdmin = () => {
     useEffect(() => { fetchItems(); }, []);
 
     const fetchItems = async () => {
-        try { const response = await api.get('/api/masters-tower'); setItems(response.data.data); }
+        try { const response = await api.get('/api/masters-tower?admin=1'); setItems(response.data.data); }
         catch (error: any) { toast.error('Ошибка загрузки данных'); }
     };
 

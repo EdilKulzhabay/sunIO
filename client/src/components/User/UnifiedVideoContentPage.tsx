@@ -121,8 +121,7 @@ const getRuTubeEmbedUrl = (url: string): string => {
 };
 
 const defaultNormalizeContent = (data: any): NormalizedContent => {
-    const rawContent = data?.content || [];
-    const content = rawContent.filter((item: any) => item?.visibility !== false);
+    const content = data?.content || [];
     return {
         title: data?.title || "",
         shortDescription: data?.shortDescription || "",
@@ -332,7 +331,7 @@ export const UnifiedVideoContentPage = ({
                         const lb = item?.linkButton;
                         const hasLinkButton = lb?.linkButtonText && lb?.linkButtonLink;
 
-                        const renderLinkButton = () =>
+                        const renderLinkButtonBlock = () =>
                             hasLinkButton ? (
                                 <div className="mt-4">
                                     {lb.linkButtonType === "external" ? (
@@ -355,22 +354,32 @@ export const UnifiedVideoContentPage = ({
                                 </div>
                             ) : null;
 
+                        // Кнопка-ссылка (отдельный тип контента)
+                        const hasVideo = item?.video?.mainUrl || item?.video?.reserveUrl;
+                        const hasText = item.text !== null && item.text !== undefined && item.text !== "";
+                        const hasImage = item.image !== null && item.image !== undefined && item.image !== "";
+                        if (hasLinkButton && !hasVideo && !hasText && !hasImage) {
+                            return (
+                                <div key={itemKey}>
+                                    {renderLinkButtonBlock()}
+                                </div>
+                            );
+                        }
+
                         // Текстовый контент
-                        if (item.text !== null && item.text !== undefined && item.text !== "") {
+                        if (hasText) {
                             return (
                                 <div key={itemKey}>
                                     <p className="mt-6" dangerouslySetInnerHTML={{ __html: item.text }}></p>
-                                    {renderLinkButton()}
                                 </div>
                             );
                         }
 
                         // Изображение
-                        if (item.image !== null && item.image !== undefined && item.image !== "") {
+                        if (hasImage) {
                             return (
                                 <div key={itemKey}>
                                     <img src={`${import.meta.env.VITE_API_URL}${item.image}`} alt={content.title} className="mt-6" />
-                                    {renderLinkButton()}
                                 </div>
                             );
                         }
@@ -408,7 +417,6 @@ export const UnifiedVideoContentPage = ({
                                         disableProgressSave={true}
                                     />
                                     </div>
-                                    {renderLinkButton()}
                                 </div>
                             );
                         }
@@ -431,7 +439,6 @@ export const UnifiedVideoContentPage = ({
                                                 />
                                             </div>
                                         </div>
-                                        {renderLinkButton()}
                                         </div>
                                     );
                                 }
@@ -452,7 +459,6 @@ export const UnifiedVideoContentPage = ({
                                         />
                                     </div>
                                 </div>
-                                {renderLinkButton()}
                                 </div>
                             );
                         }
@@ -472,7 +478,6 @@ export const UnifiedVideoContentPage = ({
                                     />
                                 </div>
                             </div>
-                            {renderLinkButton()}
                             </div>
                         );
                     })}

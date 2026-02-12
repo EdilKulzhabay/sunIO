@@ -92,12 +92,12 @@ const PracticeSchema = new mongoose.Schema(
             default: 'internal',
           }
         },
-        visibility: {
-          type: Boolean,
-          default: true,
-        }
       }
-    ]
+    ],
+    visibility: {
+      type: Boolean,
+      default: true,
+    }
   },
   {
     timestamps: true,

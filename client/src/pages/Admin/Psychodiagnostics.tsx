@@ -13,7 +13,7 @@ export const PsychodiagnosticsAdmin = () => {
     useEffect(() => { fetchItems(); }, []);
 
     const fetchItems = async () => {
-        try { const response = await api.get('/api/psychodiagnostics'); setItems(response.data.data); }
+        try { const response = await api.get('/api/psychodiagnostics?admin=1'); setItems(response.data.data); }
         catch (error: any) { toast.error('Ошибка загрузки данных'); }
     };
 

@@ -13,7 +13,7 @@ export const ConsciousnessLibraryAdmin = () => {
     useEffect(() => { fetchItems(); }, []);
 
     const fetchItems = async () => {
-        try { const response = await api.get('/api/consciousness-library'); setItems(response.data.data); }
+        try { const response = await api.get('/api/consciousness-library?admin=1'); setItems(response.data.data); }
         catch (error: any) { toast.error('Ошибка загрузки данных'); }
     };
 

@@ -13,7 +13,7 @@ export const AnalysisRelationshipsAdmin = () => {
     useEffect(() => { fetchItems(); }, []);
 
     const fetchItems = async () => {
-        try { const response = await api.get('/api/analysis-relationships'); setItems(response.data.data); }
+        try { const response = await api.get('/api/analysis-relationships?admin=1'); setItems(response.data.data); }
         catch (error: any) { toast.error('Ошибка загрузки данных'); }
     };
 

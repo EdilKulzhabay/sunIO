@@ -80,9 +80,9 @@ const AnalysisRealizationSchema = new mongoose.Schema(
           linkButtonLink: { type: String, trim: true, default: null },
           linkButtonType: { type: String, enum: ['internal', 'external'], default: 'internal' },
         },
-        visibility: { type: Boolean, default: true },
       }
-    ]
+    ],
+    visibility: { type: Boolean, default: true },
   },
   {
     timestamps: true,

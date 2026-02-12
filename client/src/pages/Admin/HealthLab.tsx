@@ -16,7 +16,7 @@ export const HealthLabAdmin = () => {
 
     const fetchItems = async () => {
         try {
-            const response = await api.get('/api/health-lab');
+            const response = await api.get('/api/health-lab?admin=1');
             setItems(response.data.data);
         } catch (error: any) {
             toast.error('Ошибка загрузки данных');

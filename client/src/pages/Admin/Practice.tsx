@@ -16,7 +16,7 @@ export const PracticeAdmin = () => {
 
     const fetchPractices = async () => {
         try {
-            const response = await api.get('/api/practice');
+            const response = await api.get('/api/practice?admin=1');
             setPractices(response.data.data);
         } catch (error: any) {
             toast.error('Ошибка загрузки практик');

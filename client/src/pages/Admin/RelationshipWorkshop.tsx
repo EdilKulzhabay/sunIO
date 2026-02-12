@@ -16,7 +16,7 @@ export const RelationshipWorkshopAdmin = () => {
 
     const fetchItems = async () => {
         try {
-            const response = await api.get('/api/relationship-workshop');
+            const response = await api.get('/api/relationship-workshop?admin=1');
             setItems(response.data.data);
         } catch (error: any) {
             toast.error('Ошибка загрузки данных');

@@ -13,7 +13,7 @@ import { ContentLinkButtonEditor } from '../../components/Admin/ContentLinkButto
 import type { LinkButtonValue } from '../../components/Admin/ContentLinkButtonEditor';
 
 interface ContentItem {
-    type: 'video' | 'text' | 'image';
+    type: 'video' | 'text' | 'image' | 'linkButton';
     video?: {
         mainUrl: string;
         reserveUrl: string;
@@ -22,7 +22,6 @@ interface ContentItem {
     text?: string;
     image?: string;
     linkButton?: LinkButtonValue | null;
-    visibility?: boolean;
 }
 
 interface FormData {
@@ -36,6 +35,7 @@ interface FormData {
     allowRepeatBonus: boolean;
     location: 'top' | 'bottom';
     redirectToPage: string;
+    visibility: boolean;
     content: ContentItem[];
 }
 
@@ -55,6 +55,7 @@ export const PracticeForm = () => {
         allowRepeatBonus: false,
         location: 'bottom',
         redirectToPage: '',
+        visibility: true,
         content: [],
     });
 
@@ -72,13 +73,16 @@ export const PracticeForm = () => {
                 const hasVideo = Boolean(item?.video?.mainUrl || item?.video?.reserveUrl);
                 const hasText = Boolean(item?.text);
                 const hasImage = Boolean(item?.image);
+                const hasLinkButton = Boolean(item?.linkButton?.linkButtonText || item?.linkButton?.linkButtonLink);
                 const resolvedType: ContentItem['type'] = hasVideo
                     ? 'video'
                     : hasText
                         ? 'text'
                         : hasImage
                             ? 'image'
-                            : 'video';
+                            : hasLinkButton
+                                ? 'linkButton'
+                                : 'video';
 
                 return {
                     type: resolvedType,
@@ -96,7 +100,6 @@ export const PracticeForm = () => {
                             linkButtonType: item?.linkButton?.linkButtonType || 'internal',
                         }
                         : null,
-                    visibility: item?.visibility !== false,
                 };
             });
             setFormData({
@@ -111,6 +114,7 @@ export const PracticeForm = () => {
                 allowRepeatBonus: data.allowRepeatBonus ?? false,
                 location: data.location || 'bottom',
                 redirectToPage: data.redirectToPage || '',
+                visibility: data.visibility !== false,
             });
         } catch (error) {
             toast.error('Ошибка загрузки практики');
@@ -146,26 +150,37 @@ export const PracticeForm = () => {
     const handleTypeChange = (index: number, newType: ContentItem['type']) => {
         setFormData(prev => {
             const newContent = [...prev.content];
-            newContent[index] = {
-                ...newContent[index],
-                type: newType
-            };
+            if (newType === 'linkButton') {
+                newContent[index] = {
+                    type: 'linkButton',
+                    linkButton: newContent[index].linkButton ?? { linkButtonText: null, linkButtonLink: null, linkButtonType: 'internal' as const },
+                };
+            } else {
+                newContent[index] = {
+                    ...newContent[index],
+                    type: newType,
+                    video: newType === 'video' ? (newContent[index].video ?? { mainUrl: '', reserveUrl: '', duration: 0 }) : undefined,
+                    text: newType === 'text' ? (newContent[index].text ?? '') : undefined,
+                    image: newType === 'image' ? (newContent[index].image ?? '') : undefined,
+                    linkButton: undefined,
+                };
+            }
             return { ...prev, content: newContent };
         });
     };
 
     const addContentItem = (type: ContentItem['type']) => {
-        setFormData(prev => ({
-            ...prev,
-            content: [...prev.content, { 
-                type, 
-                video: { mainUrl: '', reserveUrl: '', duration: 0 },
-                text: '', 
-                image: '',
-                linkButton: null,
-                visibility: true,
-            }]
-        }));
+        setFormData(prev => {
+            const base = type === 'linkButton'
+                ? { type: 'linkButton' as const, linkButton: { linkButtonText: null, linkButtonLink: null, linkButtonType: 'internal' as const } }
+                : {
+                    type,
+                    video: { mainUrl: '', reserveUrl: '', duration: 0 },
+                    text: '',
+                    image: '',
+                };
+            return { ...prev, content: [...prev.content, base] };
+        });
         setShowTypePicker(false);
     };
 
@@ -173,14 +188,6 @@ export const PracticeForm = () => {
         setFormData(prev => {
             const newContent = [...prev.content];
             newContent[index] = { ...newContent[index], linkButton: value };
-            return { ...prev, content: newContent };
-        });
-    };
-
-    const handleVisibilityChange = (index: number, value: boolean) => {
-        setFormData(prev => {
-            const newContent = [...prev.content];
-            newContent[index] = { ...newContent[index], visibility: value };
             return { ...prev, content: newContent };
         });
     };
@@ -205,16 +212,38 @@ export const PracticeForm = () => {
         });
     };
 
+    const preparePayload = () => {
+        const content = formData.content.map((item) => {
+            if (item.type === 'linkButton') {
+                return item.linkButton?.linkButtonText || item.linkButton?.linkButtonLink
+                    ? { linkButton: item.linkButton }
+                    : { linkButton: { linkButtonText: null, linkButtonLink: null, linkButtonType: 'internal' } };
+            }
+            if (item.type === 'video') {
+                return { video: item.video ?? { mainUrl: '', reserveUrl: '', duration: 0 } };
+            }
+            if (item.type === 'text') {
+                return { text: item.text ?? '' };
+            }
+            if (item.type === 'image') {
+                return { image: item.image ?? '' };
+            }
+            return {};
+        });
+        return { ...formData, content };
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
         try {
+            const payload = preparePayload();
             if (id) {
-                await api.put(`/api/practice/${id}`, formData);
+                await api.put(`/api/practice/${id}`, payload);
                 toast.success('Практика обновлена');
             } else {
-                await api.post('/api/practice', formData);
+                await api.post('/api/practice', payload);
                 toast.success('Практика создана');
             }
             navigate('/admin/practice');
@@ -339,6 +368,16 @@ export const PracticeForm = () => {
                                 <span className="text-sm">Добавление бонусов за повторные просмотры</span>
                             </div>
                         </div>
+
+                        <div className="flex items-center gap-3 pt-2">
+                            <input
+                                type="checkbox"
+                                checked={formData.visibility}
+                                onChange={(e) => setFormData({ ...formData, visibility: e.target.checked })}
+                                className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                            />
+                            <span className="text-sm">Видимость на сайте</span>
+                        </div>
                     </div>
 
                     <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
@@ -391,18 +430,7 @@ export const PracticeForm = () => {
                                                 <option value="video">Видео</option>
                                                 <option value="text">Текст</option>
                                                 <option value="image">Изображение</option>
-                                            </select>
-                                        </div>
-
-                                        <div className="flex flex-col gap-2">
-                                            <label className="text-sm font-medium">Видимость</label>
-                                            <select
-                                                value={item.visibility !== false ? 'true' : 'false'}
-                                                onChange={(e) => handleVisibilityChange(index, e.target.value === 'true')}
-                                                className="w-full p-2 rounded-md border border-gray-300"
-                                            >
-                                                <option value="true">Показывать</option>
-                                                <option value="false">Скрывать</option>
+                                                <option value="linkButton">Кнопка-ссылка</option>
                                             </select>
                                         </div>
 
@@ -452,11 +480,13 @@ export const PracticeForm = () => {
                                             </div>
                                         )}
 
-                                        <ContentLinkButtonEditor
-                                            value={item.linkButton ?? null}
-                                            onChange={(v) => handleLinkButtonChange(index, v)}
-                                            onClear={item.linkButton ? () => handleLinkButtonChange(index, null) : undefined}
-                                        />
+                                        {item.type === 'linkButton' && (
+                                            <ContentLinkButtonEditor
+                                                value={item.linkButton ?? null}
+                                                onChange={(v) => handleLinkButtonChange(index, v)}
+                                                onClear={item.linkButton ? () => handleLinkButtonChange(index, null) : undefined}
+                                            />
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -476,7 +506,7 @@ export const PracticeForm = () => {
                                         onClick={() => addContentItem('video')}
                                         className="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                                     >
-                                        Ссылка на видео
+                                        Видео
                                     </button>
                                     <button
                                         type="button"
@@ -492,11 +522,18 @@ export const PracticeForm = () => {
                                     >
                                         Изображение
                                     </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => addContentItem('linkButton')}
+                                        className="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                                    >
+                                        Кнопка-ссылка
+                                    </button>
                                 </div>
                             )}
                             <button
                                 type="button"
-                                onClick={() => addContentItem('video')}
+                                onClick={() => setShowTypePicker((p) => !p)}
                                 className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                             >
                                 <Plus size={16} />

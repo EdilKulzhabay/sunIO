@@ -13,7 +13,7 @@ export const ProductCatalogAdmin = () => {
     useEffect(() => { fetchItems(); }, []);
 
     const fetchItems = async () => {
-        try { const response = await api.get('/api/product-catalog'); setItems(response.data.data); }
+        try { const response = await api.get('/api/product-catalog?admin=1'); setItems(response.data.data); }
         catch (error: any) { toast.error('Ошибка загрузки данных'); }
     };
 

@@ -13,7 +13,7 @@ export const FemininityGazeboAdmin = () => {
     useEffect(() => { fetchItems(); }, []);
 
     const fetchItems = async () => {
-        try { const response = await api.get('/api/femininity-gazebo'); setItems(response.data.data); }
+        try { const response = await api.get('/api/femininity-gazebo?admin=1'); setItems(response.data.data); }
         catch (error: any) { toast.error('Ошибка загрузки данных'); }
     };
 

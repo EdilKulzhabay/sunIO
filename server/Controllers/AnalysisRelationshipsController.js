@@ -11,16 +11,26 @@ export const create = async (req, res) => {
             return res.status(400).json({ success: false, message: "Название обязательно" });
         }
 
-        const normalizedContent = Array.isArray(content) ? content.map((item) => ({
-            video: { mainUrl: item?.video?.mainUrl || '', reserveUrl: item?.video?.reserveUrl || '', duration: Number.isFinite(item?.video?.duration) ? item.video.duration : 0 },
-            text: item?.text || '',
-            image: item?.image || '',
-        })) : [];
+        const normalizedContent = Array.isArray(content) ? content.map((item) => {
+            const hasLinkButton = item?.linkButton?.linkButtonText || item?.linkButton?.linkButtonLink;
+            if (hasLinkButton && !item?.video?.mainUrl && !item?.video?.reserveUrl && !item?.text && !item?.image) {
+                return { linkButton: item.linkButton };
+            }
+            if (item?.video?.mainUrl || item?.video?.reserveUrl) {
+                return {
+                    video: { mainUrl: item?.video?.mainUrl || '', reserveUrl: item?.video?.reserveUrl || '', duration: Number.isFinite(item?.video?.duration) ? item.video.duration : 0 },
+                };
+            }
+            if (item?.text) return { text: item.text };
+            if (item?.image) return { image: item.image };
+            return { video: { mainUrl: '', reserveUrl: '', duration: 0 }, text: '', image: '' };
+        }) : [];
 
         const item = new AnalysisRelationships({
             title, shortDescription: shortDescription || '', imageUrl: imageUrl || '', accessType: accessType || 'free',
             starsRequired: Number.isFinite(starsRequired) ? starsRequired : 0, duration: Number.isFinite(duration) ? duration : 0,
             order: Number.isFinite(order) ? order : 0, allowRepeatBonus: Boolean(allowRepeatBonus), location: location || 'bottom', redirectToPage: redirectToPage || null, content: normalizedContent,
+            visibility: req.body.visibility !== false,
         });
 
         await item.save();
@@ -36,9 +46,10 @@ export const create = async (req, res) => {
 // Получить все записи
 export const getAll = async (req, res) => {
     try {
-        const { accessType } = req.query;
+        const { accessType, admin } = req.query;
         const filter = {};
         if (accessType) filter.accessType = accessType;
+        if (!admin) filter.visibility = { $ne: false };
 
         const items = await AnalysisRelationships.find(filter).sort({ order: 1, createdAt: -1 });
         
@@ -88,10 +99,20 @@ export const update = async (req, res) => {
         const updateData = { ...req.body };
 
         if (Array.isArray(updateData.content)) {
-            updateData.content = updateData.content.map((item) => ({
-                video: { mainUrl: item?.video?.mainUrl || '', reserveUrl: item?.video?.reserveUrl || '', duration: Number.isFinite(item?.video?.duration) ? item.video.duration : 0 },
-                text: item?.text || '', image: item?.image || '',
-            }));
+            updateData.content = updateData.content.map((item) => {
+                const hasLinkButton = item?.linkButton?.linkButtonText || item?.linkButton?.linkButtonLink;
+                if (hasLinkButton && !item?.video?.mainUrl && !item?.video?.reserveUrl && !item?.text && !item?.image) {
+                    return { linkButton: item.linkButton };
+                }
+                if (item?.video?.mainUrl || item?.video?.reserveUrl) {
+                    return {
+                        video: { mainUrl: item?.video?.mainUrl || '', reserveUrl: item?.video?.reserveUrl || '', duration: Number.isFinite(item?.video?.duration) ? item.video.duration : 0 },
+                    };
+                }
+                if (item?.text) return { text: item.text };
+                if (item?.image) return { image: item.image };
+                return { video: { mainUrl: '', reserveUrl: '', duration: 0 } };
+            });
         }
 
         if (updateData.starsRequired !== undefined) updateData.starsRequired = Number.isFinite(updateData.starsRequired) ? updateData.starsRequired : 0;

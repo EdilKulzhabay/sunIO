@@ -13,6 +13,11 @@ import { Switch } from "../../components/User/Switch";
 import { BonusPolicyModal } from "../../components/User/ClientInsufficientBonusModal";
 import { X } from 'lucide-react';
 import { toast } from "react-toastify";
+import referralLevel1 from "../../assets/referralLevel1.png";
+import referralLevel2 from "../../assets/referralLevel2.png";
+import referralLevel3 from "../../assets/referralLevel3.png";
+import referralLevel4 from "../../assets/referralLevel4.png";
+import referralLevel5 from "../../assets/referralLevel5.png";
 
 export const ClientProfile = () => {
     const [userData, setUserData] = useState<any>(null);
@@ -289,6 +294,23 @@ export const ClientProfile = () => {
                                     <img src={edit} alt="edit" className="w-5 h-5 object-cover" />
                                 </div>
                                 <div>{userData?.mail || ""}</div>
+                            </div>
+                            <div className="ml-auto w-[79px] h-[79px]">
+                                {invitedUsersCount < 5 && (
+                                    <img src={referralLevel1} alt="referralLevel1" className="w-full h-full object-cover" />
+                                )}
+                                {invitedUsersCount >= 5 && invitedUsersCount < 10 && (
+                                    <img src={referralLevel2} alt="referralLevel2" className="w-full h-full object-cover" />
+                                )}
+                                {invitedUsersCount >= 10 && invitedUsersCount < 25 && (
+                                    <img src={referralLevel3} alt="referralLevel3" className="w-full h-full object-cover" />
+                                )}
+                                {invitedUsersCount >= 25 && invitedUsersCount < 50 && (
+                                    <img src={referralLevel4} alt="referralLevel4" className="w-full h-full object-cover" />
+                                )}
+                                {invitedUsersCount >= 50 && (
+                                    <img src={referralLevel5} alt="referralLevel5" className="w-full h-full object-cover" />
+                                )}
                             </div>
                         </div>
 

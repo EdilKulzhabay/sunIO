@@ -15,11 +15,11 @@ export const BonusPolicyModal = ({ isOpen, onClose, pointsAwardingPolicy }: { is
     if (!isOpen) return null;
 
     const policies = pointsAwardingPolicy?.list || [
-        { id: 1, title: 'Регистрация в приложении', subtitle: '10 Солнц' },
-        { id: 2, title: 'Приглашение друга по ссылке', subtitle: '2 Солнца' },
-        { id: 3, title: 'Заполнение дневника осознаний', subtitle: '2 Солнца (1 Солнце за дневник, 1 Солнце за упражнение)' },
-        { id: 4, title: 'Просмотр контента', subtitle: 'Солнца за просмотр каждой единицы контента' },
-        { id: 5, title: 'Участие в клубе Мастерская энергий', subtitle: '10 солнц за каждый уровень активации' },
+        { id: 1, title: 'Регистрация в приложении', content: '10 Солнц' },
+        { id: 2, title: 'Приглашение друга по ссылке', content: '2 Солнца' },
+        { id: 3, title: 'Заполнение дневника осознаний', content: '2 Солнца (1 Солнце за дневник, 1 Солнце за упражнение)' },
+        { id: 4, title: 'Просмотр контента', content: 'Солнца за просмотр каждой единицы контента' },
+        { id: 5, title: 'Участие в клубе Мастерская энергий', content: '10 солнц за каждый уровень активации' },
     ];
 
     return (
@@ -53,7 +53,7 @@ export const BonusPolicyModal = ({ isOpen, onClose, pointsAwardingPolicy }: { is
                             {policies.map((policy: any) => (
                                 <div key={policy.id} className="">
                                     <p className="text-white font-medium">{policy.title}</p>
-                                    <p className='mt-1 text-sm'>{policy.subtitle}</p>
+                                    <p className='mt-1 text-sm'>{policy.content}</p>
                                 </div>
                             ))}
                         </div>
@@ -101,7 +101,7 @@ export const BonusPolicyModal = ({ isOpen, onClose, pointsAwardingPolicy }: { is
                             {policies.map((policy: any) => (
                                 <div key={policy.id} className="">
                                     <p className="text-white font-medium text-lg">{policy.title}</p>
-                                    <p className='mt-1'>{policy.subtitle}</p>
+                                    <p className='mt-1'>{policy.content}</p>
                                 </div>
                             ))}
                         </div>

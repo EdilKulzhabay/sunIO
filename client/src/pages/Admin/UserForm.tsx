@@ -406,7 +406,7 @@ export const UserForm = () => {
                             {([
                                 { key: 'bodyActivation' as const, label: 'Активация тела' },
                                 { key: 'heartActivation' as const, label: 'Активация здоровья' },
-                                { key: 'healingFamily' as const, label: 'Исцеление Рода' },
+                                { key: 'healingFamily' as const, label: 'Активация Рода' },
                                 { key: 'awakeningSpirit' as const, label: 'Пробуждение Духа' },
                             ]).map(({ key, label }) => (
                                 <label key={key} className="flex items-center gap-3 cursor-pointer">

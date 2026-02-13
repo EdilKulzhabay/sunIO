@@ -15,7 +15,7 @@ import main1 from "../../assets/main1.png"
 import main2 from "../../assets/main2.png"
 import main3 from "../../assets/main3.png"
 import main4 from "../../assets/main4.png"
-import redUser from "../../assets/redUser.png"
+import goldUser from "../../assets/goldUser.png"
 import { ClientSchedule } from "./ClientSchedule"
 
 
@@ -385,13 +385,9 @@ export const Main = () => {
                         <img src={logo} alt="logo" className="w-[104px] h-[40px]" />
                     </div>
                     <div className="flex items-center gap-6">
-                        {userData?.hasPaid && userData?.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date() ? (
-                                <></>
-                        ) : (
-                            <Link to="/about">
-                                <img src={users} alt="users" className="w-6 h-6" />
-                            </Link>
-                        )}
+                        <Link to="/about">
+                            <img src={users} alt="users" className="w-6 h-6" />
+                        </Link>
                         <Link to="/client/product-catalog">
                             <img src={productsCatalog} alt="productsCatalog" className="w-6 h-6" />
                         </Link>
@@ -400,7 +396,7 @@ export const Main = () => {
                         </Link>
                         <Link to="/client/profile">
                             {userData?.hasPaid && userData?.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date() ? (
-                                <img src={redUser} alt="red user" className="w-6 h-6" />
+                                <img src={goldUser} alt="gold user" className="w-6 h-6" />
                             ) : (
                                 <img src={user} alt="user" className="w-6 h-6" />
                             )}

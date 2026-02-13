@@ -347,7 +347,7 @@ export const ClientSchedule = () => {
                                 {selectedSchedule.startDate && (
                                     <p className="text-sm text-white/60">
                                         Дата начала: {new Date(selectedSchedule.startDate).toLocaleString('ru-RU', {
-                                            day: '2-digit',
+                                            day: 'numeric',
                                             month: 'long',
                                             year: 'numeric',
                                             hour: '2-digit',
@@ -358,7 +358,7 @@ export const ClientSchedule = () => {
                                 {selectedSchedule.endDate && (
                                     <p className="text-sm text-white/60">
                                         Дата окончания: {new Date(selectedSchedule.endDate).toLocaleString('ru-RU', {
-                                            day: '2-digit',
+                                            day: 'numeric',
                                             month: 'long',
                                             year: 'numeric',
                                             hour: '2-digit',
@@ -374,7 +374,9 @@ export const ClientSchedule = () => {
                                         <img src={copyLink} alt="copy" className="w-5 h-5 object-cover" />
                                     </button>
                                 </div>
-                                <a href={selectedSchedule?.eventLink} target="_blank" rel="noopener noreferrer" className="mt-1 text-left">{selectedSchedule?.eventLink}</a>
+                                <div className="break-all w-full text-left">
+                                    <a href={selectedSchedule?.eventLink} target="_blank" rel="noopener noreferrer" className="mt-1 text-left">{selectedSchedule?.eventLink}</a>
+                                </div>
                             </button>
                             <div className="mt-4 flex items-center justify-between">
                                 <div>Участвую</div>
@@ -444,7 +446,7 @@ export const ClientSchedule = () => {
                                 {selectedSchedule.startDate && (
                                     <p className="text-sm text-white/60">
                                         Дата начала: {new Date(selectedSchedule.startDate).toLocaleString('ru-RU', {
-                                            day: '2-digit',
+                                            day: 'numeric',
                                             month: 'long',
                                             year: 'numeric',
                                             hour: '2-digit',
@@ -455,7 +457,7 @@ export const ClientSchedule = () => {
                                 {selectedSchedule.endDate && (
                                     <p className="text-sm text-white/60">
                                         Дата окончания: {new Date(selectedSchedule.endDate).toLocaleString('ru-RU', {
-                                            day: '2-digit',
+                                            day: 'numeric',
                                             month: 'long',
                                             year: 'numeric',
                                             hour: '2-digit',
@@ -464,14 +466,16 @@ export const ClientSchedule = () => {
                                     </p>
                                 )}
                             </div>
-                            <button onClick={() => {}} className="bg-white/10 block w-full mt-4 rounded-lg py-3 px-4 text-sm">
+                            <button onClick={() => {}} className="bg-white/10 block w-full mt-4 rounded-lg py-3 px-4 text-sm text-left">
                                 <div className="flex items-center justify-between">
                                     <div>Ссылка на событие:</div>
                                     <button onClick={copyEventLink} className="cursor-pointer">
                                         <img src={copyLink} alt="copy" className="w-5 h-5 object-cover" />
                                     </button>
                                 </div>
-                                <a href={selectedSchedule?.eventLink} target="_blank" rel="noopener noreferrer" className="mt-1 text-left">{selectedSchedule?.eventLink}</a>
+                                <div className="break-all w-full text-left">
+                                    <a href={selectedSchedule?.eventLink} target="_blank" rel="noopener noreferrer" className="mt-1 text-left">{selectedSchedule?.eventLink}</a>
+                                </div>
                             </button>
                             <div className="mt-4 flex items-center justify-between">
                                 <div>Участвую</div>

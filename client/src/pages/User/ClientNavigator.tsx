@@ -8,13 +8,20 @@ import navigatorDesktop from "../../assets/navigatorDesktop.png"
 import { Switch } from "../../components/User/Switch"
 import { useNavigate } from "react-router-dom"
 import { Link } from "react-router-dom"
-import navigatorConsciousnessLibrary from "../../assets/navigatorConsciousnessLibrary.png"
-import navigatorRelationshipWorkshop from "../../assets/navigatorRelationshipWorkshop.png"
-import navigatorSpiritForge from "../../assets/navigatorSpiritForge.png"
-import navigatorMastersTower from "../../assets/navigatorMastersTower.png"
-import navigatorHealthLab from "../../assets/navigatorHealthLab.png"
-import navigatorFemininityGazebo from "../../assets/navigatorFemininityGazebo.png"
-import navigatorBegginingJourney from "../../assets/navigatorBegginingJourney.png"
+import navigatorConsciousnessLibraryMobile from "../../assets/navigatorConsciousnessLibraryMobile.png"
+import navigatorRelationshipWorkshopMobile from "../../assets/navigatorRelationshipWorkshopMobile.png"
+import navigatorSpiritForgeMobile from "../../assets/navigatorSpiritForgeMobile.png"
+import navigatorMastersTowerMobile from "../../assets/navigatorMastersTowerMobile.png"
+import navigatorHealthLabMobile from "../../assets/navigatorHealthLabMobile.png"
+import navigatorFemininityGazeboMobile from "../../assets/navigatorFemininityGazeboMobile.png"
+import navigatorBegginingJourneyMobile from "../../assets/navigatorBegginingJourneyMobile.png"
+import navigatorConsciousnessLibraryDesktop from "../../assets/navigatorConsciousnessLibraryDesktop.png"
+import navigatorRelationshipWorkshopDesktop from "../../assets/navigatorRelationshipWorkshopDesktop.png"
+import navigatorSpiritForgeDesktop from "../../assets/navigatorSpiritForgeDesktop.png"
+import navigatorMastersTowerDesktop from "../../assets/navigatorMastersTowerDesktop.png"
+import navigatorHealthLabDesktop from "../../assets/navigatorHealthLabDesktop.png"
+import navigatorFemininityGazeboDesktop from "../../assets/navigatorFemininityGazeboDesktop.png"
+import navigatorBegginingJourneyDesktop from "../../assets/navigatorBegginingJourneyDesktop.png"
 import { X } from "lucide-react"
 
 interface ContentItem {
@@ -40,6 +47,8 @@ export const ClientNavigator = () => {
     const [showDescription, setShowDescription] = useState(true);
     const [selectedContent, setSelectedContent] = useState<NavigatorDescription | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [loading, setLoading] = useState(false);
+
     const fetchContent = async () => {
         const response = await api.get(`/api/dynamic-content/name/navigator`);
         if (response.data.success) {
@@ -49,6 +58,7 @@ export const ClientNavigator = () => {
         if (descriptionsResponse.data.success) {
             setDescriptions(descriptionsResponse.data.data)
         }
+        setLoading(false);
     };
 
     const fetchUserData = async () => {
@@ -61,6 +71,7 @@ export const ClientNavigator = () => {
     }
 
     useEffect(() => {
+        setLoading(true);
         fetchContent();
         fetchUserData();
     }, []);
@@ -75,6 +86,14 @@ export const ClientNavigator = () => {
         if (response.data.success) {
             setShowDescription(!showDescription);
         }
+    }
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-screen bg-[#031F23]">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+            </div>
+        );
     }
 
     return (
@@ -131,8 +150,9 @@ export const ClientNavigator = () => {
                             } else {
                                 navigate("/client/consciousness-library")
                             }
-                        }} className="absolute top-[19%] left-[25%] w-[116px] h-[40px] z-20 lg:top-[35%] lg:left-[60%] cursor-pointer">
-                            <img src={navigatorConsciousnessLibrary} alt={""} className="object-cover w-full h-full" />
+                        }} className="absolute top-[13%] left-[50%] w-[95px] h-[61px] z-20 lg:w-[176px] lg:h-[72px] lg:top-[25%] lg:left-[49%] cursor-pointer">
+                            <img src={navigatorConsciousnessLibraryMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
+                            <img src={navigatorConsciousnessLibraryDesktop} alt="" className="object-cover w-full h-full hidden lg:block" />
                         </button>
                         <button onClick={() => {
                             if (showDescription) {
@@ -141,8 +161,9 @@ export const ClientNavigator = () => {
                             } else {
                                 navigate("/client/spirit-forge")
                             }
-                        }} className="absolute top-[33%] left-[18%] w-[93px] h-[40px] z-20 lg:top-[50%] lg:left-[42%] cursor-pointer">
-                            <img src={navigatorSpiritForge} alt={""} className="object-cover w-full h-full" />
+                        }} className="absolute top-[28%] left-[32%] w-[72px] h-[61px] z-20 lg:w-[140px] lg:h-[72px] lg:top-[44%] lg:left-[37%] cursor-pointer">
+                            <img src={navigatorSpiritForgeMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
+                            <img src={navigatorSpiritForgeDesktop} alt="" className="object-cover w-full h-full hidden lg:block" />
                         </button>
                         <button onClick={() => {
                             if (showDescription) {
@@ -151,8 +172,9 @@ export const ClientNavigator = () => {
                             } else {
                                 navigate("/client/relationship-workshop")
                             }
-                        }} className="absolute top-[43%] left-[20%] w-[96px] h-[61px] z-20 lg:top-[48%] lg:left-[15%] cursor-pointer">
-                            <img src={navigatorRelationshipWorkshop} alt={""} className="object-cover w-full h-full" />
+                        }} className="absolute top-[43%] left-[20%] w-[96px] h-[61px] z-20 lg:w-[157px] lg:h-[93px] lg:top-[60%] lg:left-[24%] cursor-pointer">
+                            <img src={navigatorRelationshipWorkshopMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
+                            <img src={navigatorRelationshipWorkshopDesktop} alt="" className="object-cover w-full h-full hidden lg:block" />
                         </button>
                         <button onClick={() => {
                             if (showDescription) {
@@ -161,8 +183,9 @@ export const ClientNavigator = () => {
                             } else {
                                 navigate("/client/masters-tower")
                             }
-                        }} className="absolute top-[43%] left-[72%] w-[78px] h-[61px] z-20 lg:top-[63%] lg:left-[77%] cursor-pointer">
-                            <img src={navigatorMastersTower} alt={""} className="object-cover w-full h-full" />
+                        }} className="absolute top-[43%] left-[72%] w-[78px] h-[61px] z-20 lg:w-[129px] lg:h-[93px] lg:top-[63%] lg:left-[75%] cursor-pointer">
+                            <img src={navigatorMastersTowerMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
+                            <img src={navigatorMastersTowerDesktop} alt="" className="object-cover w-full h-full hidden lg:block" />
                         </button>
                         <button onClick={() => {
                             if (showDescription) {
@@ -171,8 +194,9 @@ export const ClientNavigator = () => {
                             } else {
                                 navigate("/client/health-lab")
                             }
-                        }} className="absolute top-[56%] left-[7%] w-[107px] h-[61px] z-20 lg:top-[76%] lg:left-[9%] cursor-pointer">
-                            <img src={navigatorHealthLab} alt={""} className="object-cover w-full h-full" />
+                        }} className="absolute top-[56%] left-[7%] w-[107px] h-[61px] z-20 lg:w-[173px] lg:h-[93px] lg:top-[76%] lg:left-[9%] cursor-pointer">
+                            <img src={navigatorHealthLabMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
+                            <img src={navigatorHealthLabDesktop} alt="" className="object-cover w-full h-full hidden lg:block" />
                         </button>
                         <button onClick={() => {
                             if (showDescription) {
@@ -181,13 +205,15 @@ export const ClientNavigator = () => {
                             } else {
                                 navigate("/client/femininity-gazebo")
                             }
-                        }} className="absolute top-[68%] left-[65%] w-[115px] h-[61px] z-20 lg:top-[74%] lg:left-[86%] cursor-pointer">
-                            <img src={navigatorFemininityGazebo} alt={""} className="object-cover w-full h-full" />
+                        }} className="absolute top-[68%] left-[65%] w-[115px] h-[61px] z-20 lg:w-[186px] lg:h-[93px] lg:top-[74%] lg:left-[84%] cursor-pointer">
+                            <img src={navigatorFemininityGazeboMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
+                            <img src={navigatorFemininityGazeboDesktop} alt="" className="object-cover w-full h-full hidden lg:block" />
                         </button>
                         <button onClick={() => {
                             navigate("/client/beggining-journey")
-                        }} className="absolute top-[75%] left-[22%] w-[99px] h-[61px] z-20 lg:top-[88%] lg:left-[45%] cursor-pointer">
-                            <img src={navigatorBegginingJourney} alt={""} className="object-cover w-full h-full" />
+                        }} className="absolute top-[75%] left-[22%] w-[99px] h-[61px] z-20 lg:w-[183px] lg:h-[72px] lg:top-[82%] lg:left-[35%] cursor-pointer">
+                            <img src={navigatorBegginingJourneyMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
+                            <img src={navigatorBegginingJourneyDesktop} alt="" className="object-cover w-full h-full hidden lg:block" />
                         </button>
                     </div>
                     <div className="px-4 mt-2 pb-10 lg:hidden">
@@ -202,6 +228,8 @@ export const ClientNavigator = () => {
                         </div>
                     </div>
                 </div>
+            </div>
+            <div className="flex-1 bg-[#031F23]">
             </div>
             {isModalOpen && selectedContent && (
                 <div className="fixed inset-0 z-50 overflow-y-auto">

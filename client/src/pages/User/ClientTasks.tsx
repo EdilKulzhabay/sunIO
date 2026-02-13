@@ -184,7 +184,7 @@ export const ClientTasks = () => {
                             ) : (
                                 <img src={taskInActiveSun} alt="task in active sun" className="w-10 h-10" />
                             )}
-                            <p className="mt-1 text-center text-white whitespace-pre-line">Исцеление <br /> Рода</p>
+                            <p className="mt-1 text-center text-white whitespace-pre-line">Активация <br /> Рода</p>
                         </div>
                         <div className="col-span-1 flex flex-col items-center justify-center">
                             {userData?.awakeningSpirit ? (

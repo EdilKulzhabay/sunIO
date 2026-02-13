@@ -292,8 +292,8 @@ export const ClientProfile = () => {
                             </div>
                         </div>
 
-                        <div className="flex items-start gap-x-3 mt-4 bg-[#114E50] rounded-lg p-4">
-                            <div className="shrink-0 cursor-pointer" onClick={() => setIsBonusPolicyModalOpen(true)}>
+                        <div onClick={() => setIsBonusPolicyModalOpen(true)} className="flex items-start gap-x-3 mt-4 bg-[#114E50] rounded-lg p-4">
+                            <div className="shrink-0 cursor-pointer">
                                 <img src={sun} alt="sun" className="w-10 h-10 object-cover" />
                             </div>
                             <div className="w-full">
@@ -313,7 +313,7 @@ export const ClientProfile = () => {
                                 if (userData?.hasPaid && userData?.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date()) {
                                     console.log('Подписка активна');
                                 } else {
-                                    navigate('/about');
+                                    navigate('/client/masters-tower');
                                 }
                             }}
                         >
@@ -324,7 +324,7 @@ export const ClientProfile = () => {
                                     {userData?.subscriptionEndDate ? new Date(userData.subscriptionEndDate).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }) : ''}
                                 </div>
                             ) : (
-                                <div>У вас нет подписки на клуб</div>
+                                <div>У вас нет доступа в Башню Мастеров</div>
                             )}
                         </div>
 
@@ -344,15 +344,19 @@ export const ClientProfile = () => {
                             </div>
                         )}
 
-                        <div  className="mt-4 bg-[#114E50] rounded-lg p-4 space-y-2 cursor-pointer">
+                        <div onClick={() => navigate('/client/invited-users')} className="mt-4 bg-[#114E50] rounded-lg p-4 space-y-2 cursor-pointer">
                             <div className="flex items-center justify-between">
                                 <div className="text-xl font-medium">Пригласи друга по ссылке</div>
                                 <div className="text-lg font-medium">
-                                    <Link to="/client/invited-users">{invitedUsersCount}</Link>
+                                    {invitedUsersCount}
                                 </div>
                             </div>
                             <div className="flex items-center justify-between">
                                 <div 
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        copyReferralLink();
+                                    }}
                                     className="break-all"
                                 >
                                     {userData?.telegramId 
@@ -360,7 +364,12 @@ export const ClientProfile = () => {
                                         : 'Загрузка...'
                                     }
                                 </div>
-                                <button onClick={copyReferralLink}>
+                                <button
+                                className="cursor-pointer"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    copyReferralLink();
+                                }}>
                                     <img src={copyLink} alt="copy" className="w-5 h-5 object-cover" />
                                 </button>
                             </div>

@@ -26,34 +26,22 @@ export const About = () => {
             navigate(-1);
             return;
         }
-        // const fetchUser = async () => {
-        //     try {
-        //         const response = await api.get(`/api/user/telegram/${telegramId}`);
-        //         if (response.data.success && response.data.user) {
-        //             if (response.data.user.isBlocked) {
-        //                 navigate('/client/blocked-user');
-        //                 return;
-        //             }
-        //             if (!response.data.user.emailConfirmed) {
-        //                 navigate('/client/register');
-        //             } else {
-        //                 const user = response.data.user;
-        //                 const paymentResponse = await api.post('/api/user/payment', { userId: user._id });
-        //                 if (paymentResponse.data.success) {
-        //                     setPaymentUrl(paymentResponse.data.url);
-        //                     setShowPaymentModal(true);
-        //                 } else {
-        //                     toast.error('Ошибка при получении ссылки оплаты');
-        //                 }
-        //             }
-        //         }
-        //     } catch (error) {
-        //         console.log(error);
-        //     }
-        // }
+        const fetchUser = async () => {
+            try {
+                const response = await api.get(`/api/user/telegram/${telegramId}`);
+                if (response.data.success && response.data.user) {
+                    if (response.data.user.bodyActivation || response.data.user.heartActivation || response.data.user.healingFamily || response.data.user.awakeningSpirit) {
+                        window.location.href = 'https://t.me/+PPXcfaTFVYJlNWIy';
+                    } else {
+                        setModalOpen(true);
+                    }
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        }
 
-        // fetchUser();
-        setModalOpen(true);
+        fetchUser();
     }
 
     // const handleSkip = () => {
@@ -151,7 +139,7 @@ export const About = () => {
                         >
                             Пропустить
                         </button> */}
-                        <RedButton text="Вступить в клуб" onClick={handleJoinClub} className='w-full mt-4 cursor-pointer'/>
+                        <RedButton text="Вступить в Сообщество" onClick={handleJoinClub} className='w-full mt-4 cursor-pointer'/>
                     </div>
                 </div>
                 {modalOpen && (
@@ -177,7 +165,7 @@ export const About = () => {
                                 </button>
                                 
                                 <div className="">
-                                    <h3 className="text-xl font-bold mb-4">Вступить в клуб</h3>
+                                    <h3 className="text-xl font-bold mb-4">Вступить в Сообщество</h3>
                                     <p className="mb-6 text-gray-300" dangerouslySetInnerHTML={{ __html: dinamycContent?.content }}>
                                     </p>
                                     <MyLink 
@@ -212,7 +200,7 @@ export const About = () => {
                                 </button>
                                 
                                 <div className="mt-4">
-                                    <h3 className="text-2xl font-bold mb-4">Вступить в клуб</h3>
+                                    <h3 className="text-2xl font-bold mb-4">Вступить в Сообщество</h3>
                                     <p className="mb-6 text-gray-300 text-lg">
                                     Клуб доступен только для выпускников 4-х дневных тренингов. Свяжитесь с нами и мы поможем вам стать частью нашего Сообщества
                                     </p>

@@ -63,8 +63,8 @@ export const ClientContactUs = () => {
                         <div className="space-y-3">
                             <ContactUsBlock title="Официальный сайт" content="www.исцелениеосознанием.рф" isLink={true} link="https://psylife.io/main" />
                             <ContactUsBlock title="E-mail службы заботы" content="manager@psylife.io" isLink={true} link="mailto:manager@psylife.io" />
-                            <ContactUsBlock title="Telegram службы зоботы" content="t.me/io_care_service" isLink={true} link="https://t.me/io_care_service" />
-                            <ContactUsBlock title="WhatsApp службы зоботы *" content="wa.me/9166559655" isLink={true} link="https://wa.me/9166559655" />
+                            <ContactUsBlock title="Telegram службы заботы" content="t.me/io_care_service" isLink={true} link="https://t.me/io_care_service" />
+                            <ContactUsBlock title="WhatsApp службы заботы *" content="wa.me/9166559655" isLink={true} link="https://wa.me/9166559655" />
                             <ContactUsBlock title="Instagram Константина Павлова *" content="instagram.com/io_konstantin" isLink={true} link="https://instagram.com/io_konstantin" />
                             <ContactUsBlock title="Instagram Марины Павловой *" content="instagram.com/io_aromarina" isLink={true} link="https://instagram.com/io_aromarina" />
                             <ContactUsBlock title="YouTube канал *" content="youtube.com/@io_konstantin" isLink={true} link="https://youtube.com/@io_konstantin" />

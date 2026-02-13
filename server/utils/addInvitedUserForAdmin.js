@@ -1,4 +1,12 @@
-import User from "../Models/User";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__dirname, "../.env") });
+
+import User from "../Models/User.js";
 
 const fullNames = [
     "Акматова Жаркынай",
@@ -31,6 +39,7 @@ const fullNames = [
 
 const addInvitedUserForAdmin = async () => {
     try {
+        await mongoose.connect(process.env.MONGOURL);
         const candidates = await User.find({
             fullName: { $in: fullNames },
         });
@@ -44,9 +53,11 @@ const addInvitedUserForAdmin = async () => {
         console.log("addInvitedUserForAdmin success");
         return true;
     } catch (error) {
-        console.error('Ошибка в addInvitedUserForAdmin:', error);
+        console.error("Ошибка в addInvitedUserForAdmin:", error);
         return false;
+    } finally {
+        await mongoose.disconnect();
     }
-}
+};
 
-addInvitedUserForAdmin();
+addInvitedUserForAdmin().then((ok) => process.exit(ok ? 0 : 1));

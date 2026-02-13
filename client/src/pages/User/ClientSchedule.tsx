@@ -332,7 +332,7 @@ export const ClientSchedule = () => {
                         >
                             <button
                                 onClick={closeModal}
-                                className="absolute top-6 right-5 cursor-pointer"
+                                className="absolute top-[26px] right-5 cursor-pointer"
                             >
                                 <X size={24} />
                             </button>
@@ -367,14 +367,14 @@ export const ClientSchedule = () => {
                                     </p>
                                 )}
                             </div>
-                            <button onClick={copyEventLink} className="bg-white/10 block w-full mt-4 rounded-lg py-3 px-4 text-sm">
+                            <button onClick={() => {}} className="bg-white/10 block w-full mt-4 rounded-lg py-3 px-4 text-sm">
                                 <div className="flex items-center justify-between">
                                     <div>Ссылка на событие:</div>
-                                    <div>
+                                    <button onClick={copyEventLink} className="cursor-pointer">
                                         <img src={copyLink} alt="copy" className="w-5 h-5 object-cover" />
-                                    </div>
+                                    </button>
                                 </div>
-                                <div className="mt-1 text-left">{selectedSchedule?.eventLink}</div>
+                                <a href={selectedSchedule?.eventLink} target="_blank" rel="noopener noreferrer" className="mt-1 text-left">{selectedSchedule?.eventLink}</a>
                             </button>
                             <div className="mt-4 flex items-center justify-between">
                                 <div>Участвую</div>
@@ -429,7 +429,7 @@ export const ClientSchedule = () => {
                         >
                             <button
                                 onClick={closeModal}
-                                className="absolute top-6 right-5 cursor-pointer"
+                                className="absolute top-[26px] right-5 cursor-pointer"
                             >
                                 <X size={24} />
                             </button>
@@ -464,14 +464,14 @@ export const ClientSchedule = () => {
                                     </p>
                                 )}
                             </div>
-                            <button onClick={copyEventLink} className="bg-white/10 block w-full mt-4 rounded-lg py-3 px-4 text-sm">
+                            <button onClick={() => {}} className="bg-white/10 block w-full mt-4 rounded-lg py-3 px-4 text-sm">
                                 <div className="flex items-center justify-between">
                                     <div>Ссылка на событие:</div>
-                                    <div>
+                                    <button onClick={copyEventLink} className="cursor-pointer">
                                         <img src={copyLink} alt="copy" className="w-5 h-5 object-cover" />
-                                    </div>
+                                    </button>
                                 </div>
-                                <div className="mt-1 text-left">{selectedSchedule?.eventLink}</div>
+                                <a href={selectedSchedule?.eventLink} target="_blank" rel="noopener noreferrer" className="mt-1 text-left">{selectedSchedule?.eventLink}</a>
                             </button>
                             <div className="mt-4 flex items-center justify-between">
                                 <div>Участвую</div>

@@ -39,7 +39,7 @@ export const BonusPolicyModal = ({ isOpen, onClose, pointsAwardingPolicy }: { is
                 >
                     <button
                         onClick={onClose}
-                        className="absolute top-6 right-5 cursor-pointer z-10"
+                        className="absolute top-[26px] right-5 cursor-pointer z-10"
                     >
                         <X size={24} />
                     </button>
@@ -183,7 +183,7 @@ export const ClientInsufficientBonusModal = ({
                 >
                     <button
                         onClick={onClose}
-                        className="absolute top-6 right-5 cursor-pointer"
+                        className="absolute top-[26px] right-5 cursor-pointer"
                     >
                         <X size={24} />
                     </button>

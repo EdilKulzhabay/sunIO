@@ -115,7 +115,7 @@ const UserSchema = new mongoose.Schema({
     },
     locatedInRussia: {
         type: Boolean,
-        default: false,
+        default: true,
     },
     notifyPermission: {
         type: Boolean,

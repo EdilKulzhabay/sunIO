@@ -427,7 +427,7 @@ export const ClientInvitedUsers = () => {
                         >
                             <button
                                 onClick={() => setIsEditNameModalOpen(false)}
-                                className="absolute top-6 right-5 cursor-pointer z-10"
+                                className="absolute top-[26px] right-5 cursor-pointer z-10"
                             >
                                 <X size={24} />
                             </button>

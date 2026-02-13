@@ -171,7 +171,7 @@ export const About = () => {
                             >
                                 <button
                                     onClick={() => setModalOpen(false)}
-                                    className="absolute top-6 right-5 cursor-pointer"
+                                    className="absolute top-[26px] right-5 cursor-pointer"
                                 >
                                     <X size={24} />
                                 </button>

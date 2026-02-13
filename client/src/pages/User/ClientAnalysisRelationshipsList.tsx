@@ -237,7 +237,7 @@ export const ClientAnalysisRelationshipsList = () => {
             <UserLayout>
             <div className="flex items-center justify-between p-4">
                     <div className="flex items-center">
-                        <h1 className="text-2xl font-semibold ml-2">Разборы — Отношения</h1>
+                        <h1 className="text-2xl font-semibold">Разборы — Отношения</h1>
                     </div>
                     <div className="md:hidden">
                         <button 

@@ -12,10 +12,9 @@ export interface LinkButtonValue {
 interface ContentLinkButtonEditorProps {
     value: LinkButtonValue | null | undefined;
     onChange: (value: LinkButtonValue | null) => void;
-    onClear?: () => void;
 }
 
-export const ContentLinkButtonEditor = ({ value, onChange, onClear }: ContentLinkButtonEditorProps) => {
+export const ContentLinkButtonEditor = ({ value, onChange }: ContentLinkButtonEditorProps) => {
     const [contentItems, setContentItems] = useState<{ _id: string; title: string }[]>([]);
     const [loadingContent, setLoadingContent] = useState(false);
     const [localCategory, setLocalCategory] = useState('');
@@ -83,15 +82,6 @@ export const ContentLinkButtonEditor = ({ value, onChange, onClear }: ContentLin
         <div className="p-3 border border-gray-200 rounded-lg bg-gray-50 space-y-3">
             <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-700">Кнопка-ссылка</span>
-                {onClear && (
-                    <button
-                        type="button"
-                        onClick={onClear}
-                        className="text-sm text-red-600 hover:text-red-700"
-                    >
-                        Убрать кнопку
-                    </button>
-                )}
             </div>
 
             <MyInput

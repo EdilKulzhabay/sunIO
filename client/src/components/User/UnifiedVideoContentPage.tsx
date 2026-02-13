@@ -140,7 +140,7 @@ export const UnifiedVideoContentPage = ({
     const [content, setContent] = useState<NormalizedContent | null>(null);
     const [user, setUser] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const [locatedInRussia, setLocatedInRussia] = useState(false);
+    const [locatedInRussia, setLocatedInRussia] = useState(true);
     
     // Состояние для хранения прогресса каждого видео
     const videoProgressMapRef = useRef<Map<string, VideoProgress>>(new Map());

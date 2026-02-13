@@ -43,7 +43,6 @@ export const HealthLabForm = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const [loading, setLoading] = useState(false);
-    const [showTypePicker, setShowTypePicker] = useState(false);
     const [formData, setFormData] = useState<FormData>({
         title: '',
         shortDescription: '',
@@ -167,7 +166,6 @@ export const HealthLabForm = () => {
                 };
             return { ...prev, content: [...prev.content, base] };
         });
-        setShowTypePicker(false);
     };
 
     const handleLinkButtonChange = (index: number, value: LinkButtonValue | null) => {
@@ -353,7 +351,6 @@ export const HealthLabForm = () => {
                                             <ContentLinkButtonEditor
                                                 value={item.linkButton ?? null}
                                                 onChange={(v) => handleLinkButtonChange(index, v)}
-                                                onClear={item.linkButton ? () => handleLinkButtonChange(index, null) : undefined}
                                             />
                                         )}
                                     </div>
@@ -368,15 +365,7 @@ export const HealthLabForm = () => {
                         </div>
 
                         <div className="flex flex-col items-end gap-3">
-                            {showTypePicker && (
-                                <div className="flex flex-wrap gap-2">
-                                    <button type="button" onClick={() => addContentItem('video')} className="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Видео</button>
-                                    <button type="button" onClick={() => addContentItem('text')} className="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Текст</button>
-                                    <button type="button" onClick={() => addContentItem('image')} className="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Изображение</button>
-                                    <button type="button" onClick={() => addContentItem('linkButton')} className="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Кнопка-ссылка</button>
-                                </div>
-                            )}
-                            <button type="button" onClick={() => setShowTypePicker((p) => !p)} className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            <button type="button" onClick={() => addContentItem('video')} className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                                 <Plus size={16} />
                                 Добавить элемент
                             </button>

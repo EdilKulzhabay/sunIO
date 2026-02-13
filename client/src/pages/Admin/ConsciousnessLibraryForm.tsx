@@ -19,7 +19,6 @@ export const ConsciousnessLibraryForm = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const [loading, setLoading] = useState(false);
-    const [showTypePicker, setShowTypePicker] = useState(false);
     const [formData, setFormData] = useState<FormData>({ title: '', shortDescription: '', imageUrl: '', accessType: 'free', starsRequired: 0, duration: 0, order: 0, allowRepeatBonus: false, location: 'bottom', redirectToPage: '', visibility: true, content: [] });
 
     useEffect(() => { if (id) fetchItem(); }, [id]);
@@ -66,7 +65,6 @@ export const ConsciousnessLibraryForm = () => {
             const base = type === 'linkButton' ? { type: 'linkButton' as const, linkButton: { linkButtonText: null, linkButtonLink: null, linkButtonType: 'internal' as const } } : { type, video: { mainUrl: '', reserveUrl: '', duration: 0 }, text: '', image: '' };
             return { ...prev, content: [...prev.content, base] };
         });
-        setShowTypePicker(false);
     };
     const handleLinkButtonChange = (index: number, value: LinkButtonValue | null) => { setFormData(prev => { const newContent = [...prev.content]; newContent[index] = { ...newContent[index], linkButton: value }; return { ...prev, content: newContent }; }); };
     const removeContentItem = (index: number) => { setFormData(prev => { const newContent = [...prev.content]; newContent.splice(index, 1); return { ...prev, content: newContent }; }); };
@@ -128,22 +126,14 @@ export const ConsciousnessLibraryForm = () => {
                                         {item.type === 'video' && (<><MyInput label="Основная ссылка на видео" type="text" value={item.video?.mainUrl || ''} onChange={(e) => handleVideoChange(index, 'mainUrl', e.target.value)} placeholder="https://..." /><MyInput label="Резервная ссылка на видео" type="text" value={item.video?.reserveUrl || ''} onChange={(e) => handleVideoChange(index, 'reserveUrl', e.target.value)} placeholder="https://..." /><MyInput label="Длительность видео (мин)" type="number" value={String(item.video?.duration || 0)} onChange={(e) => handleVideoChange(index, 'duration', Number(e.target.value) || 0)} min="0" /></>)}
                                         {item.type === 'image' && <ImageUpload value={item.image || ''} onChange={(url) => handleContentChange(index, 'image', url)} label="Изображение" />}
                                         {item.type === 'text' && <div><label className="block text-sm font-medium mb-2">Текст</label><RichTextEditor value={item.text || ''} onChange={(value) => handleContentChange(index, 'text', value)} placeholder="Введите текст" height="200px" /></div>}
-                                        {item.type === 'linkButton' && <ContentLinkButtonEditor value={item.linkButton ?? null} onChange={(v) => handleLinkButtonChange(index, v)} onClear={item.linkButton ? () => handleLinkButtonChange(index, null) : undefined} />}
+                                        {item.type === 'linkButton' && <ContentLinkButtonEditor value={item.linkButton ?? null} onChange={(v) => handleLinkButtonChange(index, v)}  />}
                                     </div>
                                 </div>
                             ))}
                             {formData.content.length === 0 && <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">Нет элементов контента. Нажмите "Добавить элемент", чтобы начать.</div>}
                         </div>
                         <div className="flex flex-col items-end gap-3">
-                            {showTypePicker && (
-                                <div className="flex flex-wrap gap-2">
-                                    <button type="button" onClick={() => addContentItem('video')} className="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Видео</button>
-                                    <button type="button" onClick={() => addContentItem('text')} className="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Текст</button>
-                                    <button type="button" onClick={() => addContentItem('image')} className="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Изображение</button>
-                                    <button type="button" onClick={() => addContentItem('linkButton')} className="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Кнопка-ссылка</button>
-                                </div>
-                            )}
-                            <button type="button" onClick={() => setShowTypePicker((p) => !p)} className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"><Plus size={16} />Добавить элемент</button>
+                            <button type="button" onClick={() => addContentItem('video')} className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"><Plus size={16} />Добавить элемент</button>
                         </div>
                     </div>
                     <div className="flex gap-3 justify-end bg-white rounded-lg shadow-sm p-6"><button type="button" onClick={() => navigate('/admin/consciousness-library')} className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Отмена</button><MyButton text={loading ? 'Сохранение...' : 'Сохранить'} type="submit" disabled={loading} /></div>

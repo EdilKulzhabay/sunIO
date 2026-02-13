@@ -237,7 +237,7 @@ export const ClientRelationshipWorkshopList = () => {
             <UserLayout>
             <div className="flex items-center justify-between p-4">
                     <div className="flex items-center">
-                        <h1 className="text-2xl font-semibold ml-2">Мастерская отношений</h1>
+                        <h1 className="text-2xl font-semibold">Мастерская отношений</h1>
                     </div>
                     <div className="md:hidden">
                         <button 

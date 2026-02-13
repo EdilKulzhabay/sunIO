@@ -237,7 +237,7 @@ export const ClientSpiritForgeList = () => {
             <UserLayout>
             <div className="flex items-center justify-between p-4">
                     <div className="flex items-center">
-                        <h1 className="text-2xl font-semibold ml-2">Кузница Духа</h1>
+                        <h1 className="text-2xl font-semibold">Кузница Духа</h1>
                     </div>
                     <div className="md:hidden">
                         <button 

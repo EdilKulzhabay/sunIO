@@ -1,7 +1,7 @@
 import { UserLayout } from "../../components/User/UserLayout";
 import { BackNav } from "../../components/User/BackNav";
 import api from "../../api";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { RedButton } from "../../components/User/RedButton";
 import { useNavigate } from "react-router-dom";
 import { Switch } from "../../components/User/Switch";
@@ -46,6 +46,36 @@ export const ClientBegginingJourney = () => {
     const [locatedInRussia, setLocatedInRussia] = useState(true);
     const hasFetched = useRef(false);
 
+    const fetchUserData = useCallback(async () => {
+        try {
+            const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+            const response = await api.get(`/api/user/${storedUser._id}`);
+            if (response.data.success) {
+                setLocatedInRussia(response.data.data.locatedInRussia);
+                if (response.data.data && response.data.data.isBlocked && response.data.data.role !== "admin") {
+                    window.location.href = "/client/blocked-user";
+                }
+            }
+        } catch (error) {
+            console.error("Ошибка загрузки данных пользователя:", error);
+        }
+    }, []);
+
+    const updateUserData = async (field: string, value: boolean) => {
+        const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+        await api.put(`/api/user/${storedUser._id}`, { [field]: value });
+    };
+
+    const handleLocatedInRussiaChange = async () => {
+        try {
+            await updateUserData("locatedInRussia", !locatedInRussia);
+            setLocatedInRussia(!locatedInRussia);
+            window.location.reload();
+        } catch (error) {
+            console.error("Ошибка при изменении просмотра видео в РФ без VPN:", error);
+        }
+    };
+
     useEffect(() => {
         if (hasFetched.current) return;
         hasFetched.current = true;
@@ -62,6 +92,7 @@ export const ClientBegginingJourney = () => {
         };
 
         fetchContent();
+        fetchUserData();
     }, []);
 
     const embedUrl = useMemo(() => {
@@ -99,7 +130,7 @@ export const ClientBegginingJourney = () => {
                         {content?.video?.reserveUrl && (
                             <div className="mt-4 flex items-center justify-between">
                                 <div>Просмотр видео в РФ без VPN</div>
-                                <Switch checked={locatedInRussia} onChange={() => setLocatedInRussia(!locatedInRussia)} />
+                                <Switch checked={locatedInRussia} onChange={handleLocatedInRussiaChange} />
                             </div>
                         )}
                     </div>

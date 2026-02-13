@@ -25,10 +25,12 @@ export const ProductCatalogAdmin = () => {
         catch (error: any) { toast.error('Ошибка удаления'); }
     };
 
+    const accessTypeLabels: Record<string, string> = { free: 'Бесплатно', paid: 'Платно', subscription: 'Подписка', stars: 'Баллы' };
     const columns = [
         { key: 'title', label: 'Название' },
         { key: 'order', label: 'Порядок' },
-        { key: 'accessType', label: 'Доступ' },
+        { key: 'accessType', label: 'Доступ', render: (v: string) => accessTypeLabels[v] || v },
+        { key: 'visibility', label: 'Видимость', render: (v: boolean) => v !== false ? 'Да' : 'Нет' },
         { key: 'allowRepeatBonus', label: 'Повторные баллы', render: (value: boolean) => value ? 'Да' : 'Нет' },
     ];
 

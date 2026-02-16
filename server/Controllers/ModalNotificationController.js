@@ -124,8 +124,9 @@ export const createModalNotification = async (req, res) => {
 // Удалить модальное уведомление у пользователя (после нажатия на кнопку)
 export const removeModalNotification = async (req, res) => {
     try {
-        const admin = req.user;
         const { notificationIndex, mail } = req.body;
+
+        console.log("req.body in removeModalNotification:", req.body);
 
         if (notificationIndex === undefined || notificationIndex === null) {
             return res.status(400).json({
@@ -153,7 +154,6 @@ export const removeModalNotification = async (req, res) => {
         // Удаляем уведомление по индексу
         user.modalNotifications.splice(notificationIndex, 1);
         await user.save();
-        await addAdminAction(admin._id, `Удалил(а) модальное уведомление: "${user.modalNotifications[notificationIndex].modalTitle}"`);
 
         res.json({
             success: true,

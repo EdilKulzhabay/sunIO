@@ -133,7 +133,7 @@ export const AnalysisHealthForm = () => {
                             {formData.content.length === 0 && <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">Нет элементов контента. Нажмите "Добавить элемент", чтобы начать.</div>}
                         </div>
                         <div className="flex flex-col items-end gap-3">
-                            <button type="button" onClick={() => addContentItem} className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"><Plus size={16} />Добавить элемент</button>
+                            <button type="button" onClick={() => addContentItem('video')} className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"><Plus size={16} />Добавить элемент</button>
                         </div>
                     </div>
                     <div className="flex gap-3 justify-end bg-white rounded-lg shadow-sm p-6"><button type="button" onClick={() => navigate('/admin/analysis-health')} className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Отмена</button><MyButton text={loading ? 'Сохранение...' : 'Сохранить'} type="submit" disabled={loading} /></div>

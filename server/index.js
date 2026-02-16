@@ -363,7 +363,7 @@ app.delete("/api/broadcast/:id", authMiddleware, BroadcastController.deleteBroad
 app.post("/api/modal-notification/users", ModalNotificationController.getFilteredUsers);
 app.post("/api/modal-notification/create", createContentRateLimit, authMiddleware, ModalNotificationController.createModalNotification);
 app.post("/api/modal-notification/my", ModalNotificationController.getUserModalNotifications);
-app.post("/api/modal-notification/remove", authMiddleware, ModalNotificationController.removeModalNotification);
+app.post("/api/modal-notification/remove", ModalNotificationController.removeModalNotification);
 
 // ==================== Robokassa ====================
 app.post("/api/robres", RobokassaController.handleResult);

@@ -124,7 +124,7 @@ export const createModalNotification = async (req, res) => {
 // Удалить модальное уведомление у пользователя (после нажатия на кнопку)
 export const removeModalNotification = async (req, res) => {
     try {
-        const { notificationIndex, mail } = req.body;
+        const { notificationIndex, telegramId } = req.body;
 
         console.log("req.body in removeModalNotification:", req.body);
 
@@ -135,7 +135,7 @@ export const removeModalNotification = async (req, res) => {
             });
         }
 
-        const user = await User.findOne({ mail });
+        const user = await User.findOne({ telegramId });
         if (!user) {
             return res.status(404).json({
                 success: false,

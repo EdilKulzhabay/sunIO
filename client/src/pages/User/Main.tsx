@@ -266,10 +266,11 @@ export const Main = () => {
         const buttonLink = modalNotification.modalButtonLink;
 
         try {
+            console.log("userData in handleModalButtonClick:", userData);
             // Удаляем уведомление с сервера
             await api.post('/api/modal-notification/remove', {
                 notificationIndex: notificationIndex,
-                mail: userData.mail
+                telegramId: userData.telegramId
             });
 
             // Закрываем текущее модальное окно

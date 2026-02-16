@@ -32,7 +32,8 @@ export const getFilteredUsers = async (req, res) => {
         console.log("search: ", search);
 
         let filter = {
-            notifyPermission: true,
+            // Только пользователи, разрешившие уведомления
+            notifyPermission: { $ne: false },
             // Исключаем заблокированных пользователей
             isBlocked: { $ne: true },
         };
@@ -77,7 +78,7 @@ export const getFilteredUsers = async (req, res) => {
         }
 
         const users = await User.find(filter)
-            .select('telegramId telegramUserName userName fullName phone status isBlocked createdAt')
+            .select('telegramId telegramUserName userName fullName phone status isBlocked notifyPermission createdAt')
             .sort({ createdAt: -1 });
 
         res.json({
@@ -149,11 +150,11 @@ const executeBroadcast = async (payload) => {
             filter._id = { $in: userIds };
             filter.telegramId = { $exists: true, $ne: null, $ne: '' };
             filter.isBlocked = { $ne: true };
-            filter.notifyPermission = true;
+            filter.notifyPermission = { $ne: false };
             users = await User.find(filter).select('telegramId telegramUserName userName fullName phone status isBlocked profilePhotoUrl');
         } else {
             filter.isBlocked = { $ne: true };
-            filter.notifyPermission = true;
+            filter.notifyPermission = { $ne: false };
             
             if (status && status !== 'all') {
                 if (status !== 'blocked') {

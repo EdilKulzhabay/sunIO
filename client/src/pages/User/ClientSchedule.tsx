@@ -20,6 +20,19 @@ export const ClientSchedule = () => {
     const [selectedSchedule, setSelectedSchedule] = useState<any>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [linkCopied, setLinkCopied] = useState(false);
+
+    const dateToLocalDateTime = (date: Date | string): string => {
+        const d = typeof date === 'string' ? new Date(date) : date;
+        // Конвертируем UTC в Asia/Almaty (UTC+6)
+        const localDate = new Date(d.getTime() + (6 * 60 * 60 * 1000)); // Добавляем 6 часов
+        const year = localDate.getUTCFullYear();
+        const month = String(localDate.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(localDate.getUTCDate()).padStart(2, '0');
+        const hours = String(localDate.getUTCHours()).padStart(2, '0');
+        const minutes = String(localDate.getUTCMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    };
 
     const fetchUserData = async (id: string) => {
         const response = await api.get(`/api/user/${id}`);
@@ -236,6 +249,7 @@ export const ClientSchedule = () => {
 
     const copyEventLink = () => {
         navigator.clipboard.writeText(selectedSchedule?.eventLink || '');
+        setLinkCopied(true);
         toast.success('Ссылка на событие скопирована!');
     }
 
@@ -346,7 +360,7 @@ export const ClientSchedule = () => {
                                 )}
                                 {selectedSchedule.startDate && (
                                     <p className="text-sm text-white/60">
-                                        Дата начала: {new Date(selectedSchedule.startDate).toLocaleString('ru-RU', {
+                                        Дата начала: {new Date(dateToLocalDateTime(selectedSchedule.startDate)).toLocaleString('ru-RU', {
                                             day: 'numeric',
                                             month: 'long',
                                             year: 'numeric',
@@ -357,7 +371,7 @@ export const ClientSchedule = () => {
                                 )}
                                 {selectedSchedule.endDate && (
                                     <p className="text-sm text-white/60">
-                                        Дата окончания: {new Date(selectedSchedule.endDate).toLocaleString('ru-RU', {
+                                        Дата окончания: {new Date(dateToLocalDateTime(selectedSchedule.endDate)).toLocaleString('ru-RU', {
                                             day: 'numeric',
                                             month: 'long',
                                             year: 'numeric',
@@ -377,6 +391,9 @@ export const ClientSchedule = () => {
                                 <div className="break-all w-full text-left">
                                     <a href={selectedSchedule?.eventLink} target="_blank" rel="noopener noreferrer" className="mt-1 text-left">{selectedSchedule?.eventLink}</a>
                                 </div>
+                                {linkCopied && (
+                                    <div className="text-sm text-[#C4841D] mt-1">Ссылка скопирована!</div>
+                                )}
                             </button>
                             <div className="mt-4 flex items-center justify-between">
                                 <div>Участвую</div>
@@ -445,7 +462,7 @@ export const ClientSchedule = () => {
                                 )}
                                 {selectedSchedule.startDate && (
                                     <p className="text-sm text-white/60">
-                                        Дата начала: {new Date(selectedSchedule.startDate).toLocaleString('ru-RU', {
+                                        Дата начала: {new Date(dateToLocalDateTime(selectedSchedule.startDate)).toLocaleString('ru-RU', {
                                             day: 'numeric',
                                             month: 'long',
                                             year: 'numeric',
@@ -456,7 +473,7 @@ export const ClientSchedule = () => {
                                 )}
                                 {selectedSchedule.endDate && (
                                     <p className="text-sm text-white/60">
-                                        Дата окончания: {new Date(selectedSchedule.endDate).toLocaleString('ru-RU', {
+                                        Дата окончания: {new Date(dateToLocalDateTime(selectedSchedule.endDate)).toLocaleString('ru-RU', {
                                             day: 'numeric',
                                             month: 'long',
                                             year: 'numeric',
@@ -476,6 +493,9 @@ export const ClientSchedule = () => {
                                 <div className="break-all w-full text-left">
                                     <a href={selectedSchedule?.eventLink} target="_blank" rel="noopener noreferrer" className="mt-1 text-left">{selectedSchedule?.eventLink}</a>
                                 </div>
+                                {linkCopied && (
+                                    <div className="text-sm text-[#C4841D] mt-1">Ссылка скопирована!</div>
+                                )}
                             </button>
                             <div className="mt-4 flex items-center justify-between">
                                 <div>Участвую</div>

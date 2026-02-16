@@ -15,6 +15,7 @@ interface User {
     phone?: string;
     status: string;
     isBlocked?: boolean;
+    notifyPermission?: boolean;
 }
 
 interface SavedBroadcast {
@@ -115,11 +116,12 @@ export const BroadcastFormAdmin = () => {
                 lastActiveFilter: lastActiveFilter,
                 search: search
             });
-            setFoundUsers(response.data.data || []);
-            if (response.data.data.length === 0) {
+            const users = (response.data.data || []).filter((u: User) => u.notifyPermission !== false);
+            setFoundUsers(users);
+            if (users.length === 0) {
                 toast.info('Пользователи не найдены');
             } else {
-                toast.success(`Найдено пользователей: ${response.data.data.length}`);
+                toast.success(`Найдено пользователей: ${users.length}`);
             }
         } catch (error: any) {
             toast.error('Ошибка поиска пользователей');

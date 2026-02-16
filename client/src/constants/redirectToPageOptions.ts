@@ -11,7 +11,7 @@ export const REDIRECT_TO_PAGE_OPTIONS: { title: string; value: string }[] = [
     { title: 'Башня мастеров', value: '/client/masters-tower' },
     { title: 'Беседка женственности', value: '/client/femininity-gazebo' },
     { title: 'Библиотека сознания', value: '/client/consciousness-library' },
-    { title: 'Каталог продуктов', value: '/client/product-catalog' },
+    { title: 'Каталог платных продуктов', value: '/client/product-catalog' },
     { title: 'Разборы — Здоровье', value: '/client/analysis-health' },
     { title: 'Разборы — Отношения', value: '/client/analysis-relationships' },
     { title: 'Разборы — Реализация', value: '/client/analysis-realization' },

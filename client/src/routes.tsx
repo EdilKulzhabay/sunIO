@@ -445,7 +445,7 @@ export const routes = createBrowserRouter([
         path: "/admin/consciousness-library/edit/:id",
         element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ConsciousnessLibraryForm /></ProtectedRoute></RootLayout>,
     },
-    // ==================== ProductCatalog (Каталог продуктов) ====================
+    // ==================== ProductCatalog (Каталог платных продуктов) ====================
     {
         path: "/admin/product-catalog",
         element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ProductCatalogAdmin /></ProtectedRoute></RootLayout>,

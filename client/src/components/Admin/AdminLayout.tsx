@@ -48,7 +48,7 @@ const menuItems = [
     { path: '/admin/masters-tower', label: 'Башня мастеров', icon: Castle },
     { path: '/admin/femininity-gazebo', label: 'Беседка женственности', icon: Flower2 },
     { path: '/admin/consciousness-library', label: 'Библиотека сознания', icon: BookOpen },
-    { path: '/admin/product-catalog', label: 'Каталог продуктов', icon: ShoppingBag },
+    { path: '/admin/product-catalog', label: 'Каталог платных продуктов', icon: ShoppingBag },
     { path: '/admin/analysis-health', label: 'Разборы - Здоровье', icon: Stethoscope },
     { path: '/admin/analysis-relationships', label: 'Разборы - Отношения', icon: HeartHandshake },
     { path: '/admin/analysis-realization', label: 'Разборы - Реализация', icon: Target },

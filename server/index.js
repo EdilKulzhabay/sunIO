@@ -261,7 +261,7 @@ app.get("/api/consciousness-library/:id", ConsciousnessLibraryController.getById
 app.put("/api/consciousness-library/:id", authMiddleware, ConsciousnessLibraryController.update);
 app.delete("/api/consciousness-library/:id", authMiddleware, ConsciousnessLibraryController.remove);
 
-// ==================== ProductCatalog (Каталог продуктов) маршруты ====================
+// ==================== ProductCatalog (Каталог платных продуктов) маршруты ====================
 app.post("/api/product-catalog", createContentRateLimit, authMiddleware, ProductCatalogController.create);
 app.get("/api/product-catalog", ProductCatalogController.getAll);
 app.get("/api/product-catalog/:id", ProductCatalogController.getById);

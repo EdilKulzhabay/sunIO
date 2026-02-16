@@ -290,7 +290,7 @@ export const PracticeForm = () => {
                         <ImageUpload
                             value={formData.imageUrl}
                             onChange={(url) => setFormData({ ...formData, imageUrl: url })}
-                            label="Обложка"
+                            label="Изображение"
                         />
 
                         <div className="flex flex-col gap-2">
@@ -310,10 +310,10 @@ export const PracticeForm = () => {
                         {formData.accessType === 'stars' && (
                             <MyInput
                                 label="Стоимость в баллах"
-                                type="number"
-                                value={String(formData.starsRequired)}
-                                onChange={(e) => setFormData({ ...formData, starsRequired: Number(e.target.value) || 0 })}
-                                min="0"
+                                type="text"
+                                value={formData.starsRequired.toString()}
+                                onChange={(e) => setFormData({ ...formData, starsRequired: parseInt(e.target.value) || 0 })}
+                                placeholder="0"
                             />
                         )}
 
@@ -327,10 +327,10 @@ export const PracticeForm = () => {
                             /> */}
                             <MyInput
                                 label="Порядок"
-                                type="number"
-                                value={String(formData.order)}
-                                onChange={(e) => setFormData({ ...formData, order: Number(e.target.value) || 0 })}
-                                min="0"
+                                type="text"
+                                value={formData.order.toString()}
+                                onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
+                                placeholder="0"
                             />
                             <div className="flex flex-col gap-2">
                                 <label className="text-sm font-medium">Расположение</label>

@@ -9,7 +9,7 @@ interface ImageUploadProps {
     label?: string;
 }
 
-export const ImageUpload = ({ value, onChange, label = "Обложка" }: ImageUploadProps) => {
+export const ImageUpload = ({ value, onChange, label = "Изображение" }: ImageUploadProps) => {
     const [uploading, setUploading] = useState(false);
     const [preview, setPreview] = useState<string>(value || '');
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -138,12 +138,12 @@ export const ImageUpload = ({ value, onChange, label = "Обложка" }: Image
                         ) : (preview || value) ? (
                             <>
                                 <Upload size={20} className="text-gray-600" />
-                                <span className="text-gray-700">Изменить обложку</span>
+                                <span className="text-gray-700">Изменить изображение</span>
                             </>
                         ) : (
                             <>
                                 <ImageIcon size={20} className="text-gray-600" />
-                                <span className="text-gray-700">Добавить обложку</span>
+                                <span className="text-gray-700">Добавить изображение</span>
                             </>
                         )}
                     </button>

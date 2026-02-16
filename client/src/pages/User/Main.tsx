@@ -339,7 +339,7 @@ export const Main = () => {
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="mt-4">
-                                <h3 className="text-2xl font-bold mb-4">{modalNotification.modalTitle}</h3>
+                                <h3 className="text-xl font-bold mb-4">{modalNotification.modalTitle}</h3>
                                 <p className="mb-6 text-gray-300 text-lg" dangerouslySetInnerHTML={{ __html: modalNotification.modalDescription }}></p>
                                 <button
                                     onClick={handleModalButtonClick}
@@ -366,7 +366,7 @@ export const Main = () => {
                         >
                             
                             <div className="mt-4">
-                                <h3 className="text-2xl font-bold mb-4">{modalNotification.modalTitle}</h3>
+                                <h3 className="text-xl font-bold mb-4">{modalNotification.modalTitle}</h3>
                                 <p className="mb-6 text-gray-300 text-lg" dangerouslySetInnerHTML={{ __html: modalNotification.modalDescription }}></p>
                                 <button
                                     onClick={handleModalButtonClick}

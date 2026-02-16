@@ -1,12 +1,13 @@
-import { Link } from 'react-router-dom';
 import lock from '../../assets/lock.png';
 import star from '../../assets/star.png';
+import { useNavigate } from 'react-router-dom';
 
 export const MiniVideoCard = ({ title, image, link, progress, accessType, onLockedClick, duration, starsRequired }: { title: string, image: string, link: string, progress: number, accessType: string, onLockedClick?: () => void, duration?: number, starsRequired?: number }) => {
+    const navigate = useNavigate();
     return (
         <>
         {accessType === 'free' ? (
-            <Link to={link} className="rounded-xl bg-[#114E50] w-full h-full flex flex-col">
+            <button onClick={() => navigate(link)} className="rounded-xl bg-[#114E50] w-full h-full flex flex-col">
                 <div className="relative h-[98px] sm:h-[142px] lg:h-[197px]">
                     <img src={`${import.meta.env.VITE_API_URL}${image}`} alt={title} className="w-full h-full rounded-lg object-cover" />
                 </div>
@@ -25,17 +26,20 @@ export const MiniVideoCard = ({ title, image, link, progress, accessType, onLock
                     >
                         {title}
                     </p>
-                    <div className="mt-auto">
-                        <div className='w-full flex items-center justify-between'>
-                            <p className='text-sm font-medium'>{progress}%</p>
-                            <p className='text-sm font-medium'>{duration} мин.</p>
-                        </div>
-                        <div className='w-full h-1.5 bg-white/40 rounded-full mt-1'>
-                            <div className='h-full bg-white rounded-full' style={{ width: `${progress}%` }} />
-                        </div>
-                    </div>
+                    {duration && duration > 0 ? 
+                        <div className="mt-auto">
+                            <div className='w-full flex items-center justify-between'>
+                                <p className='text-sm font-medium'>{progress}%</p>
+                                <p className='text-sm font-medium'>{duration} мин.</p>
+                            </div>
+                            <div className='w-full h-1.5 bg-white/40 rounded-full mt-1'>
+                                <div className='h-full bg-white rounded-full' style={{ width: `${progress}%` }} />
+                            </div>
+                        </div> : <div className="mt-auto"></div>
+                        }
+                    
                 </div>
-            </Link>
+            </button>
         ) : (
             <button onClick={onLockedClick} className="rounded-xl bg-[#114E50] w-full h-full flex-1 flex flex-col">
                 <div className="relative h-[98px] sm:h-[142px] lg:h-[197px]">
@@ -63,15 +67,18 @@ export const MiniVideoCard = ({ title, image, link, progress, accessType, onLock
                         {title}
                     </p>
                     <div className="mt-auto flex items-center gap-x-3">
-                        <div className='w-[50%]'>
-                            <div className='w-full flex items-center justify-between'>
-                                <p className='text-sm font-medium'>{progress}%</p>
-                                <p className='text-sm font-medium'>{duration} мин.</p>
-                            </div>
-                            <div className='w-full h-1.5 bg-white/40 rounded-full mt-1'>
-                                <div className='h-full bg-white rounded-full' style={{ width: `${progress}%` }} />
-                            </div>
-                        </div>
+                        {duration && duration > 0 ? 
+                            <div className='w-[50%]'>
+                                <div className='w-full flex items-center justify-between'>
+                                    <p className='text-sm font-medium'>{progress}%</p>
+                                    <p className='text-sm font-medium'>{duration} мин.</p>
+                                </div>
+                                <div className='w-full h-1.5 bg-white/40 rounded-full mt-1'>
+                                    <div className='h-full bg-white rounded-full' style={{ width: `${progress}%` }} />
+                                </div>
+                            </div>    
+                            : <div className='w-[50%]'></div>
+                        }
                         <div className='self-stretch flex-1'>
                             <div className='flex h-full w-full items-center justify-center gap-x-2 border border-[#00C5AE] rounded-full'>
                                 <p className='text-sm font-medium text-[#00C5AE]'>{starsRequired}</p>

@@ -50,15 +50,17 @@ export const VideoCard = ({ title, description, image, link, accessType, progres
                     </p>
                 </div>
                 <div className="mt-auto pt-2 flex items-center justify-between flex-shrink-0">
-                    <div className='w-[50%]'>
-                        <div className='flex items-center justify-between'>
-                            <p className='text-sm font-medium'>{progress}%</p>
-                            <p className='text-sm font-medium'>{duration} мин.</p>
+                    {duration && duration > 0 ? 
+                        <div className='w-[50%]'>
+                            <div className='flex items-center justify-between'>
+                                <p className='text-sm font-medium'>{progress}%</p>
+                                <p className='text-sm font-medium'>{duration} мин.</p>
+                            </div>
+                            <div className='w-full h-1.5 bg-white/40 rounded-full mt-1'>
+                                <div className='h-full bg-white rounded-full' style={{ width: `${progress}%` }} />
+                            </div>
                         </div>
-                        <div className='w-full h-1.5 bg-white/40 rounded-full mt-1'>
-                            <div className='h-full bg-white rounded-full' style={{ width: `${progress}%` }} />
-                        </div>
-                    </div>
+                    : <div className='w-[50%]'></div>}
 
                     {accessType === 'free' && (
                         <div className="w-[45%] flex items-center justify-center px-3 py-1.5 border border-[#00C5AE] rounded-full cursor-pointer">

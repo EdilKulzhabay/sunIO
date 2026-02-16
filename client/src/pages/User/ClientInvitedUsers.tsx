@@ -380,11 +380,16 @@ export const ClientInvitedUsers = () => {
                                                 <button
                                                     onClick={() => setSelectedUser(user.telegramId)}
                                                     key={user.telegramId}
-                                                    className="block w-full py-2.5 px-3 border border-white/40 rounded-xl text-left text-white font-medium hover:bg-white/10 transition-colors"
+                                                    className="flex items-center justify-between w-full py-2.5 px-3 border border-white/40 rounded-xl text-left text-white font-medium hover:bg-white/10 transition-colors"
                                                 >
                                                     {user.telegramUserName && `@${user.telegramUserName}`}
                                                     {user.telegramUserName && user.fullName && ', '}
                                                     {user.fullName && `${user.fullName}`}
+                                                    <div className={`w-4 h-4 flex items-center justify-center border ${selectedUser === user.telegramId ? 'border-[#C4841D]' : 'border-white/40'} rounded-full`}>
+                                                        {selectedUser === user.telegramId && (
+                                                            <div className="w-[6px] h-[6px] bg-[#C4841D] rounded-full"></div>
+                                                        )}
+                                                    </div>
                                                 </button>
                                             )
                                         }

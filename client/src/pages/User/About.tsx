@@ -200,7 +200,7 @@ export const About = () => {
                                 </button>
                                 
                                 <div className="mt-4">
-                                    <h3 className="text-2xl font-bold mb-4">Вступить в Сообщество</h3>
+                                    <h3 className="text-xl font-bold mb-4">Вступить в Сообщество</h3>
                                     <p className="mb-6 text-gray-300 text-lg">
                                     Клуб доступен только для выпускников 4-х дневных тренингов. Свяжитесь с нами и мы поможем вам стать частью нашего Сообщества
                                     </p>

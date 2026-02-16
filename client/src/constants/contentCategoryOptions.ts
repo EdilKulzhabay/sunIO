@@ -10,7 +10,7 @@ export const CONTENT_CATEGORY_OPTIONS: { title: string; apiPath: string; clientP
     { title: 'Башня мастеров', apiPath: '/api/masters-tower', clientPath: '/client/masters-tower' },
     { title: 'Беседка женственности', apiPath: '/api/femininity-gazebo', clientPath: '/client/femininity-gazebo' },
     { title: 'Библиотека сознания', apiPath: '/api/consciousness-library', clientPath: '/client/consciousness-library' },
-    { title: 'Каталог продуктов', apiPath: '/api/product-catalog', clientPath: '/client/product-catalog' },
+    { title: 'Каталог платных продуктов', apiPath: '/api/product-catalog', clientPath: '/client/product-catalog' },
     { title: 'Разборы — Здоровье', apiPath: '/api/analysis-health', clientPath: '/client/analysis-health' },
     { title: 'Разборы — Отношения', apiPath: '/api/analysis-relationships', clientPath: '/client/analysis-relationships' },
     { title: 'Разборы — Реализация', apiPath: '/api/analysis-realization', clientPath: '/client/analysis-realization' },

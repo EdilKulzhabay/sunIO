@@ -237,7 +237,7 @@ export const ClientProductCatalogList = () => {
             <UserLayout>
             <div className="flex items-center justify-between p-4">
                     <div className="flex items-center">
-                        <h1 className="text-2xl font-semibold">Каталог продуктов</h1>
+                        <h1 className="text-2xl font-semibold">Каталог платных продуктов</h1>
                     </div>
                     <div className="md:hidden">
                         <button 

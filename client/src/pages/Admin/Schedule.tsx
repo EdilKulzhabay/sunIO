@@ -10,6 +10,18 @@ export const ScheduleAdmin = () => {
     const navigate = useNavigate();
     const [schedules, setSchedules] = useState([]);
 
+    const dateToLocalDateTime = (date: Date | string): string => {
+        const d = typeof date === 'string' ? new Date(date) : date;
+        // Конвертируем UTC в Asia/Almaty (UTC+6)
+        const localDate = new Date(d.getTime() + (6 * 60 * 60 * 1000)); // Добавляем 6 часов
+        const year = localDate.getUTCFullYear();
+        const month = String(localDate.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(localDate.getUTCDate()).padStart(2, '0');
+        const hours = String(localDate.getUTCHours()).padStart(2, '0');
+        const minutes = String(localDate.getUTCMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    };
+
     useEffect(() => {
         fetchSchedules();
     }, []);
@@ -49,12 +61,24 @@ export const ScheduleAdmin = () => {
         { 
             key: 'startDate', 
             label: 'Дата начала',
-            render: (value: string) => new Date(value).toLocaleString('ru-RU')
+            render: (value: string) => new Date(dateToLocalDateTime(value)).toLocaleString('ru-RU', {
+                day: 'numeric',
+                month: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            })
         },
         { 
             key: 'endDate', 
             label: 'Дата окончания',
-            render: (value: string) => new Date(value).toLocaleString('ru-RU')
+            render: (value: string) => new Date(dateToLocalDateTime(value)).toLocaleString('ru-RU', {
+                day: 'numeric',
+                month: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            })
         },
     ];
 

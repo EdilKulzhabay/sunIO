@@ -38,7 +38,7 @@ export const ProductCatalogAdmin = () => {
         <AdminLayout>
             <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-bold text-gray-900">Каталог продуктов</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Каталог платных продуктов</h1>
                     <button onClick={handleCreate} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"><Plus size={20} />Добавить запись</button>
                 </div>
                 <AdminTable columns={columns} data={items} onEdit={handleEdit} onDelete={handleDelete} />

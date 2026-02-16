@@ -231,7 +231,7 @@ export const VideoContentForm = ({ contentType, title, listRoute }: VideoContent
                         </div>
 
                         <ImageUpload
-                            label={`Обложка ${title.toLowerCase()}`}
+                            label={`Изображение ${title.toLowerCase()}`}
                             value={formData.imageUrl}
                             onChange={(url) => setFormData({ ...formData, imageUrl: url })}
                         />

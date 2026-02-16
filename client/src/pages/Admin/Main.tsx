@@ -40,7 +40,7 @@ const contentCards = [
     { title: 'Башня мастеров', icon: Castle, path: '/admin/masters-tower', color: 'bg-stone-600', description: 'Контент Башни мастеров' },
     { title: 'Беседка женственности', icon: Flower2, path: '/admin/femininity-gazebo', color: 'bg-fuchsia-500', description: 'Контент Беседки женственности' },
     { title: 'Библиотека сознания', icon: BookOpen, path: '/admin/consciousness-library', color: 'bg-violet-500', description: 'Контент Библиотеки сознания' },
-    { title: 'Каталог продуктов', icon: ShoppingBag, path: '/admin/product-catalog', color: 'bg-emerald-500', description: 'Каталог продуктов' },
+    { title: 'Каталог платных продуктов', icon: ShoppingBag, path: '/admin/product-catalog', color: 'bg-emerald-500', description: 'Каталог платных продуктов' },
     { title: 'Разборы — Здоровье', icon: Stethoscope, path: '/admin/analysis-health', color: 'bg-red-500', description: 'Разборы по здоровью' },
     { title: 'Разборы — Отношения', icon: HeartHandshake, path: '/admin/analysis-relationships', color: 'bg-rose-500', description: 'Разборы по отношениям' },
     { title: 'Разборы — Реализация', icon: Target, path: '/admin/analysis-realization', color: 'bg-amber-500', description: 'Разборы по реализации' },

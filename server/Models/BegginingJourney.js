@@ -28,6 +28,16 @@ const BegginingJourneySchema = new mongoose.Schema(
             trim: true,
             default: null,
         },
+        duration: {
+            type: Number,
+            min: 0,
+            default: 0,
+        },
+        points: {
+            type: Number,
+            min: 0,
+            default: 0,
+        },
     }
   },
   {

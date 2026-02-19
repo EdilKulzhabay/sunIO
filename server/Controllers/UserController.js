@@ -1313,6 +1313,8 @@ export const purchaseContent = async (req, res) => {
 
         // Импортируем модели контента
         const Practice = (await import("../Models/Practice.js")).default;
+        const ParablesOfLife = (await import("../Models/ParablesOfLife.js")).default;
+        const ScientificDiscoveries = (await import("../Models/ScientificDiscoveries.js")).default;
         const HealthLab = (await import("../Models/HealthLab.js")).default;
         const RelationshipWorkshop = (await import("../Models/RelationshipWorkshop.js")).default;
         const SpiritForge = (await import("../Models/SpiritForge.js")).default;
@@ -1327,6 +1329,8 @@ export const purchaseContent = async (req, res) => {
 
         const contentModels = {
             'practice': Practice,
+            'parables-of-life': ParablesOfLife,
+            'scientific-discoveries': ScientificDiscoveries,
             'health-lab': HealthLab,
             'relationship-workshop': RelationshipWorkshop,
             'spirit-forge': SpiritForge,

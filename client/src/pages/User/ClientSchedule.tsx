@@ -255,10 +255,20 @@ export const ClientSchedule = () => {
 
     useEffect(() => {
         if (!scrollToScheduleId) return;
-        const el = scheduleRefsMap.current.get(scrollToScheduleId);
-        if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setScrollToScheduleId(null);
+
+        const tryScroll = () => {
+            const el = scheduleRefsMap.current.get(scrollToScheduleId!);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setScrollToScheduleId(null);
+                return true;
+            }
+            return false;
+        };
+
+        if (!tryScroll()) {
+            const timer = setTimeout(() => tryScroll(), 150);
+            return () => clearTimeout(timer);
         }
     }, [scrollToScheduleId, schedules]);
 
@@ -392,7 +402,7 @@ export const ClientSchedule = () => {
                                     <a href={selectedSchedule?.eventLink} target="_blank" rel="noopener noreferrer" className="mt-1 text-left">{selectedSchedule?.eventLink}</a>
                                 </div>
                                 {linkCopied && (
-                                    <div className="text-sm text-[#C4841D] mt-1">Ссылка скопирована!</div>
+                                    <div className="text-left text-sm text-[#C4841D] mt-1">Ссылка скопирована!</div>
                                 )}
                             </button>
                             <div className="mt-4 flex items-center justify-between">
@@ -494,7 +504,7 @@ export const ClientSchedule = () => {
                                     <a href={selectedSchedule?.eventLink} target="_blank" rel="noopener noreferrer" className="mt-1 text-left">{selectedSchedule?.eventLink}</a>
                                 </div>
                                 {linkCopied && (
-                                    <div className="text-sm text-[#C4841D] mt-1">Ссылка скопирована!</div>
+                                    <div className="text-left text-sm text-[#C4841D] mt-1">Ссылка скопирована!</div>
                                 )}
                             </button>
                             <div className="mt-4 flex items-center justify-between">

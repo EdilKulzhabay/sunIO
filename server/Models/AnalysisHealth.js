@@ -64,6 +64,11 @@ const AnalysisHealthSchema = new mongoose.Schema(
             min: 0,
             default: 0,
           },
+          points: {
+            type: Number,
+            min: 0,
+            default: 0,
+          },
         },
         text: {
           type: String,

@@ -12,7 +12,7 @@ import { REDIRECT_TO_PAGE_OPTIONS } from '../../constants/redirectToPageOptions'
 import { ContentLinkButtonEditor } from '../../components/Admin/ContentLinkButtonEditor';
 import type { LinkButtonValue } from '../../components/Admin/ContentLinkButtonEditor';
 
-interface ContentItem { type: 'video' | 'text' | 'image' | 'linkButton'; video?: { mainUrl: string; reserveUrl: string; duration: number; }; text?: string; image?: string; linkButton?: LinkButtonValue | null; }
+interface ContentItem { type: 'video' | 'text' | 'image' | 'linkButton'; video?: { mainUrl: string; reserveUrl: string; duration: number; points?: number; }; text?: string; image?: string; linkButton?: LinkButtonValue | null; }
 interface FormData { title: string; shortDescription: string; imageUrl: string; accessType: string; starsRequired: number; duration: number; order: number; allowRepeatBonus: boolean; location: 'top' | 'bottom'; redirectToPage: string; visibility: boolean; content: ContentItem[]; }
 
 export const ProductCatalogForm = () => {
@@ -35,7 +35,7 @@ export const ProductCatalogForm = () => {
                 const resolvedType: ContentItem['type'] = hasVideo ? 'video' : hasText ? 'text' : hasImage ? 'image' : hasLinkButton ? 'linkButton' : 'video';
                 return {
                     type: resolvedType,
-                    video: { mainUrl: item?.video?.mainUrl || '', reserveUrl: item?.video?.reserveUrl || '', duration: item?.video?.duration || 0 },
+                    video: { mainUrl: item?.video?.mainUrl || '', reserveUrl: item?.video?.reserveUrl || '', duration: item?.video?.duration || 0, points: item?.video?.points ?? 0 },
                     text: item?.text || '',
                     image: item?.image || '',
                     linkButton: item?.linkButton?.linkButtonText || item?.linkButton?.linkButtonLink
@@ -47,7 +47,7 @@ export const ProductCatalogForm = () => {
         } catch (error) { toast.error('Ошибка загрузки данных'); navigate('/admin/product-catalog'); }
     };
 
-    const handleVideoChange = (index: number, field: 'mainUrl' | 'reserveUrl' | 'duration', value: string | number) => { setFormData(prev => { const newContent = [...prev.content]; newContent[index] = { ...newContent[index], video: { ...newContent[index].video!, [field]: value } }; return { ...prev, content: newContent }; }); };
+    const handleVideoChange = (index: number, field: 'mainUrl' | 'reserveUrl' | 'duration' | 'points', value: string | number) => { setFormData(prev => { const newContent = [...prev.content]; newContent[index] = { ...newContent[index], video: { ...newContent[index].video!, [field]: value } }; return { ...prev, content: newContent }; }); };
     const handleContentChange = (index: number, field: 'text' | 'image', value: string) => { setFormData(prev => { const newContent = [...prev.content]; newContent[index] = { ...newContent[index], [field]: value }; return { ...prev, content: newContent }; }); };
     const handleTypeChange = (index: number, newType: ContentItem['type']) => {
         setFormData(prev => {
@@ -55,14 +55,14 @@ export const ProductCatalogForm = () => {
             if (newType === 'linkButton') {
                 newContent[index] = { type: 'linkButton', linkButton: newContent[index].linkButton ?? { linkButtonText: null, linkButtonLink: null, linkButtonType: 'internal' as const } };
             } else {
-                newContent[index] = { ...newContent[index], type: newType, video: newType === 'video' ? (newContent[index].video ?? { mainUrl: '', reserveUrl: '', duration: 0 }) : undefined, text: newType === 'text' ? (newContent[index].text ?? '') : undefined, image: newType === 'image' ? (newContent[index].image ?? '') : undefined, linkButton: undefined };
+                newContent[index] = { ...newContent[index], type: newType, video: newType === 'video' ? (newContent[index].video ?? { mainUrl: '', reserveUrl: '', duration: 0, points: 0 }) : undefined, text: newType === 'text' ? (newContent[index].text ?? '') : undefined, image: newType === 'image' ? (newContent[index].image ?? '') : undefined, linkButton: undefined };
             }
             return { ...prev, content: newContent };
         });
     };
     const addContentItem = (type: ContentItem['type']) => {
         setFormData(prev => {
-            const base = type === 'linkButton' ? { type: 'linkButton' as const, linkButton: { linkButtonText: null, linkButtonLink: null, linkButtonType: 'internal' as const } } : { type, video: { mainUrl: '', reserveUrl: '', duration: 0 }, text: '', image: '' };
+            const base = type === 'linkButton' ? { type: 'linkButton' as const, linkButton: { linkButtonText: null, linkButtonLink: null, linkButtonType: 'internal' as const } } : { type, video: { mainUrl: '', reserveUrl: '', duration: 0, points: 0 }, text: '', image: '' };
             return { ...prev, content: [...prev.content, base] };
         });
     };
@@ -73,7 +73,7 @@ export const ProductCatalogForm = () => {
     const preparePayload = () => {
         const content = formData.content.map((item) => {
             if (item.type === 'linkButton') return item.linkButton?.linkButtonText || item.linkButton?.linkButtonLink ? { linkButton: item.linkButton } : { linkButton: { linkButtonText: null, linkButtonLink: null, linkButtonType: 'internal' } };
-            if (item.type === 'video') return { video: item.video ?? { mainUrl: '', reserveUrl: '', duration: 0 } };
+            if (item.type === 'video') return { video: item.video ?? { mainUrl: '', reserveUrl: '', duration: 0, points: 0 } };
             if (item.type === 'text') return { text: item.text ?? '' };
             if (item.type === 'image') return { image: item.image ?? '' };
             return {};
@@ -123,7 +123,7 @@ export const ProductCatalogForm = () => {
                                     <div className="flex items-center justify-between mb-3"><span className="text-sm font-medium text-gray-700">Элемент {index + 1}</span><div className="flex items-center gap-2"><button type="button" onClick={() => moveContentItem(index, index - 1)} disabled={index === 0} className="px-2 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">Вверх</button><button type="button" onClick={() => moveContentItem(index, index + 1)} disabled={index === formData.content.length - 1} className="px-2 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">Вниз</button><button type="button" onClick={() => removeContentItem(index)} className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"><Trash2 size={16} /></button></div></div>
                                     <div className="space-y-3">
                                         <div className="flex flex-col gap-2"><label className="text-sm font-medium">Тип контента</label><select value={item.type} onChange={(e) => handleTypeChange(index, e.target.value as ContentItem['type'])} className="w-full p-2 rounded-md border border-gray-300"><option value="video">Видео</option><option value="text">Текст</option><option value="image">Изображение</option><option value="linkButton">Кнопка-ссылка</option></select></div>
-                                        {item.type === 'video' && (<><MyInput label="Основная ссылка на видео" type="text" value={item.video?.mainUrl || ''} onChange={(e) => handleVideoChange(index, 'mainUrl', e.target.value)} placeholder="https://..." /><MyInput label="Резервная ссылка на видео" type="text" value={item.video?.reserveUrl || ''} onChange={(e) => handleVideoChange(index, 'reserveUrl', e.target.value)} placeholder="https://..." /><MyInput label="Длительность видео (мин)" type="number" value={String(item.video?.duration || 0)} onChange={(e) => handleVideoChange(index, 'duration', Number(e.target.value) || 0)} min="0" /></>)}
+                                        {item.type === 'video' && (<><MyInput label="Основная ссылка на видео" type="text" value={item.video?.mainUrl || ''} onChange={(e) => handleVideoChange(index, 'mainUrl', e.target.value)} placeholder="https://..." /><MyInput label="Резервная ссылка на видео" type="text" value={item.video?.reserveUrl || ''} onChange={(e) => handleVideoChange(index, 'reserveUrl', e.target.value)} placeholder="https://..." /><MyInput label="Длительность видео (мин)" type="number" value={String(item.video?.duration || 0)} onChange={(e) => handleVideoChange(index, 'duration', Number(e.target.value) || 0)} min="0" /><MyInput label="Баллы за просмотр" type="number" value={String(item.video?.points ?? 0)} onChange={(e) => handleVideoChange(index, 'points', Number(e.target.value) || 0)} min="0" /></>)}
                                         {item.type === 'image' && <ImageUpload value={item.image || ''} onChange={(url) => handleContentChange(index, 'image', url)} label="Изображение" />}
                                         {item.type === 'text' && <div><label className="block text-sm font-medium mb-2">Текст</label><RichTextEditor value={item.text || ''} onChange={(value) => handleContentChange(index, 'text', value)} placeholder="Введите текст" height="200px" /></div>}
                                         {item.type === 'linkButton' && <ContentLinkButtonEditor value={item.linkButton ?? null} onChange={(v) => handleLinkButtonChange(index, v)}  />}

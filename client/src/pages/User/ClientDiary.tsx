@@ -9,8 +9,8 @@ import { RedButton } from "../../components/User/RedButton.tsx";
 import { toast } from "react-toastify";
 import calendarLeft from "../../assets/calendarLeft.png";
 import calendarRight from "../../assets/calendarRight.png";
-import goldCheck from "../../assets/goldCheck.png";
-import redCross from "../../assets/redCross.png";
+import greenCheck from "../../assets/greenCheck.png";
+import goldCross from "../../assets/goldCross.png";
 
 const daysOfWeek = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
 const getWeekdayLabel = (date: Date) => daysOfWeek[(date.getDay() + 6) % 7];
@@ -22,6 +22,7 @@ export const ClientDiary = () => {
         discovery: '',
         achievement: '',
         gratitude: '',
+        emotions: '',
         uselessTask: false,
     });
     const [todayDiaryId, setTodayDiaryId] = useState<string | null>(null);
@@ -34,6 +35,9 @@ export const ClientDiary = () => {
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [calendarDates, setCalendarDates] = useState<any[]>([]);
     const [leftVisibleDate, setLeftVisibleDate] = useState<Date | null>(null);
+    const [uselessTaskCount, setUselessTaskCount] = useState(0);
+    const [userData, setUserData] = useState<any>(null);
+    const [diaryNotifyPermission, setDiaryNotifyPermission] = useState(false);
     const calendarContainerRef = useRef<HTMLDivElement | null>(null);
 
     const toLocalDateKey = (value: Date | string) => {
@@ -54,20 +58,31 @@ export const ClientDiary = () => {
             }));
     };
 
-    useEffect(() => {
-        // Проверка на блокировку пользователя
-        const userStr = localStorage.getItem('user');
-        if (userStr) {
-            try {
-                const user = JSON.parse(userStr);
-                if (user && user.isBlocked && user.role !== 'admin') {
+    const fetchUserData = async () => {
+        try {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const response = await api.post('/api/user/profile', { userId: user._id }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (response.data.success) {
+                setDiaryNotifyPermission(response.data.user.diaryNotifyPermission);
+                setUserData(response.data.user);
+                // Проверка на блокировку после получения данных с сервера
+                if (response.data.user.isBlocked && response.data.user.role !== 'admin') {
                     navigate('/client/blocked-user');
                     return;
                 }
-            } catch (e) {
-                console.error('Ошибка парсинга user из localStorage:', e);
             }
+        } catch (e) {
+            console.error('Ошибка парсинга user из localStorage:', e);
         }
+    }
+
+    useEffect(() => {
+        // Проверка на блокировку пользователя
+        fetchUserData();
 
         const start = new Date(2025, 9, 1); // 01.10.2025
         start.setHours(0, 0, 0, 0);
@@ -182,6 +197,7 @@ export const ClientDiary = () => {
             });
             const todayKey = toLocalDateKey(new Date());
             setAllDiaries(response.data.data || []);
+            setUselessTaskCount(response.data.data.filter((item: any) => item.uselessTask).length);
             const todayDiary = response.data.data.find((item: any) => toLocalDateKey(item.createdAt) === todayKey);
             
             // Если есть запись за сегодня, загружаем её данные в форму
@@ -191,6 +207,7 @@ export const ClientDiary = () => {
                     discovery: todayDiary.discovery || '',
                     achievement: todayDiary.achievement || '',
                     gratitude: todayDiary.gratitude || '',
+                    emotions: todayDiary.emotions || '',
                     uselessTask: todayDiary.uselessTask || false,
                 });
             } else {
@@ -199,6 +216,7 @@ export const ClientDiary = () => {
                     discovery: '',
                     achievement: '',
                     gratitude: '',
+                    emotions: '',
                     uselessTask: false,
                 });
             }
@@ -214,6 +232,30 @@ export const ClientDiary = () => {
 
     const handleChange = (e: any) => {
         setDiary({ ...diary, [e.target.name]: e.target.value });
+    }
+
+    const handleToggleDiaryNotifyPermission = async () => {
+        if (diaryNotifyPermission) {
+            const response = await api.patch(`/api/users/${userData.telegramId}`, { diaryNotifyPermission: false });
+            if (response.data.success) {
+                setUserData(response.data.data);
+                setDiaryNotifyPermission(false);
+            } else {
+                toast.error(response.data.message || 'Ошибка обновления данных пользователя');
+            }
+        } else {
+            const updateData = {
+                diaryNotifyPermission: true,
+                notifyPermission: true,
+            }
+            const response = await api.patch(`/api/users/${userData.telegramId}`, updateData);
+            if (response.data.success) {
+                setUserData(response.data.data);
+                setDiaryNotifyPermission(true);
+            } else {
+                toast.error(response.data.message || 'Ошибка обновления данных пользователя');
+            }
+        }
     }
 
     const handleSubmit = async () => {
@@ -421,59 +463,17 @@ export const ClientDiary = () => {
                                         </div>
                                         {checkDiaryForDate(date) && (
                                             <div className="mt-1 flex items-center justify-center">
-                                                <img src={goldCheck} alt="gold-check" className="w-3 h-3" />
+                                                <img src={greenCheck} alt="green-check" className="w-3 h-3" />
                                             </div>
                                         )}
                                         {!checkDiaryForDate(date) && date < today && (
                                             <div className="mt-1 flex items-center justify-center">
-                                                <img src={redCross} alt="red-cross" className="w-3 h-3" />
+                                                <img src={goldCross} alt="gold-cross" className="w-3 h-3" />
                                             </div>
                                         )}
                                     </button>
                                 )
                             })}
-                            {/* <div className="flex items-center justify-between pr-1">
-                                {['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'].map((day) => {
-                                    return (
-                                        <div key={day} className="flex flex-col items-center justify-center w-6">
-                                            <p className="text-sm">{day}</p>
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                            <div className="mt-4 flex items-start justify-between pr-1">
-                                {Array.from({ length: 7 }).map((_, index) => {
-                                    if (!weekStart) return null;
-                                    const today = new Date();
-                                    const date = new Date(weekStart);
-                                    date.setDate(weekStart.getDate() + index);
-                                    return (
-                                        <button onClick={() => {
-                                            if (selectedDate?.toISOString().split('T')[0] === date.toISOString().split('T')[0]) {
-                                                setSelectedDate(null);
-                                            } else {
-                                                setSelectedDate(date);
-                                            }
-                                        }} key={index} className="w-6 cursor-pointer">
-                                            {weekStart && (
-                                                <div className={`text-sm text-center w-6 h-6 flex items-center justify-center ${selectedDate?.toISOString().split('T')[0] === date.toISOString().split('T')[0] ? 'bg-white/20 rounded-full' : ''} ${today.toISOString().split('T')[0] === date.toISOString().split('T')[0] ? 'border-1 border-[#FFC293] rounded-full' : ''}`}>
-                                                    <p>{date.getDate()}</p>
-                                                </div>
-                                            )}
-                                            {checkDiaryForDate(date) && (
-                                                <div className="mt-1 flex items-center justify-center">
-                                                    <img src={goldCheck} alt="gold-check" className="w-3 h-3" />
-                                                </div>
-                                            )}
-                                            {!checkDiaryForDate(date) && date <= today && (
-                                                <div className="mt-1 flex items-center justify-center">
-                                                    <img src={redCross} alt="red-cross" className="w-3 h-3" />
-                                                </div>
-                                            )}
-                                        </button>
-                                    )
-                                })}
-                            </div> */}
                         </div>
                     </div>
 
@@ -537,7 +537,27 @@ export const ClientDiary = () => {
                                         value={diary.gratitude} 
                                         onChange={handleChange} 
                                         className="w-full mt-1 bg-transparent text-white focus:outline-none focus:border-white/80 overflow-y-scroll" 
-                                        placeholder="Какие цели хочу реализовать?"
+                                        placeholder="Какие цели захотел(а) реализовать?"
+                                        rows={1}
+                                        style={{
+                                            minHeight: "2.5rem",
+                                            maxHeight: "7.5rem"
+                                        }}
+                                        onInput={e => {
+                                            const target = e.target as HTMLTextAreaElement;
+                                            target.style.height = "2.5rem";
+                                            target.style.height = Math.min(target.scrollHeight, 7.5 * 16) + "px";
+                                        }}
+                                    />
+                                </div>
+                                <div className="p-2 border border-white/40 rounded-lg">
+                                    <p className="text-sm font-medium">Эмоции</p>
+                                    <textarea 
+                                        name="emotions" 
+                                        value={diary.emotions ?? ''} 
+                                        onChange={handleChange} 
+                                        className="w-full mt-1 bg-transparent text-white focus:outline-none focus:border-white/80 overflow-y-scroll" 
+                                        placeholder="Какое состояние у меня сегодня?"
                                         rows={1}
                                         style={{
                                             minHeight: "2.5rem",
@@ -551,7 +571,7 @@ export const ClientDiary = () => {
                                     />
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <p className="text-sm font-medium">Выбранное упражнение</p>
+                                    <p className="text-sm font-medium">Выбранное упражнение ({uselessTaskCount || 0})</p>
                                     <Switch
                                         checked={diary.uselessTask}
                                         onChange={() => setDiary({ ...diary, uselessTask: !diary.uselessTask })}
@@ -565,6 +585,15 @@ export const ClientDiary = () => {
                     {isOpenToday && (
                         <div className="mt-3">
                             <RedButton text={todayDiaryId ? "Обновить" : "Сохранить"} onClick={handleSubmit} className="w-full" disabled={loading} />
+                            <div className="mt-3 flex items-center justify-between">
+                                <p className="text-sm font-medium">Напоминать о заполнении</p>
+                                <Switch
+                                    checked={diaryNotifyPermission}
+                                    onChange={() => handleToggleDiaryNotifyPermission()}
+                                    className=""
+                                />
+
+                            </div>
                         </div>
                     )}
 
@@ -597,6 +626,10 @@ export const ClientDiary = () => {
                                             <div className="p-2 border border-white/40 rounded-lg max-h-[100px] overflow-y-scroll">
                                                 <p className="text-sm font-medium">Цели и задачи</p>
                                                 <p className="mt-1.5">{diary.gratitude}</p>
+                                            </div>
+                                            <div className="p-2 border border-white/40 rounded-lg max-h-[100px] overflow-y-scroll">
+                                                <p className="text-sm font-medium">Эмоции</p>
+                                                <p className="mt-1.5">{diary.emotions || ''}</p>
                                             </div>
                                             <div className="flex items-center justify-between">
                                                 <p className="text-sm font-medium">Выбранное упражнение</p>

@@ -26,6 +26,10 @@ const BroadcastScheduleSchema = new mongoose.Schema(
     sentAt: {
       type: Date,
     },
+    scheduledBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
   },
   {
     timestamps: true,

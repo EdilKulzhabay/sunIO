@@ -18,6 +18,7 @@ interface ContentItem {
         mainUrl: string;
         reserveUrl: string;
         duration: number;
+        points?: number;
     };
     text?: string;
     image?: string;
@@ -89,6 +90,7 @@ export const PracticeForm = () => {
                         mainUrl: item?.video?.mainUrl || '',
                         reserveUrl: item?.video?.reserveUrl || '',
                         duration: item?.video?.duration || 0,
+                        points: item?.video?.points ?? 0,
                     },
                     text: item?.text || '',
                     image: item?.image || '',
@@ -121,7 +123,7 @@ export const PracticeForm = () => {
         }
     };
 
-    const handleVideoChange = (index: number, field: 'mainUrl' | 'reserveUrl' | 'duration', value: string | number) => {
+    const handleVideoChange = (index: number, field: 'mainUrl' | 'reserveUrl' | 'duration' | 'points', value: string | number) => {
         setFormData(prev => {
             const newContent = [...prev.content];
             newContent[index] = {
@@ -158,7 +160,7 @@ export const PracticeForm = () => {
                 newContent[index] = {
                     ...newContent[index],
                     type: newType,
-                    video: newType === 'video' ? (newContent[index].video ?? { mainUrl: '', reserveUrl: '', duration: 0 }) : undefined,
+                    video: newType === 'video' ? (newContent[index].video ?? { mainUrl: '', reserveUrl: '', duration: 0, points: 0 }) : undefined,
                     text: newType === 'text' ? (newContent[index].text ?? '') : undefined,
                     image: newType === 'image' ? (newContent[index].image ?? '') : undefined,
                     linkButton: undefined,
@@ -174,7 +176,7 @@ export const PracticeForm = () => {
                 ? { type: 'linkButton' as const, linkButton: { linkButtonText: null, linkButtonLink: null, linkButtonType: 'internal' as const } }
                 : {
                     type,
-                    video: { mainUrl: '', reserveUrl: '', duration: 0 },
+                    video: { mainUrl: '', reserveUrl: '', duration: 0, points: 0 },
                     text: '',
                     image: '',
                 };
@@ -453,6 +455,13 @@ export const PracticeForm = () => {
                                                     type="number"
                                                     value={String(item.video?.duration || 0)}
                                                     onChange={(e) => handleVideoChange(index, 'duration', Number(e.target.value) || 0)}
+                                                    min="0"
+                                                />
+                                                <MyInput
+                                                    label="Баллы за просмотр"
+                                                    type="number"
+                                                    value={String(item.video?.points ?? 0)}
+                                                    onChange={(e) => handleVideoChange(index, 'points', Number(e.target.value) || 0)}
                                                     min="0"
                                                 />
                                             </>

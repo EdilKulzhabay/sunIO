@@ -19,6 +19,11 @@ const DiarySchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    emotions: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     uselessTask: {
       type: Boolean,
       default: false,

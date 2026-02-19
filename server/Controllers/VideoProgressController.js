@@ -1,6 +1,8 @@
 import VideoProgress from '../Models/VideoProgress.js';
 import User from '../Models/User.js';
 import Practice from '../Models/Practice.js';
+import ParablesOfLife from '../Models/ParablesOfLife.js';
+import ScientificDiscoveries from '../Models/ScientificDiscoveries.js';
 import HealthLab from '../Models/HealthLab.js';
 import RelationshipWorkshop from '../Models/RelationshipWorkshop.js';
 import SpiritForge from '../Models/SpiritForge.js';
@@ -220,7 +222,109 @@ export const getProgressesForContents = async (req, res) => {
     }
 };
 
-// Начисление бонусов при клике на обложку/воспроизведении
+// Начисление баллов за конкретное видео (YouTube/RuTube — при воспроизведении, Kinescope — при достижении порога)
+export const awardPointsForVideo = async (req, res) => {
+    try {
+        const { contentType, contentId, userId: bodyUserId, videoIndex } = req.body;
+        let userId = req.userId;
+
+        if (!userId && bodyUserId) userId = bodyUserId;
+        if (!userId) {
+            return res.status(401).json({ success: false, message: 'Пользователь не авторизован' });
+        }
+        if (!contentType || !contentId || videoIndex === undefined) {
+            return res.status(400).json({ success: false, message: 'Необходимо предоставить contentType, contentId и videoIndex' });
+        }
+
+        let content;
+        const contentIdObj = typeof contentId === 'string' ? contentId : contentId;
+        switch (contentType) {
+            case 'practice': content = await Practice.findById(contentIdObj); break;
+            case 'parables-of-life': content = await ParablesOfLife.findById(contentIdObj); break;
+            case 'scientific-discoveries': content = await ScientificDiscoveries.findById(contentIdObj); break;
+            case 'health-lab':
+            case 'healthLab': content = await HealthLab.findById(contentIdObj); break;
+            case 'relationship-workshop':
+            case 'relationshipWorkshop': content = await RelationshipWorkshop.findById(contentIdObj); break;
+            case 'spirit-forge':
+            case 'spiritForge': content = await SpiritForge.findById(contentIdObj); break;
+            case 'masters-tower':
+            case 'mastersTower': content = await MastersTower.findById(contentIdObj); break;
+            case 'femininity-gazebo':
+            case 'femininityGazebo': content = await FemininityGazebo.findById(contentIdObj); break;
+            case 'consciousness-library':
+            case 'consciousnessLibrary': content = await ConsciousnessLibrary.findById(contentIdObj); break;
+            case 'product-catalog':
+            case 'productCatalog': content = await ProductCatalog.findById(contentIdObj); break;
+            case 'analysis-health':
+            case 'analysisHealth': content = await AnalysisHealth.findById(contentIdObj); break;
+            case 'analysis-relationships':
+            case 'analysisRelationships': content = await AnalysisRelationships.findById(contentIdObj); break;
+            case 'analysis-realization':
+            case 'analysisRealization': content = await AnalysisRealization.findById(contentIdObj); break;
+            case 'psychodiagnostics': content = await Psychodiagnostics.findById(contentIdObj); break;
+            default:
+                return res.status(400).json({ success: false, message: 'Неверный тип контента' });
+        }
+
+        if (!content) {
+            return res.status(404).json({ success: false, message: 'Контент не найден' });
+        }
+
+        const contentArr = content.content || [];
+        const item = contentArr[videoIndex];
+        const points = item?.video?.points ?? 0;
+
+        if (points <= 0) {
+            return res.status(200).json({ success: true, message: 'Баллы не указаны для видео', pointsAwarded: 0 });
+        }
+
+        let progress = await VideoProgress.findOne({ userId, contentType, contentId: contentIdObj });
+        if (!progress) {
+            progress = new VideoProgress({
+                userId,
+                contentType,
+                contentId: contentIdObj,
+                awardedVideoIndices: [],
+            });
+            await progress.save();
+        }
+
+        const awarded = progress.awardedVideoIndices || [];
+        const alreadyAwarded = awarded.includes(videoIndex);
+        const canAward = content.allowRepeatBonus || !alreadyAwarded;
+
+        if (!canAward) {
+            return res.status(200).json({
+                success: true,
+                message: 'Баллы за это видео уже были начислены',
+                pointsAwarded: 0,
+            });
+        }
+
+        await User.findByIdAndUpdate(userId, { $inc: { bonus: points } });
+
+        if (!awarded.includes(videoIndex)) {
+            progress.awardedVideoIndices = [...progress.awardedVideoIndices, videoIndex];
+            await progress.save();
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Баллы начислены',
+            pointsAwarded: points,
+        });
+    } catch (error) {
+        console.error('Ошибка начисления баллов за видео:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Ошибка начисления баллов',
+            error: error.message,
+        });
+    }
+};
+
+// Начисление бонусов при клике на обложку/воспроизведении (legacy — один бонус за весь контент)
 export const awardBonusOnPlay = async (req, res) => {
     try {
         const { contentType, contentId, userId: bodyUserId } = req.body;
@@ -250,6 +354,12 @@ export const awardBonusOnPlay = async (req, res) => {
         switch (contentType) {
             case 'practice':
                 content = await Practice.findById(contentId);
+                break;
+            case 'parables-of-life':
+                content = await ParablesOfLife.findById(contentId);
+                break;
+            case 'scientific-discoveries':
+                content = await ScientificDiscoveries.findById(contentId);
                 break;
             case 'health-lab':
             case 'healthLab':

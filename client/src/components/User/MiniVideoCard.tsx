@@ -1,6 +1,7 @@
 import lock from '../../assets/lock.png';
 import star from '../../assets/star.png';
 import { useNavigate } from 'react-router-dom';
+import arrowRight from '../../assets/arrowRight.png';
 
 export const MiniVideoCard = ({ title, image, link, progress, accessType, onLockedClick, duration, starsRequired }: { title: string, image: string, link: string, progress: number, accessType: string, onLockedClick?: () => void, duration?: number, starsRequired?: number }) => {
     const navigate = useNavigate();
@@ -35,7 +36,16 @@ export const MiniVideoCard = ({ title, image, link, progress, accessType, onLock
                             <div className='w-full h-1.5 bg-white/40 rounded-full mt-1'>
                                 <div className='h-full bg-white rounded-full' style={{ width: `${progress}%` }} />
                             </div>
-                        </div> : <div className="mt-auto"></div>
+                        </div> : <div className="mt-auto flex justify-end">
+                            <div className="flex items-center justify-center px-3 py-1.5 border border-[#00C5AE] rounded-full cursor-pointer">
+                                <p className="text-[12px] text-[#00C5AE]">Перейти</p>
+                                <img
+                                    src={arrowRight}
+                                    alt="arrow-right"
+                                    className="w-[14px] h-[14px] ml-2"
+                                />
+                            </div>
+                        </div>
                         }
                     
                 </div>

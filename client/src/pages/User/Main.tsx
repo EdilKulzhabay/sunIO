@@ -17,6 +17,7 @@ import main3 from "../../assets/main3.png"
 import main4 from "../../assets/main4.png"
 import goldUser from "../../assets/goldUser.png"
 import { ClientSchedule } from "./ClientSchedule"
+import { X } from "lucide-react";
 
 
 // const SmallCard = ({ title, link, img }: { title: string, link: string, img: string }) => {
@@ -260,6 +261,28 @@ export const Main = () => {
         }
     };
 
+    const handleModalClose = async () => {
+        try {
+            await api.post('/api/modal-notification/remove', {
+                notificationIndex: notificationIndex,
+                telegramId: userData.telegramId
+            });
+            setModalNotification(null);
+            setNotificationIndex(null);
+            // Загружаем следующее уведомление (если есть)
+            const response = await api.post('/api/modal-notification/my', { mail: userData.mail });
+            if (response.data.success && response.data.notifications && response.data.notifications.length > 0) {
+                setModalNotification(response.data.notifications[0]);
+                setNotificationIndex(0);
+            }
+        } catch (error) {
+            console.error('Ошибка удаления уведомления:', error);
+            // Все равно закрываем модальное окно и переходим по ссылке
+            setModalNotification(null);
+            setNotificationIndex(null);
+        }
+    };
+
     const handleModalButtonClick = async () => {
         if (notificationIndex === null || !modalNotification) return;
 
@@ -339,7 +362,16 @@ export const Main = () => {
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="mt-4">
-                                <h3 className="text-xl font-bold mb-4">{modalNotification.modalTitle}</h3>
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-xl font-bold mb-4">{modalNotification.modalTitle}</h3>
+                                    <button
+                                        onClick={handleModalClose}
+                                        className="text-gray-400 hover:text-gray-500 ml-3"
+                                    >
+                                        <X size={24} />
+                                    </button>
+                                </div>
+                                
                                 <p className="mb-6 text-gray-300 text-lg" dangerouslySetInnerHTML={{ __html: modalNotification.modalDescription }}></p>
                                 <button
                                     onClick={handleModalButtonClick}
@@ -366,7 +398,15 @@ export const Main = () => {
                         >
                             
                             <div className="mt-4">
-                                <h3 className="text-xl font-bold mb-4">{modalNotification.modalTitle}</h3>
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-xl font-bold mb-4">{modalNotification.modalTitle}</h3>
+                                    <button
+                                        onClick={handleModalClose}
+                                        className="text-gray-400 hover:text-gray-500 ml-3"
+                                    >
+                                        <X size={24} />
+                                    </button>
+                                </div>
                                 <p className="mb-6 text-gray-300 text-lg" dangerouslySetInnerHTML={{ __html: modalNotification.modalDescription }}></p>
                                 <button
                                     onClick={handleModalButtonClick}

@@ -10,6 +10,10 @@ import { FAQAdmin } from "./pages/Admin/FAQ";
 import { FAQForm } from "./pages/Admin/FAQForm";
 import { PracticeAdmin } from "./pages/Admin/Practice";
 import { PracticeForm } from "./pages/Admin/PracticeForm";
+import { ParablesOfLifeAdmin } from "./pages/Admin/ParablesOfLife";
+import { ParablesOfLifeForm } from "./pages/Admin/ParablesOfLifeForm";
+import { ScientificDiscoveriesAdmin } from "./pages/Admin/ScientificDiscoveries";
+import { ScientificDiscoveriesForm } from "./pages/Admin/ScientificDiscoveriesForm";
 import { ScheduleAdmin } from "./pages/Admin/Schedule";
 import { ScheduleForm } from "./pages/Admin/ScheduleForm";
 import { HealthLabAdmin } from "./pages/Admin/HealthLab";
@@ -72,6 +76,10 @@ import { ClientSchumann } from "./pages/User/ClientSchumann";
 import { ClientContactUs } from "./pages/User/ClientContactUs";
 import { ClientPracticesList } from "./pages/User/ClientPracticesList";
 import { ClientPractice } from "./pages/User/ClientPractice";
+import { ClientParablesOfLifeList } from "./pages/User/ClientParablesOfLifeList";
+import { ClientParablesOfLife } from "./pages/User/ClientParablesOfLife";
+import { ClientScientificDiscoveriesList } from "./pages/User/ClientScientificDiscoveriesList";
+import { ClientScientificDiscoveries } from "./pages/User/ClientScientificDiscoveries";
 import { ClientHealthLabList } from "./pages/User/ClientHealthLabList";
 import { ClientHealthLab } from "./pages/User/ClientHealthLab";
 import { ClientRelationshipWorkshopList } from "./pages/User/ClientRelationshipWorkshopList";
@@ -186,6 +194,22 @@ export const routes = createBrowserRouter([
     {
         path: "/client/practice/:id",
         element: <RootLayout><TelegramGuard><ProtectedRoute><ClientPractice /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/parables-of-life",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientParablesOfLifeList /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/parables-of-life/:id",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientParablesOfLife /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/scientific-discoveries",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientScientificDiscoveriesList /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/scientific-discoveries/:id",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientScientificDiscoveries /></ProtectedRoute></TelegramGuard></RootLayout>,
     },
     {
         path: "/client/health-lab",
@@ -354,6 +378,30 @@ export const routes = createBrowserRouter([
     {
         path: "/admin/practice/edit/:id",
         element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><PracticeForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/parables-of-life",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ParablesOfLifeAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/parables-of-life/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ParablesOfLifeForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/parables-of-life/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ParablesOfLifeForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/scientific-discoveries",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ScientificDiscoveriesAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/scientific-discoveries/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ScientificDiscoveriesForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/scientific-discoveries/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ScientificDiscoveriesForm /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/admin/schedule",

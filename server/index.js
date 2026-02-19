@@ -37,7 +37,9 @@ import {
     PsychodiagnosticsController,
     BegginingJourneyController,
     NavigatorDescriptionsController,
-    PointsAwardingPolicyController
+    PointsAwardingPolicyController,
+    ParablesOfLifeController,
+    ScientificDiscoveriesController
 } from "./Controllers/index.js";
 import { authMiddleware } from "./Middlewares/authMiddleware.js";
 import { adminActionLogMiddleware } from "./Middlewares/adminActionLogMiddleware.js";
@@ -219,6 +221,20 @@ app.get("/api/practice/:id", PracticeController.getById);
 app.put("/api/practice/:id", authMiddleware, PracticeController.update);
 app.delete("/api/practice/:id", authMiddleware, PracticeController.remove);
 
+// ==================== ParablesOfLife (Притчи о жизни) маршруты ====================
+app.post("/api/parables-of-life", createContentRateLimit, authMiddleware, ParablesOfLifeController.create);
+app.get("/api/parables-of-life", ParablesOfLifeController.getAll);
+app.get("/api/parables-of-life/:id", ParablesOfLifeController.getById);
+app.put("/api/parables-of-life/:id", authMiddleware, ParablesOfLifeController.update);
+app.delete("/api/parables-of-life/:id", authMiddleware, ParablesOfLifeController.remove);
+
+// ==================== ScientificDiscoveries (Научные открытия) маршруты ====================
+app.post("/api/scientific-discoveries", createContentRateLimit, authMiddleware, ScientificDiscoveriesController.create);
+app.get("/api/scientific-discoveries", ScientificDiscoveriesController.getAll);
+app.get("/api/scientific-discoveries/:id", ScientificDiscoveriesController.getById);
+app.put("/api/scientific-discoveries/:id", authMiddleware, ScientificDiscoveriesController.update);
+app.delete("/api/scientific-discoveries/:id", authMiddleware, ScientificDiscoveriesController.remove);
+
 // ==================== HealthLab (Лаборатория здоровья) маршруты ====================
 app.post("/api/health-lab", createContentRateLimit, authMiddleware, HealthLabController.create);
 app.get("/api/health-lab", HealthLabController.getAll);
@@ -350,11 +366,14 @@ app.delete("/api/points-awarding-policy/:id", authMiddleware, PointsAwardingPoli
 
 // ==================== Broadcast маршруты ====================
 app.post("/api/broadcast/users", BroadcastController.getFilteredUsers);
-app.post("/api/broadcast/send", BroadcastController.sendBroadcast);
+app.post("/api/broadcast/send", authMiddleware, BroadcastController.sendBroadcast);
 app.post("/api/broadcast/test", BroadcastController.sendTestMessage);
 // Маршруты для сохраненных рассылок
 app.post("/api/broadcast", createContentRateLimit, authMiddleware, BroadcastController.createBroadcast);
 app.get("/api/broadcast", BroadcastController.getAllBroadcasts);
+app.get("/api/broadcast/scheduled", authMiddleware, BroadcastController.getScheduledBroadcasts);
+app.get("/api/broadcast/sent", authMiddleware, BroadcastController.getSentBroadcasts);
+app.delete("/api/broadcast/scheduled/:id", authMiddleware, BroadcastController.cancelScheduledBroadcast);
 app.get("/api/broadcast/:id", BroadcastController.getBroadcastById);
 app.put("/api/broadcast/:id", authMiddleware, BroadcastController.updateBroadcast);
 app.delete("/api/broadcast/:id", authMiddleware, BroadcastController.deleteBroadcast);
@@ -396,6 +415,7 @@ app.delete("/api/diary/:id", DiaryController.remove);
 // ==================== VideoProgress ====================
 app.post("/api/video-progress", VideoProgressController.saveProgress);
 app.post("/api/video-progress/award-bonus", VideoProgressController.awardBonusOnPlay);
+app.post("/api/video-progress/award-points-for-video", VideoProgressController.awardPointsForVideo);
 app.get("/api/video-progress/:userId/:contentType/:contentId", VideoProgressController.getProgress);
 app.get("/api/video-progress/user/:userId/:contentType", VideoProgressController.getUserProgresses);
 app.post("/api/video-progress/batch/:userId/:contentType", VideoProgressController.getProgressesForContents);
@@ -425,21 +445,18 @@ app.post("/api/subscription/check-expired", authMiddleware, async (req, res) => 
 });
 
 
-// Настройка cron задачи для проверки истекших подписок
-// Запускается каждый день в 12:00 (по времени сервера)
-cron.schedule('0 12 * * *', async () => {
-    console.log(`[${new Date().toISOString()}] Запуск автоматической проверки истекших подписок...`);
-    const result = await SubscriptionController.checkExpiredSubscriptions();
-    if (result.success) {
-        console.log(`[${new Date().toISOString()}] Проверка завершена успешно. Обновлено пользователей: ${result.updatedCount}`);
-    } else {
-        console.error(`[${new Date().toISOString()}] Ошибка при проверке подписок:`, result.error);
+// Рассылка diaryCheck каждый день в 5:00 (Asia/Almaty) — пользователям с notifyPermission и diaryNotifyPermission === true
+cron.schedule('0 5 * * *', async () => {
+    try {
+        await BroadcastController.sendDiaryCheckBroadcast();
+    } catch (error) {
+        console.error(`[${new Date().toISOString()}] Ошибка рассылки diaryCheck:`, error);
     }
 }, {
-    timezone: "Asia/Almaty" // Устанавливаем часовой пояс (можно изменить на нужный)
+    timezone: "Asia/Almaty"
 });
 
-console.log('Cron задача для проверки подписок настроена: каждый день в 12:00');
+console.log('Cron задача рассылки diaryCheck настроена: каждый день в 5:00 (Asia/Almaty)');
 
 // Запуск рассылок по расписанию (каждую минуту)
 cron.schedule('* * * * *', async () => {

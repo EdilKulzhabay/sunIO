@@ -4,7 +4,10 @@
  */
 export const REDIRECT_TO_PAGE_OPTIONS: { title: string; value: string }[] = [
     { title: 'Не перенаправлять', value: '' },
+    { title: 'Главная приложения', value: '/' },
     { title: 'Практики', value: '/client/practices' },
+    { title: 'Притчи о жизни', value: '/client/parables-of-life' },
+    { title: 'Научные открытия', value: '/client/scientific-discoveries' },
     { title: 'Лаборатория здоровья', value: '/client/health-lab' },
     { title: 'Мастерская отношений', value: '/client/relationship-workshop' },
     { title: 'Кузница Духа', value: '/client/spirit-forge' },

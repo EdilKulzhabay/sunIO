@@ -317,6 +317,8 @@ export const ModalNotificationsAdmin = () => {
             case 'practice':
                 fetchPractices();
                 break;
+            case 'parables-of-life':
+            case 'scientific-discoveries':
             case 'health-lab':
             case 'relationship-workshop':
             case 'spirit-forge':
@@ -715,6 +717,24 @@ export const ModalNotificationsAdmin = () => {
                                     </div>
                                 </div>
 
+                                {/* Притчи о жизни */}
+                                <div>
+                                    <p className="text-xs font-medium text-gray-600 mb-1.5">Притчи о жизни:</p>
+                                    <div className="flex flex-wrap gap-2 items-center">
+                                        <button type="button" onClick={() => { setModalButtonLink('/client/parables-of-life'); setSelectedContentType(null); }} className="px-2.5 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors">/client/parables-of-life</button>
+                                        <button type="button" onClick={() => handleContentPageClick('/client/parables-of-life', 'parables-of-life')} className="px-2.5 py-1 text-xs bg-blue-100 border border-blue-300 rounded hover:bg-blue-200 transition-colors">/client/parables-of-life/:id</button>
+                                    </div>
+                                </div>
+
+                                {/* Научные открытия */}
+                                <div>
+                                    <p className="text-xs font-medium text-gray-600 mb-1.5">Научные открытия:</p>
+                                    <div className="flex flex-wrap gap-2 items-center">
+                                        <button type="button" onClick={() => { setModalButtonLink('/client/scientific-discoveries'); setSelectedContentType(null); }} className="px-2.5 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors">/client/scientific-discoveries</button>
+                                        <button type="button" onClick={() => handleContentPageClick('/client/scientific-discoveries', 'scientific-discoveries')} className="px-2.5 py-1 text-xs bg-blue-100 border border-blue-300 rounded hover:bg-blue-200 transition-colors">/client/scientific-discoveries/:id</button>
+                                    </div>
+                                </div>
+
                                 {/* Лаборатория здоровья */}
                                 <div>
                                     <p className="text-xs font-medium text-gray-600 mb-1.5">Лаборатория здоровья:</p>
@@ -862,7 +882,7 @@ export const ModalNotificationsAdmin = () => {
                                                     </button>
                                                 ))
                                             )}
-                                            {['health-lab', 'relationship-workshop', 'spirit-forge', 'masters-tower', 'femininity-gazebo', 'consciousness-library', 'product-catalog', 'analysis-health', 'analysis-relationships', 'analysis-realization', 'psychodiagnostics'].includes(selectedContentType || '') && contentItems.length > 0 && (
+                                            {['parables-of-life', 'scientific-discoveries', 'health-lab', 'relationship-workshop', 'spirit-forge', 'masters-tower', 'femininity-gazebo', 'consciousness-library', 'product-catalog', 'analysis-health', 'analysis-relationships', 'analysis-realization', 'psychodiagnostics'].includes(selectedContentType || '') && contentItems.length > 0 && (
                                                 contentItems.map((item) => (
                                                     <button
                                                         key={item._id}
@@ -880,7 +900,7 @@ export const ModalNotificationsAdmin = () => {
                                             {((selectedContentType === 'horoscope' && horoscopes.length === 0) ||
                                               (selectedContentType === 'transit' && transits.length === 0) ||
                                               (selectedContentType === 'practice' && practices.length === 0) ||
-                                              (['health-lab', 'relationship-workshop', 'spirit-forge', 'masters-tower', 'femininity-gazebo', 'consciousness-library', 'product-catalog', 'analysis-health', 'analysis-relationships', 'analysis-realization', 'psychodiagnostics'].includes(selectedContentType || '') && contentItems.length === 0)) && (
+                                              (['parables-of-life', 'scientific-discoveries', 'health-lab', 'relationship-workshop', 'spirit-forge', 'masters-tower', 'femininity-gazebo', 'consciousness-library', 'product-catalog', 'analysis-health', 'analysis-relationships', 'analysis-realization', 'psychodiagnostics'].includes(selectedContentType || '') && contentItems.length === 0)) && (
                                                 <p className="text-xs text-gray-500 py-2">Контент не найден</p>
                                             )}
                                         </div>

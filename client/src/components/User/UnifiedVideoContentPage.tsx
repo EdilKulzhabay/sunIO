@@ -10,6 +10,8 @@ type ContentType =
     | "videoLesson" 
     | "practice" 
     | "meditation"
+    | "parables-of-life"
+    | "scientific-discoveries"
     | "health-lab"
     | "relationship-workshop"
     | "spirit-forge"
@@ -145,7 +147,7 @@ export const UnifiedVideoContentPage = ({
     // Состояние для хранения прогресса каждого видео
     const videoProgressMapRef = useRef<Map<string, VideoProgress>>(new Map());
     const saveProgressTimeoutRef = useRef<number | null>(null);
-    const bonusAwardedRef = useRef(false);
+    const awardedVideoIndicesRef = useRef<Set<number>>(new Set());
 
     const fetchUserData = useCallback(async () => {
         try {
@@ -225,43 +227,47 @@ export const UnifiedVideoContentPage = ({
         }, 2000);
     }, [calculateAndSaveProgress]);
 
-    // Начисление бонуса (один раз за весь контент)
-    const awardBonusOnPlay = useCallback(async () => {
-        if (bonusAwardedRef.current) return;
-        bonusAwardedRef.current = true;
-        
+    // Начисление баллов за конкретное видео (YouTube/RuTube — при воспроизведении, Kinescope — при достижении 90%)
+    const awardPointsForVideo = useCallback(async (videoIndex: number) => {
+        if (awardedVideoIndicesRef.current.has(videoIndex)) return;
+        awardedVideoIndicesRef.current.add(videoIndex);
+
         try {
             const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
             if (!storedUser._id || !id) return;
 
-            await api.post("/api/video-progress/award-bonus", {
+            await api.post("/api/video-progress/award-points-for-video", {
                 contentType,
                 contentId: id,
                 userId: storedUser._id,
+                videoIndex,
             });
         } catch (error) {
-            console.error("Ошибка при начислении бонуса:", error);
+            console.error("Ошибка при начислении баллов за видео:", error);
+            awardedVideoIndicesRef.current.delete(videoIndex);
         }
     }, [contentType, id]);
 
-    // Обработчик для YouTube/RuTube - сразу 100%
-    const handleYouTubeRuTubeLoad = useCallback((videoKey: string, estimatedDuration: number = 60) => {
-        // YouTube/RuTube считаем сразу просмотренными на 100%
+    // Обработчик для YouTube/RuTube — при загрузке (воспроизведении) начисляем баллы
+    const handleYouTubeRuTubeLoad = useCallback((videoKey: string, videoIndex: number, estimatedDuration: number = 60) => {
         updateVideoProgress(videoKey, estimatedDuration, estimatedDuration);
-        awardBonusOnPlay();
-    }, [updateVideoProgress, awardBonusOnPlay]);
+        awardPointsForVideo(videoIndex);
+    }, [updateVideoProgress, awardPointsForVideo]);
 
-    // Обработчик прогресса для Kinescope
-    const createKinescopeProgressHandler = useCallback((videoKey: string) => {
+    // Обработчик прогресса для Kinescope — начисляем баллы при достижении 90%
+    const createKinescopeProgressHandler = useCallback((videoKey: string, videoIndex: number) => {
         return (progress: number, duration?: number) => {
             const durationSeconds = duration || 60;
             const currentTime = (progress / 100) * durationSeconds;
             updateVideoProgress(videoKey, currentTime, durationSeconds);
+            if (progress >= 90) {
+                awardPointsForVideo(videoIndex);
+            }
         };
-    }, [updateVideoProgress]);
+    }, [updateVideoProgress, awardPointsForVideo]);
 
     // Обработчик для Kinescope когда получена длительность
-    const createKinescopeDurationHandler = useCallback((videoKey: string) => {
+    const createKinescopeDurationHandler = useCallback((videoKey: string, _videoIndex: number) => {
         return (durationSeconds: number) => {
             const currentProgress = videoProgressMapRef.current.get(videoKey);
             if (currentProgress) {
@@ -411,9 +417,8 @@ export const UnifiedVideoContentPage = ({
                                         contentId={videoKey}
                                         duration={videoDurationMinutes}
                                         accessType={content.accessType || "subscription"}
-                                        onPlay={awardBonusOnPlay}
-                                        onProgressUpdate={createKinescopeProgressHandler(videoKey)}
-                                        onDurationChange={createKinescopeDurationHandler(videoKey)}
+                                        onProgressUpdate={createKinescopeProgressHandler(videoKey, index)}
+                                        onDurationChange={createKinescopeDurationHandler(videoKey, index)}
                                         disableProgressSave={true}
                                     />
                                     </div>
@@ -435,7 +440,7 @@ export const UnifiedVideoContentPage = ({
                                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                                     allowFullScreen
                                                     className="absolute top-0 left-0 w-full h-full rounded-lg"
-                                                    onLoad={() => handleYouTubeRuTubeLoad(videoKey, videoDurationSeconds)}
+                                                    onLoad={() => handleYouTubeRuTubeLoad(videoKey, index, videoDurationSeconds)}
                                                 />
                                             </div>
                                         </div>
@@ -455,7 +460,7 @@ export const UnifiedVideoContentPage = ({
                                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                             allowFullScreen
                                             className="absolute top-0 left-0 w-full h-full rounded-lg"
-                                            onLoad={() => handleYouTubeRuTubeLoad(videoKey, videoDurationSeconds)}
+                                            onLoad={() => handleYouTubeRuTubeLoad(videoKey, index, videoDurationSeconds)}
                                         />
                                     </div>
                                 </div>
@@ -474,7 +479,7 @@ export const UnifiedVideoContentPage = ({
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                         allowFullScreen
                                         className="absolute top-0 left-0 w-full h-full rounded-lg"
-                                        onLoad={() => handleYouTubeRuTubeLoad(videoKey, videoDurationSeconds)}
+                                        onLoad={() => handleYouTubeRuTubeLoad(videoKey, index, videoDurationSeconds)}
                                     />
                                 </div>
                             </div>

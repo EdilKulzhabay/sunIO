@@ -4,7 +4,7 @@ import User from "../Models/User.js";
 // Создать новую запись дневника
 export const create = async (req, res) => {
     try {
-        const { userId, discovery, achievement, gratitude, uselessTask } = req.body;
+        const { userId, discovery, achievement, gratitude, emotions, uselessTask } = req.body;
 
         if (!userId) {
             return res.status(401).json({
@@ -18,6 +18,7 @@ export const create = async (req, res) => {
             discovery: discovery || '',
             achievement: achievement || '',
             gratitude: gratitude || '',
+            emotions: emotions || '',
             uselessTask: uselessTask || false,
             wasUselessTaskAchieved: uselessTask,
         });

@@ -37,13 +37,14 @@ export const create = async (req, res) => {
                         mainUrl: item?.video?.mainUrl || '',
                         reserveUrl: item?.video?.reserveUrl || '',
                         duration: Number.isFinite(item?.video?.duration) ? item.video.duration : 0,
+                        points: Number.isFinite(item?.video?.points) ? item.video.points : 0,
                     },
                 };
             }
             if (item?.text) return { text: item.text };
             if (item?.image) return { image: item.image };
             return {
-                video: { mainUrl: '', reserveUrl: '', duration: 0 },
+                video: { mainUrl: '', reserveUrl: '', duration: 0, points: 0 },
                 text: '',
                 image: '',
             };
@@ -171,12 +172,13 @@ export const update = async (req, res) => {
                             mainUrl: item?.video?.mainUrl || '',
                             reserveUrl: item?.video?.reserveUrl || '',
                             duration: Number.isFinite(item?.video?.duration) ? item.video.duration : 0,
+                            points: Number.isFinite(item?.video?.points) ? item.video.points : 0,
                         },
                     };
                 }
                 if (item?.text) return { text: item.text };
                 if (item?.image) return { image: item.image };
-                return { video: { mainUrl: '', reserveUrl: '', duration: 0 } };
+                return { video: { mainUrl: '', reserveUrl: '', duration: 0, points: 0 } };
             });
         }
 

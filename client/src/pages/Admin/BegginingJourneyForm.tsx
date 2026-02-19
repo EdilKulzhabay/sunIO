@@ -21,6 +21,8 @@ export const BegginingJourneyForm = () => {
         video: {
             mainUrl: '',
             reserveUrl: '',
+            duration: 0,
+            points: 0,
         },
     });
 
@@ -45,6 +47,8 @@ export const BegginingJourneyForm = () => {
                         video: {
                             mainUrl: data.video?.mainUrl || '',
                             reserveUrl: data.video?.reserveUrl || '',
+                            duration: data.video?.duration ?? 0,
+                            points: data.video?.points ?? 0,
                         },
                     });
                 } else {
@@ -155,6 +159,32 @@ export const BegginingJourneyForm = () => {
                                     })
                                 }
                                 placeholder="https://..."
+                            />
+
+                            <MyInput
+                                label="Длительность видео (мин)"
+                                type="number"
+                                value={String(formData.video.duration ?? 0)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                                    setFormData({ 
+                                        ...formData, 
+                                        video: { ...formData.video, duration: Number(e.target.value) || 0 } 
+                                    })
+                                }
+                                placeholder="0"
+                            />
+
+                            <MyInput
+                                label="Баллы за просмотр"
+                                type="number"
+                                value={String(formData.video.points ?? 0)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                                    setFormData({ 
+                                        ...formData, 
+                                        video: { ...formData.video, points: Number(e.target.value) || 0 } 
+                                    })
+                                }
+                                placeholder="0"
                             />
                         </div>
 

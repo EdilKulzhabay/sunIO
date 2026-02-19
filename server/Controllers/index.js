@@ -27,3 +27,5 @@ export * as PsychodiagnosticsController from "./PsychodiagnosticsController.js";
 export * as BegginingJourneyController from "./BegginingJourneyController.js";
 export * as NavigatorDescriptionsController from "./NavigatorDescriptionsController.js";
 export * as PointsAwardingPolicyController from "./PointsAwardingPolicyController.js";
+export * as ParablesOfLifeController from "./ParablesOfLifeController.js";
+export * as ScientificDiscoveriesController from "./ScientificDiscoveriesController.js";

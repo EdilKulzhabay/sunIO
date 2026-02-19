@@ -181,6 +181,7 @@ export const RichTextEditor = ({ value, onChange, placeholder, height = '200px' 
                 range.deleteContents();
                 range.insertNode(span);
                 selection.removeAllRanges();
+                handleInput();
             } else {
                 alert('Выделите текст для создания спойлера');
             }
@@ -191,21 +192,45 @@ export const RichTextEditor = ({ value, onChange, placeholder, height = '200px' 
     // Вставка цитаты (blockquote)
     const insertBlockquote = () => {
         const selection = window.getSelection();
-        if (selection && selection.rangeCount > 0) {
-            const range = selection.getRangeAt(0);
-            const blockquote = document.createElement('blockquote');
-            blockquote.style.borderLeft = '4px solid #ccc';
-            blockquote.style.paddingLeft = '1em';
-            blockquote.style.marginLeft = '0';
-            
-            // Извлекаем содержимое выделения
-            const contents = range.extractContents();
-            blockquote.appendChild(contents);
+        if (!selection || selection.rangeCount === 0 || !editorRef.current) return;
+
+        const range = selection.getRangeAt(0);
+        const blockquote = document.createElement('blockquote');
+        blockquote.style.borderLeft = '4px solid #ccc';
+        blockquote.style.paddingLeft = '1em';
+        blockquote.style.marginLeft = '0';
+
+        const root = editorRef.current;
+        if (!root.contains(range.commonAncestorContainer)) return;
+
+        const text = range.toString();
+        if (text) {
+            try {
+                const contents = range.extractContents();
+                blockquote.appendChild(contents);
+                range.insertNode(blockquote);
+            } catch {
+                // Если extractContents не сработал (сложный диапазон), оборачиваем в blockquote через clone
+                const fragment = range.cloneContents();
+                blockquote.appendChild(fragment);
+                range.deleteContents();
+                range.insertNode(blockquote);
+            }
+        } else {
+            // Пустое выделение: вставляем пустую цитату и ставим курсор внутрь
+            const br = document.createElement('br');
+            blockquote.appendChild(br);
             range.insertNode(blockquote);
-            
+            const newRange = document.createRange();
+            newRange.setStart(blockquote, 0);
+            newRange.setEnd(blockquote, 0);
             selection.removeAllRanges();
+            selection.addRange(newRange);
         }
-        editorRef.current?.focus();
+
+        selection.removeAllRanges();
+        editorRef.current.focus();
+        handleInput();
     };
 
     // Кнопки панели инструментов (специально для Telegram)

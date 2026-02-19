@@ -18,6 +18,7 @@ interface ContentItem {
         mainUrl: string;
         reserveUrl: string;
         duration: number;
+        points?: number;
     };
     text?: string;
     image?: string;
@@ -81,6 +82,7 @@ export const HealthLabForm = () => {
                         mainUrl: item?.video?.mainUrl || '',
                         reserveUrl: item?.video?.reserveUrl || '',
                         duration: item?.video?.duration || 0,
+                        points: item?.video?.points ?? 0,
                     },
                     text: item?.text || '',
                     image: item?.image || '',
@@ -113,7 +115,7 @@ export const HealthLabForm = () => {
         }
     };
 
-    const handleVideoChange = (index: number, field: 'mainUrl' | 'reserveUrl' | 'duration', value: string | number) => {
+    const handleVideoChange = (index: number, field: 'mainUrl' | 'reserveUrl' | 'duration' | 'points', value: string | number) => {
         setFormData(prev => {
             const newContent = [...prev.content];
             newContent[index] = {
@@ -144,7 +146,7 @@ export const HealthLabForm = () => {
                 newContent[index] = {
                     ...newContent[index],
                     type: newType,
-                    video: newType === 'video' ? (newContent[index].video ?? { mainUrl: '', reserveUrl: '', duration: 0 }) : undefined,
+                    video: newType === 'video' ? (newContent[index].video ?? { mainUrl: '', reserveUrl: '', duration: 0, points: 0 }) : undefined,
                     text: newType === 'text' ? (newContent[index].text ?? '') : undefined,
                     image: newType === 'image' ? (newContent[index].image ?? '') : undefined,
                     linkButton: undefined,
@@ -160,7 +162,7 @@ export const HealthLabForm = () => {
                 ? { type: 'linkButton' as const, linkButton: { linkButtonText: null, linkButtonLink: null, linkButtonType: 'internal' as const } }
                 : {
                     type,
-                    video: { mainUrl: '', reserveUrl: '', duration: 0 },
+                    video: { mainUrl: '', reserveUrl: '', duration: 0, points: 0 },
                     text: '',
                     image: '',
                 };
@@ -201,7 +203,7 @@ export const HealthLabForm = () => {
                     ? { linkButton: item.linkButton }
                     : { linkButton: { linkButtonText: null, linkButtonLink: null, linkButtonType: 'internal' } };
             }
-            if (item.type === 'video') return { video: item.video ?? { mainUrl: '', reserveUrl: '', duration: 0 } };
+            if (item.type === 'video') return { video: item.video ?? { mainUrl: '', reserveUrl: '', duration: 0, points: 0 } };
             if (item.type === 'text') return { text: item.text ?? '' };
             if (item.type === 'image') return { image: item.image ?? '' };
             return {};
@@ -335,6 +337,7 @@ export const HealthLabForm = () => {
                                                 <MyInput label="Основная ссылка на видео" type="text" value={item.video?.mainUrl || ''} onChange={(e) => handleVideoChange(index, 'mainUrl', e.target.value)} placeholder="https://..." />
                                                 <MyInput label="Резервная ссылка на видео" type="text" value={item.video?.reserveUrl || ''} onChange={(e) => handleVideoChange(index, 'reserveUrl', e.target.value)} placeholder="https://..." />
                                                 <MyInput label="Длительность видео (мин)" type="number" value={String(item.video?.duration || 0)} onChange={(e) => handleVideoChange(index, 'duration', Number(e.target.value) || 0)} min="0" />
+                                                <MyInput label="Баллы за просмотр" type="number" value={String(item.video?.points ?? 0)} onChange={(e) => handleVideoChange(index, 'points', Number(e.target.value) || 0)} min="0" />
                                             </>
                                         )}
 

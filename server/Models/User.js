@@ -121,6 +121,10 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: true,
     },
+    diaryNotifyPermission: {
+        type: Boolean,
+        default: false,
+    },
     profilePhotoUrl: {
         type: String,
         default: null,

@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { Send, Users, MessageSquare, Search, X, Image as ImageIcon, Save, ArrowLeft } from 'lucide-react';
 import { RichTextEditor } from '../../components/Admin/RichTextEditor';
 import { ImageUpload } from '../../components/Admin/ImageUpload';
+import { REDIRECT_TO_PAGE_OPTIONS } from '../../constants/redirectToPageOptions';
 
 interface User {
     _id: string;
@@ -24,6 +25,7 @@ interface SavedBroadcast {
     imgUrl?: string;
     content: string;
     buttonText?: string;
+    buttonUrl?: string;
     createdAt: string;
     updatedAt: string;
 }
@@ -38,7 +40,7 @@ export const BroadcastFormAdmin = () => {
     const [imageUrl, setImageUrl] = useState('');
     const [parseMode, setParseMode] = useState<'HTML' | 'Markdown'>('HTML');
     const [buttonText, setButtonText] = useState('');
-    const [buttonUrl, setButtonUrl] = useState('');
+    const [buttonPage, setButtonPage] = useState('');
     const [scheduledAt, setScheduledAt] = useState('');
 
     const [status, setStatus] = useState('all');
@@ -56,6 +58,12 @@ export const BroadcastFormAdmin = () => {
         const date = new Date(scheduledAt);
         return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
     }, [scheduledAt]);
+
+    const buttonUrl = useMemo(() => {
+        if (!buttonPage) return '';
+        const base = (import.meta.env.VITE_APP_URL || '').replace(/\/$/, '');
+        return base + (buttonPage.startsWith('/') ? buttonPage : '/' + buttonPage);
+    }, [buttonPage]);
 
     useEffect(() => {
         fetchUserCount();
@@ -82,6 +90,15 @@ export const BroadcastFormAdmin = () => {
                 setMessage(broadcast.content || '');
                 setImageUrl(broadcast.imgUrl || '');
                 setButtonText(broadcast.buttonText || '');
+                if (broadcast.buttonUrl) {
+                    const base = (import.meta.env.VITE_APP_URL || '').replace(/\/$/, '');
+                    const path = broadcast.buttonUrl.startsWith(base)
+                        ? broadcast.buttonUrl.slice(base.length) || '/'
+                        : broadcast.buttonUrl;
+                    setButtonPage(path.startsWith('/') ? path : '/' + path);
+                } else {
+                    setButtonPage('');
+                }
             }
         } catch (error: any) {
             toast.error('Ошибка загрузки рассылки');
@@ -191,6 +208,7 @@ export const BroadcastFormAdmin = () => {
                 imgUrl: imageUrl || '',
                 content: message,
                 buttonText: buttonText || '',
+                buttonUrl: buttonUrl || '',
             };
 
             const response = isEditing
@@ -253,7 +271,7 @@ export const BroadcastFormAdmin = () => {
                         setMessage('');
                         setImageUrl('');
                         setButtonText('');
-                        setButtonUrl('');
+                        setButtonPage('');
                     }
                 } else {
                     toast.error(response.data.message || 'Ошибка отправки рассылки');
@@ -304,7 +322,7 @@ export const BroadcastFormAdmin = () => {
                     setMessage('');
                     setImageUrl('');
                     setButtonText('');
-                    setButtonUrl('');
+                    setButtonPage('');
                 }
             } else {
                 toast.error(response.data.message || 'Ошибка отправки рассылки');
@@ -442,19 +460,35 @@ export const BroadcastFormAdmin = () => {
                         <label className="flex items-center gap-2 text-sm font-medium mb-2">
                             Inline кнопка (опционально)
                         </label>
-                        <div>
-                            <label className="block text-xs text-gray-600 mb-1">Текст кнопки</label>
-                            <input
-                                type="text"
-                                value={buttonText}
-                                onChange={(e) => setButtonText(e.target.value)}
-                                placeholder="Например: Открыть приложение"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
+                        <div className="space-y-3">
+                            <div>
+                                <label className="block text-xs text-gray-600 mb-1">Текст кнопки</label>
+                                <input
+                                    type="text"
+                                    value={buttonText}
+                                    onChange={(e) => setButtonText(e.target.value)}
+                                    placeholder="Например: Открыть приложение"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs text-gray-600 mb-1">Страница приложения для перехода</label>
+                                <select
+                                    value={buttonPage}
+                                    onChange={(e) => setButtonPage(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                >
+                                    {REDIRECT_TO_PAGE_OPTIONS.map((opt) => (
+                                        <option key={opt.value || 'empty'} value={opt.value}>
+                                            {opt.title}
+                                        </option>
+                                    ))}
+                                </select>
+                                <p className="text-xs text-gray-500 mt-2">
+                                    При нажатии на кнопку пользователь откроет приложение сразу на выбранной странице. URL формируется с параметрами <code className="bg-gray-100 px-1 rounded">telegramId</code> и <code className="bg-gray-100 px-1 rounded">profilePhotoUrl</code> для каждого получателя.
+                                </p>
+                            </div>
                         </div>
-                        <p className="text-xs text-gray-500 mt-2">
-                            URL кнопки будет автоматически сформирован как <code className="bg-gray-100 px-1 rounded">{import.meta.env.VITE_APP_URL}/</code> с параметрами <code className="bg-gray-100 px-1 rounded">telegramId</code> и <code className="bg-gray-100 px-1 rounded">profilePhotoUrl</code> (если указан) для каждого пользователя.
-                        </p>
                     </div>
 
                     <div className="border-t pt-4">
@@ -470,28 +504,6 @@ export const BroadcastFormAdmin = () => {
                         <p className="text-xs text-gray-500 mt-2">
                             Если указать время, рассылка будет выполнена автоматически в этот момент.
                         </p>
-                    </div>
-
-                    <div className="flex gap-3 pt-4 border-t">
-                        <button
-                            onClick={handleSave}
-                            disabled={loading || !title.trim() || !message.trim()}
-                            className="flex items-center gap-3 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                            <Save size={20} />
-                            {isEditing ? 'Сохранить изменения' : 'Создать рассылку'}
-                        </button>
-                        <button
-                            onClick={handleSendBroadcast}
-                            disabled={loading || !message.trim() || (selectedUsers.size === 0 && userCount === 0)}
-                            className="flex items-center gap-3 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex-1"
-                        >
-                            <Send size={20} />
-                            {loading ? 'Отправка...' : selectedUsers.size > 0 
-                                ? `Отправить выбранным (${selectedUsers.size})`
-                                : `Отправить рассылку (${userCount})`
-                            }
-                        </button>
                     </div>
                 </div>
 
@@ -672,6 +684,28 @@ export const BroadcastFormAdmin = () => {
                             </div>
                         </div>
                     )}
+
+                    <div className="flex gap-3 pt-6 border-t border-gray-200">
+                        <button
+                            onClick={handleSave}
+                            disabled={loading || !title.trim() || !message.trim()}
+                            className="flex items-center gap-3 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <Save size={20} />
+                            {isEditing ? 'Сохранить изменения' : 'Создать рассылку'}
+                        </button>
+                        <button
+                            onClick={handleSendBroadcast}
+                            disabled={loading || !message.trim() || (selectedUsers.size === 0 && userCount === 0)}
+                            className="flex items-center gap-3 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex-1"
+                        >
+                            <Send size={20} />
+                            {loading ? 'Отправка...' : selectedUsers.size > 0 
+                                ? `Отправить выбранным (${selectedUsers.size})`
+                                : `Отправить рассылку (${userCount})`
+                            }
+                        </button>
+                    </div>
                 </div>
             </div>
         </AdminLayout>

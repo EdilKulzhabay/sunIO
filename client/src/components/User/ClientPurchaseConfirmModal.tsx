@@ -9,6 +9,8 @@ interface ClientPurchaseConfirmModalProps {
     contentId: string;
     contentType:
         | 'practice'
+        | 'parables-of-life'
+        | 'scientific-discoveries'
         | 'health-lab'
         | 'relationship-workshop'
         | 'spirit-forge'

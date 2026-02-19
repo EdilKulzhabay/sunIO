@@ -21,6 +21,8 @@ import Psychodiagnostics from './Psychodiagnostics.js';
 import BegginingJourney from './BegginingJourney.js';
 import NavigatorDescriptions from './NavigatorDescriptions.js';
 import PointsAwardingPolicy from './PointsAwardingPolicy.js';
+import ParablesOfLife from './ParablesOfLife.js';
+import ScientificDiscoveries from './ScientificDiscoveries.js';
 
 export {
     User,
@@ -45,5 +47,7 @@ export {
     Psychodiagnostics,
     BegginingJourney,
     NavigatorDescriptions,
-    PointsAwardingPolicy
+    PointsAwardingPolicy,
+    ParablesOfLife,
+    ScientificDiscoveries
 };

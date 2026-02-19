@@ -23,7 +23,9 @@ import {
     Stethoscope,
     HeartHandshake,
     Target,
-    Brain
+    Brain,
+    MessageSquare,
+    FlaskConical
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -41,6 +43,8 @@ const menuItems = [
     { path: '', label: '', icon: null, divider: true }, // Разделитель
     { path: '/admin/faq', label: 'FAQ', icon: HelpCircle },
     { path: '/admin/practice', label: 'Практики', icon: Dumbbell },
+    { path: '/admin/parables-of-life', label: 'Притчи о жизни', icon: MessageSquare },
+    { path: '/admin/scientific-discoveries', label: 'Научные открытия', icon: FlaskConical },
     { path: '/admin/schedule', label: 'Расписание', icon: Calendar },
     { path: '/admin/health-lab', label: 'Лаборатория здоровья', icon: Heart },
     { path: '/admin/relationship-workshop', label: 'Мастерская отношений', icon: Users2 },

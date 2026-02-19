@@ -21,7 +21,9 @@ import {
     Brain,
     Compass,
     Navigation,
-    Gift
+    Gift,
+    MessageSquare,
+    FlaskConical
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -33,6 +35,8 @@ const mainCards = [
 const contentCards = [
     { title: 'FAQ', icon: HelpCircle, path: '/admin/faq', color: 'bg-blue-500', description: 'Вопросы и ответы' },
     { title: 'Практики', icon: Dumbbell, path: '/admin/practice', color: 'bg-green-500', description: 'Контент на странице Практики' },
+    { title: 'Притчи о жизни', icon: MessageSquare, path: '/admin/parables-of-life', color: 'bg-amber-600', description: 'Контент Притчи о жизни' },
+    { title: 'Научные открытия', icon: FlaskConical, path: '/admin/scientific-discoveries', color: 'bg-cyan-600', description: 'Контент Научные открытия' },
     { title: 'Расписание', icon: Calendar, path: '/admin/schedule', color: 'bg-indigo-500', description: 'События и вебинары' },
     { title: 'Лаборатория здоровья', icon: Heart, path: '/admin/health-lab', color: 'bg-rose-500', description: 'Контент Лаборатории здоровья' },
     { title: 'Мастерская отношений', icon: Users2, path: '/admin/relationship-workshop', color: 'bg-pink-500', description: 'Контент Мастерской отношений' },

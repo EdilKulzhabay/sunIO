@@ -303,6 +303,7 @@ const executeBroadcast = async (payload) => {
 // Отправить рассылку
 export const sendBroadcast = async (req, res) => {
     try {
+        const user = req.user;
         const { scheduledAt, ...payload } = req.body;
 
         if (scheduledAt) {
@@ -311,8 +312,13 @@ export const sendBroadcast = async (req, res) => {
                 const schedule = new BroadcastSchedule({
                     scheduledAt: scheduledDate,
                     payload,
+                    scheduledBy: user?._id,
                 });
                 await schedule.save();
+                if (user) {
+                    const preview = (payload.message || '').substring(0, 50);
+                    await addAdminAction(user._id, `Запланировал(а) рассылку на ${scheduledDate.toLocaleString('ru-RU')}: "${preview}${preview.length >= 50 ? '...' : ''}"`);
+                }
                 return res.status(200).json({
                     success: true,
                     message: "Рассылка запланирована",
@@ -326,6 +332,23 @@ export const sendBroadcast = async (req, res) => {
             return res.status(result.statusCode || 500).json(result);
         }
 
+        if (user) {
+            const preview = (payload.message || '').substring(0, 50);
+            const sentInfo = result.sent ? ` (отправлено ${result.sent} пользователям)` : '';
+            await addAdminAction(user._id, `Отправил(а) рассылку: "${preview}${preview.length >= 50 ? '...' : ''}"${sentInfo}`);
+        }
+
+        // Сохраняем запись об отправке для раздела «Отправленные рассылки»
+        const sentRecord = new BroadcastSchedule({
+            scheduledAt: new Date(),
+            status: 'sent',
+            payload,
+            result,
+            sentAt: new Date(),
+            scheduledBy: user?._id,
+        });
+        await sentRecord.save();
+
         return res.status(200).json(result);
     } catch (error) {
         console.log("Ошибка в sendBroadcast:", error);
@@ -333,6 +356,41 @@ export const sendBroadcast = async (req, res) => {
             success: false,
             message: "Ошибка при отправке рассылки",
         });
+    }
+};
+
+/** Рассылка "diaryCheck" всем пользователям с notifyPermission и diaryNotifyPermission === true */
+export const sendDiaryCheckBroadcast = async () => {
+    try {
+        const broadcast = await Broadcast.findOne({ title: 'diaryCheck' });
+        if (!broadcast) {
+            console.log('[sendDiaryCheckBroadcast] Рассылка с title "diaryCheck" не найдена');
+            return { success: false, message: 'Рассылка diaryCheck не найдена' };
+        }
+
+        const users = await User.find({
+            notifyPermission: true,
+            diaryNotifyPermission: true,
+            telegramId: { $exists: true, $ne: null, $ne: '' },
+            isBlocked: { $ne: true },
+        }).select('_id telegramId');
+
+        if (users.length === 0) {
+            console.log('[sendDiaryCheckBroadcast] Нет пользователей для рассылки diaryCheck');
+            return { success: true, sent: 0, message: 'Нет пользователей для рассылки' };
+        }
+
+        const userIds = users.map(u => u._id);
+        const result = await executeBroadcast({
+            broadcastTitle: 'diaryCheck',
+            userIds,
+        });
+
+        console.log(`[sendDiaryCheckBroadcast] Завершено: отправлено ${result.sent || 0}, ошибок ${result.failed || 0}`);
+        return result;
+    } catch (error) {
+        console.error('[sendDiaryCheckBroadcast] Ошибка:', error);
+        return { success: false, message: error.message };
     }
 };
 
@@ -352,6 +410,11 @@ export const processScheduledBroadcasts = async () => {
             job.sentAt = new Date();
             if (result.success) {
                 job.status = 'sent';
+                if (job.scheduledBy) {
+                    const preview = (job.payload?.message || '').substring(0, 50);
+                    const sentInfo = result.sent ? ` (отправлено ${result.sent} пользователям)` : '';
+                    await addAdminAction(job.scheduledBy, `Рассылка отправлена по расписанию: "${preview}${preview.length >= 50 ? '...' : ''}"${sentInfo}`);
+                }
             } else {
                 job.status = 'failed';
                 job.error = result.message || 'Ошибка отправки рассылки';
@@ -423,7 +486,7 @@ export const sendTestMessage = async (req, res) => {
 export const createBroadcast = async (req, res) => {
     try {
         const user = req.user;
-        const { title, imgUrl, content, buttonText } = req.body;
+        const { title, imgUrl, content, buttonText, buttonUrl } = req.body;
 
         if (!title || !content) {
             return res.status(400).json({
@@ -446,6 +509,7 @@ export const createBroadcast = async (req, res) => {
             imgUrl: imgUrl || '',
             content,
             buttonText: buttonText || '',
+            buttonUrl: buttonUrl || '',
         });
 
         await broadcast.save();
@@ -525,7 +589,7 @@ export const updateBroadcast = async (req, res) => {
     try {
         const user = req.user;
         const { id } = req.params;
-        const { title, imgUrl, content, buttonText } = req.body;
+        const { title, imgUrl, content, buttonText, buttonUrl } = req.body;
 
         const broadcast = await Broadcast.findById(id);
 
@@ -551,6 +615,7 @@ export const updateBroadcast = async (req, res) => {
         if (imgUrl !== undefined) broadcast.imgUrl = imgUrl;
         if (content !== undefined) broadcast.content = content;
         if (buttonText !== undefined) broadcast.buttonText = buttonText;
+        if (buttonUrl !== undefined) broadcast.buttonUrl = buttonUrl;
 
         await broadcast.save();
 
@@ -605,6 +670,91 @@ export const deleteBroadcast = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Ошибка при удалении рассылки",
+        });
+    }
+};
+
+// Получить запланированные рассылки
+export const getScheduledBroadcasts = async (req, res) => {
+    try {
+        const schedules = await BroadcastSchedule.find({ status: 'scheduled' })
+            .sort({ scheduledAt: 1 })
+            .populate('scheduledBy', 'fullName');
+
+        res.json({
+            success: true,
+            data: schedules,
+            count: schedules.length,
+        });
+    } catch (error) {
+        console.log("Ошибка в getScheduledBroadcasts:", error);
+        res.status(500).json({
+            success: false,
+            message: "Ошибка получения запланированных рассылок",
+        });
+    }
+};
+
+// Получить отправленные рассылки
+export const getSentBroadcasts = async (req, res) => {
+    try {
+        const schedules = await BroadcastSchedule.find({ status: 'sent' })
+            .sort({ sentAt: -1 })
+            .limit(100)
+            .populate('scheduledBy', 'fullName');
+
+        res.json({
+            success: true,
+            data: schedules,
+            count: schedules.length,
+        });
+    } catch (error) {
+        console.log("Ошибка в getSentBroadcasts:", error);
+        res.status(500).json({
+            success: false,
+            message: "Ошибка получения отправленных рассылок",
+        });
+    }
+};
+
+// Отменить запланированную рассылку
+export const cancelScheduledBroadcast = async (req, res) => {
+    try {
+        const user = req.user;
+        const { id } = req.params;
+
+        const schedule = await BroadcastSchedule.findById(id);
+
+        if (!schedule) {
+            return res.status(404).json({
+                success: false,
+                message: "Запланированная рассылка не найдена",
+            });
+        }
+
+        if (schedule.status !== 'scheduled') {
+            return res.status(400).json({
+                success: false,
+                message: "Можно отменить только запланированную рассылку",
+            });
+        }
+
+        const preview = (schedule.payload?.message || '').substring(0, 50);
+        await BroadcastSchedule.findByIdAndDelete(id);
+
+        if (user) {
+            await addAdminAction(user._id, `Отменил(а) запланированную рассылку: "${preview}${preview.length >= 50 ? '...' : ''}"`);
+        }
+
+        res.json({
+            success: true,
+            message: "Рассылка отменена",
+        });
+    } catch (error) {
+        console.log("Ошибка в cancelScheduledBroadcast:", error);
+        res.status(500).json({
+            success: false,
+            message: "Ошибка при отмене рассылки",
         });
     }
 };

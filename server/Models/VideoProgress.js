@@ -12,6 +12,8 @@ const VideoProgressSchema = new mongoose.Schema(
       type: String,
       enum: [
         'practice',
+        'parables-of-life',
+        'scientific-discoveries',
         'health-lab',
         'relationship-workshop',
         'spirit-forge',
@@ -54,6 +56,10 @@ const VideoProgressSchema = new mongoose.Schema(
     lastWatched: {
       type: Date,
       default: Date.now,
+    },
+    awardedVideoIndices: {
+      type: [Number],
+      default: [],
     },
   },
   {

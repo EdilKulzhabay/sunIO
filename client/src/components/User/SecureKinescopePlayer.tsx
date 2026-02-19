@@ -10,7 +10,9 @@ interface SecureKinescopePlayerProps {
     showPoster?: boolean;
     contentType: 
         | 'meditation' 
-        | 'practice' 
+        | 'practice'
+        | 'parables-of-life'
+        | 'scientific-discoveries' 
         | 'videoLesson'
         | 'health-lab'
         | 'relationship-workshop'

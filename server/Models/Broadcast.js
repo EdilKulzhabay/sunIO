@@ -20,6 +20,10 @@ const BroadcastSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    buttonUrl: {
+      type: String,
+      trim: true,
+    },
   },
   {
     timestamps: true,

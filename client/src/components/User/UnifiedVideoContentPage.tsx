@@ -103,14 +103,6 @@ const getVideoInfo = (url: string): { type: "kinescope" | "youtube" | "rutube" |
     return { type: "unknown", id: url };
 };
 
-const getYouTubeEmbedUrl = (url: string): string => {
-    const info = getVideoInfo(url);
-    if (info.type === "youtube") {
-        return `https://www.youtube.com/embed/${info.id}`;
-    }
-    return url;
-};
-
 const getRuTubeEmbedUrl = (url: string): string => {
     const info = getVideoInfo(url);
     if (info.type === "rutube" && info.id && info.id !== "private" && info.id.length > 0) {
@@ -120,6 +112,84 @@ const getRuTubeEmbedUrl = (url: string): string => {
         return `https://rutube.ru/play/embed/${info.id}`;
     }
     return url;
+};
+
+declare global {
+    interface Window {
+        YT?: { Player: any; PlayerState?: { PLAYING: number } };
+        onYouTubeIframeAPIReady?: () => void;
+    }
+}
+
+/** YouTube плеер: 100% и баллы только при реальном воспроизведении (onStateChange → PLAYING), не при загрузке страницы */
+const YouTubePlayerWithProgress = ({
+    videoId,
+    onFirstPlay,
+    className,
+    style,
+    title,
+}: {
+    videoId: string;
+    onFirstPlay: () => void;
+    className?: string;
+    style?: React.CSSProperties;
+    title?: string;
+}) => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const playedRef = useRef(false);
+
+    useEffect(() => {
+        if (!videoId || !containerRef.current) return;
+
+        const initPlayer = () => {
+            if (!window.YT?.Player || !containerRef.current) return;
+            const YT = window.YT;
+            const container = containerRef.current;
+            if (container.querySelector('iframe')) return;
+
+            new YT.Player(container, {
+                videoId,
+                width: '100%',
+                height: '100%',
+                playerVars: { enablejsapi: 1 },
+                events: {
+                    onStateChange: (e: { data: number }) => {
+                        if (e.data === (YT.PlayerState?.PLAYING ?? 1) && !playedRef.current) {
+                            playedRef.current = true;
+                            onFirstPlay();
+                        }
+                    },
+                },
+            });
+        };
+
+        if (window.YT?.Player) {
+            initPlayer();
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = 'https://www.youtube.com/iframe_api';
+        script.async = true;
+        const prevReady = window.onYouTubeIframeAPIReady;
+        window.onYouTubeIframeAPIReady = () => {
+            prevReady?.();
+            initPlayer();
+        };
+        if (document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+            window.onYouTubeIframeAPIReady = prevReady;
+            initPlayer();
+            return;
+        }
+        document.head.appendChild(script);
+        return () => {
+            window.onYouTubeIframeAPIReady = prevReady;
+        };
+    }, [videoId, onFirstPlay]);
+
+    return (
+        <div ref={containerRef} className={className} style={style} title={title} />
+    );
 };
 
 const defaultNormalizeContent = (data: any): NormalizedContent => {
@@ -432,57 +502,55 @@ export const UnifiedVideoContentPage = ({
                                 if (originalVideoInfo.type === "youtube") {
                                     return (
                                         <div key={itemKey}>
-                                        <div className="mt-6">
-                                            <div className="relative w-full rounded-lg overflow-hidden" style={{ paddingBottom: "56.25%" }}>
-                                                <iframe
-                                                    src={`${getYouTubeEmbedUrl(mainUrl)}?enablejsapi=1`}
-                                                    title={`YouTube video player ${index + 1}`}
-                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                                    allowFullScreen
-                                                    className="absolute top-0 left-0 w-full h-full rounded-lg"
-                                                    onLoad={() => handleYouTubeRuTubeLoad(videoKey, index, videoDurationSeconds)}
-                                                />
+                                            <div className="mt-6">
+                                                <div className="relative w-full rounded-lg overflow-hidden" style={{ paddingBottom: "56.25%" }}>
+                                                    <YouTubePlayerWithProgress
+                                                        videoId={originalVideoInfo.id}
+                                                        onFirstPlay={() => handleYouTubeRuTubeLoad(videoKey, index, videoDurationSeconds)}
+                                                        className="absolute top-0 left-0 w-full h-full rounded-lg"
+                                                        style={{ left: 0, top: 0, width: '100%', height: '100%' }}
+                                                        title={`YouTube video player ${index + 1}`}
+                                                    />
+                                                </div>
                                             </div>
-                                        </div>
                                         </div>
                                     );
                                 }
                                 return null;
                             }
 
+                            // RuTube: 100% и баллы только при воспроизведении; onLoad не вызываем, чтобы не ставить 100% при открытии страницы
                             return (
                                 <div key={itemKey}>
-                                <div className="mt-6">
-                                    <div className="relative w-full rounded-lg overflow-hidden" style={{ paddingBottom: "56.25%" }}>
-                                        <iframe
-                                            src={rutubeEmbedUrl}
-                                            title={`RuTube video player ${index + 1}`}
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                            allowFullScreen
-                                            className="absolute top-0 left-0 w-full h-full rounded-lg"
-                                            onLoad={() => handleYouTubeRuTubeLoad(videoKey, index, videoDurationSeconds)}
-                                        />
+                                    <div className="mt-6">
+                                        <div className="relative w-full rounded-lg overflow-hidden" style={{ paddingBottom: "56.25%" }}>
+                                            <iframe
+                                                src={rutubeEmbedUrl}
+                                                title={`RuTube video player ${index + 1}`}
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                allowFullScreen
+                                                className="absolute top-0 left-0 w-full h-full rounded-lg"
+                                            />
+                                        </div>
                                     </div>
-                                </div>
                                 </div>
                             );
                         }
 
-                        // YouTube по умолчанию
+                        // YouTube по умолчанию — 100% и баллы только при реальном воспроизведении
                         return (
                             <div key={itemKey}>
-                            <div className="mt-6">
-                                <div className="relative w-full rounded-lg overflow-hidden" style={{ paddingBottom: "56.25%" }}>
-                                    <iframe
-                                        src={`${getYouTubeEmbedUrl(videoUrl)}?enablejsapi=1`}
-                                        title={`YouTube video player ${index + 1}`}
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                        allowFullScreen
-                                        className="absolute top-0 left-0 w-full h-full rounded-lg"
-                                        onLoad={() => handleYouTubeRuTubeLoad(videoKey, index, videoDurationSeconds)}
-                                    />
+                                <div className="mt-6">
+                                    <div className="relative w-full rounded-lg overflow-hidden" style={{ paddingBottom: "56.25%" }}>
+                                        <YouTubePlayerWithProgress
+                                            videoId={videoInfo.id}
+                                            onFirstPlay={() => handleYouTubeRuTubeLoad(videoKey, index, videoDurationSeconds)}
+                                            className="absolute top-0 left-0 w-full h-full rounded-lg"
+                                            style={{ left: 0, top: 0, width: '100%', height: '100%' }}
+                                            title={`YouTube video player ${index + 1}`}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
                             </div>
                         );
                     })}

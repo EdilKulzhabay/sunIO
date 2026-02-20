@@ -168,6 +168,7 @@ export const update = async (req, res) => {
                             mainUrl: item?.video?.mainUrl || '',
                             reserveUrl: item?.video?.reserveUrl || '',
                             duration: Number.isFinite(item?.video?.duration) ? item.video.duration : 0,
+                            points: Number.isFinite(item?.video?.points) ? item.video.points : 0,
                         },
                     };
                 }

@@ -34,6 +34,10 @@ export const ClientFAQ = () => {
         const response = await api.put(`/api/user/${userData._id}`, { [field]: value });
         if (response.data.success) {
             const updatedUser = { ...userData, [field]: value };
+            if (value) {
+                updatedUser.showMainPageInstructions = true;
+                updatedUser.showProfilePageInstructions = true;
+            }
             localStorage.setItem('user', JSON.stringify(updatedUser));
             setUserData(updatedUser);
         }
@@ -131,8 +135,8 @@ export const ClientFAQ = () => {
                                     if (showMainPageInstructions || showProfilePageInstructions) {
                                         changeValue = true;
                                     }
-                                    updateUserData('showMainPageInstructions', !changeValue);
-                                    updateUserData('showProfilePageInstructions', !changeValue);
+                                    updateUserData('showMainPageInstructions', changeValue);
+                                    updateUserData('showProfilePageInstructions', changeValue);
                                 }} 
                             />
                         </div>

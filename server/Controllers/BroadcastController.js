@@ -32,8 +32,6 @@ export const getFilteredUsers = async (req, res) => {
         console.log("search: ", search);
 
         let filter = {
-            // Только пользователи, разрешившие уведомления
-            notifyPermission: { $ne: false },
             // Исключаем заблокированных пользователей
             isBlocked: { $ne: true },
         };

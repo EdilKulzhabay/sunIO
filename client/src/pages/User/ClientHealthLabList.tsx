@@ -7,6 +7,7 @@ import { ClientSubscriptionDynamicModal } from "../../components/User/ClientSubs
 import { ClientPurchaseConfirmModal } from "../../components/User/ClientPurchaseConfirmModal";
 import { ClientInsufficientBonusModal } from "../../components/User/ClientInsufficientBonusModal";
 import inBothDirections from "../../assets/inBothDirections.png";
+import { useAutoScrollPreview } from "../../hooks/useAutoScrollPreview";
 
 export const ClientHealthLabList = () => {
     const [healthLabs, setHealthLabs] = useState([]);
@@ -227,6 +228,9 @@ export const ClientHealthLabList = () => {
         if (userData?.hasPaid && userData?.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date()) return true;
         return false;
     }
+
+    const topItemsCount = healthLabs.filter((h: any) => h.location === 'top').length;
+    useAutoScrollPreview(cardsContainerRef, topItemsCount, !loading);
 
     const scrollRight = () => {
         const container = cardsContainerRef.current;

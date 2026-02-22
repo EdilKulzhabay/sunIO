@@ -150,7 +150,7 @@ export const ClientNavigator = () => {
                             } else {
                                 navigate("/client/consciousness-library")
                             }
-                        }} className="absolute top-[13%] left-[50%] w-[95px] h-[61px] z-20 lg:w-[176px] lg:h-[72px] lg:top-[25%] lg:left-[49%] cursor-pointer">
+                        }} className="absolute top-[10%] left-[50%] w-[95px] h-[61px] z-20 lg:w-[176px] lg:h-[72px] lg:top-[25%] lg:left-[49%] cursor-pointer">
                             <img src={navigatorConsciousnessLibraryMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
                             <img src={navigatorConsciousnessLibraryDesktop} alt="" className="object-cover w-full h-full hidden lg:block" />
                         </button>
@@ -205,13 +205,13 @@ export const ClientNavigator = () => {
                             } else {
                                 navigate("/client/femininity-gazebo")
                             }
-                        }} className="absolute top-[68%] left-[65%] w-[115px] h-[61px] z-20 lg:w-[186px] lg:h-[93px] lg:top-[74%] lg:left-[84%] cursor-pointer">
+                        }} className="absolute top-[69%] left-[66%] w-[115px] h-[61px] z-20 lg:w-[186px] lg:h-[93px] lg:top-[74%] lg:left-[84%] cursor-pointer">
                             <img src={navigatorFemininityGazeboMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
                             <img src={navigatorFemininityGazeboDesktop} alt="" className="object-cover w-full h-full hidden lg:block" />
                         </button>
                         <button onClick={() => {
                             navigate("/client/beggining-journey")
-                        }} className="absolute top-[75%] left-[22%] w-[99px] h-[61px] z-20 lg:w-[183px] lg:h-[72px] lg:top-[82%] lg:left-[35%] cursor-pointer">
+                        }} className="absolute top-[78%] left-[27%] w-[99px] h-[61px] z-20 lg:w-[183px] lg:h-[72px] lg:top-[82%] lg:left-[35%] cursor-pointer">
                             <img src={navigatorBegginingJourneyMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
                             <img src={navigatorBegginingJourneyDesktop} alt="" className="object-cover w-full h-full hidden lg:block" />
                         </button>

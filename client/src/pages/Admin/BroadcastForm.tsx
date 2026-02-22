@@ -133,7 +133,7 @@ export const BroadcastFormAdmin = () => {
                 lastActiveFilter: lastActiveFilter,
                 search: search
             });
-            const users = (response.data.data || []).filter((u: User) => u.notifyPermission !== false);
+            const users = response.data.data || [];
             setFoundUsers(users);
             if (users.length === 0) {
                 toast.info('Пользователи не найдены');
@@ -179,13 +179,14 @@ export const BroadcastFormAdmin = () => {
         setSelectedUsersData(newSelectedData);
     };
 
+    const selectableUsers = foundUsers.filter((u) => u.notifyPermission !== false);
     const toggleAllUsers = () => {
-        if (selectedUsers.size === foundUsers.length) {
+        if (selectedUsers.size === selectableUsers.length) {
             setSelectedUsers(new Set());
             setSelectedUsersData(new Map());
         } else {
-            const allIds = new Set(foundUsers.map(u => u._id));
-            const allData = new Map(foundUsers.map(u => [u._id, u]));
+            const allIds = new Set(selectableUsers.map(u => u._id));
+            const allData = new Map(selectableUsers.map(u => [u._id, u]));
             setSelectedUsers(allIds);
             setSelectedUsersData(allData);
         }
@@ -596,7 +597,7 @@ export const BroadcastFormAdmin = () => {
                                 <div className="flex items-center gap-2">
                                     <input
                                         type="checkbox"
-                                        checked={foundUsers.length > 0 && selectedUsers.size === foundUsers.length}
+                                        checked={selectableUsers.length > 0 && selectedUsers.size === selectableUsers.length}
                                         onChange={toggleAllUsers}
                                         className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                                     />
@@ -609,32 +610,41 @@ export const BroadcastFormAdmin = () => {
                                 </span>
                             </div>
                             <div className="max-h-96 overflow-y-auto">
-                                {foundUsers.map((user) => (
-                                    <div
-                                        key={user._id}
-                                        className="px-4 py-3 border-b border-gray-100 hover:bg-gray-50 flex items-center gap-3 cursor-pointer"
-                                        onClick={() => toggleUserSelection(user)}
-                                    >
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedUsers.has(user._id)}
-                                            onChange={() => toggleUserSelection(user)}
-                                            className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                                            onClick={(e) => e.stopPropagation()}
-                                        />
-                                        <div className="flex-1">
-                                            <div className="font-medium text-gray-900">{user.fullName || 'Без имени'}</div>
-                                            <div className="text-sm text-gray-500 flex gap-3">
-                                                {user.telegramUserName && <span>@{user.telegramUserName}</span>}
-                                                {user.userName && <span>{user.userName}</span>}
-                                                {user.phone && <span>{user.phone}</span>}
+                                {foundUsers.map((user) => {
+                                    const isDisabled = user.notifyPermission === false;
+                                    return (
+                                        <div
+                                            key={user._id}
+                                            className={`px-4 py-3 border-b border-gray-100 flex items-center gap-3 ${
+                                                isDisabled ? 'bg-gray-50 opacity-75' : 'hover:bg-gray-50 cursor-pointer'
+                                            }`}
+                                            onClick={() => !isDisabled && toggleUserSelection(user)}
+                                        >
+                                            {isDisabled ? (
+                                                <X size={18} className="text-gray-400 flex-shrink-0" />
+                                            ) : (
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedUsers.has(user._id)}
+                                                    onChange={() => toggleUserSelection(user)}
+                                                    className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                />
+                                            )}
+                                            <div className="flex-1">
+                                                <div className="font-medium text-gray-900">{user.fullName || 'Без имени'}</div>
+                                                <div className="text-sm text-gray-500 flex gap-3">
+                                                    {user.telegramUserName && <span>@{user.telegramUserName}</span>}
+                                                    {user.userName && <span>{user.userName}</span>}
+                                                    {user.phone && <span>{user.phone}</span>}
+                                                </div>
+                                            </div>
+                                            <div className={`text-xs px-2 py-1 rounded ${getStatusColor(user.status, user.isBlocked)}`}>
+                                                {getStatusLabel(user.status, user.isBlocked)}
                                             </div>
                                         </div>
-                                        <div className={`text-xs px-2 py-1 rounded ${getStatusColor(user.status, user.isBlocked)}`}>
-                                            {getStatusLabel(user.status, user.isBlocked)}
-                                        </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
                     )}

@@ -272,6 +272,11 @@ export const UsersAdmin = () => {
             label: 'Дата регистрации',
             render: (value: string) => new Date(value).toLocaleDateString('ru-RU')
         },
+        { 
+            key: 'notifyPermission', 
+            label: 'Уведомления',
+            render: (value: boolean) => value ? 'Вкл.' : 'Выкл.'
+        },
     ];
 
     return (

@@ -17,7 +17,9 @@ import main3 from "../../assets/main3.png"
 import main4 from "../../assets/main4.png"
 import goldUser from "../../assets/goldUser.png"
 import { ClientSchedule } from "./ClientSchedule"
+import { MainPageInstructionsModal } from "../../components/User/MainPageInstructionsModal";
 import { X } from "lucide-react";
+import { MAIN_INSTRUCTION_STEPS_COUNT } from "../../components/User/MainPageInstructionsModal";
 
 
 // const SmallCard = ({ title, link, img }: { title: string, link: string, img: string }) => {
@@ -84,6 +86,7 @@ export const Main = () => {
     const [loading, setLoading] = useState(false);
     const [modalNotification, setModalNotification] = useState<ModalNotification | null>(null);
     const [notificationIndex, setNotificationIndex] = useState<number | null>(null);
+    const [instructionStep, setInstructionStep] = useState(0);
 
     useEffect(() => {
         
@@ -283,6 +286,40 @@ export const Main = () => {
         }
     };
 
+    const openExternalLink = (url: string) => {
+        if ((window as any).Telegram?.WebApp) {
+          (window as any).Telegram.WebApp.openLink(url, { try_instant_view: false });
+        } else {
+          window.open(url, "_blank");
+        }
+      };
+
+    const handleInstructionNext = () => {
+        setInstructionStep((prev) => prev + 1);
+        if (instructionStep === MAIN_INSTRUCTION_STEPS_COUNT - 1) {
+            handleInstructionClose();
+        }
+    };
+
+    const handleInstructionClose = async () => {
+        try {
+            if (userData) {
+                if (userData.telegramId) {
+                    await api.patch(`/api/users/${userData.telegramId}`, { showMainPageInstructions: false });
+                } else if (userData._id) {
+                    await api.put(`/api/user/${userData._id}`, { showMainPageInstructions: false });
+                }
+                const updatedUser = { ...userData, showMainPageInstructions: false };
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+                setUserData(updatedUser);
+                if (updateUser) updateUser(updatedUser);
+            }
+        } catch (error) {
+            console.error('Ошибка сохранения настройки инструкций:', error);
+        }
+        setInstructionStep(-1);
+    };
+
     const handleModalButtonClick = async () => {
         if (notificationIndex === null || !modalNotification) return;
 
@@ -321,7 +358,8 @@ export const Main = () => {
                     navigate(buttonLink);
                 } else {
                     // Иначе это внешняя ссылка
-                    window.location.href = buttonLink;
+                    // window.location.href = buttonLink;
+                    openExternalLink(buttonLink);
                 }
             }
         } catch (error) {
@@ -345,8 +383,19 @@ export const Main = () => {
         </div>
     }
 
+    const showInstructions = userData && userData.showMainPageInstructions !== false && instructionStep >= 0 && instructionStep < 8;
+
     return (
         <UserLayout>
+            {/* Инструкции главной страницы */}
+            {showInstructions && (
+                <MainPageInstructionsModal
+                    currentStep={instructionStep}
+                    onNext={handleInstructionNext}
+                    onClose={handleInstructionClose}
+                />
+            )}
+
             {/* Модальное уведомление */}
             {modalNotification && (
                 <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -426,16 +475,16 @@ export const Main = () => {
                         <img src={logo} alt="logo" className="w-[104px] h-[40px]" />
                     </div>
                     <div className="flex items-center gap-6">
-                        <Link to="/about">
+                        <Link to="/about" id="main-instruction-community">
                             <img src={users} alt="users" className="w-6 h-6" />
                         </Link>
                         <Link to="/client/product-catalog">
                             <img src={productsCatalog} alt="productsCatalog" className="w-6 h-6" />
                         </Link>
-                        <Link to="/client/faq">
+                        <Link to="/client/faq" id="main-instruction-faq">
                             <img src={faq} alt="faq" className="w-6 h-6" />
                         </Link>
-                        <Link to="/client/profile">
+                        <Link to="/client/profile" id="main-instruction-profile">
                             {userData?.hasPaid && userData?.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date() ? (
                                 <img src={goldUser} alt="gold user" className="w-6 h-6" />
                             ) : (
@@ -446,13 +495,23 @@ export const Main = () => {
                 </div>
                 <h1 className="mt-1 text-2xl font-bold">Добро пожаловать, {userName ? userName : ""}!</h1>
                 <div className="grid grid-cols-2 gap-3 mt-5">
-                    <SmallCard title="Навигатор" link="/client/navigator" img={main1} />
-                    <SmallCard title="Задания" link="/client/tasks" img={main2} />
-                    <SmallCard title={`Осознания`} link="/client/diary" img={main3} />
-                    <SmallCard title={`Практики`} link="/client/practices" img={main4} />
+                    <div id="main-instruction-navigator">
+                        <SmallCard title="Навигатор" link="/client/navigator" img={main1} />
+                    </div>
+                    <div id="main-instruction-tasks">
+                        <SmallCard title="Задания" link="/client/tasks" img={main2} />
+                    </div>
+                    <div id="main-instruction-diary">
+                        <SmallCard title={`Осознания`} link="/client/diary" img={main3} />
+                    </div>
+                    <div id="main-instruction-practices">
+                        <SmallCard title={`Практики`} link="/client/practices" img={main4} />
+                    </div>
                 </div>
 
-                <ClientSchedule />
+                <div id="main-instruction-schedule">
+                    <ClientSchedule />
+                </div>
 
                 {/* <div className="mt-4 space-y-3">
                     <LargeCard 

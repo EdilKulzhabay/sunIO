@@ -496,18 +496,10 @@ export const ClientDiary = () => {
                                         name="discovery"
                                         value={diary.discovery}
                                         onChange={handleChange}
-                                        className="w-full mt-1 bg-transparent text-white focus:outline-none focus:border-white/80 overflow-y-scroll"
+                                        className="w-full mt-1 bg-transparent text-white focus:outline-none focus:border-white/80 overflow-y-auto resize-none"
                                         placeholder="Какие осознания были сегодня?"
-                                        rows={1}
-                                        style={{
-                                            minHeight: "2.5rem",
-                                            maxHeight: "7.5rem"
-                                        }}
-                                        onInput={e => {
-                                            const target = e.target as HTMLTextAreaElement;
-                                            target.style.height = "2.5rem";
-                                            target.style.height = Math.min(target.scrollHeight, 7.5 * 16) + "px";
-                                        }}
+                                        rows={2}
+                                        style={{ height: "3rem" }}
                                     />
                                 </div>
                                 <div className="p-2 border border-white/40 rounded-lg">
@@ -516,18 +508,10 @@ export const ClientDiary = () => {
                                         name="achievement" 
                                         value={diary.achievement} 
                                         onChange={handleChange} 
-                                        className="w-full mt-1 bg-transparent text-white focus:outline-none focus:border-white/80 overflow-y-scroll" 
+                                        className="w-full mt-1 bg-transparent text-white focus:outline-none focus:border-white/80 overflow-y-auto resize-none" 
                                         placeholder="Чего удалось достичь сегодня?"
-                                        rows={1}
-                                        style={{
-                                            minHeight: "2.5rem",
-                                            maxHeight: "7.5rem"
-                                        }}
-                                        onInput={e => {
-                                            const target = e.target as HTMLTextAreaElement;
-                                            target.style.height = "2.5rem";
-                                            target.style.height = Math.min(target.scrollHeight, 7.5 * 16) + "px";
-                                        }}
+                                        rows={2}
+                                        style={{ height: "3rem" }}
                                     />
                                 </div>
                                 <div className="p-2 border border-white/40 rounded-lg">
@@ -536,18 +520,10 @@ export const ClientDiary = () => {
                                         name="gratitude" 
                                         value={diary.gratitude} 
                                         onChange={handleChange} 
-                                        className="w-full mt-1 bg-transparent text-white focus:outline-none focus:border-white/80 overflow-y-scroll" 
+                                        className="w-full mt-1 bg-transparent text-white focus:outline-none focus:border-white/80 overflow-y-auto resize-none" 
                                         placeholder="Какие цели захотел(а) реализовать?"
-                                        rows={1}
-                                        style={{
-                                            minHeight: "2.5rem",
-                                            maxHeight: "7.5rem"
-                                        }}
-                                        onInput={e => {
-                                            const target = e.target as HTMLTextAreaElement;
-                                            target.style.height = "2.5rem";
-                                            target.style.height = Math.min(target.scrollHeight, 7.5 * 16) + "px";
-                                        }}
+                                        rows={2}
+                                        style={{ height: "3rem" }}
                                     />
                                 </div>
                                 <div className="p-2 border border-white/40 rounded-lg">
@@ -556,18 +532,10 @@ export const ClientDiary = () => {
                                         name="emotions" 
                                         value={diary.emotions ?? ''} 
                                         onChange={handleChange} 
-                                        className="w-full mt-1 bg-transparent text-white focus:outline-none focus:border-white/80 overflow-y-scroll" 
+                                        className="w-full mt-1 bg-transparent text-white focus:outline-none focus:border-white/80 overflow-y-auto resize-none" 
                                         placeholder="Какое состояние у меня сегодня?"
-                                        rows={1}
-                                        style={{
-                                            minHeight: "2.5rem",
-                                            maxHeight: "7.5rem"
-                                        }}
-                                        onInput={e => {
-                                            const target = e.target as HTMLTextAreaElement;
-                                            target.style.height = "2.5rem";
-                                            target.style.height = Math.min(target.scrollHeight, 7.5 * 16) + "px";
-                                        }}
+                                        rows={2}
+                                        style={{ height: "3rem" }}
                                     />
                                 </div>
                                 <div className="flex items-center justify-between">

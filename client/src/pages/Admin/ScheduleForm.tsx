@@ -19,11 +19,42 @@ export const ScheduleForm = () => {
         startDate: '',
         endDate: '',
         eventLink: '',
+        eventLinkType: 'external' as 'internal' | 'external',
         googleCalendarLink: '',
         appleCalendarLink: '',
         description: '',
         priority: false,
     });
+
+    const INTERNAL_PAGES = [
+        { path: '/client/faq', label: 'FAQ' },
+        { path: '/client/horoscope', label: 'Гороскоп' },
+        { path: '/client/horoscopes', label: 'Гороскопы' },
+        { path: '/client/transit', label: 'Транзит' },
+        { path: '/client/transits', label: 'Транзиты' },
+        { path: '/client/schumann', label: 'Шумановские резонансы' },
+        { path: '/client/contactus', label: 'Связаться с нами' },
+        { path: '/client/practices', label: 'Практики' },
+        { path: '/client/parables-of-life', label: 'Притчи о жизни' },
+        { path: '/client/scientific-discoveries', label: 'Научные открытия' },
+        { path: '/client/health-lab', label: 'Лаборатория здоровья' },
+        { path: '/client/relationship-workshop', label: 'Мастерская отношений' },
+        { path: '/client/spirit-forge', label: 'Кузница духа' },
+        { path: '/client/masters-tower', label: 'Башня мастеров' },
+        { path: '/client/femininity-gazebo', label: 'Беседка женственности' },
+        { path: '/client/consciousness-library', label: 'Библиотека сознания' },
+        { path: '/client/product-catalog', label: 'Каталог продуктов' },
+        { path: '/client/analysis-health', label: 'Анализ здоровья' },
+        { path: '/client/analysis-relationships', label: 'Анализ отношений' },
+        { path: '/client/analysis-realization', label: 'Анализ осознания' },
+        { path: '/client/psychodiagnostics', label: 'Психодиагностика' },
+        { path: '/client/schedule', label: 'Расписание' },
+        { path: '/client/diary', label: 'Дневник' },
+        { path: '/client/navigator', label: 'Навигатор' },
+        { path: '/client/profile', label: 'Профиль' },
+        { path: '/client/beggining-journey', label: 'Начало пути' },
+        { path: '/client/tasks', label: 'Задания' },
+    ];
 
     // Функция для конвертации UTC времени в локальное время Asia/Almaty (UTC+6) для отображения
     const dateToLocalDateTime = (date: Date | string): string => {
@@ -56,11 +87,14 @@ export const ScheduleForm = () => {
         try {
             const response = await api.get(`/api/schedule/${id}`);
             const schedule = response.data.data;
+            const link = schedule.eventLink || '';
+            const isInternal = schedule.eventLinkType === 'internal' || (link.startsWith('/') && !link.startsWith('//'));
             setFormData({
                 eventTitle: schedule.eventTitle,
                 startDate: dateToLocalDateTime(schedule.startDate),
                 endDate: dateToLocalDateTime(schedule.endDate),
-                eventLink: schedule.eventLink || '',
+                eventLink: link,
+                eventLinkType: isInternal ? 'internal' : 'external',
                 googleCalendarLink: schedule.googleCalendarLink || '',
                 appleCalendarLink: schedule.appleCalendarLink || '',
                 description: schedule.description,
@@ -156,13 +190,56 @@ export const ScheduleForm = () => {
                             />
                         </div>
 
-                        <MyInput
-                            label="Ссылка на событие (необязательно)"
-                            type="text"
-                            value={formData.eventLink}
-                            onChange={(e) => setFormData({ ...formData, eventLink: e.target.value })}
-                            placeholder="https://zoom.us/j/..."
-                        />
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Тип ссылки на событие</label>
+                            <div className="flex gap-4 mb-3">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="eventLinkType"
+                                        value="external"
+                                        checked={formData.eventLinkType === 'external'}
+                                        onChange={() => setFormData({ ...formData, eventLinkType: 'external', eventLink: '' })}
+                                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                    />
+                                    <span className="text-sm">Внешняя (URL)</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="eventLinkType"
+                                        value="internal"
+                                        checked={formData.eventLinkType === 'internal'}
+                                        onChange={() => setFormData({ ...formData, eventLinkType: 'internal', eventLink: '' })}
+                                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                    />
+                                    <span className="text-sm">Внутренняя (страница приложения)</span>
+                                </label>
+                            </div>
+                            {formData.eventLinkType === 'external' ? (
+                                <MyInput
+                                    label="Ссылка на событие (необязательно)"
+                                    type="text"
+                                    value={formData.eventLink}
+                                    onChange={(e) => setFormData({ ...formData, eventLink: e.target.value })}
+                                    placeholder="https://zoom.us/j/..."
+                                />
+                            ) : (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Страница приложения</label>
+                                    <select
+                                        value={formData.eventLink}
+                                        onChange={(e) => setFormData({ ...formData, eventLink: e.target.value })}
+                                        className="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
+                                    >
+                                        <option value="">— Выберите страницу —</option>
+                                        {INTERNAL_PAGES.map((page) => (
+                                            <option key={page.path} value={page.path}>{page.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+                        </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <MyInput

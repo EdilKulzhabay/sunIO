@@ -44,7 +44,7 @@ const parseDateTimeLocal = (dateTimeString) => {
 export const create = async (req, res) => {
     try {
         const user = req.user;
-        const { eventTitle, startDate, endDate, eventLink, googleCalendarLink, appleCalendarLink, description, priority } = req.body;
+        const { eventTitle, startDate, endDate, eventLink, eventLinkType, googleCalendarLink, appleCalendarLink, description, priority } = req.body;
 
         // if (!eventTitle || !startDate || !endDate || !description) {
         //     return res.status(400).json({
@@ -77,6 +77,7 @@ export const create = async (req, res) => {
             startDate: parsedStartDate,
             endDate: parsedEndDate,
             eventLink,
+            eventLinkType: eventLinkType || 'external',
             googleCalendarLink,
             appleCalendarLink,
             description,

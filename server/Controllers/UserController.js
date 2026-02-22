@@ -1117,13 +1117,15 @@ export const deleteUser = async (req, res) => {
 // Обновить профиль текущего пользователя
 export const updateProfile = async (req, res) => {
     try {
-        const { fullName, phone, profilePhotoUrl, userId } = req.body;
+        const { fullName, phone, profilePhotoUrl, userId, showMainPageInstructions, showProfilePageInstructions } = req.body;
 
         // Формируем объект для обновления
         const updateData = {};
         if (fullName !== undefined) updateData.fullName = fullName;
         if (phone !== undefined) updateData.phone = phone;
         if (profilePhotoUrl !== undefined) updateData.profilePhotoUrl = profilePhotoUrl;
+        if (showMainPageInstructions !== undefined) updateData.showMainPageInstructions = showMainPageInstructions;
+        if (showProfilePageInstructions !== undefined) updateData.showProfilePageInstructions = showProfilePageInstructions;
 
         const user = await User.findByIdAndUpdate(
             userId,

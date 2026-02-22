@@ -39,7 +39,8 @@ import {
     NavigatorDescriptionsController,
     PointsAwardingPolicyController,
     ParablesOfLifeController,
-    ScientificDiscoveriesController
+    ScientificDiscoveriesController,
+    ActivationLinkController
 } from "./Controllers/index.js";
 import { authMiddleware } from "./Middlewares/authMiddleware.js";
 import { adminActionLogMiddleware } from "./Middlewares/adminActionLogMiddleware.js";
@@ -206,6 +207,13 @@ app.get("/api/admin-action-logs", authMiddleware, AdminActionLogController.getAl
 // Управление профилем (для авторизованных пользователей)
 app.put("/api/user/profile/update", UserController.updateProfile);
 app.post("/api/user/purchase-content", UserController.purchaseContent);
+
+// ==================== ActivationLink (Ссылки активации) маршруты ====================
+app.post("/api/activation-link", createContentRateLimit, authMiddleware, ActivationLinkController.create);
+app.get("/api/activation-link", ActivationLinkController.getAll);
+app.get("/api/activation-link/:id", ActivationLinkController.getById);
+app.put("/api/activation-link/:id", authMiddleware, ActivationLinkController.update);
+app.delete("/api/activation-link/:id", authMiddleware, ActivationLinkController.remove);
 
 // ==================== FAQ маршруты ====================
 app.post("/api/faq", createContentRateLimit, authMiddleware, FAQController.create);

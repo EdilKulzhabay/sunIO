@@ -11,6 +11,7 @@ import linkArrow from "../../assets/linkArrow.png";
 import { MyLink } from "../../components/User/MyLink";
 import { Switch } from "../../components/User/Switch";
 import { BonusPolicyModal } from "../../components/User/ClientInsufficientBonusModal";
+import { ProfilePageInstructionsModal, PROFILE_INSTRUCTION_STEPS_COUNT } from "../../components/User/ProfilePageInstructionsModal";
 import { X } from 'lucide-react';
 import { toast } from "react-toastify";
 import referralLevel1 from "../../assets/referralLevel1.png";
@@ -39,6 +40,32 @@ export const ClientProfile = () => {
     const [updatingName, setUpdatingName] = useState(false);
     const [invitedUsersCount, setInvitedUsersCount] = useState(0);
     const [pointsAwardingPolicy, setPointsAwardingPolicy] = useState<any>(null);
+    const [instructionStep, setInstructionStep] = useState(0);
+
+    const handleInstructionNext = () => {
+        setInstructionStep((prev) => prev + 1);
+        if (instructionStep === PROFILE_INSTRUCTION_STEPS_COUNT - 1) {
+            handleInstructionClose();
+        }
+    };
+
+    const handleInstructionClose = async () => {
+        try {
+            if (userData) {
+                if (userData.telegramId) {
+                    await api.patch(`/api/users/${userData.telegramId}`, { showProfilePageInstructions: false });
+                } else if (userData._id) {
+                    await api.put(`/api/user/${userData._id}`, { showProfilePageInstructions: false });
+                }
+                const updatedUser = { ...userData, showProfilePageInstructions: false };
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+                setUserData(updatedUser);
+            }
+        } catch (error) {
+            console.error('Ошибка сохранения настройки инструкций:', error);
+        }
+        setInstructionStep(-1);
+    };
 
     const fetchPointsAwardingPolicy = async () => {
         const response = await api.get('/api/points-awarding-policy');
@@ -241,6 +268,8 @@ export const ClientProfile = () => {
         };
     }, []);
 
+    const showInstructions = userData && userData.showProfilePageInstructions !== false && instructionStep >= 0 && instructionStep < PROFILE_INSTRUCTION_STEPS_COUNT;
+
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen bg-[#031F23]">
@@ -251,6 +280,13 @@ export const ClientProfile = () => {
 
     return (
         <div>
+            {showInstructions && (
+                <ProfilePageInstructionsModal
+                    currentStep={instructionStep}
+                    onNext={handleInstructionNext}
+                    onClose={handleInstructionClose}
+                />
+            )}
             <UserLayout>
                 <BackNav title="Профиль" />
                 <div 
@@ -314,7 +350,7 @@ export const ClientProfile = () => {
                             </div>
                         </div>
 
-                        <div onClick={() => setIsBonusPolicyModalOpen(true)} className="flex items-start gap-x-3 mt-4 bg-[#114E50] rounded-lg p-4">
+                        <div id="profile-instruction-sun" onClick={() => setIsBonusPolicyModalOpen(true)} className="flex items-start gap-x-3 mt-4 bg-[#114E50] rounded-lg p-4">
                             <div className="shrink-0 cursor-pointer">
                                 <img src={sun} alt="sun" className="w-10 h-10 object-cover" />
                             </div>
@@ -330,6 +366,7 @@ export const ClientProfile = () => {
                         </div>
 
                         <div 
+                            id="profile-instruction-subscription"
                             className="mt-4 bg-[#114E50] rounded-lg p-4 space-y-2"
                             onClick={() => {
                                 if (userData?.hasPaid && userData?.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date()) {
@@ -366,7 +403,7 @@ export const ClientProfile = () => {
                             </div>
                         )}
 
-                        <div onClick={() => navigate('/client/invited-users')} className="mt-4 bg-[#114E50] rounded-lg p-4 space-y-2 cursor-pointer">
+                        <div id="profile-instruction-referral-link" onClick={() => navigate('/client/invited-users')} className="mt-4 bg-[#114E50] rounded-lg p-4 space-y-2 cursor-pointer">
                             <div className="flex items-center justify-between">
                                 <div className="text-xl font-medium">Пригласи друга по ссылке</div>
                                 <div className="text-lg font-medium">
@@ -402,6 +439,7 @@ export const ClientProfile = () => {
 
                         <div className="mt-4 flex items-center gap-x-2">
                             <a
+                                id="profile-instruction-telegram-channel"
                                 href="https://t.me/io_center"
                                 target="_blank"
                                 rel="noopener noreferrer"
@@ -411,6 +449,7 @@ export const ClientProfile = () => {
                                 <img src={linkArrow} alt="linkArrow" className="w-5 h-5 object-cover shrink-0" />
                             </a>
                             <a
+                                id="profile-instruction-telegram-chat"
                                 href="https://t.me/+UWaWd3xq3erdWnny"
                                 target="_blank"
                                 rel="noopener noreferrer"
@@ -421,7 +460,7 @@ export const ClientProfile = () => {
                             </a>
                         </div>
 
-                        <div className="mt-4 flex items-center justify-between">
+                        <div id="profile-instruction-video-settings" className="mt-4 flex items-center justify-between">
                             <div>Просмотр видео в РФ без VPN</div>
                             <Switch checked={locatedInRussia} onChange={() => {
                                 updateUserData('locatedInRussia', !locatedInRussia);
@@ -429,10 +468,11 @@ export const ClientProfile = () => {
                             }} />
                         </div>
 
-                        <div className="mt-4 flex items-center justify-between">
+                        <div id="profile-instruction-notifications" className="mt-4 flex items-center justify-between">
                             <div>Разрешить уведомления</div>
                             <Switch checked={notifications} onChange={() => {
                                 updateUserData('notifyPermission', !notifications);
+                                updateUserData('diaryNotifyPermission', !notifications);
                                 setNotifications(!notifications);
                             }} />
                         </div>

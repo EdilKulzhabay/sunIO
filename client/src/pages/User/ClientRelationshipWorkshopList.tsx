@@ -7,6 +7,7 @@ import { ClientSubscriptionDynamicModal } from "../../components/User/ClientSubs
 import { ClientPurchaseConfirmModal } from "../../components/User/ClientPurchaseConfirmModal";
 import { ClientInsufficientBonusModal } from "../../components/User/ClientInsufficientBonusModal";
 import inBothDirections from "../../assets/inBothDirections.png";
+import { useAutoScrollPreview } from "../../hooks/useAutoScrollPreview";
 
 export const ClientRelationshipWorkshopList = () => {
     const [relationshipWorkshops, setRelationshipWorkshops] = useState([]);
@@ -205,6 +206,9 @@ export const ClientRelationshipWorkshopList = () => {
         if (userData?.hasPaid && userData?.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date()) return true;
         return false;
     }
+
+    const topItemsCount = relationshipWorkshops.filter((r: any) => r.location === 'top').length;
+    useAutoScrollPreview(cardsContainerRef, topItemsCount, !loading);
 
     const scrollRight = () => {
         const container = cardsContainerRef.current;

@@ -4,6 +4,7 @@ import api from "../../api";
 import { BackNav } from "../../components/User/BackNav";
 import { MobileAccordionList } from "../../components/User/MobileAccordionList";
 import { MyLink } from "../../components/User/MyLink";
+import { Switch } from "../../components/User/Switch"
 
 export const ClientFAQ = () => {
     const [faqs, setFaqs] = useState<{ title: string, content: string }[]>([]);
@@ -12,11 +13,29 @@ export const ClientFAQ = () => {
     const [safeAreaBottom, setSafeAreaBottom] = useState(0);
     const [loading, setLoading] = useState(true);
     const [dinamycLink, setDinamycLink] = useState<string>('');
+    const [userData, setUserData] = useState<any>(null);
+
+    const fetchUserData = async () => {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const response = await api.get(`/api/user/${user._id}`);
+        if (response.data.success) {
+            setUserData(response.data.data);
+        }
+    }   
 
     const fetchDinamycLink = async () => {
         const response = await api.get(`/api/dynamic-content/name/faq-download-instruction`);
         if (response.data.success) {
             setDinamycLink(response.data.data.content);
+        }
+    }
+
+    const updateUserData = async (field: string, value: any) => {
+        const response = await api.put(`/api/user/${userData._id}`, { [field]: value });
+        if (response.data.success) {
+            const updatedUser = { ...userData, [field]: value };
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            setUserData(updatedUser);
         }
     }
 
@@ -37,6 +56,7 @@ export const ClientFAQ = () => {
 
         fetchFaqs();
         fetchDinamycLink();
+        fetchUserData();
     }, []);
 
     useEffect(() => {
@@ -98,6 +118,24 @@ export const ClientFAQ = () => {
                                 <MobileAccordionList items={faqs.map((faq: any) => ({ title: faq.question, content: faq.answer }))} />
                             </div>
                         )}
+                    </div>
+                    <div className="mt-4">
+                        <div className="flex items-center justify-between">
+                            <div className="">Обзор Приложения с подсказками</div>
+                            <Switch
+                                checked={userData?.showMainPageInstructions && userData?.showMainPageInstructions !== false && userData?.showProfilePageInstructions && userData?.showProfilePageInstructions !== false}
+                                onChange={() => { 
+                                    const showMainPageInstructions = !userData?.showMainPageInstructions;
+                                    const showProfilePageInstructions = !userData?.showProfilePageInstructions;
+                                    let changeValue = false;
+                                    if (showMainPageInstructions || showProfilePageInstructions) {
+                                        changeValue = true;
+                                    }
+                                    updateUserData('showMainPageInstructions', !changeValue);
+                                    updateUserData('showProfilePageInstructions', !changeValue);
+                                }} 
+                            />
+                        </div>
                     </div>
                     <div className="mt-4">
                         <a 

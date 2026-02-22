@@ -7,6 +7,7 @@ import { ClientSubscriptionDynamicModal } from "../../components/User/ClientSubs
 import { ClientPurchaseConfirmModal } from "../../components/User/ClientPurchaseConfirmModal";
 import { ClientInsufficientBonusModal } from "../../components/User/ClientInsufficientBonusModal";
 import inBothDirections from "../../assets/inBothDirections.png";
+import { useAutoScrollPreview } from "../../hooks/useAutoScrollPreview";
 
 const API_PATH = '/api/scientific-discoveries';
 const CLIENT_PATH = '/client/scientific-discoveries';
@@ -27,6 +28,7 @@ export const ClientScientificDiscoveriesList = () => {
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [progresses, setProgresses] = useState<Record<string, number>>({});
     const [loading, setLoading] = useState(true);
+    const [dinamycContent, setDinamycContent] = useState<string>('');
 
     useEffect(() => {
         const userStr = localStorage.getItem('user');
@@ -74,6 +76,8 @@ export const ClientScientificDiscoveriesList = () => {
         setSubscriptionContent(responseSubscription.data.data.content);
         const responseStars = await api.get('/api/dynamic-content/name/content-suns');
         setStarsContent(responseStars.data.data.content);
+        const responseDinamycContent = await api.get('/api/dynamic-content/scientific-discoveries-list');
+        setDinamycContent(responseDinamycContent.data.data.content);
     };
 
     const fetchItems = async () => {
@@ -165,6 +169,9 @@ export const ClientScientificDiscoveriesList = () => {
         return !!(userData?.hasPaid && userData?.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date());
     };
 
+    const topItemsCount = items.filter((item: any) => item.location === 'top' && item.visibility).length;
+    useAutoScrollPreview(cardsContainerRef, topItemsCount, !loading);
+
     const scrollRight = () => {
         const container = cardsContainerRef.current;
         if (!container) return;
@@ -199,6 +206,7 @@ export const ClientScientificDiscoveriesList = () => {
                         </button>
                     </div>
                 </div>
+                <div className="px-4 mt-2" dangerouslySetInnerHTML={{ __html: dinamycContent }} />
                 <div className="px-4 mt-2 pb-10 bg-[#031F23]">
                     <div ref={cardsContainerRef} className="flex overflow-x-auto gap-4 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
                         {topItems.length > 0 ? topItems.map((item: any) => (

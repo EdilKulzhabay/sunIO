@@ -1,5 +1,6 @@
 import { DateRangeCalendar } from "../../components/User/DateRangeCalendar";
 import { useEffect, useState, useRef } from "react";
+import { Link } from "react-router-dom";
 import api from "../../api";
 import { Switch } from "../../components/User/Switch";
 import { X } from 'lucide-react';
@@ -247,11 +248,18 @@ export const ClientSchedule = () => {
         setSelectedSchedule(null);
     };
 
+    const getEventLinkToCopy = () => {
+        const link = selectedSchedule?.eventLink || '';
+        if (!link) return '';
+        const isInternal = selectedSchedule?.eventLinkType === 'internal' || (link.startsWith('/') && !link.startsWith('//'));
+        return isInternal ? `${window.location.origin}${link}` : link;
+    };
+
     const copyEventLink = () => {
-        navigator.clipboard.writeText(selectedSchedule?.eventLink || '');
+        navigator.clipboard.writeText(getEventLinkToCopy());
         setLinkCopied(true);
         toast.success('Ссылка на событие скопирована!');
-    }
+    };
 
     useEffect(() => {
         if (!scrollToScheduleId) return;
@@ -391,6 +399,7 @@ export const ClientSchedule = () => {
                                     </p>
                                 )}
                             </div>
+                            {selectedSchedule?.eventLink && (
                             <button onClick={() => {}} className="bg-white/10 block w-full mt-4 rounded-lg py-3 px-4 text-sm">
                                 <div className="flex items-center justify-between">
                                     <div>Ссылка на событие:</div>
@@ -398,13 +407,22 @@ export const ClientSchedule = () => {
                                         <img src={copyLink} alt="copy" className="w-5 h-5 object-cover" />
                                     </button>
                                 </div>
-                                <div className="break-all w-full text-left">
-                                    <a href={selectedSchedule?.eventLink} target="_blank" rel="noopener noreferrer" className="mt-1 text-left">{selectedSchedule?.eventLink}</a>
+                                <div className="break-all w-full text-left mt-1">
+                                    {selectedSchedule?.eventLinkType === 'internal' || (selectedSchedule?.eventLink?.startsWith('/') && !selectedSchedule?.eventLink?.startsWith('//')) ? (
+                                        <Link to={selectedSchedule.eventLink} onClick={closeModal} className="text-[#00C5AE] hover:underline">
+                                            Перейти на страницу
+                                        </Link>
+                                    ) : (
+                                        <a href={selectedSchedule.eventLink} target="_blank" rel="noopener noreferrer" className="text-[#00C5AE] hover:underline">
+                                            {selectedSchedule.eventLink}
+                                        </a>
+                                    )}
                                 </div>
                                 {linkCopied && (
                                     <div className="text-left text-sm text-[#C4841D] mt-1">Ссылка скопирована!</div>
                                 )}
                             </button>
+                            )}
                             <div className="mt-4 flex items-center justify-between">
                                 <div>Участвую</div>
                                 <Switch checked={userData?.scheduleSubscriptions?.some((subscription: any) => subscription.scheduleId === selectedSchedule._id)} onChange={handleParticipatingChange} />
@@ -493,6 +511,7 @@ export const ClientSchedule = () => {
                                     </p>
                                 )}
                             </div>
+                            {selectedSchedule?.eventLink && (
                             <button onClick={() => {}} className="bg-white/10 block w-full mt-4 rounded-lg py-3 px-4 text-sm text-left">
                                 <div className="flex items-center justify-between">
                                     <div>Ссылка на событие:</div>
@@ -500,13 +519,22 @@ export const ClientSchedule = () => {
                                         <img src={copyLink} alt="copy" className="w-5 h-5 object-cover" />
                                     </button>
                                 </div>
-                                <div className="break-all w-full text-left">
-                                    <a href={selectedSchedule?.eventLink} target="_blank" rel="noopener noreferrer" className="mt-1 text-left">{selectedSchedule?.eventLink}</a>
+                                <div className="break-all w-full text-left mt-1">
+                                    {selectedSchedule?.eventLinkType === 'internal' || (selectedSchedule?.eventLink?.startsWith('/') && !selectedSchedule?.eventLink?.startsWith('//')) ? (
+                                        <Link to={selectedSchedule.eventLink} onClick={closeModal} className="text-[#00C5AE] hover:underline">
+                                            Перейти на страницу
+                                        </Link>
+                                    ) : (
+                                        <a href={selectedSchedule.eventLink} target="_blank" rel="noopener noreferrer" className="text-[#00C5AE] hover:underline">
+                                            {selectedSchedule.eventLink}
+                                        </a>
+                                    )}
                                 </div>
                                 {linkCopied && (
                                     <div className="text-left text-sm text-[#C4841D] mt-1">Ссылка скопирована!</div>
                                 )}
                             </button>
+                            )}
                             <div className="mt-4 flex items-center justify-between">
                                 <div>Участвую</div>
                                 <Switch checked={userData?.scheduleSubscriptions?.some((subscription: any) => subscription.scheduleId === selectedSchedule._id)} onChange={handleParticipatingChange} />

@@ -18,6 +18,11 @@ const ScheduleSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    eventLinkType: {
+      type: String,
+      enum: ['internal', 'external'],
+      default: 'internal',
+    },
     googleCalendarLink: {
       type: String,
       trim: true,

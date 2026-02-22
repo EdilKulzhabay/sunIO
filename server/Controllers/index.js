@@ -29,3 +29,4 @@ export * as NavigatorDescriptionsController from "./NavigatorDescriptionsControl
 export * as PointsAwardingPolicyController from "./PointsAwardingPolicyController.js";
 export * as ParablesOfLifeController from "./ParablesOfLifeController.js";
 export * as ScientificDiscoveriesController from "./ScientificDiscoveriesController.js";
+export * as ActivationLinkController from "./ActivationLinkController.js";

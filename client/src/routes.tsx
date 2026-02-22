@@ -16,6 +16,8 @@ import { ScientificDiscoveriesAdmin } from "./pages/Admin/ScientificDiscoveries"
 import { ScientificDiscoveriesForm } from "./pages/Admin/ScientificDiscoveriesForm";
 import { ScheduleAdmin } from "./pages/Admin/Schedule";
 import { ScheduleForm } from "./pages/Admin/ScheduleForm";
+import { ActivationLinksAdmin } from "./pages/Admin/ActivationLinks";
+import { ActivationLinkForm } from "./pages/Admin/ActivationLinkForm";
 import { HealthLabAdmin } from "./pages/Admin/HealthLab";
 import { HealthLabForm } from "./pages/Admin/HealthLabForm";
 import { RelationshipWorkshopAdmin } from "./pages/Admin/RelationshipWorkshop";
@@ -414,6 +416,18 @@ export const routes = createBrowserRouter([
     {
         path: "/admin/schedule/edit/:id",
         element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ScheduleForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/activation-links",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ActivationLinksAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/activation-links/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ActivationLinkForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/activation-links/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ActivationLinkForm /></ProtectedRoute></RootLayout>,
     },
     // ==================== HealthLab (Лаборатория здоровья) ====================
     {

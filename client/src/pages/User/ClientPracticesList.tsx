@@ -7,6 +7,7 @@ import { ClientSubscriptionDynamicModal } from "../../components/User/ClientSubs
 import { ClientPurchaseConfirmModal } from "../../components/User/ClientPurchaseConfirmModal";
 import { ClientInsufficientBonusModal } from "../../components/User/ClientInsufficientBonusModal";
 import inBothDirections from "../../assets/inBothDirections.png";
+import { useAutoScrollPreview } from "../../hooks/useAutoScrollPreview";
 
 export const ClientPracticesList = () => {
     const [practices, setPractices] = useState([]);
@@ -227,6 +228,9 @@ export const ClientPracticesList = () => {
         if (userData?.hasPaid && userData?.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date()) return true;
         return false;
     }
+
+    const topPracticesCount = practices.filter((p: any) => p.location === 'top' && p.visibility).length;
+    useAutoScrollPreview(cardsContainerRef, topPracticesCount, !loading);
 
     const scrollRight = () => {
         const container = cardsContainerRef.current;

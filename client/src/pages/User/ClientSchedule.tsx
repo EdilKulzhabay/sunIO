@@ -410,7 +410,7 @@ export const ClientSchedule = () => {
                                 <div className="break-all w-full text-left mt-1">
                                     {selectedSchedule?.eventLinkType === 'internal' || (selectedSchedule?.eventLink?.startsWith('/') && !selectedSchedule?.eventLink?.startsWith('//')) ? (
                                         <Link to={selectedSchedule.eventLink} onClick={closeModal} className="text-[#00C5AE] hover:underline">
-                                            Перейти на страницу
+                                            Перейти на страницу события
                                         </Link>
                                     ) : (
                                         <a href={selectedSchedule.eventLink} target="_blank" rel="noopener noreferrer" className="text-[#00C5AE] hover:underline">
@@ -522,7 +522,7 @@ export const ClientSchedule = () => {
                                 <div className="break-all w-full text-left mt-1">
                                     {selectedSchedule?.eventLinkType === 'internal' || (selectedSchedule?.eventLink?.startsWith('/') && !selectedSchedule?.eventLink?.startsWith('//')) ? (
                                         <Link to={selectedSchedule.eventLink} onClick={closeModal} className="text-[#00C5AE] hover:underline">
-                                            Перейти на страницу
+                                            Перейти на страницу события
                                         </Link>
                                     ) : (
                                         <a href={selectedSchedule.eventLink} target="_blank" rel="noopener noreferrer" className="text-[#00C5AE] hover:underline">

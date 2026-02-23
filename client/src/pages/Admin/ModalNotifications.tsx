@@ -645,14 +645,6 @@ export const ModalNotificationsAdmin = () => {
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={() => { setModalButtonLink('/client/schumann'); setSelectedContentType(null); }}
-                                            className="px-2.5 py-1.5 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors flex flex-col items-start"
-                                        >
-                                            <span className="font-medium text-gray-900">Частота Шумана</span>
-                                            <span className="text-gray-500">/client/schumann</span>
-                                        </button>
-                                        <button
-                                            type="button"
                                             onClick={() => { setModalButtonLink('/client/contactus'); setSelectedContentType(null); }}
                                             className="px-2.5 py-1.5 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors flex flex-col items-start"
                                         >
@@ -677,19 +669,11 @@ export const ModalNotificationsAdmin = () => {
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={() => { setModalButtonLink('/client/tasks'); setSelectedContentType(null); }}
+                                            onClick={() => { setModalButtonLink('/client/scientific-discoveries'); setSelectedContentType(null); }}
                                             className="px-2.5 py-1.5 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors flex flex-col items-start"
                                         >
-                                            <span className="font-medium text-gray-900">Задачи</span>
-                                            <span className="text-gray-500">/client/tasks</span>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => { setModalButtonLink('/client/ease-launch'); setSelectedContentType(null); }}
-                                            className="px-2.5 py-1.5 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors flex flex-col items-start"
-                                        >
-                                            <span className="font-medium text-gray-900">Лёгкий старт</span>
-                                            <span className="text-gray-500">/client/ease-launch</span>
+                                            <span className="font-medium text-gray-900">Научные открытия</span>
+                                            <span className="text-gray-500">/client/scientific-discoveries</span>
                                         </button>
                                     </div>
                                 </div>

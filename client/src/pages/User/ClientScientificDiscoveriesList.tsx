@@ -76,7 +76,7 @@ export const ClientScientificDiscoveriesList = () => {
         setSubscriptionContent(responseSubscription.data.data.content);
         const responseStars = await api.get('/api/dynamic-content/name/content-suns');
         setStarsContent(responseStars.data.data.content);
-        const responseDinamycContent = await api.get('/api/dynamic-content/scientific-discoveries-list');
+        const responseDinamycContent = await api.get('/api/dynamic-content/name/scientific-discoveries-list');
         setDinamycContent(responseDinamycContent.data.data.content);
     };
 

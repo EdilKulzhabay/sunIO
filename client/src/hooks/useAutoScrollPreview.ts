@@ -1,11 +1,11 @@
 import { useEffect, useRef } from 'react';
 
-const SCROLL_TO_END_DURATION = 1200;
-const SCROLL_BACK_DELAY = 400;
+const DELAY_BETWEEN_CARDS_MS = 1000;
+const INITIAL_DELAY_MS = 400;
 
 /**
- * При открытии страницы выполняет автоматический скролл до последнего элемента
- * и возврат к первому. Используется для горизонтальных каруселей с карточками.
+ * При открытии страницы выполняет автоматический скролл по карточкам по одной
+ * с задержкой 1 сек, затем возврат к первому. Используется для горизонтальных каруселей.
  */
 export function useAutoScrollPreview(
     containerRef: React.RefObject<HTMLDivElement | null>,
@@ -23,30 +23,43 @@ export function useAutoScrollPreview(
         const cards = container.querySelectorAll('[data-card]');
         if (cards.length === 0) return;
 
-        hasRunRef.current = true;
-
         const maxScrollLeft = container.scrollWidth - container.clientWidth;
         if (maxScrollLeft <= 0) return;
 
-        let scrollBackTimer: ReturnType<typeof setTimeout> | null = null;
+        hasRunRef.current = true;
 
-        const initTimer = setTimeout(() => {
-            container.scrollTo({
-                left: maxScrollLeft,
-                behavior: 'smooth',
+        const positions = Array.from(cards).map((card) =>
+            Math.min((card as HTMLElement).offsetLeft, maxScrollLeft)
+        );
+        const uniquePositions = [...new Set(positions)].filter((p) => p >= 0).sort((a, b) => a - b);
+
+        let timeouts: ReturnType<typeof setTimeout>[] = [];
+
+        const runScroll = () => {
+            // Скролл вперёд
+            uniquePositions.forEach((pos, i) => {
+                const t = setTimeout(() => {
+                    container.scrollTo({ left: pos, behavior: 'smooth' });
+                }, INITIAL_DELAY_MS + i * DELAY_BETWEEN_CARDS_MS);
+                timeouts.push(t);
             });
 
-            scrollBackTimer = setTimeout(() => {
-                container.scrollTo({
-                    left: 0,
-                    behavior: 'smooth',
-                });
-            }, SCROLL_TO_END_DURATION + SCROLL_BACK_DELAY);
-        }, 400);
+            // Скролл назад (от предпоследней позиции до 0)
+            const startBackIdx = uniquePositions.length;
+            const backPositions = [...uniquePositions].reverse().slice(1);
+            backPositions.forEach((pos, i) => {
+                const t = setTimeout(() => {
+                    container.scrollTo({ left: pos, behavior: 'smooth' });
+                }, INITIAL_DELAY_MS + (startBackIdx + i) * DELAY_BETWEEN_CARDS_MS);
+                timeouts.push(t);
+            });
+        };
+
+        const initTimer = setTimeout(runScroll, 0);
 
         return () => {
             clearTimeout(initTimer);
-            if (scrollBackTimer) clearTimeout(scrollBackTimer);
+            timeouts.forEach(clearTimeout);
         };
     }, [containerRef, itemCount, isReady]);
 }

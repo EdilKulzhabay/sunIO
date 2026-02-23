@@ -38,7 +38,7 @@ const menuItems = [
     { path: '/admin/users', label: 'Пользователи', icon: Users },
     { path: '/admin/admins', label: 'Администраторы', icon: Shield },
     { path: '/admin/action-logs', label: 'Журнал действий', icon: ClipboardList, adminOnly: true },
-    { path: '/admin/broadcast', label: 'Рассылка', icon: Send },
+    { path: '/admin/broadcast', label: 'Рассылки', icon: Send },
     { path: '/admin/modal-notifications', label: 'Модальные уведомления', icon: Bell },
     { path: '/admin/profile', label: 'Профиль', icon: User },
     { path: '', label: '', icon: null, divider: true }, // Разделитель

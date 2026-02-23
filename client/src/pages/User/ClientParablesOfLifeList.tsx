@@ -75,7 +75,7 @@ export const ClientParablesOfLifeList = () => {
         setSubscriptionContent(responseSubscription.data.data.content);
         const responseStars = await api.get('/api/dynamic-content/name/content-suns');
         setStarsContent(responseStars.data.data.content);
-        const responseDinamycContent = await api.get('/api/dynamic-content/parables-of-life-list');
+        const responseDinamycContent = await api.get('/api/dynamic-content/name/parables-of-life-list');
         setDinamycContent(responseDinamycContent.data.data.content);
     };
 

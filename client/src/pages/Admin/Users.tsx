@@ -436,7 +436,19 @@ export const UsersAdmin = () => {
                             Активность
                             {sortField === 'lastActiveDate' && (sortDirection === 'asc' ? ' ↑' : ' ↓')}
                         </button>
-                        {(sortField === 'bonus' || sortField === 'subscriptionEndDate' || sortField === 'inviteesCount' || sortField === 'lastActiveDate') && (
+                        <button
+                            onClick={() => handleSort('notifyPermission')}
+                            className={`flex items-center gap-2 px-3 py-1 rounded-lg text-sm transition-colors ${
+                                sortField === 'notifyPermission' 
+                                    ? 'bg-blue-100 text-blue-700' 
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                        >
+                            <ArrowUpDown size={16} />
+                            Уведомления
+                            {sortField === 'notifyPermission' && (sortDirection === 'asc' ? ' ↑' : ' ↓')}
+                        </button>
+                        {(sortField === 'bonus' || sortField === 'subscriptionEndDate' || sortField === 'inviteesCount' || sortField === 'lastActiveDate' || sortField === 'notifyPermission') && (
                             <button
                                 onClick={() => {
                                     setSortField('');

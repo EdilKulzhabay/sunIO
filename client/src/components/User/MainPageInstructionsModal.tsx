@@ -1,21 +1,25 @@
 import { useEffect, useRef, useState } from 'react';
-import { X, ChevronDown } from 'lucide-react';
+import { X } from 'lucide-react';
+
+export type ArrowOrigin = 'left-of-close' | 'center';
 
 export interface InstructionStep {
     title: string;
     description: string;
     targetId: string;
+    arrowOrigin?: ArrowOrigin;
 }
 
 const INSTRUCTION_STEPS: InstructionStep[] = [
-    { title: 'Профиль пользователя', description: 'Настройки Приложения, внутренний баланс, пригласительная ссылка, ссылки на ресурсы', targetId: 'main-instruction-profile' },
-    { title: 'Часто задаваемые вопросы', description: 'Ответы на частые вопросы, инструкция по работе с Приложением и контакты для связи', targetId: 'main-instruction-faq' },
-    { title: 'Сообщество', description: 'Сообщество — это поддерживающее пространство для своих людей, кто уже прошёл Активацию', targetId: 'main-instruction-community' },
-    { title: 'Навигатор', description: 'Переключение между пространствами пробуждения сознания через разные темы', targetId: 'main-instruction-navigator' },
-    { title: 'Задания', description: 'Последовательность заданий в зависимости от вашего запроса, помогает всё делать последовательно', targetId: 'main-instruction-tasks' },
-    { title: 'Дневник осознаний', description: 'Дневник осознаний, достижений, эмоций и целей для закрепления результатов на материальном носителе', targetId: 'main-instruction-diary' },
-    { title: 'Практики', description: 'Самые популярные практики для гармонизации эмоционального состояния и развития навыков', targetId: 'main-instruction-practices' },
-    { title: 'Календарь событий', description: 'Календарь событий – приоритетных и ознакомительных. Ниже карточки событий с подробной информацией', targetId: 'main-instruction-schedule' },
+    { title: 'Профиль пользователя', description: 'Настройки Приложения, внутренний баланс, пригласительная ссылка, ссылки на ресурсы', targetId: 'main-instruction-profile', arrowOrigin: 'left-of-close' },
+    { title: 'Часто задаваемые вопросы', description: 'Ответы на частые вопросы, инструкция по работе с Приложением и контакты для связи', targetId: 'main-instruction-faq', arrowOrigin: 'left-of-close' },
+    { title: 'Каталог платных продуктов', description: 'Перечень платных продуктов для покупок через списание с внутреннего баланса Приложения', targetId: 'main-instruction-product-catalog', arrowOrigin: 'left-of-close' },
+    { title: 'Сообщество', description: 'Сообщество — это поддерживающее пространство для своих людей, кто уже прошёл Активацию', targetId: 'main-instruction-community', arrowOrigin: 'left-of-close' },
+    { title: 'Навигатор', description: 'Переключение между пространствами пробуждения сознания через разные темы', targetId: 'main-instruction-navigator', arrowOrigin: 'left-of-close' },
+    { title: 'Задания', description: 'Последовательность заданий в зависимости от вашего запроса, помогает всё делать последовательно', targetId: 'main-instruction-tasks', arrowOrigin: 'left-of-close' },
+    { title: 'Дневник осознаний', description: 'Дневник осознаний, достижений, эмоций и целей для закрепления результатов на материальном носителе', targetId: 'main-instruction-diary', arrowOrigin: 'left-of-close' },
+    { title: 'Практики', description: 'Самые популярные практики для гармонизации эмоционального состояния и развития навыков', targetId: 'main-instruction-practices', arrowOrigin: 'left-of-close' },
+    { title: 'Календарь событий', description: 'Календарь событий – приоритетных и ознакомительных. Ниже карточки событий с подробной информацией', targetId: 'main-instruction-schedule', arrowOrigin: 'left-of-close' },
 ];
 
 export const MAIN_INSTRUCTION_STEPS_COUNT = INSTRUCTION_STEPS.length;
@@ -26,15 +30,27 @@ interface MainPageInstructionsModalProps {
     onClose: () => void;
 }
 
+const ARROW_COLOR = '#00C5AE';
+const CIRCLE_RADIUS = 3.5;
+const LINE_OFFSET_FROM_TARGET = 8;
+
 export const MainPageInstructionsModal = ({ currentStep, onNext, onClose }: MainPageInstructionsModalProps) => {
     const modalRef = useRef<HTMLDivElement>(null);
-    const [arrowStyle, setArrowStyle] = useState<React.CSSProperties>({});
+    const closeButtonRef = useRef<HTMLButtonElement>(null);
+    const [arrowState, setArrowState] = useState<{
+        originX: number;
+        originY: number;
+        lineEndX: number;
+        lineEndY: number;
+    } | null>(null);
+
     const step = INSTRUCTION_STEPS[currentStep];
 
     useEffect(() => {
         const updateArrowPosition = () => {
             const targetEl = document.getElementById(step.targetId);
             const modalEl = modalRef.current;
+            const closeBtn = closeButtonRef.current;
             if (!targetEl || !modalEl) return;
 
             const targetRect = targetEl.getBoundingClientRect();
@@ -42,27 +58,37 @@ export const MainPageInstructionsModal = ({ currentStep, onNext, onClose }: Main
 
             const targetCenterX = targetRect.left + targetRect.width / 2;
             const targetCenterY = targetRect.top + targetRect.height / 2;
-            const modalCenterX = modalRect.left + modalRect.width / 2;
-            const modalCenterY = modalRect.top + modalRect.height / 2;
 
-            const dx = targetCenterX - modalCenterX;
-            const dy = targetCenterY - modalCenterY;
-            const angle = Math.atan2(dy, dx);
-            const deg = (angle * 180) / Math.PI + 90;
+            let originX: number;
+            let originY: number;
 
-            const arrowSize = 24;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            const arrowDistance = Math.min(80, distance / 2);
+            const useLeftOfClose = (step.arrowOrigin ?? 'left-of-close') === 'left-of-close' && closeBtn;
 
-            setArrowStyle({
-                position: 'fixed' as const,
-                left: modalCenterX - arrowSize / 2,
-                top: modalCenterY - arrowSize / 2 - arrowDistance,
-                transform: `rotate(${deg}deg)`,
-                width: arrowSize,
-                height: arrowSize,
-                zIndex: 9999,
-                pointerEvents: 'none',
+            if (useLeftOfClose && closeBtn) {
+                const closeRect = closeBtn.getBoundingClientRect();
+                originX = closeRect.left - 20;
+                originY = closeRect.top + closeRect.height / 2;
+            } else {
+                originX = modalRect.left + modalRect.width / 2;
+                originY = modalRect.top + modalRect.height / 2;
+            }
+
+            const dx = targetCenterX - originX;
+            const dy = targetCenterY - originY;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            if (length < 5) return;
+
+            const ux = dx / length;
+            const uy = dy / length;
+
+            const lineEndX = targetCenterX - LINE_OFFSET_FROM_TARGET * ux;
+            const lineEndY = targetCenterY - LINE_OFFSET_FROM_TARGET * uy;
+
+            setArrowState({
+                originX,
+                originY,
+                lineEndX,
+                lineEndY,
             });
         };
 
@@ -71,6 +97,8 @@ export const MainPageInstructionsModal = ({ currentStep, onNext, onClose }: Main
 
         const observer = new ResizeObserver(updateArrowPosition);
         if (modalRef.current) observer.observe(modalRef.current);
+        const closeBtnEl = closeButtonRef.current;
+        if (closeBtnEl) observer.observe(closeBtnEl);
 
         window.addEventListener('scroll', updateArrowPosition, true);
         window.addEventListener('resize', updateArrowPosition);
@@ -81,18 +109,13 @@ export const MainPageInstructionsModal = ({ currentStep, onNext, onClose }: Main
             window.removeEventListener('scroll', updateArrowPosition, true);
             window.removeEventListener('resize', updateArrowPosition);
         };
-    }, [currentStep, step.targetId]);
+    }, [currentStep, step.targetId, step.arrowOrigin]);
 
     if (!step) return null;
 
     return (
         <>
-            {/* Стрелка к элементу */}
-            <div style={arrowStyle} className="text-[#C4841D]">
-                <ChevronDown size={24} strokeWidth={2.5} />
-            </div>
-
-            {/* Оверлей - клик не закрывает модалку */}
+            {/* Оверлей */}
             <div className="fixed inset-0 bg-black/60 z-[9998]" />
 
             {/* Модальное окно */}
@@ -106,6 +129,7 @@ export const MainPageInstructionsModal = ({ currentStep, onNext, onClose }: Main
                         <p className="text-gray-300 text-base leading-relaxed">{step.description}</p>
                     </div>
                     <button
+                        ref={closeButtonRef}
                         onClick={onClose}
                         className="flex-shrink-0 p-1 text-gray-400 hover:text-white transition-colors rounded"
                         aria-label="Закрыть"
@@ -122,6 +146,51 @@ export const MainPageInstructionsModal = ({ currentStep, onNext, onClose }: Main
                     </button>
                 </div>
             </div>
+
+            {/* Стрелка: круг у начала (левее крестика) → линия → остриё у иконки */}
+            {arrowState && (
+                <svg
+                    style={{
+                        position: 'fixed',
+                        left: 0,
+                        top: 0,
+                        width: '100%',
+                        height: '100%',
+                        zIndex: 10001,
+                        pointerEvents: 'none',
+                        overflow: 'visible',
+                    }}
+                >
+                    <defs>
+                        <marker
+                            id="main-instruction-arrowhead"
+                            markerWidth="6"
+                            markerHeight="6"
+                            refX="5"
+                            refY="3"
+                            orient="auto"
+                        >
+                            <polygon points="0 0, 6 3, 0 6" fill={ARROW_COLOR} />
+                        </marker>
+                    </defs>
+                    <circle
+                        cx={arrowState.originX}
+                        cy={arrowState.originY}
+                        r={CIRCLE_RADIUS}
+                        fill={ARROW_COLOR}
+                    />
+                    <line
+                        x1={arrowState.originX}
+                        y1={arrowState.originY}
+                        x2={arrowState.lineEndX}
+                        y2={arrowState.lineEndY}
+                        stroke={ARROW_COLOR}
+                        strokeWidth={1.5}
+                        strokeLinecap="round"
+                        markerEnd="url(#main-instruction-arrowhead)"
+                    />
+                </svg>
+            )}
         </>
     );
 };

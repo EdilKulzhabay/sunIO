@@ -478,7 +478,7 @@ export const Main = () => {
                         <Link to="/about" id="main-instruction-community">
                             <img src={users} alt="users" className="w-6 h-6" />
                         </Link>
-                        <Link to="/client/product-catalog">
+                        <Link to="/client/product-catalog" id="main-instruction-product-catalog">
                             <img src={productsCatalog} alt="productsCatalog" className="w-6 h-6" />
                         </Link>
                         <Link to="/client/faq" id="main-instruction-faq">

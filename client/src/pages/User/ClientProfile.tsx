@@ -290,7 +290,7 @@ export const ClientProfile = () => {
             <UserLayout>
                 <BackNav title="Профиль" />
                 <div 
-                    className="px-4 pb-10 bg-[#031F23] flex flex-col justify-between"
+                    className={`px-4 bg-[#031F23] flex flex-col justify-between ${showInstructions ? 'pb-[30vh]' : 'pb-10'}`}
                     style={{ minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom)}px` }}
                 >
                     <div className="flex-1">

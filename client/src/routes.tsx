@@ -117,6 +117,7 @@ import { ClientNavigator } from "./pages/User/ClientNavigator";
 import { ClientBegginingJourney } from "./pages/User/ClientBegginingJourney";
 import { ClientConnectError } from "./pages/User/ClientConnectError";
 import { ClientTasks } from "./pages/User/ClientTasks";
+import { ClientRegion } from "./pages/User/ClientRegion";
 
 // Компонент-обертка для всех маршрутов
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
@@ -324,6 +325,10 @@ export const routes = createBrowserRouter([
     {
         path: "/client/tasks",
         element: <RootLayout><TelegramGuard><ProtectedRoute><ClientTasks /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/region",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientRegion /></ProtectedRoute></TelegramGuard></RootLayout>,
     },
     {
         path: "/login",

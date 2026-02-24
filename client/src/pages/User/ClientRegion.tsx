@@ -1,5 +1,4 @@
 import bgGar from '../../assets/bgGar.png';
-import { ClientInput } from '../../components/User/ClientInput';
 import { useState, useEffect } from 'react';
 import { RedButton } from '../../components/User/RedButton';
 import { useNavigate } from 'react-router-dom';
@@ -9,10 +8,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import perfomanceInst from '../../assets/perfomanceInst.png';
 import sunWithHands from '../../assets/sunWithHands.png';
 
-export const ClientPerfomance = () => {
-    const [fullName, setFullName] = useState('');
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
+export const ClientRegion = () => {
+    const [locatedInRussia, setLocatedInRussia] = useState(true);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
     const navigate = useNavigate();
@@ -41,24 +38,9 @@ export const ClientPerfomance = () => {
             return;
         }
 
-        setFullName(currentUser.fullName);
-        const nameParts = currentUser.fullName.split(' ');
-        setFirstName(nameParts[1] || '');
-        setLastName(nameParts[0] || '');
     }, [user]);
 
-    useEffect(() => {
-        if (fullName && fullName.trim() !== '') {
-            navigate(`/main`);
-        }
-    }, [fullName]);
-
     const handleContinue = async () => {
-        if (firstName.trim() === '' || lastName.trim() === '') {
-            toast.error('Пожалуйста, заполните все поля');
-            return;
-        }
-
         const telegramId = localStorage.getItem('telegramId');
         if (!telegramId) {
             toast.error('Ошибка: не найден telegramId');
@@ -69,24 +51,17 @@ export const ClientPerfomance = () => {
 
         setLoading(true);
         try {
-            const fullNameToUpdate = `${lastName.trim()} ${firstName.trim()}`.trim();
             
             const response = await api.patch(`/api/users/${telegramId}`, {
-                fullName: fullNameToUpdate,
-                status: "guest"
+                locatedInRussia: locatedInRussia
             });
 
             if (response.data.success && response.data.data) {
                 // Сохраняем обновленные данные пользователя в localStorage и обновляем контекст
                 localStorage.setItem('user', JSON.stringify(response.data.data));
-                localStorage.setItem('firstName', firstName);
-                localStorage.setItem('lastName', lastName);
                 updateUser(response.data.data);
                 toast.success('Данные сохранены');
-                await api.post('/api/user/add-bonus-to-inviter', {
-                    telegramId: telegramId
-                });
-                navigate('/client/region');
+                navigate('/client/beggining-journey');
             } else {
                 toast.error('Ошибка обновления данных');
                 navigate('/client/connect-error');
@@ -126,7 +101,7 @@ export const ClientPerfomance = () => {
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
             }}
-            className='min-h-screen px-4 pb-6 flex flex-col justify-between lg:justify-start'
+            className='px-4 pb-6 flex flex-col justify-between lg:justify-start'
         >
             <div style={{ height: `${screenHeight/3}px` }} className='flex justify-center items-end'>
                 <img src={sunWithHands} alt="Sun with Hands" className='object-cover h-[175px] w-[175px] mb-5' />
@@ -142,21 +117,26 @@ export const ClientPerfomance = () => {
             )}
             {!error && (
                 <div className='flex-1 lg:flex-0 lg:w-[700px] lg:mx-auto'>
-                    <h1 className='text-[48px] font-semibold text-white leading-12'>Представьтесь, пожалуйста</h1>
-                    <div className='mt-6 lg:mt-10 space-y-3'>
-                        <ClientInput
-                            placeholder="Фамилия"
-                            onChange={(e) => setLastName(e.target.value)}
-                            className="w-full"
-                            inputType="text"
-                        />
-                        <ClientInput
-                            placeholder="Имя"
-                            onChange={(e) => setFirstName(e.target.value)}
-                            className="w-full"
-                            inputType="text"
-                        />
-                    </div>
+                    <h1 className='text-[48px] font-semibold text-white leading-12'>Просмотр видео контента</h1>
+                    <p className='mt-3 text-white'>
+                        В связи с действующими ограничениями доступ к YouTube на территории Российской Федерации ограничен. Мы заранее позаботились о твоём удобстве и подготовили альтернативные ссылки на платформе RuTube. Укажи свой регион, чтобы получать корректные ссылки для просмотра контента
+                    </p>
+                    <button
+                    onClick={() => setLocatedInRussia(true)}
+                    className='text-left w-full mt-4 flex items-center justify-between text-white py-2.5 px-3 border border-white/60 rounded-xl'>
+                        <p>Нахожусь на территории РФ (YouTube не доступен, использовать RuTube)</p>
+                        <div className={`flex-shrink-0 w-4 h-4 border rounded-full flex items-center justify-center ${locatedInRussia ? 'border-[#C4841D]' : 'border-white/60'}`}>
+                            {locatedInRussia ? <div className='w-1.5 h-1.5 bg-[#C4841D] rounded-full'></div> : null}
+                        </div>
+                    </button>
+                    <button
+                    onClick={() => setLocatedInRussia(false)}
+                    className='text-left w-full mt-2.5 flex items-center justify-between text-white py-2.5 px-3 border border-white/60 rounded-xl'>
+                        <p>Нахожусь в другом регионе (YouTube доступен, использовать его)</p>
+                        <div className={`flex-shrink-0 w-4 h-4 border rounded-full flex items-center justify-center ${!locatedInRussia ? 'border-[#C4841D]' : 'border-white/60'}`}>
+                            {!locatedInRussia ? <div className='w-1.5 h-1.5 bg-[#C4841D] rounded-full'></div> : null}
+                        </div>
+                    </button>
                 </div>
             )}
 

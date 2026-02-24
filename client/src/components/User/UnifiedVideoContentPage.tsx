@@ -114,6 +114,51 @@ const getRuTubeEmbedUrl = (url: string): string => {
     return url;
 };
 
+/** RuTube плеер: как YouTube — 100% и баллы при нажатии воспроизведения (player:changeState → playing) */
+const RuTubePlayerWithProgress = ({
+    embedUrl,
+    onFirstPlay,
+    className,
+    title,
+}: {
+    embedUrl: string;
+    onFirstPlay: () => void;
+    className?: string;
+    title?: string;
+}) => {
+    const playedRef = useRef(false);
+
+    useEffect(() => {
+        const handleMessage = (event: MessageEvent) => {
+            if (event.origin !== "https://rutube.ru" && !event.origin.includes("rutube.ru")) return;
+            try {
+                const msg = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+                if (!msg?.type) return;
+
+                if (msg.type === "player:changeState" && msg.data?.state === "playing" && !playedRef.current) {
+                    playedRef.current = true;
+                    onFirstPlay();
+                }
+            } catch {
+                // ignore parse errors
+            }
+        };
+
+        window.addEventListener("message", handleMessage);
+        return () => window.removeEventListener("message", handleMessage);
+    }, [onFirstPlay]);
+
+    return (
+        <iframe
+            src={embedUrl}
+            title={title || "RuTube video player"}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            className={className}
+        />
+    );
+};
+
 declare global {
     interface Window {
         YT?: { Player: any; PlayerState?: { PLAYING: number } };
@@ -519,17 +564,16 @@ export const UnifiedVideoContentPage = ({
                                 return null;
                             }
 
-                            // RuTube: 100% и баллы только при воспроизведении; onLoad не вызываем, чтобы не ставить 100% при открытии страницы
+                            // RuTube: прогресс и баллы через postMessage API (player:changeState, player:currentTime)
                             return (
                                 <div key={itemKey}>
                                     <div className="mt-6">
                                         <div className="relative w-full rounded-lg overflow-hidden" style={{ paddingBottom: "56.25%" }}>
-                                            <iframe
-                                                src={rutubeEmbedUrl}
-                                                title={`RuTube video player ${index + 1}`}
-                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                                allowFullScreen
+                                            <RuTubePlayerWithProgress
+                                                embedUrl={rutubeEmbedUrl}
+                                                onFirstPlay={() => handleYouTubeRuTubeLoad(videoKey, index, videoDurationSeconds)}
                                                 className="absolute top-0 left-0 w-full h-full rounded-lg"
+                                                title={`RuTube video player ${index + 1}`}
                                             />
                                         </div>
                                     </div>

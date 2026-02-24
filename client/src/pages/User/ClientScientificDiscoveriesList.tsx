@@ -209,16 +209,16 @@ export const ClientScientificDiscoveriesList = () => {
                 <div className="px-4 mt-2" dangerouslySetInnerHTML={{ __html: dinamycContent }} />
                 <div className="px-4 mt-2 pb-10 bg-[#031F23]">
                     <div ref={cardsContainerRef} className="flex overflow-x-auto gap-4 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                        {topItems.length > 0 ? topItems.map((item: any) => (
+                        {topItems.length > 0 && topItems.map((item: any) => (
                             <div key={item._id} data-card className="flex-shrink-0 w-[45vw] sm:w-[35vw] lg:w-[25vw] h-[210px] sm:h-[275px] lg:h-[330px]">
                                 <MiniVideoCard title={item.title} image={item.imageUrl} link={item.redirectToPage?.trim() || `${CLIENT_PATH}/${item._id}`} progress={progresses[item._id] || 0} accessType={hasAccessToContent(item._id) ? 'free' : item.accessType} onLockedClick={hasAccessToContentSubscription() ? undefined : (item.accessType !== 'free' ? () => handleLockedClickSubscription(item) : undefined)} duration={item?.duration || 0} starsRequired={item?.starsRequired || 0} />
                             </div>
-                        )) : <p className="text-center text-gray-500">Нет контента</p>}
+                        ))}
                     </div>
                     <div className="mt-4 space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
-                        {bottomItems.length > 0 ? bottomItems.map((item: any) => (
+                        {bottomItems.length > 0 && bottomItems.map((item: any) => (
                             <VideoCard key={item._id} title={item.title} description={item.shortDescription} image={item.imageUrl} link={item.redirectToPage?.trim() || `${CLIENT_PATH}/${item._id}`} accessType={hasAccessToContent(item._id) ? 'free' : item.accessType} progress={progresses[item._id] || 0} onLockedClick={hasAccessToContent(item._id) ? undefined : (item.accessType !== 'free' ? () => handleLockedClick(item) : undefined)} starsRequired={item?.starsRequired || 0} duration={item?.duration || 0} />
-                        )) : <p className="text-center text-gray-500 lg:col-span-2">Нет контента</p>}
+                        ))}
                     </div>
                 </div>
             </UserLayout>

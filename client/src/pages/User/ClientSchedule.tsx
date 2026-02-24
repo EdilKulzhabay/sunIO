@@ -5,7 +5,6 @@ import api from "../../api";
 import { Switch } from "../../components/User/Switch";
 import { X } from 'lucide-react';
 import copyLink from '../../assets/copyLink.png';
-import { toast } from "react-toastify";
 import { RedButton } from "../../components/User/RedButton";
 
 export const ClientSchedule = () => {
@@ -246,6 +245,7 @@ export const ClientSchedule = () => {
     const closeModal = () => {
         setIsModalOpen(false);
         setSelectedSchedule(null);
+        setLinkCopied(false);
     };
 
     const getEventLinkToCopy = () => {
@@ -258,7 +258,6 @@ export const ClientSchedule = () => {
     const copyEventLink = () => {
         navigator.clipboard.writeText(getEventLinkToCopy());
         setLinkCopied(true);
-        toast.success('Ссылка на событие скопирована!');
     };
 
     useEffect(() => {

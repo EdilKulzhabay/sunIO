@@ -288,208 +288,209 @@ export const ClientProfile = () => {
                 />
             )}
             <UserLayout>
-                <div className="bg-[#031F23]">
-                    <BackNav title="Профиль" />
-                    <div 
-                        className={`px-4 bg-[#031F23] flex flex-col justify-between ${showInstructions ? 'pb-[30vh]' : 'pb-10'}`}
-                        style={{ minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom)}px` }}
-                    >
-                        <div className="flex-1">
-                            <div className="flex items-center gap-x-4">
-                                <input
-                                    type="file"
-                                    ref={fileInputRef}
-                                    onChange={handlePhotoUpload}
-                                    accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                                    style={{ display: 'none' }}
-                                />
-                                <div 
-                                    className="w-[60px] h-[60px] bg-[#114E50] rounded-full flex items-center justify-center cursor-pointer relative"
-                                    onClick={handlePhotoClick}
-                                >
-                                    {uploadingPhoto ? (
-                                        <div className="w-full h-full flex items-center justify-center">
-                                            <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-purple-500"></div>
-                                        </div>
-                                    ) : getProfilePhotoUrl() ? (
-                                        <img 
-                                            src={getProfilePhotoUrl() || ''} 
-                                            alt="profile" 
-                                            className="w-full h-full object-cover rounded-full" 
-                                        />
-                                    ) : (
-                                        <img src={profile} alt="profile" className="w-[30px] h-[30px] object-cover rounded-full" />
-                                    )}
-                                </div>
-                                <div>
-                                    <div className="flex items-center gap-x-1" onClick={handleEditNameClick}>
-                                        <div 
-                                            className="text-xl font-medium cursor-pointer hover:opacity-80 transition-opacity"
-                                        >
-                                            {userData?.fullName || 'Не указано'}
-                                        </div>
-                                        <img src={edit} alt="edit" className="w-5 h-5 object-cover" />
-                                    </div>
-                                    <div>{userData?.mail || ""}</div>
-                                </div>
-                                <div className="ml-auto w-[79px] h-[79px]">
-                                    {invitedUsersCount < 5 && (
-                                        <img src={referralLevel1} alt="referralLevel1" className="w-full h-full object-cover" />
-                                    )}
-                                    {invitedUsersCount >= 5 && invitedUsersCount < 10 && (
-                                        <img src={referralLevel2} alt="referralLevel2" className="w-full h-full object-cover" />
-                                    )}
-                                    {invitedUsersCount >= 10 && invitedUsersCount < 25 && (
-                                        <img src={referralLevel3} alt="referralLevel3" className="w-full h-full object-cover" />
-                                    )}
-                                    {invitedUsersCount >= 25 && invitedUsersCount < 50 && (
-                                        <img src={referralLevel4} alt="referralLevel4" className="w-full h-full object-cover" />
-                                    )}
-                                    {invitedUsersCount >= 50 && (
-                                        <img src={referralLevel5} alt="referralLevel5" className="w-full h-full object-cover" />
-                                    )}
-                                </div>
-                            </div>
-
-                            <div id="profile-instruction-sun" onClick={() => setIsBonusPolicyModalOpen(true)} className="flex items-start gap-x-3 mt-4 bg-[#114E50] rounded-lg p-4">
-                                <div className="shrink-0 cursor-pointer">
-                                    <img src={sun} alt="sun" className="w-10 h-10 object-cover" />
-                                </div>
-                                <div className="w-full">
-                                    <div className="flex items-center justify-between w-full">
-                                        <div className="text-xl font-medium">Солнца</div>
-                                        <div className="text-xl font-medium">{userData?.bonus}</div>
-                                    </div>
-                                    <div className="mt-1">
-                                    Начисляются за выполнение заданий, ведение дневника осознаний, просмотр контента и приглашение друзей. Солнца обмениваются на эксклюзивный контент, который нельзя купить за деньги
-                                    </div>
-                                </div>
-                            </div>
-
+                <BackNav title="Профиль" />
+                <div 
+                    className="px-4 pb-10 bg-[#031F23] flex flex-col justify-between"
+                    style={{ minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom)}px` }}
+                >
+                    <div className="flex-1">
+                        <div className="flex items-center gap-x-4">
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handlePhotoUpload}
+                                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                                style={{ display: 'none' }}
+                            />
                             <div 
-                                id="profile-instruction-subscription"
-                                className="mt-4 bg-[#114E50] rounded-lg p-4 space-y-2"
-                                onClick={() => {
-                                    if (userData?.hasPaid && userData?.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date()) {
-                                        console.log('Подписка активна');
-                                    } else {
-                                        navigate('/client/masters-tower');
-                                    }
-                                }}
+                                className="w-[60px] h-[60px] bg-[#114E50] rounded-full flex items-center justify-center cursor-pointer relative"
+                                onClick={handlePhotoClick}
                             >
-                                <div className="text-xl font-medium">Подписка на Мастерскую Энергий</div>
-                                {userData?.hasPaid && userData?.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date() ? (
-                                    <div>
-                                        Ваша подписка действует до{' '}
-                                        {userData?.subscriptionEndDate ? new Date(userData.subscriptionEndDate).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }) : ''}
+                                {uploadingPhoto ? (
+                                    <div className="w-full h-full flex items-center justify-center">
+                                        <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-purple-500"></div>
                                     </div>
+                                ) : getProfilePhotoUrl() ? (
+                                    <img 
+                                        src={getProfilePhotoUrl() || ''} 
+                                        alt="profile" 
+                                        className="w-full h-full object-cover rounded-full" 
+                                    />
                                 ) : (
-                                    <div>У вас нет доступа в Башню Мастеров</div>
+                                    <img src={profile} alt="profile" className="w-[30px] h-[30px] object-cover rounded-full" />
                                 )}
                             </div>
-
-                            {userData?.invitedUser && (
-                                <div className="mt-4 bg-[#114E50] rounded-lg p-4 space-y-2">
-                                    <div className="text-xl font-medium">Вас пригласил</div>
-                                    <div>
-                                        {userData.invitedUser.telegramUserName 
-                                            ? `@${userData.invitedUser.telegramUserName}`
-                                            : ''
-                                        }
-                                        {userData.invitedUser.fullName 
-                                            ? `, ${userData.invitedUser.fullName}`
-                                            : ''
-                                        }
-                                    </div>
-                                </div>
-                            )}
-
-                            <div id="profile-instruction-referral-link" onClick={() => navigate('/client/invited-users')} className="mt-4 bg-[#114E50] rounded-lg p-4 space-y-2 cursor-pointer">
-                                <div className="flex items-center justify-between">
-                                    <div className="text-xl font-medium">Пригласи друга по ссылке</div>
-                                    <div className="text-lg font-medium">
-                                        {invitedUsersCount}
-                                    </div>
-                                </div>
-                                <div className="flex items-center justify-between">
+                            <div>
+                                <div className="flex items-center gap-x-1" onClick={handleEditNameClick}>
                                     <div 
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            copyReferralLink();
-                                        }}
-                                        className="break-all"
+                                        className="text-xl font-medium cursor-pointer hover:opacity-80 transition-opacity"
                                     >
-                                        {userData?.telegramId 
-                                            ? `t.me/io_sun_bot?start=${userData.telegramId}`
-                                            : 'Загрузка...'
-                                        }
+                                        {userData?.fullName || 'Не указано'}
                                     </div>
-                                    <button
-                                    className="cursor-pointer"
+                                    <img src={edit} alt="edit" className="w-5 h-5 object-cover" />
+                                </div>
+                                <div>{userData?.mail || ""}</div>
+                            </div>
+                            <div className="ml-auto w-[79px] h-[79px]">
+                                {invitedUsersCount < 5 && (
+                                    <img src={referralLevel1} alt="referralLevel1" className="w-full h-full object-cover" />
+                                )}
+                                {invitedUsersCount >= 5 && invitedUsersCount < 10 && (
+                                    <img src={referralLevel2} alt="referralLevel2" className="w-full h-full object-cover" />
+                                )}
+                                {invitedUsersCount >= 10 && invitedUsersCount < 25 && (
+                                    <img src={referralLevel3} alt="referralLevel3" className="w-full h-full object-cover" />
+                                )}
+                                {invitedUsersCount >= 25 && invitedUsersCount < 50 && (
+                                    <img src={referralLevel4} alt="referralLevel4" className="w-full h-full object-cover" />
+                                )}
+                                {invitedUsersCount >= 50 && (
+                                    <img src={referralLevel5} alt="referralLevel5" className="w-full h-full object-cover" />
+                                )}
+                            </div>
+                        </div>
+
+                        <div id="profile-instruction-sun" onClick={() => setIsBonusPolicyModalOpen(true)} className="flex items-start gap-x-3 mt-4 bg-[#114E50] rounded-lg p-4">
+                            <div className="shrink-0 cursor-pointer">
+                                <img src={sun} alt="sun" className="w-10 h-10 object-cover" />
+                            </div>
+                            <div className="w-full">
+                                <div className="flex items-center justify-between w-full">
+                                    <div className="text-xl font-medium">Солнца</div>
+                                    <div className="text-xl font-medium">{userData?.bonus}</div>
+                                </div>
+                                <div className="mt-1">
+                                Начисляются за выполнение заданий, ведение дневника осознаний, просмотр контента и приглашение друзей. Солнца обмениваются на эксклюзивный контент, который нельзя купить за деньги
+                                </div>
+                            </div>
+                        </div>
+
+                        <div 
+                            id="profile-instruction-subscription"
+                            className="mt-4 bg-[#114E50] rounded-lg p-4 space-y-2"
+                            onClick={() => {
+                                if (userData?.hasPaid && userData?.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date()) {
+                                    console.log('Подписка активна');
+                                } else {
+                                    navigate('/client/masters-tower');
+                                }
+                            }}
+                        >
+                            <div className="text-xl font-medium">Подписка на Мастерскую Энергий</div>
+                            {userData?.hasPaid && userData?.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date() ? (
+                                <div>
+                                    Ваша подписка действует до{' '}
+                                    {userData?.subscriptionEndDate ? new Date(userData.subscriptionEndDate).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }) : ''}
+                                </div>
+                            ) : (
+                                <div>У вас нет доступа в Башню Мастеров</div>
+                            )}
+                        </div>
+
+                        {userData?.invitedUser && (
+                            <div className="mt-4 bg-[#114E50] rounded-lg p-4 space-y-2">
+                                <div className="text-xl font-medium">Вас пригласил</div>
+                                <div>
+                                    {userData.invitedUser.telegramUserName 
+                                        ? `@${userData.invitedUser.telegramUserName}`
+                                        : ''
+                                    }
+                                    {userData.invitedUser.fullName 
+                                        ? `, ${userData.invitedUser.fullName}`
+                                        : ''
+                                    }
+                                </div>
+                            </div>
+                        )}
+
+                        <div id="profile-instruction-referral-link" onClick={() => navigate('/client/invited-users')} className="mt-4 bg-[#114E50] rounded-lg p-4 space-y-2 cursor-pointer">
+                            <div className="flex items-center justify-between">
+                                <div className="text-xl font-medium">Пригласи друга по ссылке</div>
+                                <div className="text-lg font-medium">
+                                    {invitedUsersCount}
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <div 
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         copyReferralLink();
-                                    }}>
-                                        <img src={copyLink} alt="copy" className="w-5 h-5 object-cover" />
-                                    </button>
+                                    }}
+                                    className="break-all"
+                                >
+                                    {userData?.telegramId 
+                                        ? `t.me/io_sun_bot?start=${userData.telegramId}`
+                                        : 'Загрузка...'
+                                    }
                                 </div>
-                                {linkCopied && (
-                                    <div className="text-sm text-[#C4841D] mt-1">Ссылка скопирована!</div>
-                                )}
+                                <button
+                                className="cursor-pointer"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    copyReferralLink();
+                                }}>
+                                    <img src={copyLink} alt="copy" className="w-5 h-5 object-cover" />
+                                </button>
                             </div>
-
-                            <div className="mt-4 flex items-center gap-x-2">
-                                <a
-                                    id="profile-instruction-telegram-channel"
-                                    href="https://t.me/io_center"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="basis-1/2 bg-[#114E50] rounded-lg p-4 pr-2 flex items-center justify-between"
-                                >
-                                    <div className="font-medium text-sm">Телеграм канал</div>
-                                    <img src={linkArrow} alt="linkArrow" className="w-5 h-5 object-cover shrink-0" />
-                                </a>
-                                <a
-                                    id="profile-instruction-telegram-chat"
-                                    href="https://t.me/+UWaWd3xq3erdWnny"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="basis-1/2 bg-[#114E50] rounded-lg p-4 pr-2 flex items-center justify-between"
-                                >
-                                    <div className="font-medium text-sm">Телеграм чат</div>
-                                    <img src={linkArrow} alt="linkArrow" className="w-5 h-5 object-cover shrink-0" />
-                                </a>
-                            </div>
-
-                            <div id="profile-instruction-video-settings" className="mt-4 flex items-center justify-between">
-                                <div>Просмотр видео в РФ без VPN</div>
-                                <Switch checked={locatedInRussia} onChange={() => {
-                                    updateUserData('locatedInRussia', !locatedInRussia);
-                                    setLocatedInRussia(!locatedInRussia);
-                                }} />
-                            </div>
-
-                            <div id="profile-instruction-notifications" className="mt-4 flex items-center justify-between">
-                                <div>Разрешить уведомления</div>
-                                <Switch checked={notifications} onChange={() => {
-                                    updateUserData('notifyPermission', !notifications);
-                                    updateUserData('diaryNotifyPermission', !notifications);
-                                    setNotifications(!notifications);
-                                }} />
-                            </div>
+                            {linkCopied && (
+                                <div className="text-sm text-[#C4841D] mt-1">Ссылка скопирована!</div>
+                            )}
                         </div>
-                        {!userData?.emailConfirmed && (
-                            <Link 
-                                to="/client/register"
-                                className="w-full block mt-4 bg-white/10 text-[#FFFFFF] py-2.5 text-center font-medium rounded-full"
+
+                        <div className="mt-4 flex items-center gap-x-2">
+                            <a
+                                id="profile-instruction-telegram-channel"
+                                href="https://t.me/io_center"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="basis-1/2 bg-[#114E50] rounded-lg p-4 pr-2 flex items-center justify-between"
                             >
-                                Регистрация
-                            </Link>
-                        )}
-                        <div className="mt-3">
-                            <MyLink to="/client/contactus" text="Связаться с нами" className='w-full' color='red'/>
+                                <div className="font-medium text-sm">Телеграм канал</div>
+                                <img src={linkArrow} alt="linkArrow" className="w-5 h-5 object-cover shrink-0" />
+                            </a>
+                            <a
+                                id="profile-instruction-telegram-chat"
+                                href="https://t.me/+UWaWd3xq3erdWnny"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="basis-1/2 bg-[#114E50] rounded-lg p-4 pr-2 flex items-center justify-between"
+                            >
+                                <div className="font-medium text-sm">Телеграм чат</div>
+                                <img src={linkArrow} alt="linkArrow" className="w-5 h-5 object-cover shrink-0" />
+                            </a>
+                        </div>
+
+                        <div id="profile-instruction-video-settings" className="mt-4 flex items-center justify-between">
+                            <div>Просмотр видео в РФ без VPN</div>
+                            <Switch checked={locatedInRussia} onChange={() => {
+                                updateUserData('locatedInRussia', !locatedInRussia);
+                                setLocatedInRussia(!locatedInRussia);
+                            }} />
+                        </div>
+
+                        <div id="profile-instruction-notifications" className="mt-4 flex items-center justify-between">
+                            <div>Разрешить уведомления</div>
+                            <Switch checked={notifications} onChange={() => {
+                                updateUserData('notifyPermission', !notifications);
+                                updateUserData('diaryNotifyPermission', !notifications);
+                                setNotifications(!notifications);
+                            }} />
                         </div>
                     </div>
+                    {!userData?.emailConfirmed && (
+                        <Link 
+                            to="/client/register"
+                            className="w-full block mt-4 bg-white/10 text-[#FFFFFF] py-2.5 text-center font-medium rounded-full"
+                        >
+                            Регистрация
+                        </Link>
+                    )}
+                    <div className="mt-3">
+                        <MyLink to="/client/contactus" text="Связаться с нами" className='w-full' color='red'/>
+                    </div>
+                    {showInstructions && (
+                        <div className="h-[30vh] w-full shrink-0 bg-[#031F23]" aria-hidden />
+                    )}
                 </div>
             </UserLayout>
             <BonusPolicyModal 

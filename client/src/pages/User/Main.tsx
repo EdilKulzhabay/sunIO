@@ -296,7 +296,7 @@ export const Main = () => {
 
     const handleInstructionNext = () => {
         setInstructionStep((prev) => prev + 1);
-        if (instructionStep === MAIN_INSTRUCTION_STEPS_COUNT - 1) {
+        if (instructionStep === MAIN_INSTRUCTION_STEPS_COUNT - 2) {
             handleInstructionClose();
         }
     };

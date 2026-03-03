@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Upload, X, Image as ImageIcon, Download } from 'lucide-react';
+import { Upload, Image as ImageIcon, Download } from 'lucide-react';
 import { toast } from 'react-toastify';
 import api from '../../api';
 
@@ -85,14 +85,6 @@ export const ImageUpload = ({ value, onChange, label = "Изображение" 
         }
     };
 
-    const handleRemove = () => {
-        setPreview('');
-        onChange('');
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-        }
-    };
-
     const handleButtonClick = () => {
         fileInputRef.current?.click();
     };
@@ -119,20 +111,6 @@ export const ImageUpload = ({ value, onChange, label = "Изображение" 
                             alt="Preview"
                             className="w-32 h-32 object-cover rounded-lg border-2 border-gray-200"
                         />
-                        <button
-                            type="button"
-                            onClick={handleDownload}
-                            className="absolute -top-2 -left-2 bg-blue-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                            <Download size={16} />
-                        </button>
-                        <button
-                            type="button"
-                            onClick={handleRemove}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                            <X size={16} />
-                        </button>
                     </div>
                 )}
 
@@ -174,6 +152,16 @@ export const ImageUpload = ({ value, onChange, label = "Изображение" 
                         )}
                     </button>
                     
+                    {(preview || value) && (
+                        <button
+                            type="button"
+                            onClick={handleDownload}
+                            className="flex items-center gap-2 mt-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                        >
+                            <Download size={16} className="text-gray-600" />
+                            <span className="text-sm text-gray-700">Скачать</span>
+                        </button>
+                    )}
                     <p className="text-xs text-gray-500 mt-2">
                         Поддерживаются: JPG, PNG, GIF, WEBP (макс. 5MB)
                     </p>

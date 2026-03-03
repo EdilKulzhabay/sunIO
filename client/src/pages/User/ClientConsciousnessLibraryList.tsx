@@ -263,6 +263,7 @@ export const ClientConsciousnessLibraryList = () => {
                     <div className="flex items-center">
                         <h1 className="text-2xl font-semibold">Библиотека сознания</h1>
                     </div>
+                    {consciousnessLibraries.some((c: any) => c.location === 'top' && c.visibility) && (
                     <div className="md:hidden">
                         <button 
                             onClick={scrollRight}
@@ -275,12 +276,12 @@ export const ClientConsciousnessLibraryList = () => {
                             />
                         </button>
                     </div>
+                    )}
                 </div>
 
                 <div className="px-4 mt-2 pb-10 bg-[#031F23]">
                     <div ref={cardsContainerRef} className="flex overflow-x-auto gap-4 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                        {consciousnessLibraries.length > 0 ? (
-                            consciousnessLibraries.filter((consciousnessLibrary: any) => consciousnessLibrary.location === 'top').sort((a: any, b: any) => a.order - b.order).map((consciousnessLibrary: any) => (
+                        {consciousnessLibraries.filter((consciousnessLibrary: any) => consciousnessLibrary.location === 'top' && consciousnessLibrary.visibility).sort((a: any, b: any) => a.order - b.order).map((consciousnessLibrary: any) => (
                                 <div 
                                     key={consciousnessLibrary._id} 
                                     data-card
@@ -297,17 +298,11 @@ export const ClientConsciousnessLibraryList = () => {
                                         starsRequired={consciousnessLibrary?.starsRequired || 0}
                                     />
                                 </div>
-                            ))
-                        ) : (
-                            <p className="text-center text-gray-500">Нет контента</p>
-                        )}
+                            ))}
                     </div>
 
                     <div className="mt-4 space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
-                        { consciousnessLibraries.length > 0 ? (
-                            <>
-                                {
-                                    consciousnessLibraries.filter((consciousnessLibrary: any) => consciousnessLibrary.location === 'bottom').sort((a: any, b: any) => a.order - b.order).map((consciousnessLibrary: any) => (
+                        {consciousnessLibraries.filter((consciousnessLibrary: any) => consciousnessLibrary.location === 'bottom' && consciousnessLibrary.visibility).sort((a: any, b: any) => a.order - b.order).map((consciousnessLibrary: any) => (
                                         <VideoCard 
                                             key={consciousnessLibrary._id} 
                                             title={consciousnessLibrary.title} 
@@ -320,12 +315,7 @@ export const ClientConsciousnessLibraryList = () => {
                                             starsRequired={consciousnessLibrary?.starsRequired || 0}
                                             duration={consciousnessLibrary?.duration || 0}
                                         />
-                                    ))
-                                }
-                            </>
-                        ) : (
-                            <p className="text-center text-gray-500 lg:col-span-2">Нет контента</p>
-                        )}
+                                    ))}
                     </div>
                 </div>
             </UserLayout>

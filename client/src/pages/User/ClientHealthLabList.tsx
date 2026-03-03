@@ -282,6 +282,7 @@ export const ClientHealthLabList = () => {
                     <div className="flex items-center">
                         <h1 className="text-2xl font-semibold">Лаборатория здоровья</h1>
                     </div>
+                    {healthLabs.some((h: any) => h.location === 'top' && h.visibility) && (
                     <div className="md:hidden">
                         <button 
                             onClick={scrollRight}
@@ -294,12 +295,12 @@ export const ClientHealthLabList = () => {
                             />
                         </button>
                     </div>
+                    )}
                 </div>
 
                 <div className="px-4 mt-2 pb-10 bg-[#031F23]">
                     <div ref={cardsContainerRef} className="flex overflow-x-auto gap-4 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                        {healthLabs.length > 0 ? (
-                            healthLabs.filter((healthLab: any) => healthLab.location === 'top').sort((a: any, b: any) => a.order - b.order).map((healthLab: any) => (
+                        {healthLabs.filter((healthLab: any) => healthLab.location === 'top' && healthLab.visibility).sort((a: any, b: any) => a.order - b.order).map((healthLab: any) => (
                                 <div 
                                     key={healthLab._id} 
                                     data-card
@@ -316,17 +317,11 @@ export const ClientHealthLabList = () => {
                                         starsRequired={healthLab?.starsRequired || 0}
                                     />
                                 </div>
-                            ))
-                        ) : (
-                            <p className="text-center text-gray-500">Нет контента</p>
-                        )}
+                            ))}
                     </div>
 
                     <div className="mt-4 space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
-                        { healthLabs.length > 0 ? (
-                            <>
-                                {
-                                    healthLabs.filter((healthLab: any) => healthLab.location === 'bottom').sort((a: any, b: any) => a.order - b.order).map((healthLab: any) => (
+                        {healthLabs.filter((healthLab: any) => healthLab.location === 'bottom' && healthLab.visibility).sort((a: any, b: any) => a.order - b.order).map((healthLab: any) => (
                                         <VideoCard 
                                             key={healthLab._id} 
                                             title={healthLab.title} 
@@ -339,12 +334,7 @@ export const ClientHealthLabList = () => {
                                             starsRequired={healthLab?.starsRequired || 0}
                                             duration={healthLab?.duration || 0}
                                         />
-                                    ))
-                                }
-                            </>
-                        ) : (
-                            <p className="text-center text-gray-500 lg:col-span-2">Нет контента</p>
-                        )}
+                                    ))}
                     </div>
                 </div>
             </UserLayout>

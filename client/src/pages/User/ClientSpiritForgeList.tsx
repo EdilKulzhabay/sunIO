@@ -260,6 +260,7 @@ export const ClientSpiritForgeList = () => {
                     <div className="flex items-center">
                         <h1 className="text-2xl font-semibold">Кузница Духа</h1>
                     </div>
+                    {spiritForges.some((s: any) => s.location === 'top' && s.visibility) && (
                     <div className="md:hidden">
                         <button 
                             onClick={scrollRight}
@@ -272,12 +273,12 @@ export const ClientSpiritForgeList = () => {
                             />
                         </button>
                     </div>
+                    )}
                 </div>
 
                 <div className="px-4 mt-2 pb-10 bg-[#031F23]">
                     <div ref={cardsContainerRef} className="flex overflow-x-auto gap-4 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                        {spiritForges.length > 0 ? (
-                            spiritForges.filter((spiritForge: any) => spiritForge.location === 'top').sort((a: any, b: any) => a.order - b.order).map((spiritForge: any) => (
+                        {spiritForges.filter((spiritForge: any) => spiritForge.location === 'top' && spiritForge.visibility).sort((a: any, b: any) => a.order - b.order).map((spiritForge: any) => (
                                 <div 
                                     key={spiritForge._id} 
                                     data-card
@@ -294,17 +295,11 @@ export const ClientSpiritForgeList = () => {
                                         starsRequired={spiritForge?.starsRequired || 0}
                                     />
                                 </div>
-                            ))
-                        ) : (
-                            <p className="text-center text-gray-500">Нет контента</p>
-                        )}
+                            ))}
                     </div>
 
                     <div className="mt-4 space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
-                        { spiritForges.length > 0 ? (
-                            <>
-                                {
-                                    spiritForges.filter((spiritForge: any) => spiritForge.location === 'bottom').sort((a: any, b: any) => a.order - b.order).map((spiritForge: any) => (
+                        {spiritForges.filter((spiritForge: any) => spiritForge.location === 'bottom' && spiritForge.visibility).sort((a: any, b: any) => a.order - b.order).map((spiritForge: any) => (
                                         <VideoCard 
                                             key={spiritForge._id} 
                                             title={spiritForge.title} 
@@ -317,12 +312,7 @@ export const ClientSpiritForgeList = () => {
                                             starsRequired={spiritForge?.starsRequired || 0}
                                             duration={spiritForge?.duration || 0}
                                         />
-                                    ))
-                                }
-                            </>
-                        ) : (
-                            <p className="text-center text-gray-500 lg:col-span-2">Нет контента</p>
-                        )}
+                                    ))}
                     </div>
                 </div>
             </UserLayout>

@@ -260,6 +260,7 @@ export const ClientProductCatalogList = () => {
                     <div className="flex items-center">
                         <h1 className="text-2xl font-semibold">Каталог платных продуктов</h1>
                     </div>
+                    {productCatalogs.some((p: any) => p.location === 'top' && p.visibility) && (
                     <div className="md:hidden">
                         <button 
                             onClick={scrollRight}
@@ -272,12 +273,12 @@ export const ClientProductCatalogList = () => {
                             />
                         </button>
                     </div>
+                    )}
                 </div>
 
                 <div className="px-4 mt-2 pb-10 bg-[#031F23]">
                     <div ref={cardsContainerRef} className="flex overflow-x-auto gap-4 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                        {productCatalogs.length > 0 ? (
-                            productCatalogs.filter((productCatalog: any) => productCatalog.location === 'top').sort((a: any, b: any) => a.order - b.order).map((productCatalog: any) => (
+                        {productCatalogs.filter((productCatalog: any) => productCatalog.location === 'top' && productCatalog.visibility).sort((a: any, b: any) => a.order - b.order).map((productCatalog: any) => (
                                 <div 
                                     key={productCatalog._id} 
                                     data-card
@@ -294,17 +295,11 @@ export const ClientProductCatalogList = () => {
                                         starsRequired={productCatalog?.starsRequired || 0}
                                     />
                                 </div>
-                            ))
-                        ) : (
-                            <p className="text-center text-gray-500">Нет контента</p>
-                        )}
+                            ))}
                     </div>
 
                     <div className="mt-4 space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
-                        { productCatalogs.length > 0 ? (
-                            <>
-                                {
-                                    productCatalogs.filter((productCatalog: any) => productCatalog.location === 'bottom').sort((a: any, b: any) => a.order - b.order).map((productCatalog: any) => (
+                        {productCatalogs.filter((productCatalog: any) => productCatalog.location === 'bottom' && productCatalog.visibility).sort((a: any, b: any) => a.order - b.order).map((productCatalog: any) => (
                                         <VideoCard 
                                             key={productCatalog._id} 
                                             title={productCatalog.title} 
@@ -317,12 +312,7 @@ export const ClientProductCatalogList = () => {
                                             starsRequired={productCatalog?.starsRequired || 0}
                                             duration={productCatalog?.duration || 0}
                                         />
-                                    ))
-                                }
-                            </>
-                        ) : (
-                            <p className="text-center text-gray-500 lg:col-span-2">Нет контента</p>
-                        )}
+                                    ))}
                     </div>
                 </div>
             </UserLayout>

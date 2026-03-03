@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, Download } from 'lucide-react';
 import { toast } from 'react-toastify';
 import api from '../../api';
 
@@ -66,6 +66,25 @@ export const ImageUpload = ({ value, onChange, label = "Изображение" 
         }
     };
 
+    const handleDownload = async () => {
+        const url = getFullImageUrl(preview || value);
+        if (!url) return;
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = url.split('/').pop() || 'image';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(blobUrl);
+        } catch {
+            toast.error('Ошибка скачивания изображения');
+        }
+    };
+
     const handleRemove = () => {
         setPreview('');
         onChange('');
@@ -100,6 +119,13 @@ export const ImageUpload = ({ value, onChange, label = "Изображение" 
                             alt="Preview"
                             className="w-32 h-32 object-cover rounded-lg border-2 border-gray-200"
                         />
+                        <button
+                            type="button"
+                            onClick={handleDownload}
+                            className="absolute -top-2 -left-2 bg-blue-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                            <Download size={16} />
+                        </button>
                         <button
                             type="button"
                             onClick={handleRemove}

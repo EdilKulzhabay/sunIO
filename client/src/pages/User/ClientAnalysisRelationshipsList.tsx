@@ -260,6 +260,7 @@ export const ClientAnalysisRelationshipsList = () => {
                     <div className="flex items-center">
                         <h1 className="text-2xl font-semibold">Разборы — Отношения</h1>
                     </div>
+                    {analysisRelationshipss.some((x: any) => x.location === 'top' && x.visibility) && (
                     <div className="md:hidden">
                         <button 
                             onClick={scrollRight}
@@ -272,12 +273,12 @@ export const ClientAnalysisRelationshipsList = () => {
                             />
                         </button>
                     </div>
+                    )}
                 </div>
 
                 <div className="px-4 mt-2 pb-10 bg-[#031F23]">
                     <div ref={cardsContainerRef} className="flex overflow-x-auto gap-4 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                        {analysisRelationshipss.length > 0 ? (
-                            analysisRelationshipss.filter((analysisRelationships: any) => analysisRelationships.location === 'top').sort((a: any, b: any) => a.order - b.order).map((analysisRelationships: any) => (
+                        {analysisRelationshipss.filter((analysisRelationships: any) => analysisRelationships.location === 'top' && analysisRelationships.visibility).sort((a: any, b: any) => a.order - b.order).map((analysisRelationships: any) => (
                                 <div 
                                     key={analysisRelationships._id} 
                                     data-card
@@ -294,17 +295,11 @@ export const ClientAnalysisRelationshipsList = () => {
                                         starsRequired={analysisRelationships?.starsRequired || 0}
                                     />
                                 </div>
-                            ))
-                        ) : (
-                            <p className="text-center text-gray-500">Нет контента</p>
-                        )}
+                            ))}
                     </div>
 
                     <div className="mt-4 space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
-                        { analysisRelationshipss.length > 0 ? (
-                            <>
-                                {
-                                    analysisRelationshipss.filter((analysisRelationships: any) => analysisRelationships.location === 'bottom').sort((a: any, b: any) => a.order - b.order).map((analysisRelationships: any) => (
+                        {analysisRelationshipss.filter((analysisRelationships: any) => analysisRelationships.location === 'bottom' && analysisRelationships.visibility).sort((a: any, b: any) => a.order - b.order).map((analysisRelationships: any) => (
                                         <VideoCard 
                                             key={analysisRelationships._id} 
                                             title={analysisRelationships.title} 
@@ -317,12 +312,7 @@ export const ClientAnalysisRelationshipsList = () => {
                                             starsRequired={analysisRelationships?.starsRequired || 0}
                                             duration={analysisRelationships?.duration || 0}
                                         />
-                                    ))
-                                }
-                            </>
-                        ) : (
-                            <p className="text-center text-gray-500 lg:col-span-2">Нет контента</p>
-                        )}
+                                    ))}
                     </div>
                 </div>
             </UserLayout>

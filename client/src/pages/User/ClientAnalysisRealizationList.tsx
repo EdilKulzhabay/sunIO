@@ -260,6 +260,7 @@ export const ClientAnalysisRealizationList = () => {
                     <div className="flex items-center">
                         <h1 className="text-2xl font-semibold">Разборы — Реализация</h1>
                     </div>
+                    {analysisRealizations.some((x: any) => x.location === 'top' && x.visibility) && (
                     <div className="md:hidden">
                         <button 
                             onClick={scrollRight}
@@ -272,12 +273,12 @@ export const ClientAnalysisRealizationList = () => {
                             />
                         </button>
                     </div>
+                    )}
                 </div>
 
                 <div className="px-4 mt-2 pb-10 bg-[#031F23]">
                     <div ref={cardsContainerRef} className="flex overflow-x-auto gap-4 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                        {analysisRealizations.length > 0 ? (
-                            analysisRealizations.filter((analysisRealization: any) => analysisRealization.location === 'top').sort((a: any, b: any) => a.order - b.order).map((analysisRealization: any) => (
+                        {analysisRealizations.filter((analysisRealization: any) => analysisRealization.location === 'top' && analysisRealization.visibility).sort((a: any, b: any) => a.order - b.order).map((analysisRealization: any) => (
                                 <div 
                                     key={analysisRealization._id} 
                                     data-card
@@ -294,17 +295,11 @@ export const ClientAnalysisRealizationList = () => {
                                         starsRequired={analysisRealization?.starsRequired || 0}
                                     />
                                 </div>
-                            ))
-                        ) : (
-                            <p className="text-center text-gray-500">Нет контента</p>
-                        )}
+                            ))}
                     </div>
 
                     <div className="mt-4 space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
-                        { analysisRealizations.length > 0 ? (
-                            <>
-                                {
-                                    analysisRealizations.filter((analysisRealization: any) => analysisRealization.location === 'bottom').sort((a: any, b: any) => a.order - b.order).map((analysisRealization: any) => (
+                        {analysisRealizations.filter((analysisRealization: any) => analysisRealization.location === 'bottom' && analysisRealization.visibility).sort((a: any, b: any) => a.order - b.order).map((analysisRealization: any) => (
                                         <VideoCard 
                                             key={analysisRealization._id} 
                                             title={analysisRealization.title} 
@@ -317,12 +312,7 @@ export const ClientAnalysisRealizationList = () => {
                                             starsRequired={analysisRealization?.starsRequired || 0}
                                             duration={analysisRealization?.duration || 0}
                                         />
-                                    ))
-                                }
-                            </>
-                        ) : (
-                            <p className="text-center text-gray-500 lg:col-span-2">Нет контента</p>
-                        )}
+                                    ))}
                     </div>
                 </div>
             </UserLayout>

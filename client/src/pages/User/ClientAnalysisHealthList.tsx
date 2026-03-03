@@ -260,6 +260,7 @@ export const ClientAnalysisHealthList = () => {
                     <div className="flex items-center">
                         <h1 className="text-2xl font-semibold">Разборы — Здоровье</h1>
                     </div>
+                    {analysisHealths.some((x: any) => x.location === 'top' && x.visibility) && (
                     <div className="md:hidden">
                         <button 
                             onClick={scrollRight}
@@ -272,12 +273,12 @@ export const ClientAnalysisHealthList = () => {
                             />
                         </button>
                     </div>
+                    )}
                 </div>
 
                 <div className="px-4 mt-2 pb-10 bg-[#031F23]">
                     <div ref={cardsContainerRef} className="flex overflow-x-auto gap-4 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                        {analysisHealths.length > 0 ? (
-                            analysisHealths.filter((analysisHealth: any) => analysisHealth.location === 'top').sort((a: any, b: any) => a.order - b.order).map((analysisHealth: any) => (
+                        {analysisHealths.filter((analysisHealth: any) => analysisHealth.location === 'top' && analysisHealth.visibility).sort((a: any, b: any) => a.order - b.order).map((analysisHealth: any) => (
                                 <div 
                                     key={analysisHealth._id} 
                                     data-card
@@ -294,17 +295,11 @@ export const ClientAnalysisHealthList = () => {
                                         starsRequired={analysisHealth?.starsRequired || 0}
                                     />
                                 </div>
-                            ))
-                        ) : (
-                            <p className="text-center text-gray-500">Нет контента</p>
-                        )}
+                            ))}
                     </div>
 
                     <div className="mt-4 space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
-                        { analysisHealths.length > 0 ? (
-                            <>
-                                {
-                                    analysisHealths.filter((analysisHealth: any) => analysisHealth.location === 'bottom').sort((a: any, b: any) => a.order - b.order).map((analysisHealth: any) => (
+                        {analysisHealths.filter((analysisHealth: any) => analysisHealth.location === 'bottom' && analysisHealth.visibility).sort((a: any, b: any) => a.order - b.order).map((analysisHealth: any) => (
                                         <VideoCard 
                                             key={analysisHealth._id} 
                                             title={analysisHealth.title} 
@@ -317,12 +312,7 @@ export const ClientAnalysisHealthList = () => {
                                             starsRequired={analysisHealth?.starsRequired || 0}
                                             duration={analysisHealth?.duration || 0}
                                         />
-                                    ))
-                                }
-                            </>
-                        ) : (
-                            <p className="text-center text-gray-500 lg:col-span-2">Нет контента</p>
-                        )}
+                                    ))}
                     </div>
                 </div>
             </UserLayout>

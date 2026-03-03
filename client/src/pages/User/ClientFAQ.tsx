@@ -124,6 +124,9 @@ export const ClientFAQ = () => {
                         )}
                     </div>
                     <div className="mt-4">
+                        
+                    </div>
+                    <div className="mt-4">
                         <div className="flex items-center justify-between">
                             <div className="">Обзор Приложения с подсказками</div>
                             <Switch
@@ -140,8 +143,6 @@ export const ClientFAQ = () => {
                                 }} 
                             />
                         </div>
-                    </div>
-                    <div className="mt-4">
                         <a 
                             href={dinamycLink || 'https://drive.google.com/file/d/1AI8UwHC_BIZ3Rwi6MaP9Z04T-J6xFR03/view?usp=drive_link'}
                             target="_blank"

@@ -216,11 +216,13 @@ export const ClientParablesOfLifeList = () => {
             <UserLayout>
                 <div className="flex items-center justify-between p-4">
                     <h1 className="text-2xl font-semibold">{TITLE}</h1>
-                    <div className="md:hidden">
-                        <button onClick={scrollRight} className="flex items-center justify-center w-8 h-8 border border-[#00C5AE] rounded-full cursor-pointer hover:bg-[#00C5AE] transition-colors">
-                            <img src={inBothDirections} alt="scroll" className="w-5 h-5" />
-                        </button>
-                    </div>
+                    {topItems.length > 0 && (
+                        <div className="md:hidden">
+                            <button onClick={scrollRight} className="flex items-center justify-center w-8 h-8 border border-[#00C5AE] rounded-full cursor-pointer hover:bg-[#00C5AE] transition-colors">
+                                <img src={inBothDirections} alt="scroll" className="w-5 h-5" />
+                            </button>
+                        </div>
+                    )}
                 </div>
                 <div className="px-4 mt-2" dangerouslySetInnerHTML={{ __html: dinamycContent }} />
                 <div className="px-4 mt-2 pb-10 bg-[#031F23]">

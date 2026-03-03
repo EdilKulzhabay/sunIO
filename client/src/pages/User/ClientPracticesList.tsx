@@ -282,85 +282,75 @@ export const ClientPracticesList = () => {
                     <div className="flex items-center">
                         <h1 className="text-2xl font-semibold">Практики</h1>
                     </div>
-                    <div className="md:hidden">
-                        <button 
-                            onClick={scrollRight}
-                            className="flex items-center justify-center w-8 h-8 border border-[#00C5AE] rounded-full cursor-pointer hover:bg-[#00C5AE] transition-colors"
-                        >
-                            <img 
-                                src={inBothDirections}
-                                alt="inBothDirections"
-                                className="w-5 h-5"
-                            />
-                        </button>
-                    </div>
+                    {practices.filter((practice: any) => practice.location === 'top' && practice.visibility).length > 0 && (
+                        <div className="md:hidden">
+                            <button 
+                                onClick={scrollRight}
+                                className="flex items-center justify-center w-8 h-8 border border-[#00C5AE] rounded-full cursor-pointer hover:bg-[#00C5AE] transition-colors"
+                            >
+                                <img 
+                                    src={inBothDirections}
+                                    alt="inBothDirections"
+                                    className="w-5 h-5"
+                                />
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 <div className="px-4 mt-2 pb-10 bg-[#031F23]">
                     <div ref={cardsContainerRef} className="flex overflow-x-auto gap-4 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                        {practices.length > 0 ? (
-                            practices.filter((practice: any) => practice.location === 'top' && practice.visibility).sort((a: any, b: any) => a.order - b.order).map((practice: any) => (
-                                <div 
-                                    key={practice._id} 
-                                    data-card
-                                    className="flex-shrink-0 w-[45vw] sm:w-[35vw] lg:w-[25vw] h-[210px] sm:h-[275px] lg:h-[330px]"
-                                >
-                                    <MiniVideoCard 
-                                        title={practice.title} 
-                                        image={practice.imageUrl} 
-                                        link={practice.redirectToPage?.trim() || `/client/practice/${practice._id}`} 
-                                        progress={progresses[practice._id] || 0} 
-                                        accessType={hasAccessToContent(practice._id) ? 'free' : practice.accessType} 
-                                        onLockedClick={hasAccessToContentSubscription() ? undefined : (practice.accessType !== 'free' ? () => handleLockedPracticeClickSubscription(practice) : undefined)}
-                                        duration={practice?.duration || 0}
-                                        starsRequired={practice?.starsRequired || 0}
-                                    />
-                                </div>
-                            ))
-                        ) : (
-                            <p className="text-center text-gray-500">Нет практик</p>
-                        )}
+                        {
+                            practices.filter((practice: any) => practice.location === 'top' && practice.visibility).length > 0 && (
+                                <>
+                                    {
+                                        practices.filter((practice: any) => practice.location === 'top' && practice.visibility).sort((a: any, b: any) => a.order - b.order).map((practice: any) => (
+                                            <div 
+                                                key={practice._id} 
+                                                data-card
+                                                className="flex-shrink-0 w-[45vw] sm:w-[35vw] lg:w-[25vw] h-[210px] sm:h-[275px] lg:h-[330px]"
+                                            >
+                                                <MiniVideoCard 
+                                                    title={practice.title} 
+                                                    image={practice.imageUrl} 
+                                                    link={practice.redirectToPage?.trim() || `/client/practice/${practice._id}`} 
+                                                    progress={progresses[practice._id] || 0} 
+                                                    accessType={hasAccessToContent(practice._id) ? 'free' : practice.accessType} 
+                                                    onLockedClick={hasAccessToContentSubscription() ? undefined : (practice.accessType !== 'free' ? () => handleLockedPracticeClickSubscription(practice) : undefined)}
+                                                    duration={practice?.duration || 0}
+                                                    starsRequired={practice?.starsRequired || 0}
+                                                />
+                                            </div>
+                                        ))
+                                    }
+                                </>
+                            )
+                        }
                     </div>
 
                     <div className="mt-4 space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
-                        { practices.length > 0 ? (
-                            <>
-                                {
-                                    practices.filter((practice: any) => practice.location === 'bottom' && practice.visibility).sort((a: any, b: any) => a.order - b.order).map((practice: any) => (
-                                        <VideoCard 
-                                            key={practice._id} 
-                                            title={practice.title} 
-                                            description={practice.shortDescription} 
-                                            image={practice.imageUrl} 
-                                            link={practice.redirectToPage?.trim() || `/client/practice/${practice._id}`} 
-                                            accessType={hasAccessToContent(practice._id) ? 'free' : practice.accessType} 
-                                            progress={progresses[practice._id] || 0} 
-                                            onLockedClick={hasAccessToContent(practice._id) ? undefined : (practice.accessType !== 'free' ? () => handleLockedPracticeClick(practice) : undefined)} 
-                                            starsRequired={practice?.starsRequired || 0}
-                                            duration={practice?.duration || 0}
-                                        />
-                                    ))
-                                }
-                                {/* {
-                                    practices.filter((practice: any) => practice.location === 'bottom' && practice.accessType === 'free').map((practice: any) => (
-                                        <VideoCard 
-                                            key={practice._id} 
-                                            title={practice.title} 
-                                            description={practice.shortDescription} 
-                                            image={practice.imageUrl} 
-                                            link={practice.redirectToPage?.trim() || `/client/practice/${practice._id}`} 
-                                            accessType={hasAccessToContent(practice._id) ? 'free' : practice.accessType} 
-                                            progress={progresses[practice._id] || 0} 
-                                            onLockedClick={hasAccessToContent(practice._id) ? undefined : (practice.accessType !== 'free' ? () => handleLockedPracticeClick(practice) : undefined)} 
-                                            starsRequired={practice?.starsRequired || 0}
-                                            duration={practice?.duration || 0}
-                                        />
-                                    ))
-                                } */}
-                            </>
-                        ) : (
-                            <p className="text-center text-gray-500 lg:col-span-2">Нет практик</p>
-                        )}
+                        {
+                            practices.filter((practice: any) => practice.location === 'bottom' && practice.visibility).length > 0 && (
+                                <>
+                                    {
+                                        practices.filter((practice: any) => practice.location === 'bottom' && practice.visibility).sort((a: any, b: any) => a.order - b.order).map((practice: any) => (
+                                            <VideoCard 
+                                                key={practice._id} 
+                                                title={practice.title} 
+                                                description={practice.shortDescription} 
+                                                image={practice.imageUrl} 
+                                                link={practice.redirectToPage?.trim() || `/client/practice/${practice._id}`} 
+                                                accessType={hasAccessToContent(practice._id) ? 'free' : practice.accessType} 
+                                                progress={progresses[practice._id] || 0} 
+                                                onLockedClick={hasAccessToContent(practice._id) ? undefined : (practice.accessType !== 'free' ? () => handleLockedPracticeClick(practice) : undefined)} 
+                                                starsRequired={practice?.starsRequired || 0}
+                                                duration={practice?.duration || 0}
+                                            />
+                                        ))
+                                    }
+                                </>
+                            )
+                        }
                     </div>
                 </div>
             </UserLayout>

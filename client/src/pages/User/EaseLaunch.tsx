@@ -44,12 +44,12 @@ export const EaseLaunch = () => {
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
             }}
-            className='min-h-screen px-4 pb-6 flex flex-col justify-between'
+            className='px-4 pb-6 flex flex-1 flex-col'
         >
-            <div style={{ height: `${screenHeight/3}px` }}>
+            <div style={{ height: `${screenHeight/6}px` }}>
                 <img src={logo} alt="logo" className='w-[104px] h-[40px] mt-10' />
             </div>
-            <div className='flex-1'>
+            <div className=''>
                 <h1 className='text-[48px] font-semibold text-white leading-12'>Важная информация</h1>
                 <p className='text-white mt-3'>Для удобства запуска приложения Солнце его нужно добавить на экран телефона, нажав на три точки в правом верхнем углу экрана. Не откладывай на потом – сделай это прямо сейчас!</p>
                 <div className='mt-4'>

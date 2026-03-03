@@ -82,7 +82,6 @@ export const ClientPerfomance = () => {
                 localStorage.setItem('firstName', firstName);
                 localStorage.setItem('lastName', lastName);
                 updateUser(response.data.data);
-                toast.success('Данные сохранены');
                 await api.post('/api/user/add-bonus-to-inviter', {
                     telegramId: telegramId
                 });

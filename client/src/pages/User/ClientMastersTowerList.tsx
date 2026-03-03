@@ -260,6 +260,7 @@ export const ClientMastersTowerList = () => {
                     <div className="flex items-center">
                         <h1 className="text-2xl font-semibold">Башня мастеров</h1>
                     </div>
+                    {mastersTowers.some((m: any) => m.location === 'top' && m.visibility) && (
                     <div className="md:hidden">
                         <button 
                             onClick={scrollRight}
@@ -272,12 +273,12 @@ export const ClientMastersTowerList = () => {
                             />
                         </button>
                     </div>
+                    )}
                 </div>
 
                 <div className="px-4 mt-2 pb-10 bg-[#031F23]">
                     <div ref={cardsContainerRef} className="flex overflow-x-auto gap-4 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                        {mastersTowers.length > 0 ? (
-                            mastersTowers.filter((mastersTower: any) => mastersTower.location === 'top').sort((a: any, b: any) => a.order - b.order).map((mastersTower: any) => (
+                        {mastersTowers.filter((mastersTower: any) => mastersTower.location === 'top' && mastersTower.visibility).sort((a: any, b: any) => a.order - b.order).map((mastersTower: any) => (
                                 <div 
                                     key={mastersTower._id} 
                                     data-card
@@ -294,17 +295,11 @@ export const ClientMastersTowerList = () => {
                                         starsRequired={mastersTower?.starsRequired || 0}
                                     />
                                 </div>
-                            ))
-                        ) : (
-                            <p className="text-center text-gray-500">Нет контента</p>
-                        )}
+                            ))}
                     </div>
 
                     <div className="mt-4 space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
-                        { mastersTowers.length > 0 ? (
-                            <>
-                                {
-                                    mastersTowers.filter((mastersTower: any) => mastersTower.location === 'bottom').sort((a: any, b: any) => a.order - b.order).map((mastersTower: any) => (
+                        {mastersTowers.filter((mastersTower: any) => mastersTower.location === 'bottom' && mastersTower.visibility).sort((a: any, b: any) => a.order - b.order).map((mastersTower: any) => (
                                         <VideoCard 
                                             key={mastersTower._id} 
                                             title={mastersTower.title} 
@@ -317,12 +312,7 @@ export const ClientMastersTowerList = () => {
                                             starsRequired={mastersTower?.starsRequired || 0}
                                             duration={mastersTower?.duration || 0}
                                         />
-                                    ))
-                                }
-                            </>
-                        ) : (
-                            <p className="text-center text-gray-500 lg:col-span-2">Нет контента</p>
-                        )}
+                                    ))}
                     </div>
                 </div>
             </UserLayout>

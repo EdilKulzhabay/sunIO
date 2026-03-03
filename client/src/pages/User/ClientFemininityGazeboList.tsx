@@ -260,6 +260,7 @@ export const ClientFemininityGazeboList = () => {
                     <div className="flex items-center">
                         <h1 className="text-2xl font-semibold">Беседка женственности</h1>
                     </div>
+                    {femininityGazebos.some((f: any) => f.location === 'top' && f.visibility) && (
                     <div className="md:hidden">
                         <button 
                             onClick={scrollRight}
@@ -272,12 +273,12 @@ export const ClientFemininityGazeboList = () => {
                             />
                         </button>
                     </div>
+                    )}
                 </div>
 
                 <div className="px-4 mt-2 pb-10 bg-[#031F23]">
                     <div ref={cardsContainerRef} className="flex overflow-x-auto gap-4 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                        {femininityGazebos.length > 0 ? (
-                            femininityGazebos.filter((femininityGazebo: any) => femininityGazebo.location === 'top').sort((a: any, b: any) => a.order - b.order).map((femininityGazebo: any) => (
+                        {femininityGazebos.filter((femininityGazebo: any) => femininityGazebo.location === 'top' && femininityGazebo.visibility).sort((a: any, b: any) => a.order - b.order).map((femininityGazebo: any) => (
                                 <div 
                                     key={femininityGazebo._id} 
                                     data-card
@@ -294,17 +295,11 @@ export const ClientFemininityGazeboList = () => {
                                         starsRequired={femininityGazebo?.starsRequired || 0}
                                     />
                                 </div>
-                            ))
-                        ) : (
-                            <p className="text-center text-gray-500">Нет контента</p>
-                        )}
+                            ))}
                     </div>
 
                     <div className="mt-4 space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
-                        { femininityGazebos.length > 0 ? (
-                            <>
-                                {
-                                    femininityGazebos.filter((femininityGazebo: any) => femininityGazebo.location === 'bottom').sort((a: any, b: any) => a.order - b.order).map((femininityGazebo: any) => (
+                        {femininityGazebos.filter((femininityGazebo: any) => femininityGazebo.location === 'bottom' && femininityGazebo.visibility).sort((a: any, b: any) => a.order - b.order).map((femininityGazebo: any) => (
                                         <VideoCard 
                                             key={femininityGazebo._id} 
                                             title={femininityGazebo.title} 
@@ -317,12 +312,7 @@ export const ClientFemininityGazeboList = () => {
                                             starsRequired={femininityGazebo?.starsRequired || 0}
                                             duration={femininityGazebo?.duration || 0}
                                         />
-                                    ))
-                                }
-                            </>
-                        ) : (
-                            <p className="text-center text-gray-500 lg:col-span-2">Нет контента</p>
-                        )}
+                                    ))}
                     </div>
                 </div>
             </UserLayout>

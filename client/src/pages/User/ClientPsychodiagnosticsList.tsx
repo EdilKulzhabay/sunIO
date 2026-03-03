@@ -260,6 +260,7 @@ export const ClientPsychodiagnosticsList = () => {
                     <div className="flex items-center">
                         <h1 className="text-2xl font-semibold">Психодиагностика</h1>
                     </div>
+                    {psychodiagnosticss.some((x: any) => x.location === 'top' && x.visibility) && (
                     <div className="md:hidden">
                         <button 
                             onClick={scrollRight}
@@ -272,12 +273,12 @@ export const ClientPsychodiagnosticsList = () => {
                             />
                         </button>
                     </div>
+                    )}
                 </div>
 
                 <div className="px-4 mt-2 pb-10 bg-[#031F23]">
                     <div ref={cardsContainerRef} className="flex overflow-x-auto gap-4 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-                        {psychodiagnosticss.length > 0 ? (
-                            psychodiagnosticss.filter((psychodiagnostics: any) => psychodiagnostics.location === 'top').sort((a: any, b: any) => a.order - b.order).map((psychodiagnostics: any) => (
+                        {psychodiagnosticss.filter((psychodiagnostics: any) => psychodiagnostics.location === 'top' && psychodiagnostics.visibility).sort((a: any, b: any) => a.order - b.order).map((psychodiagnostics: any) => (
                                 <div 
                                     key={psychodiagnostics._id} 
                                     data-card
@@ -294,17 +295,11 @@ export const ClientPsychodiagnosticsList = () => {
                                         starsRequired={psychodiagnostics?.starsRequired || 0}
                                     />
                                 </div>
-                            ))
-                        ) : (
-                            <p className="text-center text-gray-500">Нет контента</p>
-                        )}
+                            ))}
                     </div>
 
                     <div className="mt-4 space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
-                        { psychodiagnosticss.length > 0 ? (
-                            <>
-                                {
-                                    psychodiagnosticss.filter((psychodiagnostics: any) => psychodiagnostics.location === 'bottom').sort((a: any, b: any) => a.order - b.order).map((psychodiagnostics: any) => (
+                        {psychodiagnosticss.filter((psychodiagnostics: any) => psychodiagnostics.location === 'bottom' && psychodiagnostics.visibility).sort((a: any, b: any) => a.order - b.order).map((psychodiagnostics: any) => (
                                         <VideoCard 
                                             key={psychodiagnostics._id} 
                                             title={psychodiagnostics.title} 
@@ -317,12 +312,7 @@ export const ClientPsychodiagnosticsList = () => {
                                             starsRequired={psychodiagnostics?.starsRequired || 0}
                                             duration={psychodiagnostics?.duration || 0}
                                         />
-                                    ))
-                                }
-                            </>
-                        ) : (
-                            <p className="text-center text-gray-500 lg:col-span-2">Нет контента</p>
-                        )}
+                                    ))}
                     </div>
                 </div>
             </UserLayout>

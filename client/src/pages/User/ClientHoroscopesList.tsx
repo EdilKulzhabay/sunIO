@@ -198,10 +198,6 @@ export const ClientHoroscopesList = () => {
                     <div className="text-center py-8">
                         <p className="text-white/60">Загрузка...</p>
                     </div>
-                ) : horoscopes.length === 0 ? (
-                    <div className="text-center py-8">
-                        <p className="text-white/60">Нет гороскопов</p>
-                    </div>
                 ) : (
                     <div className="space-y-3">
                         {horoscopes.map((horoscope) => {

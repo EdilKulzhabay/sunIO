@@ -166,10 +166,6 @@ export const ClientTransitsList = () => {
                     <div className="text-center py-8">
                         <p className="text-white/60">Загрузка...</p>
                     </div>
-                ) : transits.length === 0 ? (
-                    <div className="text-center py-8">
-                        <p className="text-white/60">Нет транзитов</p>
-                    </div>
                 ) : (
                     <div className="space-y-3">
                         {transits.map((transit) => {

@@ -29,8 +29,21 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
+let consecutiveServerErrors = 0;
+const SERVER_ERROR_THRESHOLD = 2;
+const UNAVAILABLE_PATH = '/client/app-temporarily-unavailable';
+
+function redirectToUnavailable() {
+    if (window.location.pathname !== UNAVAILABLE_PATH) {
+        window.location.href = UNAVAILABLE_PATH;
+    }
+}
+
 api.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        consecutiveServerErrors = 0;
+        return response;
+    },
     (error) => {
         const isTelegramWebView = window.Telegram?.WebApp !== undefined;
         
@@ -45,15 +58,20 @@ api.interceptors.response.use(
         
         const isAuthCheck = error.config?.url?.includes('/user/me') || 
                            error.config?.url?.includes('/user/check-session');
+
+        const status = error.response?.status;
+        const isServerError = status && status >= 500;
+        const isNetworkOrTimeout = !error.response && (error.code === 'ECONNABORTED' || error.message?.includes('timeout') || error.message === 'Network Error');
+
+        if (isServerError || isNetworkOrTimeout) {
+            consecutiveServerErrors++;
+            if (consecutiveServerErrors >= SERVER_ERROR_THRESHOLD) {
+                redirectToUnavailable();
+            }
+        }
         
         if (!error.response) {
             console.error('❌ Сетевая ошибка:', error.message);
-            if (isTelegramWebView) {
-                console.error('⚠️ Возможные причины в Telegram WebView:');
-                console.error('1. Проверьте подключение к интернету');
-                console.error('2. Проверьте настройки CORS на сервере');
-                console.error('3. Проверьте, что сервер доступен из Telegram WebView');
-            }
             return Promise.reject(error);
         }
         

@@ -3,12 +3,29 @@ import star from '../../assets/star.png';
 import { useNavigate } from 'react-router-dom';
 import arrowRight from '../../assets/arrowRight.png';
 
+const isExternalLink = (url: string) => url.startsWith('http://') || url.startsWith('https://');
+
+const openExternalLink = (url: string) => {
+    if ((window as any).Telegram?.WebApp) {
+        (window as any).Telegram.WebApp.openLink(url, { try_instant_view: false });
+    } else {
+        window.open(url, '_blank');
+    }
+};
+
 export const MiniVideoCard = ({ title, image, link, progress, accessType, onLockedClick, duration, starsRequired }: { title: string, image: string, link: string, progress: number, accessType: string, onLockedClick?: () => void, duration?: number, starsRequired?: number }) => {
     const navigate = useNavigate();
+    const handleFreeClick = () => {
+        if (isExternalLink(link)) {
+            openExternalLink(link);
+        } else {
+            navigate(link);
+        }
+    };
     return (
         <>
         {accessType === 'free' ? (
-            <button onClick={() => navigate(link)} className="rounded-xl bg-[#114E50] w-full h-full flex flex-col">
+            <button onClick={handleFreeClick} className="rounded-xl bg-[#114E50] w-full h-full flex flex-col">
                 <div className="relative h-[98px] sm:h-[142px] lg:h-[197px]">
                     <img src={`${import.meta.env.VITE_API_URL}${image}`} alt={title} className="w-full h-full rounded-lg object-cover" />
                 </div>

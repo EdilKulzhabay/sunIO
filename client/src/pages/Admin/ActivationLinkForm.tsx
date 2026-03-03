@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AdminLayout } from '../../components/Admin/AdminLayout';
-import { MyInput } from '../../components/Admin/MyInput';
 import { MyButton } from '../../components/Admin/MyButton';
 import { ArrowLeft } from 'lucide-react';
 import api from '../../api';
 import { toast } from 'react-toastify';
-import { REDIRECT_TO_PAGE_OPTIONS } from '../../constants/redirectToPageOptions';
+import { RedirectToPageSelector } from '../../components/Admin/RedirectToPageSelector';
 
 const ACTIVATION_TITLES = [
     'Активация тела',
@@ -14,8 +13,6 @@ const ACTIVATION_TITLES = [
     'Активация Рода',
     'Пробуждение Духа',
 ];
-
-const INTERNAL_PAGES = REDIRECT_TO_PAGE_OPTIONS.filter((opt) => opt.value !== '');
 
 export const ActivationLinkForm = () => {
     const { id } = useParams();
@@ -131,57 +128,13 @@ export const ActivationLinkForm = () => {
                             )}
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Тип ссылки</label>
-                            <div className="flex gap-4 mb-3">
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        name="linkType"
-                                        value="external"
-                                        checked={formData.linkType === 'external'}
-                                        onChange={() => setFormData({ ...formData, linkType: 'external', link: '' })}
-                                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                                    />
-                                    <span className="text-sm">Внешняя (URL)</span>
-                                </label>
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        name="linkType"
-                                        value="internal"
-                                        checked={formData.linkType === 'internal'}
-                                        onChange={() => setFormData({ ...formData, linkType: 'internal', link: '' })}
-                                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                                    />
-                                    <span className="text-sm">Внутренняя (страница приложения)</span>
-                                </label>
-                            </div>
-                            {formData.linkType === 'external' ? (
-                                <MyInput
-                                    label="Ссылка"
-                                    type="url"
-                                    value={formData.link}
-                                    onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-                                    placeholder="https://..."
-                                    required
-                                />
-                            ) : (
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Страница приложения</label>
-                                    <select
-                                        value={formData.link}
-                                        onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-                                        className="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
-                                    >
-                                        <option value="">— Выберите страницу —</option>
-                                        {INTERNAL_PAGES.map((opt) => (
-                                            <option key={opt.value} value={opt.value}>{opt.title}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            )}
-                        </div>
+                        <RedirectToPageSelector
+                            value={formData.link}
+                            onChange={(val) => {
+                                const linkType = val.startsWith('http://') || val.startsWith('https://') ? 'external' : 'internal';
+                                setFormData({ ...formData, link: val, linkType });
+                            }}
+                        />
 
                         <div className="flex gap-3 justify-end pt-4">
                             <button

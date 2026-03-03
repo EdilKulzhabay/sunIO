@@ -4,6 +4,7 @@ import api from "../../api";
 import { MiniVideoCard } from "../../components/User/MiniVideoCard";
 import { VideoCard } from "../../components/User/VideoCard";
 import { ClientSubscriptionDynamicModal } from "../../components/User/ClientSubscriptionDynamicModal";
+import { ClientPaidDynamicModal } from "../../components/User/ClientPaidDynamicModal";
 import { ClientPurchaseConfirmModal } from "../../components/User/ClientPurchaseConfirmModal";
 import { ClientInsufficientBonusModal } from "../../components/User/ClientInsufficientBonusModal";
 import inBothDirections from "../../assets/inBothDirections.png";
@@ -22,12 +23,14 @@ export const ClientParablesOfLifeList = () => {
     const cardsContainerRef = useRef<HTMLDivElement>(null);
     const [subscriptionContent, setSubscriptionContent] = useState<string>('');
     const [starsContent, setStarsContent] = useState<string>('');
+    const [paidContent, setPaidContent] = useState<string>('');
     const [content, setContent] = useState<string>('');
     const [accessType, setAccessType] = useState<string>('');
     const [userData, setUserData] = useState<any>(null);
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [progresses, setProgresses] = useState<Record<string, number>>({});
     const [loading, setLoading] = useState(true);
+    const [isPaidModalOpen, setIsPaidModalOpen] = useState(false);
     const [dinamycContent, setDinamycContent] = useState<string>('');
     useEffect(() => {
         const userStr = localStorage.getItem('user');
@@ -75,6 +78,8 @@ export const ClientParablesOfLifeList = () => {
         setSubscriptionContent(responseSubscription.data.data.content);
         const responseStars = await api.get('/api/dynamic-content/name/content-suns');
         setStarsContent(responseStars.data.data.content);
+        const responsePaidContent = await api.get('/api/dynamic-content/name/paid-content');
+        setPaidContent(responsePaidContent.data.data.content);
         const responseDinamycContent = await api.get('/api/dynamic-content/name/parables-of-life-list');
         setDinamycContent(responseDinamycContent.data.data.content);
     };
@@ -130,8 +135,14 @@ export const ClientParablesOfLifeList = () => {
             return;
         }
         setAccessType(at);
-        if (at === 'subscription') setContent(subscriptionContent);
-        setIsModalOpen(true);
+        if (at === 'subscription') {
+            setContent(subscriptionContent);
+            setIsModalOpen(true);
+        }
+        if (at === 'paid') {
+            setContent(paidContent);
+            setIsPaidModalOpen(true);
+        }
     };
 
     const handleLockedClickSubscription = (item: any) => {
@@ -155,8 +166,14 @@ export const ClientParablesOfLifeList = () => {
             return;
         }
         setAccessType(at);
-        if (at === 'subscription') setContent(subscriptionContent);
-        setIsModalOpen(true);
+        if (at === 'subscription') {
+            setContent(subscriptionContent);
+            setIsModalOpen(true);
+        }
+        if (at === 'paid') {
+            setContent(paidContent);
+            setIsPaidModalOpen(true);
+        }
     };
 
     const hasAccessToContent = (contentId: string): boolean => {
@@ -222,6 +239,9 @@ export const ClientParablesOfLifeList = () => {
                 </div>
             </UserLayout>
             <ClientSubscriptionDynamicModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} content={content} accessType={accessType} />
+            {isPaidModalOpen && (
+                <ClientPaidDynamicModal isOpen={isPaidModalOpen} onClose={() => setIsPaidModalOpen(false)} content={content} accessType={accessType} />
+            )}
             {selectedItem && (
                 <>
                     <ClientPurchaseConfirmModal isOpen={isPurchaseModalOpen} onClose={() => { setIsPurchaseModalOpen(false); setSelectedItem(null); }} contentId={selectedItem._id} contentType={CONTENT_TYPE} contentTitle={selectedItem.title} starsRequired={selectedItem.starsRequired || 0} userBonus={userData?.bonus || 0} onPurchaseSuccess={async () => { await fetchUserData(); await fetchItems(); }} />

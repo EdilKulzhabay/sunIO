@@ -493,7 +493,7 @@ export const Main = () => {
                         </Link>
                     </div>
                 </div>
-                <h1 className="mt-1 text-2xl font-bold">Добро пожаловать, {userName ? userName : ""}!</h1>
+                <h1 className="mt-1 text-xl font-bold">Добро пожаловать, {userName ? userName : ""}!</h1>
                 <div className="grid grid-cols-2 gap-3 mt-5">
                     <div id="main-instruction-navigator">
                         <SmallCard title="Навигатор" link="/client/navigator" img={main1} />

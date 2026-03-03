@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 import { Send, Users, MessageSquare, Search, X, Image as ImageIcon, Save, ArrowLeft } from 'lucide-react';
 import { RichTextEditor } from '../../components/Admin/RichTextEditor';
 import { ImageUpload } from '../../components/Admin/ImageUpload';
-import { REDIRECT_TO_PAGE_OPTIONS } from '../../constants/redirectToPageOptions';
+import { RedirectToPageSelector } from '../../components/Admin/RedirectToPageSelector';
 
 interface User {
     _id: string;
@@ -473,20 +473,12 @@ export const BroadcastFormAdmin = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs text-gray-600 mb-1">Страница приложения для перехода</label>
-                                <select
+                                <RedirectToPageSelector
                                     value={buttonPage}
-                                    onChange={(e) => setButtonPage(e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                >
-                                    {REDIRECT_TO_PAGE_OPTIONS.map((opt) => (
-                                        <option key={opt.value || 'empty'} value={opt.value}>
-                                            {opt.title}
-                                        </option>
-                                    ))}
-                                </select>
+                                    onChange={(val) => setButtonPage(val)}
+                                />
                                 <p className="text-xs text-gray-500 mt-2">
-                                    При нажатии на кнопку пользователь откроет приложение сразу на выбранной странице. URL формируется с параметрами <code className="bg-gray-100 px-1 rounded">telegramId</code> и <code className="bg-gray-100 px-1 rounded">profilePhotoUrl</code> для каждого получателя.
+                                    При нажатии на кнопку пользователь откроет приложение сразу на выбранной странице.
                                 </p>
                             </div>
                         </div>

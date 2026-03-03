@@ -353,21 +353,8 @@ export const ClientDiary = () => {
     }
 
     useEffect(() => {
-        if (!selectedDate) {
-            setDiaries(buildDiaryList(allDiaries));
-            return;
-        }
-
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        if (selectedDate <= today && checkDiaryForDate(selectedDate)) {
-            const selectedKey = toLocalDateKey(selectedDate);
-            const filtered = allDiaries.filter((item: any) => toLocalDateKey(item.createdAt) === selectedKey);
-            setDiaries(buildDiaryList(filtered));
-        } else {
-            setDiaries(buildDiaryList(allDiaries));
-        }
-    }, [selectedDate, allDiaries]);
+        setDiaries(buildDiaryList(allDiaries));
+    }, [allDiaries]);
 
     if (loading) {
         return (
@@ -449,10 +436,35 @@ export const ClientDiary = () => {
                                         className="shrink-0 cursor-pointer flex flex-col items-center justify-center"
                                         style={{ width: `${widthPerDay}px`, minWidth: `${widthPerDay}px` }}
                                         onClick={() => {
-                                            if (selectedDate?.toISOString().split('T')[0] === date.toISOString().split('T')[0]) {
+                                            const dateKey = toLocalDateKey(date);
+                                            const todayKey = toLocalDateKey(new Date());
+
+                                            if (selectedDate && toLocalDateKey(selectedDate) === dateKey) {
                                                 setSelectedDate(null);
-                                            } else {
-                                                setSelectedDate(date);
+                                                return;
+                                            }
+
+                                            setSelectedDate(date);
+
+                                            if (dateKey === todayKey) {
+                                                setIsOpenToday(true);
+                                                setTimeout(() => {
+                                                    document.getElementById('diary-today')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                                }, 100);
+                                                return;
+                                            }
+
+                                            const match = allDiaries.find((d: any) => toLocalDateKey(d.createdAt) === dateKey);
+                                            if (match) {
+                                                setDiaries((prev: any[]) =>
+                                                    prev.map((d: any) => ({
+                                                        ...d,
+                                                        isOpen: d._id === match._id ? true : d.isOpen,
+                                                    }))
+                                                );
+                                                setTimeout(() => {
+                                                    document.getElementById(`diary-${match._id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                                }, 100);
                                             }
                                         }}
                                         key={date.toISOString().split('T')[0]}
@@ -477,7 +489,7 @@ export const ClientDiary = () => {
                         </div>
                     </div>
 
-                    <div className="mt-4 bg-[#114E50] p-4 rounded-lg">
+                    <div id="diary-today" className="mt-4 bg-[#114E50] p-4 rounded-lg">
                         <div className="flex items-center justify-between">
                             <h2 className="text-xl font-medium">Сегодня</h2>
                             <button onClick={handleToggleDiaryToday}>
@@ -568,7 +580,7 @@ export const ClientDiary = () => {
                     {diaries.length > 0 && (
                         <div className="mt-3">
                             {diaries.map((diary: any) => (
-                                <div key={diary._id} className="mt-4 bg-[#114E50] p-4 rounded-lg">
+                                <div key={diary._id} id={`diary-${diary._id}`} className="mt-4 bg-[#114E50] p-4 rounded-lg">
                                     <div className="flex items-center justify-between">
                                         <h2 className="text-xl font-medium">
                                             {diary.createdAt.split('T')[0] === new Date().toISOString().split('T')[0] ? 'Сегодня' : new Date(diary.createdAt).toLocaleDateString('ru-RU', { day: '2-digit', month: 'long', year: 'numeric' })}

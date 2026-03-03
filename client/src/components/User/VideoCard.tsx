@@ -4,11 +4,25 @@ import arrowRight from '../../assets/arrowRight.png';
 import star from '../../assets/star.png';
 import needMoney from '../../assets/needMoney.png';
 
+const isExternalLink = (url: string) => url.startsWith('http://') || url.startsWith('https://');
+
+const openExternalLink = (url: string) => {
+    if ((window as any).Telegram?.WebApp) {
+        (window as any).Telegram.WebApp.openLink(url, { try_instant_view: false });
+    } else {
+        window.open(url, '_blank');
+    }
+};
+
 export const VideoCard = ({ title, description, image, link, accessType, progress, onLockedClick, starsRequired, duration }: { title: string, description: string, image: string, link: string, accessType: string, progress: number, onLockedClick?: () => void, starsRequired?: number, duration?: number }) => {
     const navigate = useNavigate();
     const handleClick = () => {
         if (accessType === 'free') {
-            navigate(link);
+            if (isExternalLink(link)) {
+                openExternalLink(link);
+            } else {
+                navigate(link);
+            }
         } else {
             onLockedClick?.();
         }

@@ -6,6 +6,16 @@ import api from "../../api";
 import taskInActiveSun from "../../assets/taskInActiveSun.png";
 import taskActiveSun from "../../assets/taskActiveSun.png";
 
+const isExternalLink = (url: string) => url.startsWith('http://') || url.startsWith('https://');
+
+const openExternalLink = (url: string) => {
+    if ((window as any).Telegram?.WebApp) {
+        (window as any).Telegram.WebApp.openLink(url, { try_instant_view: false });
+    } else {
+        window.open(url, '_blank');
+    }
+};
+
 export const ClientTasks = () => {
     const navigate = useNavigate();
     const [content, setContent] = useState<any>(null);
@@ -167,79 +177,27 @@ export const ClientTasks = () => {
                     <p dangerouslySetInnerHTML={{ __html: content?.content }}>
                     </p>
 
-                    <div className="mt-4 grid grid-cols-4 justify-between items-center w-full">
-                        <button onClick={() => {
-                            if (activationLinks.find((link: any) => link.title === 'Активация тела')) {
-                                const link = activationLinks.find((link: any) => link.title === 'Активация тела')?.link;
-                                if (link.linkType === 'internal') {
-                                    navigate(link);
+                    <div className="mt-4 grid grid-cols-4 justify-between items-center w-full -ml-1">
+                        {[
+                            { title: 'Активация тела', label: 'Активация \n тела', active: userData?.bodyActivation },
+                            { title: 'Активация здоровья', label: 'Активация \n здоровья', active: userData?.heartActivation },
+                            { title: 'Активация Рода', label: 'Активация \n Рода', active: userData?.healingFamily },
+                            { title: 'Пробуждение Духа', label: 'Пробуждение \n Духа', active: userData?.awakeningSpirit },
+                        ].map((item) => (
+                            <button key={item.title} onClick={() => {
+                                const found = activationLinks.find((l: any) => l.title === item.title);
+                                if (found?.link) {
+                                    if (isExternalLink(found.link)) {
+                                        openExternalLink(found.link);
+                                    } else {
+                                        navigate(found.link);
+                                    }
                                 }
-                                else {
-                                    window.location.href = link;
-                                }
-                            }
-                        }} className="col-span-1 flex flex-col items-center justify-center">
-                            {userData?.bodyActivation ? (
-                                <img src={taskActiveSun} alt="task active sun" className="w-10 h-10" />
-                            ) : (
-                                <img src={taskInActiveSun} alt="task in active sun" className="w-10 h-10" />
-                            )}
-                            <p className="mt-1 text-center text-white whitespace-pre-line">Активация <br /> тела</p>
-                        </button>
-                        <button onClick={() => {
-                            if (activationLinks.find((link: any) => link.title === 'Активация здоровья')) {
-                                const link = activationLinks.find((link: any) => link.title === 'Активация здоровья')?.link;
-                                if (link.linkType === 'internal') {
-                                    navigate(link);
-                                }
-                                else {
-                                    window.location.href = link;
-                                }
-                            }
-                        }} className="col-span-1 flex flex-col items-center justify-center">
-                            {userData?.heartActivation ? (
-                                <img src={taskActiveSun} alt="task active sun" className="w-10 h-10" />
-                            ) : (
-                                <img src={taskInActiveSun} alt="task in active sun" className="w-10 h-10" />
-                            )}
-                            <p className="mt-1 text-center text-white whitespace-pre-line">Активация <br /> здоровья</p>
-                        </button>
-                        <button onClick={() => {
-                            if (activationLinks.find((link: any) => link.title === 'Активация Рода')) {
-                                const link = activationLinks.find((link: any) => link.title === 'Активация Рода')?.link;
-                                if (link.linkType === 'internal') {
-                                    navigate(link);
-                                }
-                                else {
-                                    window.location.href = link;
-                                }
-                            }
-                        }} className="col-span-1 flex flex-col items-center justify-center">
-                            {userData?.healingFamily ? (
-                                <img src={taskActiveSun} alt="task active sun" className="w-10 h-10" />
-                            ) : (
-                                <img src={taskInActiveSun} alt="task in active sun" className="w-10 h-10" />
-                            )}
-                            <p className="mt-1 text-center text-white whitespace-pre-line">Активация <br /> Рода</p>
-                        </button>
-                        <button onClick={() => {
-                            if (activationLinks.find((link: any) => link.title === 'Пробуждение Духа')) {
-                                const link = activationLinks.find((link: any) => link.title === 'Пробуждение Духа')?.link;
-                                if (link.linkType === 'internal') {
-                                    navigate(link);
-                                }
-                                else {
-                                    window.location.href = link;
-                                }
-                            }
-                        }} className="col-span-1 flex flex-col items-center justify-center">
-                            {userData?.awakeningSpirit ? (
-                                <img src={taskActiveSun} alt="task active sun" className="w-10 h-10" />
-                            ) : (
-                                <img src={taskInActiveSun} alt="task in active sun" className="w-10 h-10" />
-                            )}
-                            <p className="mt-1 text-center text-white whitespace-pre-line">Пробуждение <br /> Духа</p>
-                        </button>
+                            }} className="col-span-1 flex flex-col items-center justify-center">
+                                <img src={item.active ? taskActiveSun : taskInActiveSun} alt={item.title} className="w-10 h-10" />
+                                <p className="mt-1 text-center text-white whitespace-pre-line">{item.label}</p>
+                            </button>
+                        ))}
                     </div>
 
                     <div className="mt-6">

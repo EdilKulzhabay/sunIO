@@ -8,7 +8,7 @@ import { ImageUpload } from '../../components/Admin/ImageUpload';
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import api from '../../api';
 import { toast } from 'react-toastify';
-import { REDIRECT_TO_PAGE_OPTIONS } from '../../constants/redirectToPageOptions';
+import { RedirectToPageSelector } from '../../components/Admin/RedirectToPageSelector';
 import { ContentLinkButtonEditor } from '../../components/Admin/ContentLinkButtonEditor';
 import type { LinkButtonValue } from '../../components/Admin/ContentLinkButtonEditor';
 
@@ -103,15 +103,10 @@ export const SpiritForgeForm = () => {
                         <div className="flex flex-col gap-2"><label className="text-sm font-medium">Тип доступа</label><select value={formData.accessType} onChange={(e) => setFormData({ ...formData, accessType: e.target.value })} className="w-full p-2 rounded-md border border-gray-300"><option value="free">Бесплатно</option><option value="paid">Платно</option><option value="subscription">Подписка</option><option value="stars">Баллы</option></select></div>
                         {formData.accessType === 'stars' && <MyInput label="Стоимость в баллах" type="text" value={formData.starsRequired.toString()} onChange={(e) => setFormData({ ...formData, starsRequired: parseInt(e.target.value) || 0 })} placeholder="0" />}
                         <div className="grid grid-cols-2 gap-4"><MyInput label="Порядок" type="text" value={formData.order.toString()} onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })} placeholder="0" /><div className="flex flex-col gap-2"><label className="text-sm font-medium">Расположение</label><select value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value as FormData['location'] })} className="w-full p-2 rounded-md border border-gray-300"><option value="top">Сверху</option><option value="bottom">Снизу</option></select></div></div>
-                        <div className="flex flex-col gap-2">
-                            <label className="text-sm font-medium">Ссылка перехода</label>
-                            <select value={formData.redirectToPage} onChange={(e) => setFormData({ ...formData, redirectToPage: e.target.value })} className="w-full p-2 rounded-md border border-gray-300">
-                                {REDIRECT_TO_PAGE_OPTIONS.map((opt) => (
-                                    <option key={opt.value || 'empty'} value={opt.value}>{opt.title}</option>
-                                ))}
-                            </select>
-                            <p className="text-xs text-gray-500">Если выбрана страница — при нажатии на карточку откроется она вместо страницы контента</p>
-                        </div>
+                        <RedirectToPageSelector
+                            value={formData.redirectToPage}
+                            onChange={(val) => setFormData({ ...formData, redirectToPage: val })}
+                        />
                         <div className="-mt-2"><div className="flex items-center gap-3 pt-6"><input type="checkbox" checked={formData.allowRepeatBonus} onChange={(e) => setFormData({ ...formData, allowRepeatBonus: e.target.checked })} className="h-4 w-4 text-blue-600 border-gray-300 rounded" /><span className="text-sm">Добавление бонусов за повторные просмотры</span></div></div>
                         <div className="flex items-center gap-3 pt-2"><input type="checkbox" checked={formData.visibility} onChange={(e) => setFormData({ ...formData, visibility: e.target.checked })} className="h-4 w-4 text-blue-600 border-gray-300 rounded" /><span className="text-sm">Видимость на сайте</span></div>
                     </div>

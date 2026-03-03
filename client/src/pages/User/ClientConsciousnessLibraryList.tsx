@@ -6,6 +6,7 @@ import { VideoCard } from "../../components/User/VideoCard";
 import { ClientSubscriptionDynamicModal } from "../../components/User/ClientSubscriptionDynamicModal";
 import { ClientPurchaseConfirmModal } from "../../components/User/ClientPurchaseConfirmModal";
 import { ClientInsufficientBonusModal } from "../../components/User/ClientInsufficientBonusModal";
+import { ClientPaidDynamicModal } from "../../components/User/ClientPaidDynamicModal";
 import inBothDirections from "../../assets/inBothDirections.png";
 import { useAutoScrollPreview } from "../../hooks/useAutoScrollPreview";
 
@@ -16,6 +17,7 @@ export const ClientConsciousnessLibraryList = () => {
     const [isInsufficientBonusModalOpen, setIsInsufficientBonusModalOpen] = useState(false);
     const cardsContainerRef = useRef<HTMLDivElement>(null);
     const [subscriptionContent, setSubscriptionContent] = useState<string>('');
+    const [paidContent, setPaidContent] = useState<string>('');
     const [starsContent, setStarsContent] = useState<string>('');
     const [content, setContent] = useState<string>('');
     const [accessType, setAccessType] = useState<string>('');
@@ -23,6 +25,7 @@ export const ClientConsciousnessLibraryList = () => {
     const [selectedConsciousnessLibrary, setSelectedConsciousnessLibrary] = useState<any>(null);
     const [progresses, setProgresses] = useState<Record<string, number>>({});
     const [loading, setLoading] = useState(true);
+    const [isPaidModalOpen, setIsPaidModalOpen] = useState(false);
 
     useEffect(() => {
         const userStr = localStorage.getItem('user');
@@ -71,6 +74,8 @@ export const ClientConsciousnessLibraryList = () => {
         setSubscriptionContent(responseSubscription.data.data.content);
         const responseStars = await api.get('/api/dynamic-content/name/content-suns');
         setStarsContent(responseStars.data.data.content);
+        const responsePaidContent = await api.get('/api/dynamic-content/name/paid-content');
+        setPaidContent(responsePaidContent.data.data.content);
     }
 
     const fetchConsciousnessLibraries = async () => {
@@ -109,6 +114,8 @@ export const ClientConsciousnessLibraryList = () => {
     }
 
     const handleLockedConsciousnessLibraryClick = (consciousnessLibrary: any) => {
+        console.log(consciousnessLibrary, "Asdasdasdasd");
+
         const accessType = consciousnessLibrary.accessType;
         
         if (hasAccessToContent(consciousnessLibrary._id)) {
@@ -138,8 +145,13 @@ export const ClientConsciousnessLibraryList = () => {
         setAccessType(accessType);
         if (accessType === 'subscription') {
             setContent(subscriptionContent);
+            setIsModalOpen(true);
         }
-        setIsModalOpen(true);
+
+        if (accessType === 'paid') {
+            setContent(paidContent);
+            setIsPaidModalOpen(true);
+        }
     }
     
     const handleLockedConsciousnessLibraryClickSubscription = (consciousnessLibrary: any) => {
@@ -172,8 +184,12 @@ export const ClientConsciousnessLibraryList = () => {
         setAccessType(accessType);
         if (accessType === 'subscription') {
             setContent(subscriptionContent);
+            setIsModalOpen(true);
         }
-        setIsModalOpen(true);
+        if (accessType === 'paid') {
+            setContent(paidContent);
+            setIsPaidModalOpen(true);
+        }
     }
 
     const handleCloseModal = () => {
@@ -188,6 +204,10 @@ export const ClientConsciousnessLibraryList = () => {
     const handleCloseInsufficientBonusModal = () => {
         setIsInsufficientBonusModalOpen(false);
         setSelectedConsciousnessLibrary(null);
+    }
+
+    const handleClosePaidModal = () => {
+        setIsPaidModalOpen(false);
     }
 
     const handlePurchaseSuccess = async () => {
@@ -316,6 +336,15 @@ export const ClientConsciousnessLibraryList = () => {
                 content={content}
                 accessType={accessType}
             />
+
+            {isPaidModalOpen && (
+                <ClientPaidDynamicModal
+                    isOpen={isPaidModalOpen}
+                    onClose={handleClosePaidModal}
+                    content={content}
+                    accessType={accessType}
+                />
+            )}
 
             {selectedConsciousnessLibrary && (
                 <ClientPurchaseConfirmModal

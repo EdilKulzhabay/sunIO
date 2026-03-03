@@ -4,6 +4,7 @@ import api from "../../api";
 import { MiniVideoCard } from "../../components/User/MiniVideoCard";
 import { VideoCard } from "../../components/User/VideoCard";
 import { ClientSubscriptionDynamicModal } from "../../components/User/ClientSubscriptionDynamicModal";
+import { ClientPaidDynamicModal } from "../../components/User/ClientPaidDynamicModal";
 import { ClientPurchaseConfirmModal } from "../../components/User/ClientPurchaseConfirmModal";
 import { ClientInsufficientBonusModal } from "../../components/User/ClientInsufficientBonusModal";
 import inBothDirections from "../../assets/inBothDirections.png";
@@ -17,12 +18,14 @@ export const ClientPracticesList = () => {
     const cardsContainerRef = useRef<HTMLDivElement>(null);
     const [subscriptionContent, setSubscriptionContent] = useState<string>('');
     const [starsContent, setStarsContent] = useState<string>('');
+    const [paidContent, setPaidContent] = useState<string>('');
     const [content, setContent] = useState<string>('');
     const [accessType, setAccessType] = useState<string>('');
     const [userData, setUserData] = useState<any>(null);
     const [selectedPractice, setSelectedPractice] = useState<any>(null);
     const [progresses, setProgresses] = useState<Record<string, number>>({});
     const [loading, setLoading] = useState(true);
+    const [isPaidModalOpen, setIsPaidModalOpen] = useState(false);
 
     useEffect(() => {
         // Проверка на блокировку пользователя
@@ -73,6 +76,8 @@ export const ClientPracticesList = () => {
         setSubscriptionContent(responseSubscription.data.data.content);
         const responseStars = await api.get('/api/dynamic-content/name/content-suns');
         setStarsContent(responseStars.data.data.content);
+        const responsePaidContent = await api.get('/api/dynamic-content/name/paid-content');
+        setPaidContent(responsePaidContent.data.data.content);
     }
 
     const fetchPractices = async () => {
@@ -149,8 +154,12 @@ export const ClientPracticesList = () => {
         setAccessType(accessType);
         if (accessType === 'subscription') {
             setContent(subscriptionContent);
+            setIsModalOpen(true);
         }
-        setIsModalOpen(true);
+        if (accessType === 'paid') {
+            setContent(paidContent);
+            setIsPaidModalOpen(true);
+        }
     }
     
     const handleLockedPracticeClickSubscription = (practice: any) => {
@@ -192,8 +201,12 @@ export const ClientPracticesList = () => {
         setAccessType(accessType);
         if (accessType === 'subscription') {
             setContent(subscriptionContent);
+            setIsModalOpen(true);
         }
-        setIsModalOpen(true);
+        if (accessType === 'paid') {
+            setContent(paidContent);
+            setIsPaidModalOpen(true);
+        }
     }
 
     const handleCloseModal = () => {
@@ -208,6 +221,10 @@ export const ClientPracticesList = () => {
     const handleCloseInsufficientBonusModal = () => {
         setIsInsufficientBonusModalOpen(false);
         setSelectedPractice(null);
+    }
+
+    const handleClosePaidModal = () => {
+        setIsPaidModalOpen(false);
     }
 
     const handlePurchaseSuccess = async () => {
@@ -355,6 +372,15 @@ export const ClientPracticesList = () => {
                 content={content}
                 accessType={accessType}
             />
+
+            {isPaidModalOpen && (
+                <ClientPaidDynamicModal
+                    isOpen={isPaidModalOpen}
+                    onClose={handleClosePaidModal}
+                    content={content}
+                    accessType={accessType}
+                />
+            )}
 
             {/* Модальное окно подтверждения покупки */}
             {selectedPractice && (

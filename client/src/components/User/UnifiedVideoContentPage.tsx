@@ -452,18 +452,24 @@ export const UnifiedVideoContentPage = ({
                         const lb = item?.linkButton;
                         const hasLinkButton = lb?.linkButtonText && lb?.linkButtonLink;
 
+                        const openExternalLink = (url: string) => {
+                            if ((window as any).Telegram?.WebApp) {
+                                (window as any).Telegram.WebApp.openLink(url, { try_instant_view: false });
+                            } else {
+                                window.open(url, '_blank');
+                            }
+                        };
+
                         const renderLinkButtonBlock = () =>
                             hasLinkButton ? (
                                 <div className="mt-4">
                                     {lb.linkButtonType === "external" ? (
-                                        <a
-                                            href={lb.linkButtonLink}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
+                                        <button
+                                            onClick={() => openExternalLink(lb.linkButtonLink)}
                                             className="block w-full text-center py-2 bg-[#C4841D] text-white font-medium rounded-full hover:cursor-pointer transition-colors"
                                         >
                                             {lb.linkButtonText}
-                                        </a>
+                                        </button>
                                     ) : (
                                         <Link
                                             to={lb.linkButtonLink}

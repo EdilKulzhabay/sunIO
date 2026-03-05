@@ -1114,6 +1114,90 @@ export const deleteUser = async (req, res) => {
     }
 };
 
+export const bulkDeleteUsers = async (req, res) => {
+    try {
+        const admin = req.user;
+        const { userIds } = req.body;
+
+        if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+            return res.status(400).json({ success: false, message: "Не указаны пользователи для удаления" });
+        }
+
+        const result = await User.deleteMany({ _id: { $in: userIds }, role: "user" });
+
+        if (admin) {
+            await addAdminAction(admin._id, `Массовое удаление: удалено ${result.deletedCount} пользователей`);
+        }
+
+        res.json({ success: true, deletedCount: result.deletedCount });
+    } catch (error) {
+        console.log("Ошибка в bulkDeleteUsers:", error);
+        res.status(500).json({ success: false, message: "Ошибка массового удаления" });
+    }
+};
+
+export const bulkDeleteByFilter = async (req, res) => {
+    try {
+        const admin = req.user;
+        const { statusFilter, lastActiveFilter, searchQuery } = req.body;
+
+        const filter = { role: "user" };
+
+        if (statusFilter && statusFilter !== 'all') {
+            if (statusFilter === 'blocked') {
+                filter.isBlocked = true;
+            } else {
+                filter.isBlocked = { $ne: true };
+                filter.status = statusFilter;
+            }
+        }
+
+        if (lastActiveFilter === 'active' || lastActiveFilter === 'inactive') {
+            const thresholdDate = new Date(Date.now() - 15 * 24 * 60 * 60 * 1000);
+            if (lastActiveFilter === 'active') {
+                filter.lastActiveDate = { $gte: thresholdDate };
+            } else {
+                filter.$or = [
+                    { lastActiveDate: { $lt: thresholdDate } },
+                    { lastActiveDate: { $eq: null } },
+                ];
+            }
+        }
+
+        if (searchQuery && searchQuery.trim()) {
+            const query = searchQuery.trim();
+            const searchOr = [
+                { fullName: { $regex: query, $options: 'i' } },
+                { telegramUserName: { $regex: query, $options: 'i' } },
+                { phone: { $regex: query, $options: 'i' } },
+                { mail: { $regex: query, $options: 'i' } }
+            ];
+            if (filter.$or) {
+                filter.$and = [{ $or: filter.$or }, { $or: searchOr }];
+                delete filter.$or;
+            } else {
+                filter.$or = searchOr;
+            }
+        }
+
+        const count = await User.countDocuments(filter);
+        if (count === 0) {
+            return res.json({ success: true, deletedCount: 0 });
+        }
+
+        const result = await User.deleteMany(filter);
+
+        if (admin) {
+            await addAdminAction(admin._id, `Удаление по фильтру (status=${statusFilter || 'all'}): удалено ${result.deletedCount} пользователей`);
+        }
+
+        res.json({ success: true, deletedCount: result.deletedCount });
+    } catch (error) {
+        console.log("Ошибка в bulkDeleteByFilter:", error);
+        res.status(500).json({ success: false, message: "Ошибка удаления по фильтру" });
+    }
+};
+
 // Обновить профиль текущего пользователя
 export const updateProfile = async (req, res) => {
     try {

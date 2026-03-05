@@ -177,7 +177,7 @@ export const ClientTasks = () => {
                     <p dangerouslySetInnerHTML={{ __html: content?.content }}>
                     </p>
 
-                    <div className="mt-4 grid grid-cols-4 justify-between items-center w-full -ml-1">
+                    <div className="mt-4 grid grid-cols-4 justify-between items-center w-full -ml-3">
                         {[
                             { title: 'Активация тела', label: 'Активация \n тела', active: userData?.bodyActivation },
                             { title: 'Активация здоровья', label: 'Активация \n здоровья', active: userData?.heartActivation },

@@ -11,17 +11,51 @@ interface AdminTableProps {
     data: any[];
     onEdit: (item: any) => void;
     onDelete: (item: any) => void;
+    selectable?: boolean;
+    selectedIds?: Set<string>;
+    onSelectionChange?: (ids: Set<string>) => void;
 }
 
-export const AdminTable = ({ columns, data, onEdit, onDelete }: AdminTableProps) => {
-    // Защита от undefined
+export const AdminTable = ({ columns, data, onEdit, onDelete, selectable, selectedIds, onSelectionChange }: AdminTableProps) => {
     const safeData = data || [];
+
+    const allSelected = safeData.length > 0 && selectedIds ? safeData.every((row) => selectedIds.has(row._id)) : false;
+
+    const toggleAll = () => {
+        if (!onSelectionChange) return;
+        if (allSelected) {
+            onSelectionChange(new Set());
+        } else {
+            onSelectionChange(new Set(safeData.map((row) => row._id)));
+        }
+    };
+
+    const toggleOne = (id: string) => {
+        if (!onSelectionChange || !selectedIds) return;
+        const next = new Set(selectedIds);
+        if (next.has(id)) {
+            next.delete(id);
+        } else {
+            next.add(id);
+        }
+        onSelectionChange(next);
+    };
     
     return (
         <div className="overflow-x-auto bg-white rounded-lg shadow">
             <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                     <tr>
+                        {selectable && (
+                            <th className="px-3 py-3 w-10">
+                                <input
+                                    type="checkbox"
+                                    checked={allSelected}
+                                    onChange={toggleAll}
+                                    className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                                />
+                            </th>
+                        )}
                         {columns.map((column) => (
                             <th
                                 key={column.key}
@@ -39,7 +73,7 @@ export const AdminTable = ({ columns, data, onEdit, onDelete }: AdminTableProps)
                     {safeData.length === 0 ? (
                         <tr>
                             <td
-                                colSpan={columns.length + 1}
+                                colSpan={columns.length + 1 + (selectable ? 1 : 0)}
                                 className="px-6 py-4 text-center text-gray-500"
                             >
                                 Нет данных
@@ -47,7 +81,17 @@ export const AdminTable = ({ columns, data, onEdit, onDelete }: AdminTableProps)
                         </tr>
                     ) : (
                         safeData.map((row, index) => (
-                            <tr key={row._id || index} className="hover:bg-gray-50">
+                            <tr key={row._id || index} className={`hover:bg-gray-50 ${selectable && selectedIds?.has(row._id) ? 'bg-blue-50' : ''}`}>
+                                {selectable && (
+                                    <td className="px-3 py-4 w-10">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedIds?.has(row._id) || false}
+                                            onChange={() => toggleOne(row._id)}
+                                            className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                                        />
+                                    </td>
+                                )}
                                 {columns.map((column) => (
                                     <td key={column.key} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {column.render
@@ -79,4 +123,3 @@ export const AdminTable = ({ columns, data, onEdit, onDelete }: AdminTableProps)
         </div>
     );
 };
-

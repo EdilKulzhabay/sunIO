@@ -55,9 +55,8 @@ export const getFilteredUsers = async (req, res) => {
 export const createModalNotification = async (req, res) => {
     try {
         const user = req.user;
-        const { modalTitle, modalDescription, modalButtonText, modalButtonLink, userIds, status } = req.body;
+        const { modalTitle, modalDescription, modalButtonText, modalButtonLink, showUpTo, userIds, status } = req.body;
 
-        // Валидация обязательных полей
         if (!modalTitle || !modalDescription || !modalButtonText) {
             return res.status(400).json({
                 success: false,
@@ -65,12 +64,12 @@ export const createModalNotification = async (req, res) => {
             });
         }
 
-        // Формируем объект уведомления
         const notification = {
             modalTitle,
             modalDescription,
             modalButtonText,
             modalButtonLink: modalButtonLink || undefined,
+            showUpTo: showUpTo ? new Date(showUpTo) : null,
         };
 
         let filter = {};
@@ -183,9 +182,25 @@ export const getUserModalNotifications = async (req, res) => {
 
         await User.findByIdAndUpdate(user._id, { lastActiveDate: new Date() });
 
+        const now = new Date();
+        const expired = user.modalNotifications.filter(
+            (n) => n.showUpTo && new Date(n.showUpTo) < now
+        );
+
+        if (expired.length > 0) {
+            const expiredIds = expired.map((n) => n._id);
+            await User.findByIdAndUpdate(user._id, {
+                $pull: { modalNotifications: { _id: { $in: expiredIds } } },
+            });
+        }
+
+        const active = user.modalNotifications.filter(
+            (n) => !n.showUpTo || new Date(n.showUpTo) >= now
+        );
+
         res.json({
             success: true,
-            notifications: user.modalNotifications || [],
+            notifications: active,
         });
     } catch (error) {
         console.log("Ошибка в getUserModalNotifications:", error);

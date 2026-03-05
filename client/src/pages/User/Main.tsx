@@ -71,10 +71,12 @@ const SmallCard = ({ title, link, img }: { title: string, link: string, img: str
 // }
 
 interface ModalNotification {
+    _id: string;
     modalTitle: string;
     modalDescription: string;
     modalButtonText: string;
     modalButtonLink?: string;
+    showUpTo?: string;
 }
 
 export const Main = () => {

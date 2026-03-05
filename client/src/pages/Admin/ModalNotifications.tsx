@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { AdminLayout } from '../../components/Admin/AdminLayout';
 import api from '../../api';
 import { toast } from 'react-toastify';
-import { Send, Users, Search, X, MessageSquare } from 'lucide-react';
+import { Send, Users, Search, X, MessageSquare, Clock } from 'lucide-react';
 import { RichTextEditor } from '../../components/Admin/RichTextEditor';
+import { RedirectToPageSelector } from '../../components/Admin/RedirectToPageSelector';
 
 interface User {
     _id: string;
@@ -21,6 +22,7 @@ export const ModalNotificationsAdmin = () => {
     const [modalDescription, setModalDescription] = useState('');
     const [modalButtonText, setModalButtonText] = useState('');
     const [modalButtonLink, setModalButtonLink] = useState('');
+    const [showUpTo, setShowUpTo] = useState('');
     const [status, setStatus] = useState('all');
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(false);
@@ -31,13 +33,6 @@ export const ModalNotificationsAdmin = () => {
     const [selectedUsersData, setSelectedUsersData] = useState<Map<string, User>>(new Map());
     const [lastCount, setLastCount] = useState<number | null>(null);
     
-    // Состояния для контентов
-    const [horoscopes, setHoroscopes] = useState<any[]>([]);
-    const [transits, setTransits] = useState<any[]>([]);
-    const [practices, setPractices] = useState<any[]>([]);
-    const [contentItems, setContentItems] = useState<any[]>([]);
-    const [selectedContentType, setSelectedContentType] = useState<string | null>(null);
-    const [loadingContent, setLoadingContent] = useState(false);
 
     const fetchUserCount = async () => {
         try {
@@ -148,6 +143,7 @@ export const ModalNotificationsAdmin = () => {
                     modalDescription,
                     modalButtonText,
                     modalButtonLink: modalButtonLink.trim() || undefined,
+                    showUpTo: showUpTo || undefined,
                     userIds: Array.from(selectedUsers),
                 });
                 
@@ -160,6 +156,7 @@ export const ModalNotificationsAdmin = () => {
                     setModalDescription('');
                     setModalButtonText('');
                     setModalButtonLink('');
+                    setShowUpTo('');
                     setSelectedUsers(new Set());
                     setSelectedUsersData(new Map());
                 } else {
@@ -196,6 +193,7 @@ export const ModalNotificationsAdmin = () => {
                 modalDescription,
                 modalButtonText,
                 modalButtonLink: modalButtonLink.trim() || undefined,
+                showUpTo: showUpTo || undefined,
                 status: status === 'all' ? undefined : status,
             });
             
@@ -208,6 +206,7 @@ export const ModalNotificationsAdmin = () => {
                 setModalDescription('');
                 setModalButtonText('');
                 setModalButtonLink('');
+                setShowUpTo('');
             } else {
                 toast.error(response.data.message || 'Ошибка создания уведомления');
             }
@@ -244,102 +243,6 @@ export const ModalNotificationsAdmin = () => {
         }
     };
 
-    // Функции загрузки контентов
-    const fetchHoroscopes = async () => {
-        setLoadingContent(true);
-        try {
-            const response = await api.get('/api/horoscope');
-            const data = response.data?.success ? response.data.data : response.data?.data || response.data || [];
-            setHoroscopes(Array.isArray(data) ? data : []);
-        } catch (error) {
-            toast.error('Ошибка загрузки гороскопов');
-            setHoroscopes([]);
-        } finally {
-            setLoadingContent(false);
-        }
-    };
-
-    const fetchTransits = async () => {
-        setLoadingContent(true);
-        try {
-            const response = await api.get('/api/transit');
-            const data = response.data?.success ? response.data.data : response.data?.data || response.data || [];
-            setTransits(Array.isArray(data) ? data : []);
-        } catch (error) {
-            toast.error('Ошибка загрузки транзитов');
-            setTransits([]);
-        } finally {
-            setLoadingContent(false);
-        }
-    };
-
-    const fetchPractices = async () => {
-        setLoadingContent(true);
-        try {
-            const response = await api.get('/api/practice');
-            const data = response.data?.success ? response.data.data : response.data?.data || response.data || [];
-            setPractices(Array.isArray(data) ? data : []);
-        } catch (error) {
-            toast.error('Ошибка загрузки практик');
-            setPractices([]);
-        } finally {
-            setLoadingContent(false);
-        }
-    };
-
-    const fetchContentByType = async (apiPath: string) => {
-        setLoadingContent(true);
-        try {
-            const url = apiPath.includes('?') ? `${apiPath}&admin=1` : `${apiPath}?admin=1`;
-            const response = await api.get(url);
-            const data = response.data?.success ? response.data.data : response.data?.data || response.data || [];
-            setContentItems(Array.isArray(data) ? data : []);
-        } catch (error) {
-            toast.error('Ошибка загрузки контента');
-            setContentItems([]);
-        } finally {
-            setLoadingContent(false);
-        }
-    };
-
-    // Обработка выбора страницы с контентом
-    const handleContentPageClick = (basePath: string, contentType: string) => {
-        setSelectedContentType(contentType);
-        setModalButtonLink(basePath);
-        
-        switch (contentType) {
-            case 'horoscope':
-                fetchHoroscopes();
-                break;
-            case 'transit':
-                fetchTransits();
-                break;
-            case 'practice':
-                fetchPractices();
-                break;
-            case 'parables-of-life':
-            case 'scientific-discoveries':
-            case 'health-lab':
-            case 'relationship-workshop':
-            case 'spirit-forge':
-            case 'masters-tower':
-            case 'femininity-gazebo':
-            case 'consciousness-library':
-            case 'product-catalog':
-            case 'analysis-health':
-            case 'analysis-relationships':
-            case 'analysis-realization':
-            case 'psychodiagnostics':
-                fetchContentByType(`/api/${contentType}`);
-                break;
-        }
-    };
-
-    // Обработка выбора контента
-    const handleContentSelect = (basePath: string, contentId: string) => {
-        setModalButtonLink(`${basePath}/${contentId}`);
-        setSelectedContentType(null);
-    };
 
     return (
         <AdminLayout>
@@ -571,329 +474,27 @@ export const ModalNotificationsAdmin = () => {
                         />
                     </div>
 
-                    {/* Ссылка кнопки (опционально) */}
+                    <RedirectToPageSelector
+                        value={modalButtonLink}
+                        onChange={(val) => setModalButtonLink(val)}
+                    />
+
+                    {/* Отображать до */}
                     <div>
                         <label className="flex items-center gap-2 text-sm font-medium mb-2">
-                            Ссылка кнопки <span className="text-xs text-gray-500 font-normal">(необязательно)</span>
+                            <Clock size={18} />
+                            Отображать до <span className="text-xs text-gray-500 font-normal">(необязательно)</span>
                         </label>
                         <input
-                            type="text"
-                            value={modalButtonLink}
-                            onChange={(e) => setModalButtonLink(e.target.value)}
-                            placeholder="Например: /client/profile или https://example.com"
+                            type="datetime-local"
+                            value={showUpTo}
+                            onChange={(e) => setShowUpTo(e.target.value)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                         <p className="text-xs text-gray-500 mt-1">
-                            Если указана ссылка, при нажатии на кнопку произойдет переход на эту страницу
+                            Если указана дата, уведомление автоматически удалится после истечения срока. Если не указана — будет отображаться пока пользователь не закроет.
                         </p>
-                        
-                        {/* Список клиентских страниц */}
-                        <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                            <h4 className="text-sm font-semibold text-gray-700 mb-3">Доступные клиентские страницы:</h4>
-                            <div className="space-y-3">
-                                {/* Основные страницы */}
-                                <div>
-                                    <p className="text-xs font-medium text-gray-600 mb-1.5">Основные:</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => { setModalButtonLink('/main'); setSelectedContentType(null); }}
-                                            className="px-2.5 py-1.5 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors flex flex-col items-start"
-                                        >
-                                            <span className="font-medium text-gray-900">Главная страница</span>
-                                            <span className="text-gray-500">/main</span>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => { setModalButtonLink('/about'); setSelectedContentType(null); }}
-                                            className="px-2.5 py-1.5 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors flex flex-col items-start"
-                                        >
-                                            <span className="font-medium text-gray-900">О клубе</span>
-                                            <span className="text-gray-500">/about</span>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => { setModalButtonLink('/client/faq'); setSelectedContentType(null); }}
-                                            className="px-2.5 py-1.5 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors flex flex-col items-start"
-                                        >
-                                            <span className="font-medium text-gray-900">Вопросы-ответы</span>
-                                            <span className="text-gray-500">/client/faq</span>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => { setModalButtonLink('/client/profile'); setSelectedContentType(null); }}
-                                            className="px-2.5 py-1.5 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors flex flex-col items-start"
-                                        >
-                                            <span className="font-medium text-gray-900">Профиль</span>
-                                            <span className="text-gray-500">/client/profile</span>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => { setModalButtonLink('/client/schedule'); setSelectedContentType(null); }}
-                                            className="px-2.5 py-1.5 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors flex flex-col items-start"
-                                        >
-                                            <span className="font-medium text-gray-900">Расписание</span>
-                                            <span className="text-gray-500">/client/schedule</span>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => { setModalButtonLink('/client/diary'); setSelectedContentType(null); }}
-                                            className="px-2.5 py-1.5 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors flex flex-col items-start"
-                                        >
-                                            <span className="font-medium text-gray-900">Дневник</span>
-                                            <span className="text-gray-500">/client/diary</span>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => { setModalButtonLink('/client/contactus'); setSelectedContentType(null); }}
-                                            className="px-2.5 py-1.5 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors flex flex-col items-start"
-                                        >
-                                            <span className="font-medium text-gray-900">Связаться с нами</span>
-                                            <span className="text-gray-500">/client/contactus</span>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => { setModalButtonLink('/client/navigator'); setSelectedContentType(null); }}
-                                            className="px-2.5 py-1.5 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors flex flex-col items-start"
-                                        >
-                                            <span className="font-medium text-gray-900">Навигатор</span>
-                                            <span className="text-gray-500">/client/navigator</span>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => { setModalButtonLink('/client/beggining-journey'); setSelectedContentType(null); }}
-                                            className="px-2.5 py-1.5 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors flex flex-col items-start"
-                                        >
-                                            <span className="font-medium text-gray-900">Начало пути</span>
-                                            <span className="text-gray-500">/client/beggining-journey</span>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => { setModalButtonLink('/client/scientific-discoveries'); setSelectedContentType(null); }}
-                                            className="px-2.5 py-1.5 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors flex flex-col items-start"
-                                        >
-                                            <span className="font-medium text-gray-900">Научные открытия</span>
-                                            <span className="text-gray-500">/client/scientific-discoveries</span>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Практики */}
-                                <div>
-                                    <p className="text-xs font-medium text-gray-600 mb-1.5">Практики:</p>
-                                    <div className="flex flex-wrap gap-2 items-center">
-                                        <button
-                                            type="button"
-                                            onClick={() => { setModalButtonLink('/client/practices'); setSelectedContentType(null); }}
-                                            className="px-2.5 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors"
-                                            title="Список всех практик"
-                                        >
-                                            /client/practices
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => handleContentPageClick('/client/practice', 'practice')}
-                                            className="px-2.5 py-1 text-xs bg-blue-100 border border-blue-300 rounded hover:bg-blue-200 transition-colors"
-                                            title="Выбрать конкретную практику"
-                                        >
-                                            /client/practice/:id
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Притчи о жизни */}
-                                <div>
-                                    <p className="text-xs font-medium text-gray-600 mb-1.5">Притчи о жизни:</p>
-                                    <div className="flex flex-wrap gap-2 items-center">
-                                        <button type="button" onClick={() => { setModalButtonLink('/client/parables-of-life'); setSelectedContentType(null); }} className="px-2.5 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors">/client/parables-of-life</button>
-                                        <button type="button" onClick={() => handleContentPageClick('/client/parables-of-life', 'parables-of-life')} className="px-2.5 py-1 text-xs bg-blue-100 border border-blue-300 rounded hover:bg-blue-200 transition-colors">/client/parables-of-life/:id</button>
-                                    </div>
-                                </div>
-
-                                {/* Научные открытия */}
-                                <div>
-                                    <p className="text-xs font-medium text-gray-600 mb-1.5">Научные открытия:</p>
-                                    <div className="flex flex-wrap gap-2 items-center">
-                                        <button type="button" onClick={() => { setModalButtonLink('/client/scientific-discoveries'); setSelectedContentType(null); }} className="px-2.5 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors">/client/scientific-discoveries</button>
-                                        <button type="button" onClick={() => handleContentPageClick('/client/scientific-discoveries', 'scientific-discoveries')} className="px-2.5 py-1 text-xs bg-blue-100 border border-blue-300 rounded hover:bg-blue-200 transition-colors">/client/scientific-discoveries/:id</button>
-                                    </div>
-                                </div>
-
-                                {/* Лаборатория здоровья */}
-                                <div>
-                                    <p className="text-xs font-medium text-gray-600 mb-1.5">Лаборатория здоровья:</p>
-                                    <div className="flex flex-wrap gap-2 items-center">
-                                        <button type="button" onClick={() => { setModalButtonLink('/client/health-lab'); setSelectedContentType(null); }} className="px-2.5 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors" title="Список">/client/health-lab</button>
-                                        <button type="button" onClick={() => handleContentPageClick('/client/health-lab', 'health-lab')} className="px-2.5 py-1 text-xs bg-blue-100 border border-blue-300 rounded hover:bg-blue-200 transition-colors" title="Выбрать элемент">/client/health-lab/:id</button>
-                                    </div>
-                                </div>
-
-                                {/* Мастерская отношений */}
-                                <div>
-                                    <p className="text-xs font-medium text-gray-600 mb-1.5">Мастерская отношений:</p>
-                                    <div className="flex flex-wrap gap-2 items-center">
-                                        <button type="button" onClick={() => { setModalButtonLink('/client/relationship-workshop'); setSelectedContentType(null); }} className="px-2.5 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors">/client/relationship-workshop</button>
-                                        <button type="button" onClick={() => handleContentPageClick('/client/relationship-workshop', 'relationship-workshop')} className="px-2.5 py-1 text-xs bg-blue-100 border border-blue-300 rounded hover:bg-blue-200 transition-colors">/client/relationship-workshop/:id</button>
-                                    </div>
-                                </div>
-
-                                {/* Кузница Духа */}
-                                <div>
-                                    <p className="text-xs font-medium text-gray-600 mb-1.5">Кузница Духа:</p>
-                                    <div className="flex flex-wrap gap-2 items-center">
-                                        <button type="button" onClick={() => { setModalButtonLink('/client/spirit-forge'); setSelectedContentType(null); }} className="px-2.5 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors">/client/spirit-forge</button>
-                                        <button type="button" onClick={() => handleContentPageClick('/client/spirit-forge', 'spirit-forge')} className="px-2.5 py-1 text-xs bg-blue-100 border border-blue-300 rounded hover:bg-blue-200 transition-colors">/client/spirit-forge/:id</button>
-                                    </div>
-                                </div>
-
-                                {/* Башня мастеров */}
-                                <div>
-                                    <p className="text-xs font-medium text-gray-600 mb-1.5">Башня мастеров:</p>
-                                    <div className="flex flex-wrap gap-2 items-center">
-                                        <button type="button" onClick={() => { setModalButtonLink('/client/masters-tower'); setSelectedContentType(null); }} className="px-2.5 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors">/client/masters-tower</button>
-                                        <button type="button" onClick={() => handleContentPageClick('/client/masters-tower', 'masters-tower')} className="px-2.5 py-1 text-xs bg-blue-100 border border-blue-300 rounded hover:bg-blue-200 transition-colors">/client/masters-tower/:id</button>
-                                    </div>
-                                </div>
-
-                                {/* Беседка женственности */}
-                                <div>
-                                    <p className="text-xs font-medium text-gray-600 mb-1.5">Беседка женственности:</p>
-                                    <div className="flex flex-wrap gap-2 items-center">
-                                        <button type="button" onClick={() => { setModalButtonLink('/client/femininity-gazebo'); setSelectedContentType(null); }} className="px-2.5 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors">/client/femininity-gazebo</button>
-                                        <button type="button" onClick={() => handleContentPageClick('/client/femininity-gazebo', 'femininity-gazebo')} className="px-2.5 py-1 text-xs bg-blue-100 border border-blue-300 rounded hover:bg-blue-200 transition-colors">/client/femininity-gazebo/:id</button>
-                                    </div>
-                                </div>
-
-                                {/* Библиотека сознания */}
-                                <div>
-                                    <p className="text-xs font-medium text-gray-600 mb-1.5">Библиотека сознания:</p>
-                                    <div className="flex flex-wrap gap-2 items-center">
-                                        <button type="button" onClick={() => { setModalButtonLink('/client/consciousness-library'); setSelectedContentType(null); }} className="px-2.5 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors">/client/consciousness-library</button>
-                                        <button type="button" onClick={() => handleContentPageClick('/client/consciousness-library', 'consciousness-library')} className="px-2.5 py-1 text-xs bg-blue-100 border border-blue-300 rounded hover:bg-blue-200 transition-colors">/client/consciousness-library/:id</button>
-                                    </div>
-                                </div>
-
-                                {/* Каталог платных продуктов */}
-                                <div>
-                                    <p className="text-xs font-medium text-gray-600 mb-1.5">Каталог платных продуктов:</p>
-                                    <div className="flex flex-wrap gap-2 items-center">
-                                        <button type="button" onClick={() => { setModalButtonLink('/client/product-catalog'); setSelectedContentType(null); }} className="px-2.5 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors">/client/product-catalog</button>
-                                        <button type="button" onClick={() => handleContentPageClick('/client/product-catalog', 'product-catalog')} className="px-2.5 py-1 text-xs bg-blue-100 border border-blue-300 rounded hover:bg-blue-200 transition-colors">/client/product-catalog/:id</button>
-                                    </div>
-                                </div>
-
-                                {/* Разборы */}
-                                <div>
-                                    <p className="text-xs font-medium text-gray-600 mb-1.5">Разборы:</p>
-                                    <div className="flex flex-wrap gap-2 items-center">
-                                        <button type="button" onClick={() => { setModalButtonLink('/client/analysis-health'); setSelectedContentType(null); }} className="px-2.5 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors">/client/analysis-health</button>
-                                        <button type="button" onClick={() => handleContentPageClick('/client/analysis-health', 'analysis-health')} className="px-2.5 py-1 text-xs bg-blue-100 border border-blue-300 rounded hover:bg-blue-200 transition-colors">/client/analysis-health/:id</button>
-                                        <button type="button" onClick={() => { setModalButtonLink('/client/analysis-relationships'); setSelectedContentType(null); }} className="px-2.5 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors">/client/analysis-relationships</button>
-                                        <button type="button" onClick={() => handleContentPageClick('/client/analysis-relationships', 'analysis-relationships')} className="px-2.5 py-1 text-xs bg-blue-100 border border-blue-300 rounded hover:bg-blue-200 transition-colors">/client/analysis-relationships/:id</button>
-                                        <button type="button" onClick={() => { setModalButtonLink('/client/analysis-realization'); setSelectedContentType(null); }} className="px-2.5 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors">/client/analysis-realization</button>
-                                        <button type="button" onClick={() => handleContentPageClick('/client/analysis-realization', 'analysis-realization')} className="px-2.5 py-1 text-xs bg-blue-100 border border-blue-300 rounded hover:bg-blue-200 transition-colors">/client/analysis-realization/:id</button>
-                                    </div>
-                                </div>
-
-                                {/* Психодиагностика */}
-                                <div>
-                                    <p className="text-xs font-medium text-gray-600 mb-1.5">Психодиагностика:</p>
-                                    <div className="flex flex-wrap gap-2 items-center">
-                                        <button type="button" onClick={() => { setModalButtonLink('/client/psychodiagnostics'); setSelectedContentType(null); }} className="px-2.5 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors">/client/psychodiagnostics</button>
-                                        <button type="button" onClick={() => handleContentPageClick('/client/psychodiagnostics', 'psychodiagnostics')} className="px-2.5 py-1 text-xs bg-blue-100 border border-blue-300 rounded hover:bg-blue-200 transition-colors">/client/psychodiagnostics/:id</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Список контентов для выбранной страницы */}
-                            {selectedContentType && (
-                                <div className="mt-4 pt-4 border-t border-gray-300">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <p className="text-xs font-semibold text-gray-700">
-                                            Выберите контент:
-                                        </p>
-                                        <button
-                                            type="button"
-                                            onClick={() => setSelectedContentType(null)}
-                                            className="text-xs text-gray-500 hover:text-gray-700"
-                                        >
-                                            <X size={16} />
-                                        </button>
-                                    </div>
-                                    {loadingContent ? (
-                                        <p className="text-xs text-gray-500 py-2">Загрузка...</p>
-                                    ) : (
-                                        <div className="max-h-48 overflow-y-auto space-y-1">
-                                            {selectedContentType === 'horoscope' && horoscopes.length > 0 && (
-                                                horoscopes.map((item) => (
-                                                    <button
-                                                        key={item._id}
-                                                        type="button"
-                                                        onClick={() => handleContentSelect('/client/horoscope', item._id)}
-                                                        className="w-full text-left px-3 py-2 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors"
-                                                    >
-                                                        <div className="font-medium text-gray-900">{item.title || 'Без названия'}</div>
-                                                        {item.subtitle && (
-                                                            <div className="text-gray-500 text-xs mt-0.5">{item.subtitle}</div>
-                                                        )}
-                                                    </button>
-                                                ))
-                                            )}
-                                            {selectedContentType === 'transit' && transits.length > 0 && (
-                                                transits.map((item) => (
-                                                    <button
-                                                        key={item._id}
-                                                        type="button"
-                                                        onClick={() => handleContentSelect('/client/transit', item._id)}
-                                                        className="w-full text-left px-3 py-2 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors"
-                                                    >
-                                                        <div className="font-medium text-gray-900">{item.title || 'Без названия'}</div>
-                                                        {item.subtitle && (
-                                                            <div className="text-gray-500 text-xs mt-0.5">{item.subtitle}</div>
-                                                        )}
-                                                    </button>
-                                                ))
-                                            )}
-                                            {selectedContentType === 'practice' && practices.length > 0 && (
-                                                practices.map((item) => (
-                                                    <button
-                                                        key={item._id}
-                                                        type="button"
-                                                        onClick={() => handleContentSelect('/client/practice', item._id)}
-                                                        className="w-full text-left px-3 py-2 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors"
-                                                    >
-                                                        <div className="font-medium text-gray-900">{item.title || 'Без названия'}</div>
-                                                    </button>
-                                                ))
-                                            )}
-                                            {['parables-of-life', 'scientific-discoveries', 'health-lab', 'relationship-workshop', 'spirit-forge', 'masters-tower', 'femininity-gazebo', 'consciousness-library', 'product-catalog', 'analysis-health', 'analysis-relationships', 'analysis-realization', 'psychodiagnostics'].includes(selectedContentType || '') && contentItems.length > 0 && (
-                                                contentItems.map((item) => (
-                                                    <button
-                                                        key={item._id}
-                                                        type="button"
-                                                        onClick={() => handleContentSelect(`/client/${selectedContentType}`, item._id)}
-                                                        className="w-full text-left px-3 py-2 text-xs bg-white border border-gray-300 rounded hover:bg-blue-50 hover:border-blue-300 transition-colors"
-                                                    >
-                                                        <div className="font-medium text-gray-900">{item.title || item.name || 'Без названия'}</div>
-                                                        {(item.subtitle || item.shortDescription) && (
-                                                            <div className="text-gray-500 text-xs mt-0.5">{item.subtitle || item.shortDescription}</div>
-                                                        )}
-                                                    </button>
-                                                ))
-                                            )}
-                                            {((selectedContentType === 'horoscope' && horoscopes.length === 0) ||
-                                              (selectedContentType === 'transit' && transits.length === 0) ||
-                                              (selectedContentType === 'practice' && practices.length === 0) ||
-                                              (['parables-of-life', 'scientific-discoveries', 'health-lab', 'relationship-workshop', 'spirit-forge', 'masters-tower', 'femininity-gazebo', 'consciousness-library', 'product-catalog', 'analysis-health', 'analysis-relationships', 'analysis-realization', 'psychodiagnostics'].includes(selectedContentType || '') && contentItems.length === 0)) && (
-                                                <p className="text-xs text-gray-500 py-2">Контент не найден</p>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
                     </div>
-                    
 
                     {/* Кнопка создания */}
                     <div className="flex gap-3 pt-4 border-t">

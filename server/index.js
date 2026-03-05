@@ -192,6 +192,8 @@ app.put("/api/user/:id/deactivate-subscription", authMiddleware, UserController.
 app.put("/api/user/:id/block", authMiddleware, UserController.blockUser);
 app.put("/api/user/:id/unblock", authMiddleware, UserController.unblockUser);
 app.delete("/api/user/:id", authMiddleware, UserController.deleteUser);
+app.post("/api/user/bulk-delete", authMiddleware, UserController.bulkDeleteUsers);
+app.post("/api/user/bulk-delete-by-filter", authMiddleware, UserController.bulkDeleteByFilter);
 
 // Управление администраторами (только для admin)
 app.get("/api/admin/all", authMiddleware, UserController.getAllAdmins);

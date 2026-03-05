@@ -2,11 +2,9 @@ import bgGar from '../../assets/bgGar.png';
 import { MyLink } from '../../components/User/MyLink';
 import easeLaunch from '../../assets/easeLaunch.png';
 import { useState, useEffect } from 'react';
-import logo from '../../assets/logo.png';
 import api from '../../api';
 
 export const EaseLaunch = () => {
-    const [screenHeight, setScreenHeight] = useState<number>(0);
     const [dinamycLink, setDinamycLink] = useState<string>('');
 
     const fetchDinamycLink = async () => {
@@ -17,23 +15,7 @@ export const EaseLaunch = () => {
     }
 
     useEffect(() => {
-        const updateScreenHeight = () => {
-            // window.innerHeight - высота окна браузера в пикселях (это то же самое, что h-screen)
-            const height = window.innerHeight;
-            setScreenHeight(height);
-            console.log('Высота экрана (h-screen):', height, 'px');
-        };
-
-        // Получаем высоту при монтировании компонента
-        updateScreenHeight();
         fetchDinamycLink();
-
-        // Обновляем при изменении размера окна
-        window.addEventListener('resize', updateScreenHeight);
-
-        return () => {
-            window.removeEventListener('resize', updateScreenHeight);
-        };
     }, []);
 
     return (
@@ -46,10 +28,7 @@ export const EaseLaunch = () => {
             }}
             className='px-4 pb-6 flex flex-1 flex-col'
         >
-            <div style={{ height: `${screenHeight/6}px` }}>
-                <img src={logo} alt="logo" className='w-[104px] h-[40px] mt-10' />
-            </div>
-            <div className=''>
+            <div className='mt-5'>
                 <h1 className='text-[48px] font-semibold text-white leading-12'>Важная информация</h1>
                 <p className='text-white mt-3'>Для удобства запуска приложения Солнце его нужно добавить на экран телефона, нажав на три точки в правом верхнем углу экрана. Не откладывай на потом – сделай это прямо сейчас!</p>
                 <div className='mt-4'>

@@ -103,8 +103,8 @@ export const RedirectToPageSelector = ({ value, onChange }: RedirectToPageSelect
                 className="w-full p-2 rounded-md border border-gray-300"
             >
                 <option value="none">Не перенаправлять</option>
-                <option value="page">На страницу (список)</option>
-                <option value="content">На конкретный контент</option>
+                <option value="page">На раздел</option>
+                <option value="content">На контент раздела</option>
                 <option value="external">Внешняя ссылка</option>
             </select>
 

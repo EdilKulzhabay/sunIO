@@ -14,7 +14,6 @@ export const ClientRegion = () => {
     const [error, setError] = useState(false);
     const navigate = useNavigate();
     const { updateUser, user } = useAuth();
-    const [screenHeight, setScreenHeight] = useState<number>(0);
 
     useEffect(() => {
         // Используем user из контекста, если он есть, иначе пытаемся получить из localStorage
@@ -74,24 +73,6 @@ export const ClientRegion = () => {
         }
     }
 
-    useEffect(() => {
-        const updateScreenHeight = () => {
-            // window.innerHeight - высота окна браузера в пикселях (это то же самое, что h-screen)
-            const height = window.innerHeight;
-            setScreenHeight(height);
-        };
-
-        // Получаем высоту при монтировании компонента
-        updateScreenHeight();
-
-        // Обновляем при изменении размера окна
-        window.addEventListener('resize', updateScreenHeight);
-
-        return () => {
-            window.removeEventListener('resize', updateScreenHeight);
-        };
-    }, []);
-
     return (
         <div 
             style={{
@@ -102,7 +83,7 @@ export const ClientRegion = () => {
             }}
             className='px-4 pb-6 flex flex-col justify-between lg:justify-start'
         >
-            <div style={{ height: `${screenHeight/3}px` }} className='flex justify-center items-end'>
+            <div className='flex justify-center items-end mt-5'>
                 <img src={sunWithHands} alt="Sun with Hands" className='object-cover h-[175px] w-[175px] mb-5' />
             </div>
             {error && (

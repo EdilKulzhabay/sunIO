@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { AdminLayout } from '../../components/Admin/AdminLayout';
 import { AdminTable } from '../../components/Admin/AdminTable';
-import { Search, ArrowUpDown, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, ArrowUpDown, Download, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 import api from '../../api';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
@@ -42,11 +42,13 @@ export const UsersAdmin = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [pagination, setPagination] = useState<PaginationInfo | null>(null);
     const [loading, setLoading] = useState(false);
+    const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
+    const [bulkDeleting, setBulkDeleting] = useState(false);
     const limit = 100;
 
-    // Сбрасываем страницу при изменении фильтров/сортировки
     useEffect(() => {
         setCurrentPage(1);
+        setSelectedUserIds(new Set());
     }, [statusFilter, lastActiveFilter, sortField, sortDirection, searchQuery]);
 
     // Загружаем данные при изменении страницы или параметров
@@ -127,6 +129,62 @@ export const UsersAdmin = () => {
             }
         } catch (error: any) {
             toast.error('Ошибка удаления');
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedUserIds.size === 0) return;
+        if (!confirm(`Вы уверены, что хотите удалить ${selectedUserIds.size} выбранных пользователей? Это действие необратимо.`)) return;
+
+        setBulkDeleting(true);
+        try {
+            await api.post('/api/user/bulk-delete', { userIds: Array.from(selectedUserIds) });
+            toast.success(`Удалено пользователей: ${selectedUserIds.size}`);
+            setSelectedUserIds(new Set());
+            if (users.length === selectedUserIds.size && currentPage > 1) {
+                setCurrentPage(currentPage - 1);
+            } else {
+                fetchUsers(currentPage);
+            }
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Ошибка массового удаления');
+        } finally {
+            setBulkDeleting(false);
+        }
+    };
+
+    const handleDeleteByFilter = async () => {
+        const statusLabel: Record<string, string> = {
+            anonym: 'Аноним',
+            guest: 'Гость',
+            registered: 'Зарегистрирован',
+            client: 'Клиент',
+            blocked: 'Заблокирован',
+        };
+        const label = statusLabel[statusFilter] || statusFilter;
+        const count = pagination?.totalUsers || 0;
+        if (count === 0) {
+            toast.warning('Нет пользователей для удаления по текущему фильтру');
+            return;
+        }
+        if (!confirm(`Вы уверены, что хотите удалить ВСЕХ пользователей со статусом "${label}" (${count} шт.)? Это действие необратимо!`)) return;
+        if (!confirm(`ПОДТВЕРДИТЕ ЕЩЁ РАЗ: удалить ${count} пользователей со статусом "${label}"?`)) return;
+
+        setBulkDeleting(true);
+        try {
+            const params: any = { statusFilter };
+            if (lastActiveFilter !== 'all') params.lastActiveFilter = lastActiveFilter;
+            if (searchQuery.trim()) params.searchQuery = searchQuery.trim();
+
+            const response = await api.post('/api/user/bulk-delete-by-filter', params);
+            toast.success(`Удалено пользователей: ${response.data.deletedCount || 0}`);
+            setSelectedUserIds(new Set());
+            setCurrentPage(1);
+            fetchUsers(1);
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Ошибка удаления по фильтру');
+        } finally {
+            setBulkDeleting(false);
         }
     };
 
@@ -462,6 +520,46 @@ export const UsersAdmin = () => {
                     </div>
                 </div>
 
+                {(selectedUserIds.size > 0 || (statusFilter !== 'all' && pagination && pagination.totalUsers > 0)) && (
+                    <div className="bg-white p-4 rounded-lg shadow flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            {selectedUserIds.size > 0 && (
+                                <span className="text-sm font-medium text-blue-700">
+                                    Выбрано: {selectedUserIds.size}
+                                </span>
+                            )}
+                            {selectedUserIds.size > 0 && (
+                                <button
+                                    onClick={handleBulkDelete}
+                                    disabled={bulkDeleting}
+                                    className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+                                >
+                                    <Trash2 size={16} />
+                                    {bulkDeleting ? 'Удаление...' : `Удалить выбранных (${selectedUserIds.size})`}
+                                </button>
+                            )}
+                            {selectedUserIds.size > 0 && (
+                                <button
+                                    onClick={() => setSelectedUserIds(new Set())}
+                                    className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 underline"
+                                >
+                                    Снять выделение
+                                </button>
+                            )}
+                        </div>
+                        {statusFilter !== 'all' && pagination && pagination.totalUsers > 0 && (
+                            <button
+                                onClick={handleDeleteByFilter}
+                                disabled={bulkDeleting}
+                                className="flex items-center gap-2 px-4 py-2 bg-red-700 text-white rounded-lg hover:bg-red-800 disabled:opacity-50 transition-colors"
+                            >
+                                <Trash2 size={16} />
+                                {bulkDeleting ? 'Удаление...' : `Удалить всех по фильтру (${pagination.totalUsers})`}
+                            </button>
+                        )}
+                    </div>
+                )}
+
                 {loading ? (
                     <div className="bg-white p-8 rounded-lg shadow text-center">
                         <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -473,6 +571,9 @@ export const UsersAdmin = () => {
                         data={filteredAndSortedUsers}
                         onEdit={handleOpenForm}
                         onDelete={handleDelete}
+                        selectable
+                        selectedIds={selectedUserIds}
+                        onSelectionChange={setSelectedUserIds}
                     />
                 )}
 

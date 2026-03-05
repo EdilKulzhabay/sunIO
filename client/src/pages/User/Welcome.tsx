@@ -57,11 +57,11 @@ export const Welcome = () => {
                         const savedUser = localStorage.getItem('user');
                         console.log("Проверка сохраненного user: ", savedUser);
                         
-                        // Переходим на главную только если есть fullName
                         if (response.data.user.fullName && response.data.user.fullName.trim() !== '') {
                             const fullName = response.data.user.fullName;
                             localStorage.setItem('fullName', fullName);
-                            navigate('/main');
+                            const redirectTo = searchParams.get('redirectTo');
+                            navigate(redirectTo || '/main');
                         } else {
                             // Оставляем только 'telegramId', 'telegramUserName' и 'user' в localStorage
                             const telegramIdValue = localStorage.getItem("telegramId");

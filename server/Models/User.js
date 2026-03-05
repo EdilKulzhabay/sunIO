@@ -163,6 +163,10 @@ const UserSchema = new mongoose.Schema({
             modalButtonLink: {
                 type: String,
             },
+            showUpTo: {
+                type: Date,
+                default: null,
+            }
         }
     ],
     lastActiveDate: {

@@ -519,19 +519,39 @@ app.post('/api/bot/broadcast', async (req, res) => {
                     parse_mode: finalParseMode
                 };
 
-                // Добавляем inline кнопку, если указан текст
                 if (buttonText) {
-                    const finalButtonUrl = buildButtonUrl(userData);
-                    messageOptions.reply_markup = {
-                        inline_keyboard: [[
-                            {
-                                text: buttonText,
-                                web_app: {
-                                    url: finalButtonUrl
-                                }
+                    const appUrl = process.env.APP_URL || '';
+                    const isExternalUrl = buttonUrl && (
+                        buttonUrl.startsWith('http://') || buttonUrl.startsWith('https://')
+                    ) && !buttonUrl.startsWith(appUrl);
+
+                    if (isExternalUrl) {
+                        messageOptions.reply_markup = {
+                            inline_keyboard: [[
+                                { text: buttonText, url: buttonUrl }
+                            ]]
+                        };
+                    } else {
+                        const finalButtonUrl = buildButtonUrl(userData);
+                        let webAppUrl = finalButtonUrl;
+
+                        if (buttonUrl) {
+                            let internalPath = buttonUrl;
+                            if (buttonUrl.startsWith(appUrl)) {
+                                internalPath = buttonUrl.slice(appUrl.length);
                             }
-                        ]]
-                    };
+                            if (internalPath && internalPath !== '/') {
+                                const separator = webAppUrl.includes('?') ? '&' : '?';
+                                webAppUrl = `${webAppUrl}${separator}redirectTo=${encodeURIComponent(internalPath)}`;
+                            }
+                        }
+
+                        messageOptions.reply_markup = {
+                            inline_keyboard: [[
+                                { text: buttonText, web_app: { url: webAppUrl } }
+                            ]]
+                        };
+                    }
                 }
 
                 // Если есть изображение, отправляем фото с подписью

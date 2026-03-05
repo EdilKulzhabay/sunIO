@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import VideoProgress from '../Models/VideoProgress.js';
 import User from '../Models/User.js';
 import Practice from '../Models/Practice.js';
@@ -95,15 +96,14 @@ export const saveProgress = async (req, res) => {
     }
 };
 
-// Получение прогресса просмотра
 export const getProgress = async (req, res) => {
     try {
         const { userId, contentType, contentId } = req.params;
 
-        if (!userId) {
-            return res.status(400).json({
-                success: false,
-                message: 'Необходимо предоставить userId'
+        if (!userId || !mongoose.Types.ObjectId.isValid(contentId)) {
+            return res.status(200).json({
+                success: true,
+                data: { currentTime: 0, duration: 0, progress: 0, completed: false }
             });
         }
 

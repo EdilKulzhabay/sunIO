@@ -1,19 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '../../components/Admin/AdminLayout';
 import { AdminTable } from '../../components/Admin/AdminTable';
-import { Plus } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import api from '../../api';
 import { toast } from 'react-toastify';
 
 export const ScheduleAdmin = () => {
     const navigate = useNavigate();
-    const [schedules, setSchedules] = useState([]);
+    const [schedules, setSchedules] = useState<any[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const dateToLocalDateTime = (date: Date | string): string => {
         const d = typeof date === 'string' ? new Date(date) : date;
-        // Конвертируем UTC в Asia/Almaty (UTC+6)
-        const localDate = new Date(d.getTime() + (6 * 60 * 60 * 1000)); // Добавляем 6 часов
+        const localDate = new Date(d.getTime() + (6 * 60 * 60 * 1000));
         const year = localDate.getUTCFullYear();
         const month = String(localDate.getUTCMonth() + 1).padStart(2, '0');
         const day = String(localDate.getUTCDate()).padStart(2, '0');
@@ -34,6 +34,15 @@ export const ScheduleAdmin = () => {
             toast.error('Ошибка загрузки расписания');
         }
     };
+
+    const filteredSchedules = useMemo(() => {
+        const sorted = [...schedules].sort(
+            (a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+        );
+        if (!searchQuery.trim()) return sorted;
+        const q = searchQuery.trim().toLowerCase();
+        return sorted.filter((s: any) => s.eventTitle?.toLowerCase().includes(q));
+    }, [schedules, searchQuery]);
 
     const handleCreate = () => {
         navigate('/admin/schedule/create');
@@ -96,9 +105,20 @@ export const ScheduleAdmin = () => {
                     </button>
                 </div>
 
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <input
+                        type="text"
+                        placeholder="Поиск по названию события..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                </div>
+
                 <AdminTable
                     columns={columns}
-                    data={schedules}
+                    data={filteredSchedules}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                 />

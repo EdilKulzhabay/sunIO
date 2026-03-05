@@ -218,18 +218,16 @@ export const SecureKinescopePlayer = ({
         }
     }, [contentType, contentId, onProgressUpdate, disableProgressSave]);
 
-    // Загрузка сохраненного прогресса
     useEffect(() => {
         const loadProgress = async () => {
+            if (disableProgressSave) return;
+
             try {
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
                 if (!user._id) {
-                    console.log('⚠️ Пользователь не найден, прогресс не загружен');
                     return;
                 }
 
-                console.log(`📥 Загрузка прогресса для ${contentType}/${contentId}, userId: ${user._id}`);
-                
                 const response = await api.get(`/api/video-progress/${user._id}/${contentType}/${contentId}`);
                 
                 if (response.data.success && response.data.data) {
@@ -269,7 +267,7 @@ export const SecureKinescopePlayer = ({
         };
 
         loadProgress();
-    }, [contentType, contentId, onProgressUpdate]);
+    }, [contentType, contentId, onProgressUpdate, disableProgressSave]);
 
     // Инициализация длительности из пропсов
     useEffect(() => {

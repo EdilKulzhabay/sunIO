@@ -455,18 +455,18 @@ app.post("/api/subscription/check-expired", authMiddleware, async (req, res) => 
 });
 
 
-// Рассылка diaryCheck каждый день в 5:00 (Asia/Almaty) — пользователям с notifyPermission и diaryNotifyPermission === true
-cron.schedule('0 5 * * *', async () => {
+// Рассылка diaryCheck каждый день в 20:00 (МСК) — пользователям, не заполнившим дневник сегодня
+cron.schedule('0 20 * * *', async () => {
     try {
         await BroadcastController.sendDiaryCheckBroadcast();
     } catch (error) {
         console.error(`[${new Date().toISOString()}] Ошибка рассылки diaryCheck:`, error);
     }
 }, {
-    timezone: "Asia/Almaty"
+    timezone: "Europe/Moscow"
 });
 
-console.log('Cron задача рассылки diaryCheck настроена: каждый день в 5:00 (Asia/Almaty)');
+console.log('Cron задача рассылки diaryCheck настроена: каждый день в 20:00 (Europe/Moscow)');
 
 // Запуск рассылок по расписанию (каждую минуту)
 cron.schedule('* * * * *', async () => {

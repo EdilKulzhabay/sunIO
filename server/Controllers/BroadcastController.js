@@ -373,12 +373,22 @@ export const sendDiaryCheckBroadcast = async () => {
             isBlocked: { $ne: true },
         }).select('_id telegramId');
 
+        const nowMsk = new Date(Date.now() + 3 * 60 * 60 * 1000);
+        const todayStartMsk = new Date(Date.UTC(
+            nowMsk.getUTCFullYear(), nowMsk.getUTCMonth(), nowMsk.getUTCDate(), 0, 0, 0
+        ));
+        const todayStartUtc = new Date(todayStartMsk.getTime() - 3 * 60 * 60 * 1000);
+
+        const todayCompletedUsers = await Diary.find({
+            createdAt: { $gte: todayStartUtc },
+        }).select('user');
+
         if (users.length === 0) {
             console.log('[sendDiaryCheckBroadcast] Нет пользователей для рассылки diaryCheck');
             return { success: true, sent: 0, message: 'Нет пользователей для рассылки' };
         }
 
-        const userIds = users.map(u => u._id);
+        const userIds = users.filter(u => !todayCompletedUsers.some(d => d.user.toString() === u._id.toString())).map(u => u._id);
         const result = await executeBroadcast({
             broadcastTitle: 'diaryCheck',
             userIds,
@@ -484,7 +494,7 @@ export const sendTestMessage = async (req, res) => {
 export const createBroadcast = async (req, res) => {
     try {
         const user = req.user;
-        const { title, imgUrl, content, buttonText, buttonUrl } = req.body;
+        const { title, imgUrl, content, buttonText, buttonUrl, scheduledAt } = req.body;
 
         if (!title || !content) {
             return res.status(400).json({
@@ -493,7 +503,6 @@ export const createBroadcast = async (req, res) => {
             });
         }
 
-        // Проверяем, существует ли уже рассылка с таким названием
         const existingBroadcast = await Broadcast.findOne({ title });
         if (existingBroadcast) {
             return res.status(400).json({
@@ -508,6 +517,7 @@ export const createBroadcast = async (req, res) => {
             content,
             buttonText: buttonText || '',
             buttonUrl: buttonUrl || '',
+            scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
         });
 
         await broadcast.save();
@@ -587,7 +597,7 @@ export const updateBroadcast = async (req, res) => {
     try {
         const user = req.user;
         const { id } = req.params;
-        const { title, imgUrl, content, buttonText, buttonUrl } = req.body;
+        const { title, imgUrl, content, buttonText, buttonUrl, scheduledAt } = req.body;
 
         const broadcast = await Broadcast.findById(id);
 
@@ -614,6 +624,7 @@ export const updateBroadcast = async (req, res) => {
         if (content !== undefined) broadcast.content = content;
         if (buttonText !== undefined) broadcast.buttonText = buttonText;
         if (buttonUrl !== undefined) broadcast.buttonUrl = buttonUrl;
+        if (scheduledAt !== undefined) broadcast.scheduledAt = scheduledAt ? new Date(scheduledAt) : null;
 
         await broadcast.save();
 

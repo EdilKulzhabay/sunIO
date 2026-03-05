@@ -24,6 +24,10 @@ const BroadcastSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    scheduledAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

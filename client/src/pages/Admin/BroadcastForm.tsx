@@ -26,6 +26,7 @@ interface SavedBroadcast {
     content: string;
     buttonText?: string;
     buttonUrl?: string;
+    scheduledAt?: string;
     createdAt: string;
     updatedAt: string;
 }
@@ -98,6 +99,11 @@ export const BroadcastFormAdmin = () => {
                     setButtonPage(path.startsWith('/') ? path : '/' + path);
                 } else {
                     setButtonPage('');
+                }
+                if (broadcast.scheduledAt) {
+                    const d = new Date(broadcast.scheduledAt);
+                    const pad = (n: number) => String(n).padStart(2, '0');
+                    setScheduledAt(`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`);
                 }
             }
         } catch (error: any) {
@@ -210,6 +216,7 @@ export const BroadcastFormAdmin = () => {
                 content: message,
                 buttonText: buttonText || '',
                 buttonUrl: buttonUrl || '',
+                scheduledAt: scheduledAtIso || null,
             };
 
             const response = isEditing

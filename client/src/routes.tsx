@@ -119,6 +119,8 @@ import { ClientConnectError } from "./pages/User/ClientConnectError";
 import { ClientTasks } from "./pages/User/ClientTasks";
 import { ClientRegion } from "./pages/User/ClientRegion";
 import { ClientAppTemporarilyUnavailable } from "./pages/User/ClientAppTemporarilyUnavailable";
+import { ClientDocuments } from "./pages/User/ClientDocuments";
+import { ClientOperationLog } from "./pages/User/ClientOperationLog";
 
 // Компонент-обертка для всех маршрутов
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
@@ -362,6 +364,14 @@ export const routes = createBrowserRouter([
     {
         path: "/client/invited-users",
         element: <RootLayout><ClientInvitedUsers /></RootLayout>,
+    },
+    {
+        path: "/client/documents",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientDocuments /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/operation-log",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientOperationLog /></ProtectedRoute></TelegramGuard></RootLayout>,
     },
     {
         path: "/admin",

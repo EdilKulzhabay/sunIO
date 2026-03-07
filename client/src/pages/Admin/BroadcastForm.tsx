@@ -104,6 +104,8 @@ export const BroadcastFormAdmin = () => {
                     const d = new Date(broadcast.scheduledAt);
                     const pad = (n: number) => String(n).padStart(2, '0');
                     setScheduledAt(`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`);
+                } else {
+                    setScheduledAt('');
                 }
             }
         } catch (error: any) {
@@ -264,6 +266,7 @@ export const BroadcastFormAdmin = () => {
             setLoading(true);
             try {
                 const response = await api.post('/api/broadcast/send', { 
+                    title: title.trim() || undefined,
                     message: finalMessage || undefined,
                     userIds: Array.from(selectedUsers),
                     imageUrl: imageUrl || undefined,
@@ -305,8 +308,8 @@ export const BroadcastFormAdmin = () => {
         
         if (status !== 'all') {
             confirmText = scheduledAtIso
-                ? `Запланировать рассылку ${userCount} пользователям со статусом "${getStatusLabel(status)}"?`
-                : `Вы уверены, что хотите отправить сообщение ${userCount} пользователям со статусом "${getStatusLabel(status)}"?`;
+                ? `Запланировать рассылку ${userCount} пользователям со статусом «${getStatusFilterLabel(status)}»?`
+                : `Вы уверены, что хотите отправить сообщение ${userCount} пользователям со статусом «${getStatusFilterLabel(status)}»?`;
         }
 
         if (!confirm(confirmText)) return;
@@ -314,6 +317,7 @@ export const BroadcastFormAdmin = () => {
         setLoading(true);
         try {
             const response = await api.post('/api/broadcast/send', { 
+                title: title.trim() || undefined,
                 message: finalMessage || undefined,
                 status: status === 'all' ? undefined : status,
                 lastActiveFilter: lastActiveFilter === 'all' ? undefined : lastActiveFilter,
@@ -341,6 +345,17 @@ export const BroadcastFormAdmin = () => {
             toast.error(errorMessage);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const getStatusFilterLabel = (statusValue: string) => {
+        switch (statusValue) {
+            case 'all': return 'Все';
+            case 'guest': return 'Гости';
+            case 'registered': return 'Зарегистрированные';
+            case 'client': return 'Клиенты';
+            case 'anonym': return 'Анонимы';
+            default: return statusValue;
         }
     };
 
@@ -513,24 +528,40 @@ export const BroadcastFormAdmin = () => {
                             <Users size={18} />
                             Фильтр по статусу пользователей
                         </label>
-                        <div className="grid grid-cols-4 gap-3">
-                            {['all', 'anonym', 'guest', 'registered', 'client'].map((statusOption) => (
+                        <div className="space-y-3">
+                            <div className="grid grid-cols-4 gap-3">
+                                {(['all', 'guest', 'registered', 'client'] as const).map((statusOption) => (
+                                    <button
+                                        key={statusOption}
+                                        onClick={() => setStatus(statusOption)}
+                                        className={`p-3 rounded-lg border-2 transition-all ${
+                                            status === statusOption
+                                                ? 'border-blue-500 bg-blue-50'
+                                                : 'border-gray-200 hover:border-gray-300'
+                                        }`}
+                                    >
+                                        <div className="text-center">
+                                            <span className={`text-xs px-2 py-1 rounded inline-block ${getStatusColor(statusOption)}`}>
+                                                {getStatusFilterLabel(statusOption)}
+                                            </span>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                            <div>
                                 <button
-                                    key={statusOption}
-                                    onClick={() => setStatus(statusOption)}
-                                    className={`p-3 rounded-lg border-2 transition-all ${
-                                        status === statusOption
+                                    onClick={() => setStatus('anonym')}
+                                    className={`w-full sm:w-auto p-3 rounded-lg border-2 transition-all ${
+                                        status === 'anonym'
                                             ? 'border-blue-500 bg-blue-50'
                                             : 'border-gray-200 hover:border-gray-300'
                                     }`}
                                 >
-                                    <div className="text-center">
-                                        <div className={`text-xs px-2 py-1 rounded inline-block ${getStatusColor(statusOption)}`}>
-                                            {getStatusLabel(statusOption)}
-                                        </div>
-                                    </div>
+                                    <span className={`text-xs px-2 py-1 rounded inline-block ${getStatusColor('anonym')}`}>
+                                        Анонимы
+                                    </span>
                                 </button>
-                            ))}
+                            </div>
                         </div>
                     </div>
 

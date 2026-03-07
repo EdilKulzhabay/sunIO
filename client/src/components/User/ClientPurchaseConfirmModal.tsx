@@ -8,7 +8,9 @@ interface ClientPurchaseConfirmModalProps {
     onClose: () => void;
     contentId: string;
     contentType:
+        | 'videoLesson'
         | 'practice'
+        | 'meditation'
         | 'parables-of-life'
         | 'scientific-discoveries'
         | 'health-lab'

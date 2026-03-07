@@ -197,16 +197,20 @@ const executeBroadcast = async (payload) => {
         };
         }
 
-    const telegramIds = users.map(user => user.telegramId).filter(id => id);
-        
+    const validUsers = users.filter(u => {
+            const id = u.telegramId;
+            return id != null && id !== '' && String(id).trim() !== '';
+        });
+        const telegramIds = validUsers.map(u => String(u.telegramId));
+
         if (telegramIds.length === 0) {
-        return {
+            return {
                 success: true,
                 message: "Нет пользователей с telegramId для отправки",
                 sent: 0,
                 failed: 0,
                 total: 0,
-        };
+            };
         }
 
         console.log(`Начинаем рассылку для ${telegramIds.length} пользователей через бот сервер`);
@@ -216,8 +220,8 @@ const executeBroadcast = async (payload) => {
             console.warn('BOT_SERVER_URL не настроен или использует значение по умолчанию');
         }
 
-        const usersData = users.map(user => ({
-            telegramId: user.telegramId,
+        const usersData = validUsers.map(user => ({
+            telegramId: String(user.telegramId),
             telegramUserName: user.telegramUserName || '',
             profilePhotoUrl: user.profilePhotoUrl || '',
         }));
@@ -511,13 +515,14 @@ export const createBroadcast = async (req, res) => {
             });
         }
 
+        const scheduledDate = scheduledAt && !Number.isNaN(new Date(scheduledAt).getTime()) ? new Date(scheduledAt) : null;
         const broadcast = new Broadcast({
             title,
             imgUrl: imgUrl || '',
             content,
             buttonText: buttonText || '',
             buttonUrl: buttonUrl || '',
-            scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
+            scheduledAt: scheduledDate,
         });
 
         await broadcast.save();
@@ -624,7 +629,9 @@ export const updateBroadcast = async (req, res) => {
         if (content !== undefined) broadcast.content = content;
         if (buttonText !== undefined) broadcast.buttonText = buttonText;
         if (buttonUrl !== undefined) broadcast.buttonUrl = buttonUrl;
-        if (scheduledAt !== undefined) broadcast.scheduledAt = scheduledAt ? new Date(scheduledAt) : null;
+        if (scheduledAt !== undefined) {
+            broadcast.scheduledAt = (scheduledAt && !Number.isNaN(new Date(scheduledAt).getTime())) ? new Date(scheduledAt) : null;
+        }
 
         await broadcast.save();
 

@@ -61,7 +61,7 @@ export const Welcome = () => {
                             const fullName = response.data.user.fullName;
                             localStorage.setItem('fullName', fullName);
                             const redirectTo = searchParams.get('redirectTo');
-                            navigate(redirectTo || '/main');
+                            navigate(redirectTo || '/main', { replace: true });
                         } else {
                             // Оставляем только 'telegramId', 'telegramUserName' и 'user' в localStorage
                             const telegramIdValue = localStorage.getItem("telegramId");

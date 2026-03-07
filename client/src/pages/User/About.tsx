@@ -127,7 +127,7 @@ export const About = () => {
                     <div className='relative lg:w-[700px] lg:mx-auto z-20'>
                         <h1 className="text-2xl font-bold mt-4">{content?.title}</h1>
                         <p className="mt-4" dangerouslySetInnerHTML={{ __html: content?.content }} />
-                        <h2 className="text-xl font-medium mt-4">Что входит в подписку</h2>
+                        <h2 className="text-xl font-medium mt-4">Для членов Сообщества</h2>
                         {content?.list.length > 0 && (
                             <div className='mt-4'>
                                 <MobileAccordionList items={content?.list} />

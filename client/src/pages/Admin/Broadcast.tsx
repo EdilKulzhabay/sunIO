@@ -19,7 +19,7 @@ interface ScheduledBroadcast {
     _id: string;
     scheduledAt: string;
     status: string;
-    payload: { message?: string; imageUrl?: string; buttonText?: string };
+    payload: { title?: string; message?: string; imageUrl?: string; buttonText?: string };
     scheduledBy?: { fullName?: string };
 }
 
@@ -28,7 +28,7 @@ interface SentBroadcast {
     scheduledAt: string;
     sentAt: string;
     status: string;
-    payload: { message?: string; imageUrl?: string; buttonText?: string };
+    payload: { title?: string; message?: string; imageUrl?: string; buttonText?: string };
     result?: { sent?: number; failed?: number; total?: number };
     scheduledBy?: { fullName?: string };
 }
@@ -225,6 +225,9 @@ export const BroadcastAdmin = () => {
                                     key={item._id}
                                     className="border border-amber-200 rounded-lg p-4 bg-amber-50/50 hover:bg-amber-50 transition-colors"
                                 >
+                                    {item.payload?.title && (
+                                        <div className="font-semibold text-gray-900 mb-1">{item.payload.title}</div>
+                                    )}
                                     <div className="text-sm text-gray-700 line-clamp-2 mb-2">
                                         {getMessagePreview(item.payload?.message)}
                                     </div>
@@ -266,6 +269,9 @@ export const BroadcastAdmin = () => {
                                     key={item._id}
                                     className="border border-green-200 rounded-lg p-4 bg-green-50/30 hover:bg-green-50/50 transition-colors"
                                 >
+                                    {item.payload?.title && (
+                                        <div className="font-semibold text-gray-900 mb-1">{item.payload.title}</div>
+                                    )}
                                     <div className="text-sm text-gray-700 line-clamp-2 mb-2">
                                         {getMessagePreview(item.payload?.message)}
                                     </div>

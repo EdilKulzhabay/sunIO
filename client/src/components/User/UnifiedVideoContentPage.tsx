@@ -1,10 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../../api";
 import { UserLayout } from "./UserLayout";
 import { BackNav } from "./BackNav";
 import { SecureKinescopePlayer } from "./SecureKinescopePlayer";
 import { Switch } from "./Switch";
+import { ClientPurchaseConfirmModal } from "./ClientPurchaseConfirmModal";
+import { ClientInsufficientBonusModal } from "./ClientInsufficientBonusModal";
+import { X } from "lucide-react";
 
 type ContentType = 
     | "videoLesson" 
@@ -30,6 +33,7 @@ interface NormalizedContent {
     content: any[];
     duration?: number;
     accessType?: "free" | "stars" | "paid" | "subscription";
+    starsRequired?: number;
 }
 
 interface UnifiedVideoContentPageProps {
@@ -245,6 +249,7 @@ const defaultNormalizeContent = (data: any): NormalizedContent => {
         content,
         duration: data?.duration || 0,
         accessType: data?.accessType || "subscription",
+        starsRequired: data?.starsRequired || 0,
     };
 };
 
@@ -254,6 +259,7 @@ export const UnifiedVideoContentPage = ({
     normalizeContent = defaultNormalizeContent,
     id
 }: UnifiedVideoContentPageProps) => {
+    const navigate = useNavigate();
     const [content, setContent] = useState<NormalizedContent | null>(null);
     const [user, setUser] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -297,6 +303,53 @@ export const UnifiedVideoContentPage = ({
         fetchUserData();
         fetchContent();
     }, [fetchContent, fetchUserData]);
+
+    const hasAccess = useMemo(() => {
+        if (!content || !user) return true;
+        const accessType = content.accessType;
+        if (!accessType || accessType === 'free') return true;
+
+        if (accessType === 'stars' || accessType === 'paid') {
+            if (user.products?.some(
+                (p: any) => p.productId === id && p.type === 'one-time' && p.paymentStatus === 'paid'
+            )) return true;
+        }
+
+        if (accessType === 'subscription' || accessType === 'paid') {
+            if (user.hasPaid && user.subscriptionEndDate && new Date(user.subscriptionEndDate) > new Date()) return true;
+        }
+
+        return false;
+    }, [content, user, id]);
+
+    const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+    const [showInsufficientBonusModal, setShowInsufficientBonusModal] = useState(false);
+    const [showAccessDeniedModal, setShowAccessDeniedModal] = useState(false);
+
+    useEffect(() => {
+        if (loading || !content || !user || hasAccess) return;
+        const accessType = content.accessType;
+        if (accessType === 'stars' && user.emailConfirmed) {
+            const starsNeeded = content.starsRequired || 0;
+            if ((user.bonus || 0) >= starsNeeded) {
+                setShowPurchaseModal(true);
+            } else {
+                setShowInsufficientBonusModal(true);
+            }
+        } else {
+            setShowAccessDeniedModal(true);
+        }
+    }, [loading, content, user, hasAccess]);
+
+    const handleAccessClose = () => {
+        navigate('/main', { replace: true });
+    };
+
+    const handlePurchaseSuccess = async () => {
+        setShowPurchaseModal(false);
+        await fetchUserData();
+        await fetchContent();
+    };
 
     // Функция для расчёта и сохранения общего прогресса
     const calculateAndSaveProgress = useCallback(async () => {
@@ -436,6 +489,87 @@ export const UnifiedVideoContentPage = ({
         return (
             <div className="flex justify-center items-center h-screen bg-[#031F23] text-white">
                 Контент не найден
+            </div>
+        );
+    }
+
+    if (!hasAccess) {
+        const accessType = content.accessType;
+        return (
+            <div className="flex justify-center items-center h-screen bg-[#031F23] text-white">
+                {accessType === 'stars' && user?.emailConfirmed && (
+                    <>
+                        <ClientPurchaseConfirmModal
+                            isOpen={showPurchaseModal}
+                            onClose={handleAccessClose}
+                            contentId={id}
+                            contentType={contentType}
+                            contentTitle={content.title}
+                            starsRequired={content.starsRequired || 0}
+                            userBonus={user?.bonus || 0}
+                            onPurchaseSuccess={handlePurchaseSuccess}
+                        />
+                        <ClientInsufficientBonusModal
+                            isOpen={showInsufficientBonusModal}
+                            onClose={handleAccessClose}
+                            starsRequired={content.starsRequired || 0}
+                            userBonus={user?.bonus || 0}
+                            contentTitle={content.title}
+                        />
+                    </>
+                )}
+
+                {showAccessDeniedModal && (
+                    <div className="fixed inset-0 z-50 overflow-y-auto">
+                        <div className="flex items-end justify-center min-h-screen sm:hidden">
+                            <div className="fixed inset-0 bg-black/60 transition-opacity z-20" />
+                            <div
+                                className="relative z-50 px-4 pt-6 pb-8 inline-block w-full bg-[#114E50] rounded-t-[24px] text-left text-white overflow-hidden shadow-xl transform transition-all"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <button onClick={handleAccessClose} className="absolute top-[26px] right-5 cursor-pointer">
+                                    <X size={24} />
+                                </button>
+                                <div className="text-xl font-semibold mb-2">{content.title}</div>
+                                <div className="text-white mt-2">
+                                    {accessType === 'subscription' && <p>Этот контент доступен только по подписке.</p>}
+                                    {accessType === 'paid' && <p>Функционал доступа к платному контенту внутри Приложения будет скоро доступен.</p>}
+                                    {accessType === 'stars' && !user?.emailConfirmed && <p>Для доступа к этому контенту необходимо зарегистрироваться.</p>}
+                                </div>
+                                <button
+                                    onClick={handleAccessClose}
+                                    className="w-full mt-4 py-3 bg-[#C4841D] text-white font-medium rounded-full transition-colors"
+                                >
+                                    Закрыть
+                                </button>
+                            </div>
+                        </div>
+                        <div className="hidden sm:flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center">
+                            <div className="fixed inset-0 bg-black/60 transition-opacity" />
+                            <div
+                                className="relative p-8 inline-block align-middle bg-[#114E50] rounded-lg text-left text-white overflow-hidden shadow-xl transform transition-all"
+                                style={{ maxWidth: '500px', width: '100%' }}
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <button onClick={handleAccessClose} className="absolute top-8 right-8 cursor-pointer">
+                                    <X size={32} />
+                                </button>
+                                <div className="text-xl font-semibold mb-2">{content.title}</div>
+                                <div className="text-white mt-2">
+                                    {accessType === 'subscription' && <p>Этот контент доступен только по подписке.</p>}
+                                    {accessType === 'paid' && <p>Функционал доступа к платному контенту внутри Приложения будет скоро доступен.</p>}
+                                    {accessType === 'stars' && !user?.emailConfirmed && <p>Для доступа к этому контенту необходимо зарегистрироваться.</p>}
+                                </div>
+                                <button
+                                    onClick={handleAccessClose}
+                                    className="w-full mt-4 py-3 bg-[#C4841D] text-white font-medium rounded-full transition-colors"
+                                >
+                                    Закрыть
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }

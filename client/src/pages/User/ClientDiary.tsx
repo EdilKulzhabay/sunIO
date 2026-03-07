@@ -595,19 +595,19 @@ export const ClientDiary = () => {
                                     </div>
                                     {diary.isOpen && (
                                         <div className="mt-3 space-y-3">
-                                            <div className="p-2 border border-white/40 rounded-lg max-h-[100px] overflow-y-scroll">
+                                            <div className="p-2 border border-white/40 rounded-lg overflow-y-scroll">
                                                 <p className="text-sm font-medium">Осознания</p>
                                                 <p className="mt-1.5">{diary.discovery}</p>
                                             </div>
-                                            <div className="p-2 border border-white/40 rounded-lg max-h-[100px] overflow-y-scroll">
+                                            <div className="p-2 border border-white/40 rounded-lg overflow-y-scroll">
                                                 <p className="text-sm font-medium">Достижения</p>
                                                 <p className="mt-1.5">{diary.achievement}</p>
                                             </div>
-                                            <div className="p-2 border border-white/40 rounded-lg max-h-[100px] overflow-y-scroll">
+                                            <div className="p-2 border border-white/40 rounded-lg overflow-y-scroll">
                                                 <p className="text-sm font-medium">Цели и задачи</p>
                                                 <p className="mt-1.5">{diary.gratitude}</p>
                                             </div>
-                                            <div className="p-2 border border-white/40 rounded-lg max-h-[100px] overflow-y-scroll">
+                                            <div className="p-2 border border-white/40 rounded-lg overflow-y-scroll">
                                                 <p className="text-sm font-medium">Эмоции</p>
                                                 <p className="mt-1.5">{diary.emotions || ''}</p>
                                             </div>

@@ -152,6 +152,7 @@ export const createDeposit = async (req, res) => {
 
         const MERCHANT_LOGIN = process.env.ROBOKASSA_MERCHANT_LOGIN;
         const PASSWORD_1 = process.env.ROBOKASSA_PASSWORD1;
+        const isTest = process.env.ROBOKASSA_TEST_MODE === '1';
 
         const outSum = parseFloat(amount).toFixed(2);
         const invId = Date.now();
@@ -174,7 +175,6 @@ export const createDeposit = async (req, res) => {
         const receiptJson = JSON.stringify(receipt);
         const receiptEncoded = encodeURIComponent(receiptJson);
 
-        // Shp_ параметры в алфавитном порядке: Shp_type, Shp_userId
         const signatureString =
             `${MERCHANT_LOGIN}:${outSum}:${invId}:${receiptEncoded}:${PASSWORD_1}:Shp_type=deposit:Shp_userId=${userId}`;
 
@@ -183,7 +183,7 @@ export const createDeposit = async (req, res) => {
             .update(signatureString)
             .digest('hex');
 
-        const url =
+        let url =
             `https://auth.robokassa.ru/Merchant/Index.aspx` +
             `?MerchantLogin=${MERCHANT_LOGIN}` +
             `&OutSum=${outSum}` +
@@ -193,6 +193,10 @@ export const createDeposit = async (req, res) => {
             `&SignatureValue=${signature}` +
             `&Shp_type=deposit` +
             `&Shp_userId=${userId}`;
+
+        if (isTest) {
+            url += `&IsTest=1`;
+        }
 
         user.depositHistory.push({
             date: new Date(),

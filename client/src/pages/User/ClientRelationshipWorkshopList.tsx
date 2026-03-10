@@ -146,6 +146,7 @@ export const ClientRelationshipWorkshopList = () => {
             setIsModalOpen(true);
         }
         if (accessType === 'paid') {
+            setSelectedRelationshipWorkshop(relationshipWorkshop);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
@@ -184,6 +185,7 @@ export const ClientRelationshipWorkshopList = () => {
             setIsModalOpen(true);
         }
         if (accessType === 'paid') {
+            setSelectedRelationshipWorkshop(relationshipWorkshop);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
@@ -205,6 +207,7 @@ export const ClientRelationshipWorkshopList = () => {
 
     const handleClosePaidModal = () => {
         setIsPaidModalOpen(false);
+        setSelectedRelationshipWorkshop(null);
     }
 
     const handlePurchaseSuccess = async () => {
@@ -324,12 +327,14 @@ export const ClientRelationshipWorkshopList = () => {
                 accessType={accessType}
             />
 
-            {isPaidModalOpen && (
+            {isPaidModalOpen && selectedRelationshipWorkshop && (
                 <ClientPaidDynamicModal
                     isOpen={isPaidModalOpen}
                     onClose={handleClosePaidModal}
-                    content={content}
-                    accessType={accessType}
+                    item={selectedRelationshipWorkshop}
+                    contentType="relationship-workshop"
+                    userBalance={userData?.balance ?? 0}
+                    onPurchaseSuccess={handlePurchaseSuccess}
                 />
             )}
 

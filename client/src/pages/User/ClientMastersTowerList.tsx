@@ -146,6 +146,7 @@ export const ClientMastersTowerList = () => {
             setIsModalOpen(true);
         }
         if (accessType === 'paid') {
+            setSelectedMastersTower(mastersTower);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
@@ -184,6 +185,7 @@ export const ClientMastersTowerList = () => {
             setIsModalOpen(true);
         }
         if (accessType === 'paid') {
+            setSelectedMastersTower(mastersTower);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
@@ -324,12 +326,14 @@ export const ClientMastersTowerList = () => {
                 accessType={accessType}
             />
 
-            {isPaidModalOpen && (
+            {isPaidModalOpen && selectedMastersTower && (
                 <ClientPaidDynamicModal
                     isOpen={isPaidModalOpen}
                     onClose={handleClosePaidModal}
-                    content={content}
-                    accessType={accessType}
+                    item={selectedMastersTower}
+                    contentType="masters-tower"
+                    userBalance={userData?.balance ?? 0}
+                    onPurchaseSuccess={handlePurchaseSuccess}
                 />
             )}
 

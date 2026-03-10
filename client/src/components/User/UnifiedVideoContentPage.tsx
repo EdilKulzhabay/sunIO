@@ -7,6 +7,7 @@ import { SecureKinescopePlayer } from "./SecureKinescopePlayer";
 import { Switch } from "./Switch";
 import { ClientPurchaseConfirmModal } from "./ClientPurchaseConfirmModal";
 import { ClientInsufficientBonusModal } from "./ClientInsufficientBonusModal";
+import { ClientPaidDynamicModal } from "./ClientPaidDynamicModal";
 import { X } from "lucide-react";
 
 type ContentType = 
@@ -34,6 +35,7 @@ interface NormalizedContent {
     duration?: number;
     accessType?: "free" | "stars" | "paid" | "subscription";
     starsRequired?: number;
+    price?: number;
 }
 
 interface UnifiedVideoContentPageProps {
@@ -250,6 +252,7 @@ const defaultNormalizeContent = (data: any): NormalizedContent => {
         duration: data?.duration || 0,
         accessType: data?.accessType || "subscription",
         starsRequired: data?.starsRequired || 0,
+        price: data?.price || 0,
     };
 };
 
@@ -326,6 +329,8 @@ export const UnifiedVideoContentPage = ({
     const [showInsufficientBonusModal, setShowInsufficientBonusModal] = useState(false);
     const [showAccessDeniedModal, setShowAccessDeniedModal] = useState(false);
 
+    const [showPaidModal, setShowPaidModal] = useState(false);
+
     useEffect(() => {
         if (loading || !content || !user || hasAccess) return;
         const accessType = content.accessType;
@@ -336,6 +341,8 @@ export const UnifiedVideoContentPage = ({
             } else {
                 setShowInsufficientBonusModal(true);
             }
+        } else if (accessType === 'paid' && (content.price ?? 0) > 0) {
+            setShowPaidModal(true);
         } else {
             setShowAccessDeniedModal(true);
         }
@@ -517,6 +524,17 @@ export const UnifiedVideoContentPage = ({
                             contentTitle={content.title}
                         />
                     </>
+                )}
+
+                {accessType === 'paid' && showPaidModal && content && (
+                    <ClientPaidDynamicModal
+                        isOpen={showPaidModal}
+                        onClose={handleAccessClose}
+                        item={{ _id: id, title: content.title, price: content.price }}
+                        contentType={contentType}
+                        userBalance={user?.balance ?? 0}
+                        onPurchaseSuccess={handlePurchaseSuccess}
+                    />
                 )}
 
                 {showAccessDeniedModal && (

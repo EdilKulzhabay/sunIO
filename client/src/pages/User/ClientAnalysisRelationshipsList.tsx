@@ -146,6 +146,7 @@ export const ClientAnalysisRelationshipsList = () => {
             setIsModalOpen(true);
         }
         if (accessType === 'paid') {
+            setSelectedULAnalysisLRelationships(analysisRelationships);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
@@ -184,6 +185,7 @@ export const ClientAnalysisRelationshipsList = () => {
             setIsModalOpen(true);
         }
         if (accessType === 'paid') {
+            setSelectedULAnalysisLRelationships(analysisRelationships);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
@@ -205,6 +207,7 @@ export const ClientAnalysisRelationshipsList = () => {
 
     const handleClosePaidModal = () => {
         setIsPaidModalOpen(false);
+        setSelectedULAnalysisLRelationships(null);
     }
 
     const handlePurchaseSuccess = async () => {
@@ -324,12 +327,14 @@ export const ClientAnalysisRelationshipsList = () => {
                 accessType={accessType}
             />
 
-            {isPaidModalOpen && (
+            {isPaidModalOpen && selectedULAnalysisLRelationships && (
                 <ClientPaidDynamicModal
                     isOpen={isPaidModalOpen}
                     onClose={handleClosePaidModal}
-                    content={content}
-                    accessType={accessType}
+                    item={selectedULAnalysisLRelationships}
+                    contentType="analysis-relationships"
+                    userBalance={userData?.balance ?? 0}
+                    onPurchaseSuccess={handlePurchaseSuccess}
                 />
             )}
 

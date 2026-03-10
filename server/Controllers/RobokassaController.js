@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import User from '../Models/User.js';
+import DepositLog from '../Models/DepositLog.js';
 import axios from 'axios';
 import 'dotenv/config';
 
@@ -44,9 +45,11 @@ export const handleResult = async (req, res) => {
         if (Shp_userId) {
             const user = await User.findById(Shp_userId);
             if (user) {
-                const pendingDeposit = user.depositHistory.find(
-                    d => d.invId === String(InvId) && d.status === 'pending'
-                );
+                const pendingDeposit = await DepositLog.findOne({
+                    invId: String(InvId),
+                    userId: Shp_userId,
+                    status: 'pending',
+                });
 
                 if (pendingDeposit) {
                     await handleDepositResult(user, OutSum, InvId);
@@ -103,15 +106,18 @@ const handleSubscriptionResult = async (user, outSum, invId) => {
 const handleDepositResult = async (user, outSum, invId) => {
     const amount = parseFloat(outSum);
 
-    const deposit = user.depositHistory.find(d => d.invId === String(invId));
-    if (deposit) {
-        if (deposit.status === 'paid') {
-            console.log(`Депозит ${invId} уже обработан`);
-            return;
-        }
-        deposit.status = 'paid';
-        deposit.date = new Date();
+    const deposit = await DepositLog.findOne({ invId: String(invId), userId: user._id });
+    if (!deposit) {
+        console.log(`Депозит ${invId} не найден`);
+        return;
     }
+    if (deposit.status === 'paid') {
+        console.log(`Депозит ${invId} уже обработан`);
+        return;
+    }
+
+    deposit.status = 'paid';
+    await deposit.save();
 
     user.balance = (user.balance || 0) + amount;
     await user.save();
@@ -173,13 +179,13 @@ export const createDeposit = async (req, res) => {
             `&SignatureValue=${signature}` +
             `&Shp_userId=${userId}`;
 
-        user.depositHistory.push({
-            date: new Date(),
+        await DepositLog.create({
+            userId,
+            userFullName: user.fullName || '',
+            invId: String(invId),
             amount: parseFloat(outSum),
             status: 'pending',
-            invId: String(invId),
         });
-        await user.save();
 
         res.json({ success: true, url });
     } catch (error) {
@@ -191,17 +197,22 @@ export const createDeposit = async (req, res) => {
 export const getOperationHistory = async (req, res) => {
     try {
         const { userId } = req.params;
-        const user = await User.findById(userId).select('balance depositHistory purchaseHistory');
+        const user = await User.findById(userId).select('balance');
         if (!user) {
             return res.status(404).json({ success: false, message: 'Пользователь не найден' });
         }
+
+        const [deposits, purchases] = await Promise.all([
+            DepositLog.find({ userId, status: 'paid' }).sort({ createdAt: -1 }),
+            [],
+        ]);
 
         res.json({
             success: true,
             data: {
                 balance: user.balance || 0,
-                depositHistory: (user.depositHistory || []).sort((a, b) => new Date(b.date) - new Date(a.date)),
-                purchaseHistory: (user.purchaseHistory || []).sort((a, b) => new Date(b.date) - new Date(a.date)),
+                depositHistory: deposits,
+                purchaseHistory: purchases,
             },
         });
     } catch (error) {

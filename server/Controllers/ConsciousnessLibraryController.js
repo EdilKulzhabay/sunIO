@@ -11,6 +11,7 @@ export const create = async (req, res) => {
             imageUrl,
             accessType,
             starsRequired,
+            price,
             duration,
             order,
             allowRepeatBonus,
@@ -182,6 +183,9 @@ export const update = async (req, res) => {
             updateData.starsRequired = Number.isFinite(updateData.starsRequired)
                 ? updateData.starsRequired
                 : 0;
+        }
+        if (updateData.price !== undefined) {
+            updateData.price = Number.isFinite(updateData.price) ? updateData.price : 0;
         }
         if (updateData.duration !== undefined) {
             updateData.duration = Number.isFinite(updateData.duration)

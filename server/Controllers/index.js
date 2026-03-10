@@ -30,3 +30,5 @@ export * as PointsAwardingPolicyController from "./PointsAwardingPolicyControlle
 export * as ParablesOfLifeController from "./ParablesOfLifeController.js";
 export * as ScientificDiscoveriesController from "./ScientificDiscoveriesController.js";
 export * as ActivationLinkController from "./ActivationLinkController.js";
+export * as OperationLogController from "./OperationLogController.js";
+export * as DocumentsController from "./DocumentsController.js";

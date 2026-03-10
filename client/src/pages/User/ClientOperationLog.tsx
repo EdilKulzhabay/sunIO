@@ -45,11 +45,11 @@ export const ClientOperationLog = () => {
         try {
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             if (!user._id) return;
-            const response = await api.get(`/api/operation-history/${user._id}`);
+            const response = await api.get(`/api/operation-logs/client/${user._id}`);
             if (response.data.success) {
                 setBalance(response.data.data.balance || 0);
-                setHistory(response.data.data.depositHistory || []);
-                setPurchases(response.data.data.purchaseHistory || []);
+                setHistory(response.data.data.deposits || []);
+                setPurchases(response.data.data.purchases || []);
             }
         } catch (error) {
             console.error('Ошибка загрузки истории операций:', error);
@@ -92,24 +92,6 @@ export const ClientOperationLog = () => {
         const d = new Date(dateStr);
         const pad = (n: number) => String(n).padStart(2, '0');
         return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
-    };
-
-    const getStatusLabel = (status: string) => {
-        switch (status) {
-            case 'paid': return 'Успешно';
-            case 'pending': return 'В обработке';
-            case 'failed': return 'Ошибка';
-            default: return status;
-        }
-    };
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'paid': return 'text-green-400';
-            case 'pending': return 'text-yellow-400';
-            case 'failed': return 'text-red-400';
-            default: return 'text-white/60';
-        }
     };
 
     useEffect(() => {
@@ -181,15 +163,10 @@ export const ClientOperationLog = () => {
                             </div>
                             {isHistoryOpen && (
                                 <div className="mt-2 space-y-3">
-                                    {history.length > 0 ? history.map((item) => (
+                                    {history.length > 0 ? history.map((item: any) => (
                                         <div key={item._id} className="border border-white/10 rounded-xl py-2.5 px-3">
-                                            <div className="flex items-center justify-between">
-                                                <div className="text-white/60 text-xs">
-                                                    {formatDate(item.date)}
-                                                </div>
-                                                <div className={`text-xs ${getStatusColor(item.status)}`}>
-                                                    {getStatusLabel(item.status)}
-                                                </div>
+                                            <div className="text-white/60 text-xs">
+                                                {formatDate(item.createdAt)}
                                             </div>
                                             <div className="text-white mt-1">
                                                 +{item.amount.toLocaleString("ru-RU")} руб.
@@ -211,18 +188,13 @@ export const ClientOperationLog = () => {
                             </div>
                             {isPurchasesOpen && (
                                 <div className="mt-2 space-y-3">
-                                    {purchases.length > 0 ? purchases.map((item) => (
+                                    {purchases.length > 0 ? purchases.map((item: any) => (
                                         <div key={item._id} className="border border-white/10 rounded-xl py-2.5 px-3">
-                                            <div className="flex items-center justify-between">
-                                                <div className="text-white/60 text-xs">
-                                                    {formatDate(item.date)}, {item.amount.toLocaleString("ru-RU")} руб.
-                                                </div>
-                                                <div className={`text-xs ${getStatusColor(item.status)}`}>
-                                                    {getStatusLabel(item.status)}
-                                                </div>
+                                            <div className="text-white/60 text-xs">
+                                                {formatDate(item.createdAt)}, {item.amount.toLocaleString("ru-RU")} руб.
                                             </div>
                                             <div className="text-white mt-1">
-                                                {item.product}
+                                                {item.productTitle}
                                             </div>
                                         </div>
                                     )) : (

@@ -213,46 +213,6 @@ const UserSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
-    depositHistory: [
-        {
-            date: {
-                type: Date,
-                default: null,
-            },
-            amount: {
-                type: Number,
-                default: 0,
-            },
-            status: {
-                type: String,
-                enum: ['pending', 'paid', 'failed'],
-            },
-            invId: {
-                type: String,
-                default: null,
-            },
-        },
-    ],
-    purchaseHistory: [
-        {
-            date: {
-                type: Date,
-                default: null,
-            },
-            amount: {
-                type: Number,
-                default: 0,
-            },
-            product: {
-                type: String,
-                default: null,
-            },
-            status: {
-                type: String,
-                enum: ['pending', 'paid', 'failed'],
-            },
-        },
-    ],
 }, {
     timestamps: true
 });

@@ -146,6 +146,7 @@ export const ClientSpiritForgeList = () => {
             setIsModalOpen(true);
         }
         if (accessType === 'paid') {
+            setSelectedSpiritForge(spiritForge);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
@@ -184,6 +185,7 @@ export const ClientSpiritForgeList = () => {
             setIsModalOpen(true);
         }
         if (accessType === 'paid') {
+            setSelectedSpiritForge(spiritForge);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
@@ -205,6 +207,7 @@ export const ClientSpiritForgeList = () => {
 
     const handleClosePaidModal = () => {
         setIsPaidModalOpen(false);
+        setSelectedSpiritForge(null);
     }
 
     const handlePurchaseSuccess = async () => {
@@ -324,12 +327,14 @@ export const ClientSpiritForgeList = () => {
                 accessType={accessType}
             />
 
-            {isPaidModalOpen && (
+            {isPaidModalOpen && selectedSpiritForge && (
                 <ClientPaidDynamicModal
                     isOpen={isPaidModalOpen}
                     onClose={handleClosePaidModal}
-                    content={content}
-                    accessType={accessType}
+                    item={selectedSpiritForge}
+                    contentType="spirit-forge"
+                    userBalance={userData?.balance ?? 0}
+                    onPurchaseSuccess={handlePurchaseSuccess}
                 />
             )}
 

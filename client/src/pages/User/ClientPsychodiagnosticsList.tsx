@@ -146,6 +146,7 @@ export const ClientPsychodiagnosticsList = () => {
             setIsModalOpen(true);
         }
         if (accessType === 'paid') {
+            setSelectedULPsychodiagnostics(psychodiagnostics);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
@@ -184,6 +185,7 @@ export const ClientPsychodiagnosticsList = () => {
             setIsModalOpen(true);
         }
         if (accessType === 'paid') {
+            setSelectedULPsychodiagnostics(psychodiagnostics);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
@@ -205,6 +207,7 @@ export const ClientPsychodiagnosticsList = () => {
 
     const handleClosePaidModal = () => {
         setIsPaidModalOpen(false);
+        setSelectedULPsychodiagnostics(null);
     }
 
     const handlePurchaseSuccess = async () => {
@@ -324,12 +327,14 @@ export const ClientPsychodiagnosticsList = () => {
                 accessType={accessType}
             />
 
-            {isPaidModalOpen && (
+            {isPaidModalOpen && selectedULPsychodiagnostics && (
                 <ClientPaidDynamicModal
                     isOpen={isPaidModalOpen}
                     onClose={handleClosePaidModal}
-                    content={content}
-                    accessType={accessType}
+                    item={selectedULPsychodiagnostics}
+                    contentType="psychodiagnostics"
+                    userBalance={userData?.balance ?? 0}
+                    onPurchaseSuccess={handlePurchaseSuccess}
                 />
             )}
 

@@ -24,6 +24,11 @@ const HealthLabSchema = new mongoose.Schema(
       min: 0,
       default: 0,
     },
+    price: {
+      type: Number,
+      min: 0,
+      default: 0,
+    },
     duration: {
       type: Number,
       min: 0,

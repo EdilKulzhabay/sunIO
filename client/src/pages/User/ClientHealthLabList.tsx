@@ -157,11 +157,12 @@ export const ClientHealthLabList = () => {
             setIsModalOpen(true);
         }
         if (accessType === 'paid') {
+            setSelectedHealthLab(healthLab);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
     }
-    
+
     const handleLockedHealthLabClickSubscription = (healthLab: any) => {
         const accessType = healthLab.accessType;
         
@@ -204,6 +205,7 @@ export const ClientHealthLabList = () => {
             setIsModalOpen(true);
         }
         if (accessType === 'paid') {
+            setSelectedHealthLab(healthLab);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
@@ -225,6 +227,7 @@ export const ClientHealthLabList = () => {
 
     const handleClosePaidModal = () => {
         setIsPaidModalOpen(false);
+        setSelectedHealthLab(null);
     }
 
     const handlePurchaseSuccess = async () => {
@@ -347,12 +350,14 @@ export const ClientHealthLabList = () => {
                 accessType={accessType}
             />
 
-            {isPaidModalOpen && (
+            {isPaidModalOpen && selectedHealthLab && (
                 <ClientPaidDynamicModal
                     isOpen={isPaidModalOpen}
                     onClose={handleClosePaidModal}
-                    content={content}
-                    accessType={accessType}
+                    item={selectedHealthLab}
+                    contentType="health-lab"
+                    userBalance={userData?.balance ?? 0}
+                    onPurchaseSuccess={handlePurchaseSuccess}
                 />
             )}
 

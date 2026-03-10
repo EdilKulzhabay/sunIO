@@ -146,6 +146,7 @@ export const ClientAnalysisHealthList = () => {
             setIsModalOpen(true);
         }
         if (accessType === 'paid') {
+            setSelectedULAnalysisLHealth(analysisHealth);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
@@ -184,6 +185,7 @@ export const ClientAnalysisHealthList = () => {
             setIsModalOpen(true);
         }
         if (accessType === 'paid') {
+            setSelectedULAnalysisLHealth(analysisHealth);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
@@ -205,6 +207,7 @@ export const ClientAnalysisHealthList = () => {
 
     const handleClosePaidModal = () => {
         setIsPaidModalOpen(false);
+        setSelectedULAnalysisLHealth(null);
     }
 
     const handlePurchaseSuccess = async () => {
@@ -324,12 +327,14 @@ export const ClientAnalysisHealthList = () => {
                 accessType={accessType}
             />
 
-            {isPaidModalOpen && (
+            {isPaidModalOpen && selectedULAnalysisLHealth && (
                 <ClientPaidDynamicModal
                     isOpen={isPaidModalOpen}
                     onClose={handleClosePaidModal}
-                    content={content}
-                    accessType={accessType}
+                    item={selectedULAnalysisLHealth}
+                    contentType="analysis-health"
+                    userBalance={userData?.balance ?? 0}
+                    onPurchaseSuccess={handlePurchaseSuccess}
                 />
             )}
 

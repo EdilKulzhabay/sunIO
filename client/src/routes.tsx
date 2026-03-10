@@ -8,6 +8,8 @@ import { ProtectedRoute } from "./components/ProtectedRoute.tsx";
 import { AuthProvider } from "./contexts/AuthContext";
 import { FAQAdmin } from "./pages/Admin/FAQ";
 import { FAQForm } from "./pages/Admin/FAQForm";
+import { DocumentsAdmin } from "./pages/Admin/Documents";
+import { DocumentsForm } from "./pages/Admin/DocumentsForm";
 import { PracticeAdmin } from "./pages/Admin/Practice";
 import { PracticeForm } from "./pages/Admin/PracticeForm";
 import { ParablesOfLifeAdmin } from "./pages/Admin/ParablesOfLife";
@@ -61,6 +63,7 @@ import { ModalNotificationsAdmin } from "./pages/Admin/ModalNotifications";
 import { AdminsAdmin } from "./pages/Admin/Admins";
 import { AdminForm } from "./pages/Admin/AdminForm";
 import { AdminActionLogs } from "./pages/Admin/AdminActionLogs";
+import { OperationLogs } from "./pages/Admin/OperationLogs";
 import { RobokassaSuccess } from "./pages/Robokassa/Success";
 import { RobokassaFail } from "./pages/Robokassa/Fail";
 import { ClientPerfomance } from "./pages/User/ClientPerfomance";
@@ -390,6 +393,18 @@ export const routes = createBrowserRouter([
         element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><FAQForm /></ProtectedRoute></RootLayout>,
     },
     {
+        path: "/admin/documents",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><DocumentsAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/documents/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><DocumentsForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/documents/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><DocumentsForm /></ProtectedRoute></RootLayout>,
+    },
+    {
         path: "/admin/practice",
         element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><PracticeAdmin /></ProtectedRoute></RootLayout>,
     },
@@ -711,6 +726,10 @@ export const routes = createBrowserRouter([
     {
         path: "/admin/action-logs",
         element: <RootLayout><ProtectedRoute requiredRole={["admin"]}><AdminActionLogs /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/operation-logs",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin"]}><OperationLogs /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/robokassa_callback/success",

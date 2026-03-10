@@ -146,6 +146,7 @@ export const ClientFemininityGazeboList = () => {
             setIsModalOpen(true);
         }
         if (accessType === 'paid') {
+            setSelectedFemininityGazebo(femininityGazebo);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
@@ -184,6 +185,7 @@ export const ClientFemininityGazeboList = () => {
             setIsModalOpen(true);
         }
         if (accessType === 'paid') {
+            setSelectedFemininityGazebo(femininityGazebo);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
@@ -205,6 +207,7 @@ export const ClientFemininityGazeboList = () => {
 
     const handleClosePaidModal = () => {
         setIsPaidModalOpen(false);
+        setSelectedFemininityGazebo(null);
     }
 
     const handlePurchaseSuccess = async () => {
@@ -324,12 +327,14 @@ export const ClientFemininityGazeboList = () => {
                 accessType={accessType}
             />
 
-            {isPaidModalOpen && (
+            {isPaidModalOpen && selectedFemininityGazebo && (
                 <ClientPaidDynamicModal
                     isOpen={isPaidModalOpen}
                     onClose={handleClosePaidModal}
-                    content={content}
-                    accessType={accessType}
+                    item={selectedFemininityGazebo}
+                    contentType="femininity-gazebo"
+                    userBalance={userData?.balance ?? 0}
+                    onPurchaseSuccess={handlePurchaseSuccess}
                 />
             )}
 

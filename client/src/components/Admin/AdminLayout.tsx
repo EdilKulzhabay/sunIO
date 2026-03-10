@@ -26,7 +26,8 @@ import {
     Target,
     Brain,
     MessageSquare,
-    FlaskConical
+    FlaskConical,
+    FileText
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -38,11 +39,13 @@ const menuItems = [
     { path: '/admin/users', label: 'Пользователи', icon: Users },
     { path: '/admin/admins', label: 'Администраторы', icon: Shield },
     { path: '/admin/action-logs', label: 'Журнал действий', icon: ClipboardList, adminOnly: true },
+    { path: '/admin/operation-logs', label: 'Журнал операций', icon: ClipboardList, adminOnly: true },
     { path: '/admin/broadcast', label: 'Рассылки', icon: Send },
     { path: '/admin/modal-notifications', label: 'Модальные уведомления', icon: Bell },
     { path: '/admin/profile', label: 'Профиль', icon: User },
     { path: '', label: '', icon: null, divider: true }, // Разделитель
     { path: '/admin/faq', label: 'FAQ', icon: HelpCircle },
+    { path: '/admin/documents', label: 'Документы', icon: FileText },
     { path: '/admin/practice', label: 'Практики', icon: Dumbbell },
     { path: '/admin/parables-of-life', label: 'Притчи о жизни', icon: MessageSquare },
     { path: '/admin/scientific-discoveries', label: 'Научные открытия', icon: FlaskConical },

@@ -157,6 +157,7 @@ export const ClientPracticesList = () => {
             setIsModalOpen(true);
         }
         if (accessType === 'paid') {
+            setSelectedPractice(practice);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
@@ -204,6 +205,7 @@ export const ClientPracticesList = () => {
             setIsModalOpen(true);
         }
         if (accessType === 'paid') {
+            setSelectedPractice(practice);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
@@ -225,6 +227,7 @@ export const ClientPracticesList = () => {
 
     const handleClosePaidModal = () => {
         setIsPaidModalOpen(false);
+        setSelectedPractice(null);
     }
 
     const handlePurchaseSuccess = async () => {
@@ -363,12 +366,14 @@ export const ClientPracticesList = () => {
                 accessType={accessType}
             />
 
-            {isPaidModalOpen && (
+            {isPaidModalOpen && selectedPractice && (
                 <ClientPaidDynamicModal
                     isOpen={isPaidModalOpen}
                     onClose={handleClosePaidModal}
-                    content={content}
-                    accessType={accessType}
+                    item={selectedPractice}
+                    contentType="practice"
+                    userBalance={userData?.balance ?? 0}
+                    onPurchaseSuccess={handlePurchaseSuccess}
                 />
             )}
 

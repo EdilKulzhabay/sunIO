@@ -23,6 +23,8 @@ import NavigatorDescriptions from './NavigatorDescriptions.js';
 import PointsAwardingPolicy from './PointsAwardingPolicy.js';
 import ParablesOfLife from './ParablesOfLife.js';
 import ScientificDiscoveries from './ScientificDiscoveries.js';
+import DepositLog from './DepositLog.js';
+import PurchaseLog from './PurchaseLog.js';
 
 export {
     User,
@@ -49,5 +51,7 @@ export {
     NavigatorDescriptions,
     PointsAwardingPolicy,
     ParablesOfLife,
-    ScientificDiscoveries
+    ScientificDiscoveries,
+    DepositLog,
+    PurchaseLog
 };

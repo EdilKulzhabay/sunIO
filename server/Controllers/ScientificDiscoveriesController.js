@@ -11,6 +11,7 @@ export const create = async (req, res) => {
             imageUrl,
             accessType,
             starsRequired,
+            price,
             duration,
             order,
             allowRepeatBonus,
@@ -56,6 +57,7 @@ export const create = async (req, res) => {
             imageUrl: imageUrl || '',
             accessType: accessType || 'free',
             starsRequired: Number.isFinite(starsRequired) ? starsRequired : 0,
+            price: Number.isFinite(price) ? price : 0,
             duration: Number.isFinite(duration) ? duration : 0,
             order: Number.isFinite(order) ? order : 0,
             allowRepeatBonus: Boolean(allowRepeatBonus),
@@ -185,6 +187,9 @@ export const update = async (req, res) => {
             updateData.starsRequired = Number.isFinite(updateData.starsRequired)
                 ? updateData.starsRequired
                 : 0;
+        }
+        if (updateData.price !== undefined) {
+            updateData.price = Number.isFinite(updateData.price) ? updateData.price : 0;
         }
         if (updateData.duration !== undefined) {
             updateData.duration = Number.isFinite(updateData.duration)

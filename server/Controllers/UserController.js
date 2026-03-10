@@ -6,6 +6,7 @@ import XLSX from "xlsx";
 import axios from "axios";
 import crypto from 'crypto';
 import { addAdminAction } from "../utils/addAdminAction.js";
+import PurchaseLog from "../Models/PurchaseLog.js";
 
 const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
@@ -827,6 +828,17 @@ export const updateUser = async (req, res) => {
             await User.findByIdAndUpdate(candidate._id, { $push: { modalNotifications: notification } });
         }
 
+        if ('balance' in updateData && updateData.balance !== candidate.balance && (updateData.balance || 0) > (candidate.balance || 0)) {
+            const addedAmount = (updateData.balance || 0) - (candidate.balance || 0);
+            const notification = {
+                modalTitle: "Вам пополнен баланс",
+                modalDescription: `Администратор пополнил ваш баланс на ${addedAmount.toLocaleString('ru-RU')} руб.`,
+                modalButtonText: "Принимаю с благодарностью",
+                modalButtonLink: undefined,
+            };
+            await User.findByIdAndUpdate(candidate._id, { $push: { modalNotifications: notification } });
+        }
+
         const user = await User.findByIdAndUpdate(
             id,
             updateData,
@@ -1447,15 +1459,13 @@ export const purchaseContent = async (req, res) => {
             });
         }
 
-        // Проверяем, что контент доступен за бонусы
-        if (content.accessType !== 'stars') {
+        if (content.accessType !== 'stars' && content.accessType !== 'paid') {
             return res.status(400).json({
                 success: false,
-                message: "Этот контент нельзя купить за бонусы",
+                message: "Этот контент нельзя купить",
             });
         }
 
-        // Проверяем, есть ли уже этот контент у пользователя
         const existingProduct = user.products.find(
             (p) => p.productId === contentId.toString() && p.type === 'one-time'
         );
@@ -1467,37 +1477,117 @@ export const purchaseContent = async (req, res) => {
             });
         }
 
-        // Проверяем количество бонусов
-        const starsRequired = content.starsRequired || 0;
-        if (user.bonus < starsRequired) {
-            return res.status(400).json({
-                success: false,
-                message: `Недостаточно бонусов. Требуется: ${starsRequired}, у вас: ${user.bonus}`,
-                starsRequired,
-                userBonus: user.bonus,
+        const contentTypeLabels = {
+            'practice': 'Практики',
+            'parables-of-life': 'Притчи о жизни',
+            'scientific-discoveries': 'Научные открытия',
+            'health-lab': 'Лаборатория здоровья',
+            'relationship-workshop': 'Мастерская отношений',
+            'spirit-forge': 'Кузница Духа',
+            'masters-tower': 'Башня мастеров',
+            'femininity-gazebo': 'Беседка женственности',
+            'consciousness-library': 'Библиотека сознания',
+            'product-catalog': 'Каталог платных продуктов',
+            'analysis-health': 'Анализ здоровья',
+            'analysis-relationships': 'Анализ отношений',
+            'analysis-realization': 'Анализ реализации',
+            'psychodiagnostics': 'Психодиагностика',
+        };
+
+        const sectionLabel = contentTypeLabels[contentType] || contentType;
+        const productTitle = `${sectionLabel}: ${content.title || 'Без названия'}`;
+
+        if (content.accessType === 'stars') {
+            const starsRequired = content.starsRequired || 0;
+            if (user.bonus < starsRequired) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Недостаточно бонусов. Требуется: ${starsRequired}, у вас: ${user.bonus}`,
+                    starsRequired,
+                    userBonus: user.bonus,
+                });
+            }
+
+            user.bonus -= starsRequired;
+            user.products.push({
+                productId: contentId.toString(),
+                type: 'one-time',
+                paymentDate: new Date(),
+                paymentAmount: starsRequired,
+                paymentStatus: 'paid',
+            });
+
+            await user.save();
+
+            await PurchaseLog.create({
+                userId: user._id,
+                userFullName: user.fullName || '',
+                productId: contentId.toString(),
+                productTitle,
+                amount: starsRequired,
+                paymentType: 'stars',
+            });
+
+            return res.json({
+                success: true,
+                message: "Контент успешно приобретен",
+                user: {
+                    bonus: user.bonus,
+                    balance: user.balance,
+                    products: user.products,
+                },
             });
         }
 
-        // Списываем бонусы и добавляем контент в products
-        user.bonus -= starsRequired;
-        user.products.push({
-            productId: contentId.toString(),
-            type: 'one-time',
-            paymentDate: new Date(),
-            paymentAmount: starsRequired,
-            paymentStatus: 'paid',
-        });
+        if (content.accessType === 'paid') {
+            const price = content.price || 0;
+            if (price <= 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Цена недоступна",
+                });
+            }
 
-        await user.save();
+            const userBalance = user.balance || 0;
+            if (userBalance < price) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Недостаточно средств. Требуется: ${price} руб., у вас: ${userBalance} руб.`,
+                    price,
+                    userBalance,
+                });
+            }
 
-        res.json({
-            success: true,
-            message: "Контент успешно приобретен",
-            user: {
-                bonus: user.bonus,
-                products: user.products,
-            },
-        });
+            user.balance = userBalance - price;
+            user.products.push({
+                productId: contentId.toString(),
+                type: 'one-time',
+                paymentDate: new Date(),
+                paymentAmount: price,
+                paymentStatus: 'paid',
+            });
+
+            await user.save();
+
+            await PurchaseLog.create({
+                userId: user._id,
+                userFullName: user.fullName || '',
+                productId: contentId.toString(),
+                productTitle,
+                amount: price,
+                paymentType: 'balance',
+            });
+
+            return res.json({
+                success: true,
+                message: "Контент успешно приобретен",
+                user: {
+                    bonus: user.bonus,
+                    balance: user.balance,
+                    products: user.products,
+                },
+            });
+        }
     } catch (error) {
         console.log("Ошибка в purchaseContent:", error);
         res.status(500).json({

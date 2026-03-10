@@ -40,7 +40,9 @@ import {
     PointsAwardingPolicyController,
     ParablesOfLifeController,
     ScientificDiscoveriesController,
-    ActivationLinkController
+    ActivationLinkController,
+    OperationLogController,
+    DocumentsController
 } from "./Controllers/index.js";
 import { authMiddleware } from "./Middlewares/authMiddleware.js";
 import { adminActionLogMiddleware } from "./Middlewares/adminActionLogMiddleware.js";
@@ -206,6 +208,11 @@ app.put("/api/admin/:id/unblock", authMiddleware, UserController.unblockAdmin);
 // Журнал действий админа (только для admin)
 app.get("/api/admin-action-logs", authMiddleware, AdminActionLogController.getAll);
 
+// Журнал операций (для admin)
+app.get("/api/operation-logs/deposits", authMiddleware, OperationLogController.getDeposits);
+app.get("/api/operation-logs/purchases", authMiddleware, OperationLogController.getPurchases);
+app.get("/api/operation-logs/client/:userId", OperationLogController.getClientHistory);
+
 // Управление профилем (для авторизованных пользователей)
 app.put("/api/user/profile/update", UserController.updateProfile);
 app.post("/api/user/purchase-content", UserController.purchaseContent);
@@ -223,6 +230,12 @@ app.get("/api/faq", FAQController.getAll);
 app.get("/api/faq/:id", FAQController.getById);
 app.put("/api/faq/:id", authMiddleware, FAQController.update);
 app.delete("/api/faq/:id", authMiddleware, FAQController.remove);
+
+app.post("/api/documents", createContentRateLimit, authMiddleware, DocumentsController.create);
+app.get("/api/documents", DocumentsController.getAll);
+app.get("/api/documents/:id", DocumentsController.getById);
+app.put("/api/documents/:id", authMiddleware, DocumentsController.update);
+app.delete("/api/documents/:id", authMiddleware, DocumentsController.remove);
 
 // ==================== Practice маршруты ====================
 app.post("/api/practice", createContentRateLimit, authMiddleware, PracticeController.create);

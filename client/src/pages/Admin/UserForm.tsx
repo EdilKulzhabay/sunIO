@@ -12,6 +12,7 @@ interface FormData {
     mail: string;
     phone: string;
     bonus: number;
+    balance: number;
     telegramId?: string;
     telegramUserName?: string;
     status?: string;
@@ -35,6 +36,7 @@ export const UserForm = () => {
         mail: '',
         phone: '',
         bonus: 0,
+        balance: 0,
         paymentLink: '',
         paymentId: '',
         lastActiveDate: "",
@@ -58,6 +60,7 @@ export const UserForm = () => {
                 mail: data.mail || '',
                 phone: data.phone || '',
                 bonus: data.bonus || 0,
+                balance: data.balance ?? 0,
                 telegramId: data.telegramId || '',
                 telegramUserName: data.telegramUserName || '',
                 status: data.status || '',
@@ -259,6 +262,18 @@ export const UserForm = () => {
                             onChange={(e) => {
                                 const value = parseInt(e.target.value) || 0;
                                 setFormData({ ...formData, bonus: value });
+                            }}
+                            placeholder="0"
+                            min="0"
+                        />
+
+                        <MyInput
+                            label="Баланс (руб.)"
+                            type="text"
+                            value={formData.balance.toString()}
+                            onChange={(e) => {
+                                const value = parseInt(e.target.value) || 0;
+                                setFormData({ ...formData, balance: value });
                             }}
                             placeholder="0"
                             min="0"

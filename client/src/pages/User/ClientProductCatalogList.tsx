@@ -146,6 +146,7 @@ export const ClientProductCatalogList = () => {
             setIsModalOpen(true);
         }
         if (accessType === 'paid') {
+            setSelectedULProductLCatalog(productCatalog);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
@@ -184,6 +185,7 @@ export const ClientProductCatalogList = () => {
             setIsModalOpen(true);
         }
         if (accessType === 'paid') {
+            setSelectedULProductLCatalog(productCatalog);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
@@ -205,6 +207,7 @@ export const ClientProductCatalogList = () => {
 
     const handleClosePaidModal = () => {
         setIsPaidModalOpen(false);
+        setSelectedULProductLCatalog(null);
     }
 
     const handlePurchaseSuccess = async () => {
@@ -324,12 +327,14 @@ export const ClientProductCatalogList = () => {
                 accessType={accessType}
             />
 
-            {isPaidModalOpen && (
+            {isPaidModalOpen && selectedULProductLCatalog && (
                 <ClientPaidDynamicModal
                     isOpen={isPaidModalOpen}
                     onClose={handleClosePaidModal}
-                    content={content}
-                    accessType={accessType}
+                    item={selectedULProductLCatalog}
+                    contentType="product-catalog"
+                    userBalance={userData?.balance ?? 0}
+                    onPurchaseSuccess={handlePurchaseSuccess}
                 />
             )}
 

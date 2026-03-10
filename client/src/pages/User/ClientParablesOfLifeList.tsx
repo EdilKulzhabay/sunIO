@@ -140,6 +140,7 @@ export const ClientParablesOfLifeList = () => {
             setIsModalOpen(true);
         }
         if (at === 'paid') {
+            setSelectedItem(item);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
@@ -171,6 +172,7 @@ export const ClientParablesOfLifeList = () => {
             setIsModalOpen(true);
         }
         if (at === 'paid') {
+            setSelectedItem(item);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
@@ -242,7 +244,7 @@ export const ClientParablesOfLifeList = () => {
             </UserLayout>
             <ClientSubscriptionDynamicModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} content={content} accessType={accessType} />
             {isPaidModalOpen && (
-                <ClientPaidDynamicModal isOpen={isPaidModalOpen} onClose={() => setIsPaidModalOpen(false)} content={content} accessType={accessType} />
+                <ClientPaidDynamicModal isOpen={isPaidModalOpen} onClose={() => { setIsPaidModalOpen(false); setSelectedItem(null); }} item={selectedItem} contentType={CONTENT_TYPE} userBalance={userData?.balance ?? 0} onPurchaseSuccess={async () => { await fetchUserData(); await fetchItems(); }} />
             )}
             {selectedItem && (
                 <>

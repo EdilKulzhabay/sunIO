@@ -31,6 +31,7 @@ interface FormData {
     imageUrl: string;
     accessType: string;
     starsRequired: number;
+    price: number;
     duration: number;
     order: number;
     allowRepeatBonus: boolean;
@@ -50,6 +51,7 @@ export const PracticeForm = () => {
         imageUrl: '',
         accessType: 'free',
         starsRequired: 0,
+        price: 0,
         duration: 0,
         order: 0,
         allowRepeatBonus: false,
@@ -110,6 +112,7 @@ export const PracticeForm = () => {
                 content: mappedContent,
                 accessType: data.accessType || 'free',
                 starsRequired: data.starsRequired ?? 0,
+                price: data.price ?? 0,
                 duration: data.duration ?? 0,
                 order: data.order ?? 0,
                 allowRepeatBonus: data.allowRepeatBonus ?? false,
@@ -315,6 +318,16 @@ export const PracticeForm = () => {
                                 type="text"
                                 value={formData.starsRequired.toString()}
                                 onChange={(e) => setFormData({ ...formData, starsRequired: parseInt(e.target.value) || 0 })}
+                                placeholder="0"
+                            />
+                        )}
+
+                        {formData.accessType === 'paid' && (
+                            <MyInput
+                                label="Цена (руб.)"
+                                type="text"
+                                value={formData.price.toString()}
+                                onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) || 0 })}
                                 placeholder="0"
                             />
                         )}

@@ -5,7 +5,7 @@ import { addAdminAction } from "../utils/addAdminAction.js";
 export const create = async (req, res) => {
     try {
         const user = req.user;
-        const { title, shortDescription, imageUrl, accessType, starsRequired, duration, order, allowRepeatBonus, location, redirectToPage, content } = req.body;
+        const { title, shortDescription, imageUrl, accessType, starsRequired, price, duration, order, allowRepeatBonus, location, redirectToPage, content } = req.body;
 
         if (!title) {
             return res.status(400).json({ success: false, message: "Название обязательно" });
@@ -28,7 +28,7 @@ export const create = async (req, res) => {
 
         const item = new AnalysisRelationships({
             title, shortDescription: shortDescription || '', imageUrl: imageUrl || '', accessType: accessType || 'free',
-            starsRequired: Number.isFinite(starsRequired) ? starsRequired : 0, duration: Number.isFinite(duration) ? duration : 0,
+            starsRequired: Number.isFinite(starsRequired) ? starsRequired : 0, price: Number.isFinite(price) ? price : 0, duration: Number.isFinite(duration) ? duration : 0,
             order: Number.isFinite(order) ? order : 0, allowRepeatBonus: Boolean(allowRepeatBonus), location: location || 'bottom', redirectToPage: redirectToPage || null, content: normalizedContent,
             visibility: req.body.visibility !== false,
         });
@@ -116,6 +116,7 @@ export const update = async (req, res) => {
         }
 
         if (updateData.starsRequired !== undefined) updateData.starsRequired = Number.isFinite(updateData.starsRequired) ? updateData.starsRequired : 0;
+        if (updateData.price !== undefined) updateData.price = Number.isFinite(updateData.price) ? updateData.price : 0;
         if (updateData.duration !== undefined) updateData.duration = Number.isFinite(updateData.duration) ? updateData.duration : 0;
         if (updateData.order !== undefined) updateData.order = Number.isFinite(updateData.order) ? updateData.order : 0;
 

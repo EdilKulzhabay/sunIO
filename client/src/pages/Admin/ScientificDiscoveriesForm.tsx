@@ -17,7 +17,7 @@ interface ContentItem {
     video?: { mainUrl: string; reserveUrl: string; duration: number; points?: number; };
     text?: string; image?: string; linkButton?: LinkButtonValue | null;
 }
-interface FormData { title: string; shortDescription: string; imageUrl: string; accessType: string; starsRequired: number; duration: number; order: number; allowRepeatBonus: boolean; location: 'top' | 'bottom'; redirectToPage: string; visibility: boolean; content: ContentItem[]; }
+interface FormData { title: string; shortDescription: string; imageUrl: string; accessType: string; starsRequired: number; price: number; duration: number; order: number; allowRepeatBonus: boolean; location: 'top' | 'bottom'; redirectToPage: string; visibility: boolean; content: ContentItem[]; }
 
 const API_PATH = '/api/scientific-discoveries';
 const ADMIN_PATH = '/admin/scientific-discoveries';
@@ -26,7 +26,7 @@ export const ScientificDiscoveriesForm = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const [loading, setLoading] = useState(false);
-    const [formData, setFormData] = useState<FormData>({ title: '', shortDescription: '', imageUrl: '', accessType: 'free', starsRequired: 0, duration: 0, order: 0, allowRepeatBonus: false, location: 'bottom', redirectToPage: '', visibility: true, content: [] });
+    const [formData, setFormData] = useState<FormData>({ title: '', shortDescription: '', imageUrl: '', accessType: 'free', starsRequired: 0, price: 0, duration: 0, order: 0, allowRepeatBonus: false, location: 'bottom', redirectToPage: '', visibility: true, content: [] });
 
     useEffect(() => { if (id) fetchItem(); }, [id]);
 
@@ -47,7 +47,7 @@ export const ScientificDiscoveriesForm = () => {
                     linkButton: item?.linkButton?.linkButtonText || item?.linkButton?.linkButtonLink ? { linkButtonText: item?.linkButton?.linkButtonText || null, linkButtonLink: item?.linkButton?.linkButtonLink || null, linkButtonType: item?.linkButton?.linkButtonType || 'internal' } : null,
                 };
             });
-            setFormData({ title: data.title || '', shortDescription: data.shortDescription || '', imageUrl: data.imageUrl || '', content: mappedContent, accessType: data.accessType || 'free', starsRequired: data.starsRequired ?? 0, duration: data.duration ?? 0, order: data.order ?? 0, allowRepeatBonus: data.allowRepeatBonus ?? false, location: data.location || 'bottom', redirectToPage: data.redirectToPage || '', visibility: data.visibility !== false });
+            setFormData({ title: data.title || '', shortDescription: data.shortDescription || '', imageUrl: data.imageUrl || '', content: mappedContent, accessType: data.accessType || 'free', starsRequired: data.starsRequired ?? 0, price: data.price ?? 0, duration: data.duration ?? 0, order: data.order ?? 0, allowRepeatBonus: data.allowRepeatBonus ?? false, location: data.location || 'bottom', redirectToPage: data.redirectToPage || '', visibility: data.visibility !== false });
         } catch (error) { toast.error('Ошибка загрузки данных'); navigate(ADMIN_PATH); }
     };
 
@@ -101,6 +101,7 @@ export const ScientificDiscoveriesForm = () => {
                         <ImageUpload value={formData.imageUrl} onChange={(url) => setFormData({ ...formData, imageUrl: url })} label="Изображение" />
                         <div className="flex flex-col gap-2"><label className="text-sm font-medium">Тип доступа</label><select value={formData.accessType} onChange={(e) => setFormData({ ...formData, accessType: e.target.value })} className="w-full p-2 rounded-md border border-gray-300"><option value="free">Бесплатно</option><option value="paid">Платно</option><option value="subscription">Подписка</option><option value="stars">Баллы</option></select></div>
                         {formData.accessType === 'stars' && <MyInput label="Стоимость в баллах" type="text" value={formData.starsRequired.toString()} onChange={(e) => setFormData({ ...formData, starsRequired: parseInt(e.target.value) || 0 })} placeholder="0" />}
+                        {formData.accessType === 'paid' && <MyInput label="Цена (руб.)" type="text" value={formData.price.toString()} onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) || 0 })} placeholder="0" />}
                         <div className="grid grid-cols-2 gap-4"><MyInput label="Порядок" type="text" value={formData.order.toString()} onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })} placeholder="0" /><div className="flex flex-col gap-2"><label className="text-sm font-medium">Расположение</label><select value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value as FormData['location'] })} className="w-full p-2 rounded-md border border-gray-300"><option value="top">Сверху</option><option value="bottom">Снизу</option></select></div></div>
                         <RedirectToPageSelector
                             value={formData.redirectToPage}

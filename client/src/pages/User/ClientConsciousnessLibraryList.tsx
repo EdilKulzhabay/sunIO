@@ -149,6 +149,7 @@ export const ClientConsciousnessLibraryList = () => {
         }
 
         if (accessType === 'paid') {
+            setSelectedConsciousnessLibrary(consciousnessLibrary);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
@@ -187,6 +188,7 @@ export const ClientConsciousnessLibraryList = () => {
             setIsModalOpen(true);
         }
         if (accessType === 'paid') {
+            setSelectedConsciousnessLibrary(consciousnessLibrary);
             setContent(paidContent);
             setIsPaidModalOpen(true);
         }
@@ -208,6 +210,7 @@ export const ClientConsciousnessLibraryList = () => {
 
     const handleClosePaidModal = () => {
         setIsPaidModalOpen(false);
+        setSelectedConsciousnessLibrary(null);
     }
 
     const handlePurchaseSuccess = async () => {
@@ -327,12 +330,14 @@ export const ClientConsciousnessLibraryList = () => {
                 accessType={accessType}
             />
 
-            {isPaidModalOpen && (
+            {isPaidModalOpen && selectedConsciousnessLibrary && (
                 <ClientPaidDynamicModal
                     isOpen={isPaidModalOpen}
                     onClose={handleClosePaidModal}
-                    content={content}
-                    accessType={accessType}
+                    item={selectedConsciousnessLibrary}
+                    contentType="consciousness-library"
+                    userBalance={userData?.balance ?? 0}
+                    onPurchaseSuccess={handlePurchaseSuccess}
                 />
             )}
 

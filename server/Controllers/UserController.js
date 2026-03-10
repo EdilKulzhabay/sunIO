@@ -862,7 +862,7 @@ export const updateUser = async (req, res) => {
             await DepositLog.create({
                 userId: user._id,
                 userFullName: user.fullName || '',
-                invId: `admin-${user._id}-${Date.now()}`,
+                invId: admin.fullName || 'Админ',
                 amount: balanceAddedAmount,
                 status: 'paid',
             });

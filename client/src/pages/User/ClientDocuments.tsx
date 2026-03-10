@@ -97,7 +97,7 @@ export const ClientDocuments = () => {
 
                     <div className="mt-5 space-y-4">
                         {documents.map((document) => (
-                            <div key={document.id} className="bg-[#114E50] rounded-xl p-4 flex items-center justify-between">
+                            <div key={document._id} className="bg-[#114E50] rounded-xl p-4 flex items-center justify-between">
                                 <div>
                                     <a href={document.link} target="_blank" rel="noopener noreferrer" className="text-white font-medium text-xl">
                                         {document.title}

@@ -211,6 +211,8 @@ app.get("/api/admin-action-logs", authMiddleware, AdminActionLogController.getAl
 // Журнал операций (для admin)
 app.get("/api/operation-logs/deposits", authMiddleware, OperationLogController.getDeposits);
 app.get("/api/operation-logs/purchases", authMiddleware, OperationLogController.getPurchases);
+app.get("/api/operation-logs/client/:userId/deposits", OperationLogController.getClientDeposits);
+app.get("/api/operation-logs/client/:userId/purchases", OperationLogController.getClientPurchases);
 app.get("/api/operation-logs/client/:userId", OperationLogController.getClientHistory);
 
 // Управление профилем (для авторизованных пользователей)

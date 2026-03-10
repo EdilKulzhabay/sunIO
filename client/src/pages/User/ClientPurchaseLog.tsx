@@ -3,14 +3,12 @@ import { BackNav } from "../../components/User/BackNav";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api";
-import linkArrow from "../../assets/linkArrow.png";
 
-export const ClientDocuments = () => {
+export const ClientPurchaseLog = () => {
     const [userData, setUserData] = useState<any>(null);
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
-    const [documents, setDocuments] = useState<any[]>([]);
-    const [content, setContent] = useState<string>('');
+    const [purchaseLog, setPurchaseLog] = useState<any[]>([]);
 
     useEffect(() => {
         // Проверка на блокировку пользователя
@@ -28,27 +26,21 @@ export const ClientDocuments = () => {
         }
 
         fetchUserData();
-        fetchDocuments();
-        fetchContent();
+        fetchPurchaseLog();
     }, [navigate]);
 
-    const fetchContent = async () => {
+    const fetchPurchaseLog = async () => {
         try {
-            const response = await api.get('/api/dynamic-content/name/documents');
-            setContent(response.data.data.content);
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!user?._id) return;
+            const response = await api.get(`/api/operation-logs/client/${user._id}/purchases`);
+            if (response.data.success) {
+                setPurchaseLog(response.data.data || []);
+            }
         } catch (error) {
-            console.error('Ошибка загрузки контента:', error);
+            console.error('Ошибка загрузки истории покупок:', error);
         }
-    }
-
-    const fetchDocuments = async () => {
-        try {
-            const response = await api.get('/api/documents');
-            setDocuments(response.data.data);
-        } catch (error) {
-            console.error('Ошибка загрузки документов:', error);
-        }
-    }
+    };
 
     const fetchUserData = async () => {
         try {
@@ -76,6 +68,14 @@ export const ClientDocuments = () => {
         }
     }
 
+    const formatDate = (date: string) => {
+        return new Date(date).toLocaleDateString('ru-RU', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+        });
+    }
+
 
     if (loading) {
         return (
@@ -88,27 +88,21 @@ export const ClientDocuments = () => {
     return (
         <div>
             <UserLayout>
-                <BackNav title="Документы" />
-                <div className="flex-1 px-4">
-
-                    <div className="text-white">
-                    {content}
-                    </div>
-
-                    <div className="mt-5 space-y-4">
-                        {documents.map((document) => (
-                            <div key={document.id} className="bg-[#114E50] rounded-xl p-4 flex items-center justify-between">
-                                <div>
-                                    <a href={document.link} target="_blank" rel="noopener noreferrer" className="text-white font-medium text-xl">
-                                        {document.title}
-                                    </a>
-                                </div>
-                                <div>
-                                    <img src={linkArrow} alt="arrow-link" className="w-5 h-5 object-cover" />
-                                </div>
+                <BackNav title="История покупок" />
+                <div className="flex-1 px-4 space-y-3">
+                    {purchaseLog && purchaseLog.length > 0 && purchaseLog.map((purchase) => (
+                        <div 
+                            key={purchase._id}
+                            className="bg-[#114E50] rounded-xl p-4"
+                        >
+                            <div className="text-white/60 text-sm">
+                                {formatDate(purchase.createdAt)}, {purchase.amount.toLocaleString('ru-RU')} руб.
                             </div>
-                        ))}
-                    </div>
+                            <div className="mt-1 text-white font-medium">
+                                <div>{purchase.productTitle}</div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </UserLayout>
         </div>

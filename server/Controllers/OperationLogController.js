@@ -108,7 +108,7 @@ export const getClientHistory = async (req, res) => {
 
         const [deposits, purchases] = await Promise.all([
             DepositLog.find({ userId, status: 'paid' }).sort({ createdAt: -1 }),
-            PurchaseLog.find({ userId }).sort({ createdAt: -1 }),
+            PurchaseLog.find({ userId, paymentType: 'balance' }).sort({ createdAt: -1 }),
         ]);
 
         res.json({
@@ -122,5 +122,41 @@ export const getClientHistory = async (req, res) => {
     } catch (error) {
         console.error('Ошибка получения истории операций клиента:', error);
         res.status(500).json({ success: false, message: 'Ошибка получения истории операций' });
+    }
+};
+
+export const getClientDeposits = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const deposits = await DepositLog.find({ userId, status: 'paid' })
+            .sort({ createdAt: -1 })
+            .select('_id createdAt invId amount');
+
+        res.json({
+            success: true,
+            data: deposits,
+        });
+    } catch (error) {
+        console.error('Ошибка получения журнала пополнений клиента:', error);
+        res.status(500).json({ success: false, message: 'Ошибка получения журнала пополнений' });
+    }
+};
+
+export const getClientPurchases = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const purchases = await PurchaseLog.find({ userId, paymentType: 'balance' })
+            .sort({ createdAt: -1 })
+            .select('_id createdAt amount productTitle');
+
+        res.json({
+            success: true,
+            data: purchases,
+        });
+    } catch (error) {
+        console.error('Ошибка получения журнала покупок клиента:', error);
+        res.status(500).json({ success: false, message: 'Ошибка получения журнала покупок' });
     }
 };

@@ -330,7 +330,7 @@ export const ClientProfile = () => {
                             <div className="ml-auto">
                                 <button
                                     onClick={() => navigate('/client/operation-log')}
-                                    className="flex items-center gap-x-2 border border-white/40 rounded-full py-2 px-2.5"
+                                    className="flex items-center gap-x-2 border border-white/40 rounded-full py-2 px-2.5 text-sm"
                                 >
                                     <p className="text-white">{userData?.balance || 0} руб.</p>
                                     <img src={ruble} alt="ruble" className="w-2 h-[13px] object-cover" />

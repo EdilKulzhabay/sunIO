@@ -25,6 +25,7 @@ import ParablesOfLife from './ParablesOfLife.js';
 import ScientificDiscoveries from './ScientificDiscoveries.js';
 import DepositLog from './DepositLog.js';
 import PurchaseLog from './PurchaseLog.js';
+import Documents from './Documents.js';
 
 export {
     User,
@@ -53,5 +54,6 @@ export {
     ParablesOfLife,
     ScientificDiscoveries,
     DepositLog,
-    PurchaseLog
+    PurchaseLog,
+    Documents
 };

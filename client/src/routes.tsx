@@ -124,6 +124,8 @@ import { ClientRegion } from "./pages/User/ClientRegion";
 import { ClientAppTemporarilyUnavailable } from "./pages/User/ClientAppTemporarilyUnavailable";
 import { ClientDocuments } from "./pages/User/ClientDocuments";
 import { ClientOperationLog } from "./pages/User/ClientOperationLog";
+import { ClientDepositLog } from "./pages/User/ClientDepositLog";
+import { ClientPurchaseLog } from "./pages/User/ClientPurchaseLog";
 
 // Компонент-обертка для всех маршрутов
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
@@ -375,6 +377,14 @@ export const routes = createBrowserRouter([
     {
         path: "/client/operation-log",
         element: <RootLayout><TelegramGuard><ProtectedRoute><ClientOperationLog /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/deposit-log",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientDepositLog /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/purchase-log",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientPurchaseLog /></ProtectedRoute></TelegramGuard></RootLayout>,
     },
     {
         path: "/admin",

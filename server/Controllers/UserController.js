@@ -7,6 +7,7 @@ import axios from "axios";
 import crypto from 'crypto';
 import { addAdminAction } from "../utils/addAdminAction.js";
 import PurchaseLog from "../Models/PurchaseLog.js";
+import DepositLog from "../Models/DepositLog.js";
 
 const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
@@ -828,13 +829,14 @@ export const updateUser = async (req, res) => {
             await User.findByIdAndUpdate(candidate._id, { $push: { modalNotifications: notification } });
         }
 
+        let balanceAddedAmount = 0;
         if ('balance' in updateData && updateData.balance !== candidate.balance && (updateData.balance || 0) > (candidate.balance || 0)) {
-            const addedAmount = (updateData.balance || 0) - (candidate.balance || 0);
+            balanceAddedAmount = (updateData.balance || 0) - (candidate.balance || 0);
             const notification = {
-                modalTitle: "Вам пополнен баланс",
-                modalDescription: `Администратор пополнил ваш баланс на ${addedAmount.toLocaleString('ru-RU')} руб.`,
-                modalButtonText: "Принимаю с благодарностью",
-                modalButtonLink: undefined,
+                modalTitle: "Пополнение баланса",
+                modalDescription: `Баланс Приложения пополнен на сумму\n${balanceAddedAmount.toLocaleString('ru-RU')} руб.`,
+                modalButtonText: "Открыть Журнал операций",
+                modalButtonLink: "/client/deposit-log",
             };
             await User.findByIdAndUpdate(candidate._id, { $push: { modalNotifications: notification } });
         }
@@ -854,6 +856,16 @@ export const updateUser = async (req, res) => {
 
         if (admin && admin !== null) {
             await addAdminAction(admin._id, `Обновил(а) пользователя: "${user.fullName}"`);
+        }
+
+        if (balanceAddedAmount > 0) {
+            await DepositLog.create({
+                userId: user._id,
+                userFullName: user.fullName || '',
+                invId: `admin-${user._id}-${Date.now()}`,
+                amount: balanceAddedAmount,
+                status: 'paid',
+            });
         }
 
         res.json({

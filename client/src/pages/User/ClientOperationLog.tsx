@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api";
 import needMoney from "../../assets/needMoney.png";
-import arrowDown from "../../assets/arrowDown.png";
 import { toast } from "react-toastify";
 import { X } from "lucide-react";
+import whiteArrowRight from "../../assets/whiteArrowRight.png";
 
 export const ClientOperationLog = () => {
     const navigate = useNavigate();
@@ -14,11 +14,7 @@ export const ClientOperationLog = () => {
     const [safeAreaTop, setSafeAreaTop] = useState(0);
     const [safeAreaBottom, setSafeAreaBottom] = useState(0);
     const [loading, setLoading] = useState(true);
-    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-    const [isPurchasesOpen, setIsPurchasesOpen] = useState(false);
     const [balance, setBalance] = useState(0);
-    const [history, setHistory] = useState<any[]>([]);
-    const [purchases, setPurchases] = useState<any[]>([]);
 
     const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
     const [depositAmount, setDepositAmount] = useState('');
@@ -48,8 +44,6 @@ export const ClientOperationLog = () => {
             const response = await api.get(`/api/operation-logs/client/${user._id}`);
             if (response.data.success) {
                 setBalance(response.data.data.balance || 0);
-                setHistory(response.data.data.deposits || []);
-                setPurchases(response.data.data.purchases || []);
             }
         } catch (error) {
             console.error('Ошибка загрузки истории операций:', error);
@@ -85,13 +79,6 @@ export const ClientOperationLog = () => {
         } finally {
             setDepositLoading(false);
         }
-    };
-
-    const formatDate = (dateStr: string) => {
-        if (!dateStr) return '';
-        const d = new Date(dateStr);
-        const pad = (n: number) => String(n).padStart(2, '0');
-        return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
     };
 
     useEffect(() => {
@@ -139,70 +126,46 @@ export const ClientOperationLog = () => {
                     style={{ minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom)}px` }}
                 >
                     <div className="flex-1">
-
-                        <div className="text-white">
-                            Здесь отображаются операции пополнения баланса приложения (предоплата за услуги), а также история покупок продуктов. Внесённые средства учитываются как внутренний баланс и могут быть использованы исключительно для оплаты услуг внутри приложения
-                        </div>
-
-                        <div className="text-white mt-3">
-                            <div className="font-medium">Баланс приложения</div>
-                            <div className="mt-2 border border-white/40 rounded-full py-2 px-2.5 flex items-center gap-x-6 max-w-max">
-                                <div>{balance.toLocaleString("ru-RU")} руб.</div>
+                        <div className="bg-[#114E50] rounded-xl p-4 text-white flex items-start gap-x-3">
+                            <div className="shrink-0">
+                                <img src={needMoney} alt="wallet" className="w-[30px] h-[30px] object-cover" />
+                            </div>
+                            <div>
+                                <div className="flex items-center justify-between text-xl font-medium">
+                                    <div>Баланс приложения</div>
+                                    <div>{balance.toLocaleString("ru-RU")} руб.</div>
+                                </div>
                                 <div>
-                                    <img src={needMoney} alt="wallet" className="w-6 h-6 object-cover" />
+                                Внесённые на баланс средства могут быть использованы только для оплаты продуктов внутри Приложения Солнце
                                 </div>
                             </div>
                         </div>
 
-                        <div className="mt-5 bg-[#114E50] rounded-xl p-4">
+                        <button onClick={() => {navigate('/client/deposit-log')}} className="w-full block mt-3 bg-[#114E50] rounded-xl p-4">
                             <div className="flex items-center justify-between">
                                 <div className="text-xl font-medium">История пополнений</div>
-                                <button onClick={() => setIsHistoryOpen(!isHistoryOpen)}>
-                                    <img src={arrowDown} alt="arrow-down" className={`w-6 h-6 object-cover ${isHistoryOpen ? "rotate-180" : ""}`} />
-                                </button>
-                            </div>
-                            {isHistoryOpen && (
-                                <div className="mt-2 space-y-3">
-                                    {history.length > 0 ? history.map((item: any) => (
-                                        <div key={item._id} className="border border-white/10 rounded-xl py-2.5 px-3">
-                                            <div className="text-white/60 text-xs">
-                                                {formatDate(item.createdAt)}
-                                            </div>
-                                            <div className="text-white mt-1">
-                                                +{item.amount.toLocaleString("ru-RU")} руб.
-                                            </div>
-                                        </div>
-                                    )) : (
-                                        <div className="text-white/40 text-sm">Нет операций</div>
-                                    )}
+                                <div>
+                                <img src={whiteArrowRight} alt="arrow-right" className="w-4 h-4 object-cover" />
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        </button>
 
-                        <div className="mt-3 bg-[#114E50] rounded-xl p-4">
+                        <button onClick={() => {navigate('/client/purchase-log')}} className="w-full block mt-3 bg-[#114E50] rounded-xl p-4">
                             <div className="flex items-center justify-between">
                                 <div className="text-xl font-medium">История покупок</div>
-                                <button onClick={() => setIsPurchasesOpen(!isPurchasesOpen)}>
-                                    <img src={arrowDown} alt="arrow-down" className={`w-6 h-6 object-cover ${isPurchasesOpen ? "rotate-180" : ""}`} />
-                                </button>
-                            </div>
-                            {isPurchasesOpen && (
-                                <div className="mt-2 space-y-3">
-                                    {purchases.length > 0 ? purchases.map((item: any) => (
-                                        <div key={item._id} className="border border-white/10 rounded-xl py-2.5 px-3">
-                                            <div className="text-white/60 text-xs">
-                                                {formatDate(item.createdAt)}, {item.amount.toLocaleString("ru-RU")} руб.
-                                            </div>
-                                            <div className="text-white mt-1">
-                                                {item.productTitle}
-                                            </div>
-                                        </div>
-                                    )) : (
-                                        <div className="text-white/40 text-sm">Нет покупок</div>
-                                    )}
+                                <div>
+                                    <img src={whiteArrowRight} alt="arrow-right" className="w-4 h-4 object-cover" />
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        </button>
+                        <button onClick={() => navigate('/client/documents')} className="w-full block mt-3 bg-[#114E50] rounded-xl p-4">
+                            <div className="flex items-center justify-between">
+                                <div className="text-xl font-medium">Документы</div>
+                                <div>
+                                    <img src={whiteArrowRight} alt="arrow-right" className="w-4 h-4 object-cover" />
+                                </div>
+                            </div>
+                        </button>
                     </div>
                     <button
                         onClick={() => setIsDepositModalOpen(true)}

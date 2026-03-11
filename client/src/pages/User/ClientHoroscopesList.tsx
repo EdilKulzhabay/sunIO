@@ -5,6 +5,7 @@ import api from "../../api";
 import { ClientSubscriptionDynamicModal } from "../../components/User/ClientSubscriptionDynamicModal";
 import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
+import { SafeExternalLink } from "../../components/User/SafeExternalLink";
 
 interface HoroscopeEntity {
     _id: string;
@@ -262,13 +263,12 @@ export const ClientHoroscopesList = () => {
                                 <p className="mt-4 font-bold" dangerouslySetInnerHTML={{ __html: corridorsContent?.['horoscope-corridor-subtitle'] ?? '' }}></p>
                                 <p className="mt-1 text-sm" dangerouslySetInnerHTML={{ __html: corridorsContent?.['horoscope-corridor-content'] ?? '' }}></p>
                             </div>
-                            <a 
+                            <SafeExternalLink 
                                 className="block bg-[#C4841D] text-white py-2.5 text-center font-medium rounded-full mt-4 w-full" 
-                                href={corridorsContent?.['horoscope-corridor-link'] ?? '#'} 
-                                target="_blank"
+                                href={corridorsContent?.['horoscope-corridor-link'] ?? '#'}
                             >
                                 <p dangerouslySetInnerHTML={{ __html: corridorsContent?.['horoscope-corridor-link-text'] ?? '' }}></p>
-                            </a>
+                            </SafeExternalLink>
                         </div>
                     </div>
         
@@ -301,13 +301,12 @@ export const ClientHoroscopesList = () => {
                                     Когда вы знаете особенности энергии того или иного коридора (диапазон дат) или сверхдаты (один день), то вы сможете достигать сверх результатов даже не будучи рождёнными в это время. Красота этой технологии в том, что вы можете проявлять любую антисоциумную энергию, которая активна на текущую дату. Как это сделать, какие условия активации этой энергии в вас, а также подводные камни вы узнаете на онлайн Точке «Знаки»
                                 </p>
                             </div>
-                            <a 
+                            <SafeExternalLink 
                                 className="block bg-[#C4841D] text-white py-2.5 text-center font-medium rounded-full mt-4 w-full" 
-                                href="https://tochka.li/signs" 
-                                target="_blank"
+                                href="https://tochka.li/signs"
                             >
                                 Подробнее о Точке «Знаки»
-                            </a>
+                            </SafeExternalLink>
                         </div>
                     </div>
                 </div>

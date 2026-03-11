@@ -2,6 +2,7 @@ import api from '../../api';
 import bgGar from '../../assets/bgGar.png';
 import { useState, useEffect } from 'react';
 import sunWithHands from '../../assets/sunWithHands.png';
+import { SafeExternalLink } from '../../components/User/SafeExternalLink';
 
 export const BlockedBrowser = () => {
     const [screenHeight, setScreenHeight] = useState<number>(0);
@@ -75,7 +76,7 @@ export const BlockedBrowser = () => {
                     <p className='mb-2'>Как открыть приложение:</p>
                     <ol className='list-decimal list-inside space-y-1 ml-2'>
                         <li>Откройте Telegram</li>
-                        <li>Найдите бота <a href={content?.link?.content} target='_blank' className='text-[#C4841D]'>{content?.title?.content}</a></li>
+                        <li>Найдите бота <SafeExternalLink href={content?.link?.content || '#'} className='text-[#C4841D]'>{content?.title?.content}</SafeExternalLink></li>
                         <li>Нажмите кнопку {content?.buttonText?.content}</li>
                     </ol>
                 </div>

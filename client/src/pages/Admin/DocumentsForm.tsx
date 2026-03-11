@@ -15,6 +15,7 @@ export const DocumentsForm = () => {
     const [formData, setFormData] = useState({
         title: '',
         link: '',
+        order: 0,
     });
 
     useEffect(() => {
@@ -31,6 +32,7 @@ export const DocumentsForm = () => {
             setFormData({
                 title: doc.title || '',
                 link: doc.link || '',
+                order: doc.order ?? 0,
             });
         } catch (error) {
             toast.error('Ошибка загрузки документа');
@@ -92,6 +94,14 @@ export const DocumentsForm = () => {
                             onChange={(e) => setFormData({ ...formData, link: e.target.value })}
                             placeholder="https://..."
                             required
+                        />
+
+                        <MyInput
+                            label="Порядковый номер"
+                            type="number"
+                            value={String(formData.order)}
+                            onChange={(e) => setFormData({ ...formData, order: Number(e.target.value) || 0 })}
+                            placeholder="0"
                         />
 
                         <div className="flex gap-3 justify-end pt-4">

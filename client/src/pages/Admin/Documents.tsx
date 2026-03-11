@@ -45,6 +45,7 @@ export const DocumentsAdmin = () => {
     };
 
     const columns = [
+        { key: 'order', label: 'Порядок' },
         { key: 'title', label: 'Название' },
         {
             key: 'link',

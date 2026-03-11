@@ -15,6 +15,7 @@ import { ProfilePageInstructionsModal, PROFILE_INSTRUCTION_STEPS_COUNT } from ".
 import { X } from 'lucide-react';
 import { toast } from "react-toastify";
 import ruble from "../../assets/ruble.png";
+import { SafeExternalLink } from "../../components/User/SafeExternalLink";
 
 export const ClientProfile = () => {
     const [userData, setUserData] = useState<any>(null);
@@ -330,9 +331,9 @@ export const ClientProfile = () => {
                             <div className="ml-auto">
                                 <button
                                     onClick={() => navigate('/client/operation-log')}
-                                    className="flex items-center gap-x-2 border border-white/40 border-r-0 rounded-bl-full rounded-tl-full py-2 px-2.5 text-sm"
+                                    className="flex items-center gap-x-2 border border-white/40 border-r-0 rounded-bl-full rounded-tl-full py-2 px-2.5 pr-4 text-sm"
                                 >
-                                    <p className="text-white">{userData?.balance || 0} руб.</p>
+                                    <p className="text-white">{userData?.balance || 0}</p>
                                     <img src={ruble} alt="ruble" className="shrink-0 w-2 h-[13px] object-cover" />
                                 </button>
                             </div>
@@ -428,26 +429,22 @@ export const ClientProfile = () => {
                             </div>
 
                             <div className="mt-4 flex items-center gap-x-2">
-                                <a
+                                <SafeExternalLink
                                     id="profile-instruction-telegram-channel"
                                     href="https://t.me/io_center"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
                                     className="basis-1/2 bg-[#114E50] rounded-lg p-4 pr-2 flex items-center justify-between"
                                 >
                                     <div className="font-medium text-sm">Телеграм канал</div>
                                     <img src={linkArrow} alt="linkArrow" className="w-5 h-5 object-cover shrink-0" />
-                                </a>
-                                <a
+                                </SafeExternalLink>
+                                <SafeExternalLink
                                     id="profile-instruction-telegram-chat"
                                     href="https://t.me/+UWaWd3xq3erdWnny"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
                                     className="basis-1/2 bg-[#114E50] rounded-lg p-4 pr-2 flex items-center justify-between"
                                 >
                                     <div className="font-medium text-sm">Телеграм чат</div>
                                     <img src={linkArrow} alt="linkArrow" className="w-5 h-5 object-cover shrink-0" />
-                                </a>
+                                </SafeExternalLink>
                             </div>
 
                             <div id="profile-instruction-video-settings" className="mt-4 flex items-center justify-between">

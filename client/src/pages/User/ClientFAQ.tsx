@@ -4,7 +4,10 @@ import api from "../../api";
 import { BackNav } from "../../components/User/BackNav";
 import { MobileAccordionList } from "../../components/User/MobileAccordionList";
 import { MyLink } from "../../components/User/MyLink";
-import { Switch } from "../../components/User/Switch"
+import { Switch } from "../../components/User/Switch";
+import { SafeExternalLink } from "../../components/User/SafeExternalLink";
+import search from "../../assets/search.png";
+import { useNavigate } from "react-router-dom";
 
 export const ClientFAQ = () => {
     const [faqs, setFaqs] = useState<{ title: string, content: string }[]>([]);
@@ -14,7 +17,7 @@ export const ClientFAQ = () => {
     const [loading, setLoading] = useState(true);
     const [dinamycLink, setDinamycLink] = useState<string>('');
     const [userData, setUserData] = useState<any>(null);
-
+    const navigate = useNavigate();
     const fetchUserData = async () => {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         const response = await api.get(`/api/user/${user._id}`);
@@ -117,6 +120,15 @@ export const ClientFAQ = () => {
                     style={{ minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom)}px` }}
                 >
                     <div className="">
+                        <button 
+                            onClick={() => navigate('/client/content-search')}
+                            className="flex items-center justify-center gap-x-2 w-full bg-white/10 rounded-full py-2.5 text-white mb-4"
+                        >
+                            <div className="shrink-0">
+                                <img src={search} alt="search" className="w-5 h-5 object-cover" />
+                            </div>
+                            <div className="text-white font-medium">Найти контент по ключевым словам</div>
+                        </button>
                         {faqs && faqs.length > 0 && (
                             <div className="">
                                 <MobileAccordionList items={faqs.map((faq: any) => ({ title: faq.question, content: faq.answer }))} />
@@ -143,11 +155,10 @@ export const ClientFAQ = () => {
                                 }} 
                             />
                         </div>
-                        <a 
+                        <SafeExternalLink 
                             href={dinamycLink || 'https://drive.google.com/file/d/1AI8UwHC_BIZ3Rwi6MaP9Z04T-J6xFR03/view?usp=drive_link'}
-                            target="_blank"
                             className='w-full mt-4 bg-white/10 block text-white py-2.5 text-center font-medium rounded-full'
-                        >Открыть инструкцию</a>
+                        >Открыть инструкцию</SafeExternalLink>
                         <MyLink to="/client/contactus" text="Связаться с нами" className='w-full mt-3' color='red'/>
                     </div>
                 </div>

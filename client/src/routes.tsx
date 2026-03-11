@@ -126,6 +126,8 @@ import { ClientDocuments } from "./pages/User/ClientDocuments";
 import { ClientOperationLog } from "./pages/User/ClientOperationLog";
 import { ClientDepositLog } from "./pages/User/ClientDepositLog";
 import { ClientPurchaseLog } from "./pages/User/ClientPurchaseLog";
+import { ClientWelcome2 } from "./pages/User/ClientWelcome2";
+import { ClientContentSearch } from "./pages/User/ClientContentSearch";
 
 // Компонент-обертка для всех маршрутов
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
@@ -145,6 +147,10 @@ export const routes = createBrowserRouter([
     {
         path: "/main",
         element: <RootLayout><TelegramGuard><ProtectedRoute><Main /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/welcome2",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientWelcome2 /></ProtectedRoute></TelegramGuard></RootLayout>,
     },
     {
         path: "/client-performance",
@@ -385,6 +391,10 @@ export const routes = createBrowserRouter([
     {
         path: "/client/purchase-log",
         element: <RootLayout><TelegramGuard><ProtectedRoute><ClientPurchaseLog /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/content-search",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientContentSearch /></ProtectedRoute></TelegramGuard></RootLayout>,
     },
     {
         path: "/admin",

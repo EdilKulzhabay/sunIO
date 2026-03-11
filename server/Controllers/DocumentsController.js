@@ -4,7 +4,7 @@ import { addAdminAction } from '../utils/addAdminAction.js';
 export const create = async (req, res) => {
     try {
         const user = req.user;
-        const { title, link } = req.body;
+        const { title, link, order } = req.body;
 
         if (!title || !link) {
             return res.status(400).json({
@@ -13,7 +13,7 @@ export const create = async (req, res) => {
             });
         }
 
-        const doc = new Documents({ title, link });
+        const doc = new Documents({ title, link, order: order != null ? Number(order) : 0 });
         await doc.save();
 
         await addAdminAction(user._id, `Создал(а) документ: "${title}"`);
@@ -35,7 +35,7 @@ export const create = async (req, res) => {
 
 export const getAll = async (req, res) => {
     try {
-        const docs = await Documents.find().sort({ createdAt: -1 });
+        const docs = await Documents.find().sort({ order: 1, createdAt: -1 });
 
         res.json({
             success: true,
@@ -82,11 +82,14 @@ export const update = async (req, res) => {
     try {
         const user = req.user;
         const { id } = req.params;
-        const { title, link } = req.body;
+        const { title, link, order } = req.body;
+
+        const updateData = { title, link };
+        if (order !== undefined) updateData.order = Number(order);
 
         const doc = await Documents.findByIdAndUpdate(
             id,
-            { title, link },
+            updateData,
             { new: true, runValidators: true }
         );
 

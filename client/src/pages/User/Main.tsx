@@ -20,6 +20,7 @@ import { ClientSchedule } from "./ClientSchedule"
 import { MainPageInstructionsModal } from "../../components/User/MainPageInstructionsModal";
 import { X } from "lucide-react";
 import { MAIN_INSTRUCTION_STEPS_COUNT } from "../../components/User/MainPageInstructionsModal";
+import { openExternalLink } from "../../utils/telegramWebApp";
 
 
 // const SmallCard = ({ title, link, img }: { title: string, link: string, img: string }) => {
@@ -288,13 +289,6 @@ export const Main = () => {
         }
     };
 
-    const openExternalLink = (url: string) => {
-        if ((window as any).Telegram?.WebApp) {
-          (window as any).Telegram.WebApp.openLink(url, { try_instant_view: false });
-        } else {
-          window.open(url, "_blank");
-        }
-      };
 
     const handleInstructionNext = () => {
         setInstructionStep((prev) => prev + 1);
@@ -473,7 +467,7 @@ export const Main = () => {
 
             <div className="px-4 pb-10 bg-[#031F23]">
                 <div className="flex items-center justify-between pt-5 pb-4">
-                    <div className="cursor-pointer" onClick={() => navigate('/client/contactus')}>
+                    <div className="cursor-pointer" onClick={() => navigate('/client/welcome2')}>
                         <img src={logo} alt="logo" className="w-[104px] h-[40px]" />
                     </div>
                     <div className="flex items-center gap-6">

@@ -104,7 +104,7 @@ export const getClientHistory = async (req, res) => {
         const { userId } = req.params;
 
         const User = (await import('../Models/User.js')).default;
-        const user = await User.findById(userId).select('balance');
+        const user = await User.findById(userId).select('balance supportKarma');
 
         const [deposits, purchases] = await Promise.all([
             DepositLog.find({ userId, status: 'paid' }).sort({ createdAt: -1 }),
@@ -115,6 +115,7 @@ export const getClientHistory = async (req, res) => {
             success: true,
             data: {
                 balance: user?.balance || 0,
+                supportKarma: user?.supportKarma || 0,
                 deposits,
                 purchases,
             },

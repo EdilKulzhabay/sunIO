@@ -6,6 +6,8 @@ import { Switch } from "../../components/User/Switch";
 import { X } from 'lucide-react';
 import copyLink from '../../assets/copyLink.png';
 import { RedButton } from "../../components/User/RedButton";
+import { SafeExternalLink } from "../../components/User/SafeExternalLink";
+import { openExternalLink } from "../../utils/telegramWebApp";
 
 export const ClientSchedule = () => {
     const [userData, setUserData] = useState<any>(null);
@@ -412,9 +414,9 @@ export const ClientSchedule = () => {
                                             Перейти на страницу события
                                         </Link>
                                     ) : (
-                                        <a href={selectedSchedule.eventLink} target="_blank" rel="noopener noreferrer" className="text-[#00C5AE] hover:underline">
+                                        <SafeExternalLink href={selectedSchedule.eventLink} className="text-[#00C5AE] hover:underline">
                                             {selectedSchedule.eventLink}
-                                        </a>
+                                        </SafeExternalLink>
                                     )}
                                 </div>
                                 {linkCopied && (
@@ -429,13 +431,7 @@ export const ClientSchedule = () => {
                             <button
                                 onClick={() => {
                                     if (selectedSchedule.googleCalendarLink) {
-                                        // Открываем ссылку во внешнем браузере через Telegram WebApp API
-                                        if (window.Telegram?.WebApp?.openLink) {
-                                            window.Telegram.WebApp.openLink(selectedSchedule.googleCalendarLink);
-                                        } else {
-                                            // Fallback для обычного браузера
-                                            window.open(selectedSchedule.googleCalendarLink, '_blank');
-                                        }
+                                        openExternalLink(selectedSchedule.googleCalendarLink);
                                         closeModal();
                                     }
                                 }}
@@ -446,13 +442,7 @@ export const ClientSchedule = () => {
                                 text="Добавить в календарь iOS" 
                                 onClick={() => {
                                     if (selectedSchedule.appleCalendarLink) {
-                                        // Открываем ссылку во внешнем браузере через Telegram WebApp API
-                                        if (window.Telegram?.WebApp?.openLink) {
-                                            window.Telegram.WebApp.openLink(selectedSchedule.appleCalendarLink);
-                                        } else {
-                                            // Fallback для обычного браузера
-                                            window.open(selectedSchedule.appleCalendarLink, '_blank');
-                                        }
+                                        openExternalLink(selectedSchedule.appleCalendarLink);
                                         closeModal();
                                     }
                                 }} 
@@ -524,9 +514,9 @@ export const ClientSchedule = () => {
                                             Перейти на страницу события
                                         </Link>
                                     ) : (
-                                        <a href={selectedSchedule.eventLink} target="_blank" rel="noopener noreferrer" className="text-[#00C5AE] hover:underline">
+                                        <SafeExternalLink href={selectedSchedule.eventLink} className="text-[#00C5AE] hover:underline">
                                             {selectedSchedule.eventLink}
-                                        </a>
+                                        </SafeExternalLink>
                                     )}
                                 </div>
                                 {linkCopied && (
@@ -541,13 +531,7 @@ export const ClientSchedule = () => {
                             <button
                                 onClick={() => {
                                     if (selectedSchedule.googleCalendarLink) {
-                                        // Открываем ссылку во внешнем браузере через Telegram WebApp API
-                                        if (window.Telegram?.WebApp?.openLink) {
-                                            window.Telegram.WebApp.openLink(selectedSchedule.googleCalendarLink);
-                                        } else {
-                                            // Fallback для обычного браузера
-                                            window.open(selectedSchedule.googleCalendarLink, '_blank');
-                                        }
+                                        openExternalLink(selectedSchedule.googleCalendarLink);
                                         closeModal();
                                     }
                                 }}
@@ -558,13 +542,7 @@ export const ClientSchedule = () => {
                                 text="Добавить в календарь iOS" 
                                 onClick={() => {
                                     if (selectedSchedule.appleCalendarLink) {
-                                        // Открываем ссылку во внешнем браузере через Telegram WebApp API
-                                        if (window.Telegram?.WebApp?.openLink) {
-                                            window.Telegram.WebApp.openLink(selectedSchedule.appleCalendarLink);
-                                        } else {
-                                            // Fallback для обычного браузера
-                                            window.open(selectedSchedule.appleCalendarLink, '_blank');
-                                        }
+                                        openExternalLink(selectedSchedule.appleCalendarLink);
                                         closeModal();
                                     }
                                 }} 

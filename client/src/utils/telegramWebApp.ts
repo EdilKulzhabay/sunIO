@@ -206,6 +206,25 @@ export const showTelegramBackButton = () => {
 };
 
 /**
+ * Открывает ссылку: если в URL есть "t.me", открывает в Telegram (openTelegramLink),
+ * иначе — во внешнем браузере (openLink) или window.open вне WebApp.
+ */
+export const openExternalLink = (url: string): void => {
+    if (!url?.trim()) return;
+    const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+        if (normalized.includes('t.me')) {
+            tg.openTelegramLink?.(normalized);
+        } else {
+            tg.openLink?.(normalized, { try_instant_view: false });
+        }
+    } else {
+        window.open(normalized, '_blank', 'noopener,noreferrer');
+    }
+};
+
+/**
  * Проверяет, запущено ли приложение в Telegram WebView
  * Более строгая проверка: проверяет наличие initData, который заполняется только в реальном Telegram WebApp
  * В обычном браузере скрипт SDK создает объект, но initData будет пустой строкой или undefined

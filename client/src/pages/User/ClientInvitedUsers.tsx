@@ -9,6 +9,7 @@ import edit from "../../assets/edit.png";
 import { X } from 'lucide-react';
 import { toast } from "react-toastify";
 import { BonusPolicyModal } from "../../components/User/ClientInsufficientBonusModal";
+import { SafeExternalLink } from "../../components/User/SafeExternalLink";
 
 export const ClientInvitedUsers = () => {
     const [userData, setUserData] = useState<any>(null);
@@ -363,11 +364,11 @@ export const ClientInvitedUsers = () => {
                                                     key={user.telegramId}
                                                     className="flex items-center justify-between w-full py-2.5 px-3 border border-white/40 rounded-xl text-left text-white font-medium hover:bg-white/10 transition-colors"
                                                 >
-                                                    <a href={`https://t.me/${user.telegramUserName}`} target="_blank" rel="noopener noreferrer">
+                                                    <SafeExternalLink href={`https://t.me/${user.telegramUserName}`}>
                                                         {user.telegramUserName && `@${user.telegramUserName}`}
                                                         {user.telegramUserName && user.fullName && ', '}
                                                         {user.fullName && `${user.fullName}`}
-                                                    </a>
+                                                    </SafeExternalLink>
                                                     <div className={`w-4 h-4 flex items-center justify-center border ${selectedUser === user.telegramId ? 'border-[#C4841D]' : 'border-white/40'} rounded-full`}>
                                                         {selectedUser === user.telegramId && (
                                                             <div className="w-[6px] h-[6px] bg-[#C4841D] rounded-full"></div>

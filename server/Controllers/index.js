@@ -32,3 +32,4 @@ export * as ScientificDiscoveriesController from "./ScientificDiscoveriesControl
 export * as ActivationLinkController from "./ActivationLinkController.js";
 export * as OperationLogController from "./OperationLogController.js";
 export * as DocumentsController from "./DocumentsController.js";
+export * as ContentSearchController from "./ContentSearchController.js";

@@ -31,7 +31,7 @@ export const About = () => {
                 const response = await api.get(`/api/user/telegram/${telegramId}`);
                 if (response.data.success && response.data.user) {
                     if (response.data.user.bodyActivation || response.data.user.heartActivation || response.data.user.healingFamily || response.data.user.awakeningSpirit) {
-                        window.location.href = 'https://t.me/+PPXcfaTFVYJlNWIy';
+                        (await import('../../utils/telegramWebApp')).openExternalLink('https://t.me/+PPXcfaTFVYJlNWIy');
                     } else {
                         setModalOpen(true);
                     }

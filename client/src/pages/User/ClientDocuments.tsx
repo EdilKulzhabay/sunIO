@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api";
 import linkArrow from "../../assets/linkArrow.png";
+import { openExternalLink } from "../../utils/telegramWebApp";
+
+const isExternalLink = (url: string) => url.startsWith('http://') || url.startsWith('https://');
 
 export const ClientDocuments = () => {
     const [userData, setUserData] = useState<any>(null);
@@ -44,7 +47,8 @@ export const ClientDocuments = () => {
     const fetchDocuments = async () => {
         try {
             const response = await api.get('/api/documents');
-            setDocuments(response.data.data);
+            const list = response.data.data || [];
+            setDocuments([...list].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
         } catch (error) {
             console.error('Ошибка загрузки документов:', error);
         }
@@ -97,16 +101,22 @@ export const ClientDocuments = () => {
 
                     <div className="mt-5 space-y-4">
                         {documents.map((document) => (
-                            <div key={document._id} className="bg-[#114E50] rounded-xl p-4 flex items-center justify-between">
+                            <button key={document._id} onClick={() => {
+                                if (isExternalLink(document.link)) {
+                                    openExternalLink(document.link);
+                                } else {
+                                    navigate(document.link);
+                                }
+                            }} className="w-full bg-[#114E50] rounded-xl p-4 flex items-center justify-between">
                                 <div>
-                                    <a href={document.link} target="_blank" rel="noopener noreferrer" className="text-white font-medium text-xl">
+                                    <p className="text-white font-medium text-xl">
                                         {document.title}
-                                    </a>
+                                    </p>
                                 </div>
                                 <div>
                                     <img src={linkArrow} alt="arrow-link" className="w-5 h-5 object-cover" />
                                 </div>
-                            </div>
+                            </button>
                         ))}
                     </div>
                 </div>

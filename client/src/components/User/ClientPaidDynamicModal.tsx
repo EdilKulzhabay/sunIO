@@ -14,6 +14,7 @@ interface ClientPaidDynamicModalProps {
     item?: {
         _id: string;
         title: string;
+        shortDescription?: string;
         price?: number;
     };
     contentType?: string;
@@ -85,10 +86,11 @@ export const ClientPaidDynamicModal = ({
                     >
                         <X size={24} />
                     </button>
-                    <div className="text-xl font-semibold mb-2">Платный контент</div>
+                    <div className="text-xl font-semibold mb-2">Покупка контента</div>
                     {item && (
                         <div className="text-white mt-2 space-y-3">
                             <p className="font-medium">{item.title}</p>
+                            <p className="text-white/80 text-sm">{item.shortDescription}</p>
                             <p>Стоимость: <span className="font-bold">{price.toLocaleString('ru-RU')} руб.</span></p>
                             <p className="text-white/80 text-sm">Ваш баланс: {userBalance.toLocaleString('ru-RU')} руб.</p>
                             {canBuy ? (
@@ -100,18 +102,16 @@ export const ClientPaidDynamicModal = ({
                                     >
                                         {loading ? 'Покупка...' : `Купить за ${price.toLocaleString('ru-RU')} руб.`}
                                     </button>
-                                    <RedButton text="Закрыть" onClick={onClose} className="w-full" />
                                 </div>
                             ) : (
                                 <div className="flex flex-col gap-2 mt-4">
-                                    <p className="text-yellow-200 text-sm">Недостаточно средств. Пополните баланс для покупки.</p>
+                                    <p className="text-[#00C5AE] text-sm">Недостаточно средств. Пополните баланс для покупки.</p>
                                     <Link
                                         to="/client/operation-log"
                                         className="w-full py-3 bg-[#C4841D] text-white font-medium rounded-full text-center block"
                                     >
                                         Пополнить баланс
                                     </Link>
-                                    <RedButton text="Закрыть" onClick={onClose} className="w-full" />
                                 </div>
                             )}
                         </div>
@@ -140,10 +140,11 @@ export const ClientPaidDynamicModal = ({
                     >
                         <X size={32} />
                     </button>
-                    <div className="text-xl font-semibold mb-2">Платный контент</div>
+                    <div className="text-xl font-semibold mb-2">Покупка контента</div>
                     {item && (
                         <div className="text-white mt-2 space-y-3">
                             <p className="font-medium text-lg">{item.title}</p>
+                            <p className="text-white/80 text-sm">{item.shortDescription}</p>
                             <p>Стоимость: <span className="font-bold">{price.toLocaleString('ru-RU')} руб.</span></p>
                             <p className="text-white/80 text-sm">Ваш баланс: {userBalance.toLocaleString('ru-RU')} руб.</p>
                             {canBuy ? (
@@ -155,18 +156,16 @@ export const ClientPaidDynamicModal = ({
                                     >
                                         {loading ? 'Покупка...' : `Купить за ${price.toLocaleString('ru-RU')} руб.`}
                                     </button>
-                                    <RedButton text="Закрыть" onClick={onClose} className="w-full" />
                                 </div>
                             ) : (
                                 <div className="flex flex-col gap-2 mt-6">
-                                    <p className="text-yellow-200 text-sm">Недостаточно средств. Пополните баланс для покупки.</p>
+                                    <p className="text-[#00C5AE] text-sm">Недостаточно средств. Пополните баланс для покупки.</p>
                                     <Link
                                         to="/client/operation-log"
                                         className="w-full py-3 bg-[#C4841D] text-white font-medium rounded-full text-center block"
                                     >
                                         Пополнить баланс
                                     </Link>
-                                    <RedButton text="Закрыть" onClick={onClose} className="w-full" />
                                 </div>
                             )}
                         </div>

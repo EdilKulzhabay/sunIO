@@ -5,7 +5,8 @@ import api from "../../api"
 import { formatDateRangeDDMM } from "../../components/User/dateUtils"
 import { MobileAccordionList } from "../../components/User/MobileAccordionList"
 import { RedButton } from "../../components/User/RedButton"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom";
+import { SafeExternalLink } from "../../components/User/SafeExternalLink";
 
 export const ClientHoroscope = () => {
     const [horoscope, setHoroscope] = useState<any>(null);
@@ -142,13 +143,12 @@ export const ClientHoroscope = () => {
                 </div>
 
                 <div className="px-4 mt-auto pt-8 space-y-3 pb-10 lg:hidden">
-                    <a
+                    <SafeExternalLink
                         href="https://tochka.li/signs"
-                        target="_blank"
                         className="w-full block border border-[#FFC293] text-[#FFC293] py-2.5 text-center font-medium rounded-full"
                     >
                         Подробнее об энергии на Точке Знаки
-                    </a>
+                    </SafeExternalLink>
                     <RedButton
                         text="Посмотреть все гороскопы"
                         onClick={() => navigate('/client/horoscopes')}
@@ -156,13 +156,12 @@ export const ClientHoroscope = () => {
                     />
                 </div>
                 <div className="hidden lg:flex justify-end items-center gap-x-3 lg:pb-10 lg:mt-4">
-                    <a
+                    <SafeExternalLink
                         href="https://tochka.li/signs"
-                        target="_blank"
                         className="block border px-4 border-[#FFC293] text-[#FFC293] py-2.5 text-center font-medium rounded-full"
                     >
                         Подробнее об энергии на Точке Знаки
-                    </a>
+                    </SafeExternalLink>
                     <RedButton
                         text="Посмотреть все гороскопы"
                         onClick={() => navigate('/client/horoscopes')}

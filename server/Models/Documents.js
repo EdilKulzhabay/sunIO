@@ -12,6 +12,10 @@ const DocumentsSchema = new mongoose.Schema(
             required: [true, 'Ссылка обязательна'],
             trim: true,
         },
+        order: {
+            type: Number,
+            default: 0,
+        },
     },
     {
         timestamps: true,

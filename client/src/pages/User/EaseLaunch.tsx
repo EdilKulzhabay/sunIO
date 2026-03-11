@@ -3,6 +3,7 @@ import { MyLink } from '../../components/User/MyLink';
 import easeLaunch from '../../assets/easeLaunch.png';
 import { useState, useEffect } from 'react';
 import api from '../../api';
+import { SafeExternalLink } from '../../components/User/SafeExternalLink';
 
 export const EaseLaunch = () => {
     const [dinamycLink, setDinamycLink] = useState<string>('');
@@ -38,11 +39,10 @@ export const EaseLaunch = () => {
             </div>
             
             <div className='bg-[#031F23]'>
-                <a 
+                <SafeExternalLink 
                     href={dinamycLink || 'https://drive.google.com/file/d/1mvJtPzDEQQCcDBlbiFNgLb2U2ArlcPZp/view?usp=sharing'}
-                    target="_blank"
                     className='w-full mt-4 bg-white/10 block text-white py-2.5 text-center font-medium rounded-full'
-                >Открыть инструкцию</a>
+                >Открыть инструкцию</SafeExternalLink>
                 <MyLink to="/client-performance" text="Далее" className='w-full mt-4' color='red'/>
             </div>
         </div>

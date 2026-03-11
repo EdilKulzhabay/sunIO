@@ -8,6 +8,7 @@ import crypto from 'crypto';
 import { addAdminAction } from "../utils/addAdminAction.js";
 import PurchaseLog from "../Models/PurchaseLog.js";
 import DepositLog from "../Models/DepositLog.js";
+import DepositLog from "../Models/DepositLog.js";
 
 const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
@@ -1605,6 +1606,65 @@ export const purchaseContent = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Ошибка при покупке контента",
+        });
+    }
+};
+
+export const supportProject = async (req, res) => {
+    try {
+        const { userId, amount } = req.body;
+
+        const parsedAmount = Number(amount);
+        if (!userId || !parsedAmount || parsedAmount <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Некорректные данные. Укажите пользователя и положительную сумму.",
+            });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "Пользователь не найден",
+            });
+        }
+
+        const currentBalance = user.balance || 0;
+        if (currentBalance < parsedAmount) {
+            return res.status(400).json({
+                success: false,
+                message: `Недостаточно средств на балансе. Требуется: ${parsedAmount} руб., у вас: ${currentBalance} руб.`,
+            });
+        }
+
+        user.balance = currentBalance - parsedAmount;
+        user.supportKarma = (user.supportKarma || 0) + parsedAmount;
+
+        await user.save();
+
+        await PurchaseLog.create({
+            userId: user._id,
+            userFullName: user.fullName || "",
+            productId: null,
+            productTitle: "Поддержка проекта, плюс в карму",
+            amount: parsedAmount,
+            paymentType: "balance",
+        });
+
+        return res.json({
+            success: true,
+            message: "Спасибо за поддержку проекта!",
+            user: {
+                balance: user.balance,
+                supportKarma: user.supportKarma,
+            },
+        });
+    } catch (error) {
+        console.log("Ошибка в supportProject:", error);
+        res.status(500).json({
+            success: false,
+            message: "Ошибка при поддержке проекта",
         });
     }
 };

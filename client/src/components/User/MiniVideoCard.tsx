@@ -2,16 +2,9 @@ import lock from '../../assets/lock.png';
 import star from '../../assets/star.png';
 import { useNavigate } from 'react-router-dom';
 import arrowRight from '../../assets/arrowRight.png';
+import { openExternalLink } from '../../utils/telegramWebApp';
 
 const isExternalLink = (url: string) => url.startsWith('http://') || url.startsWith('https://');
-
-const openExternalLink = (url: string) => {
-    if ((window as any).Telegram?.WebApp) {
-        (window as any).Telegram.WebApp.openLink(url, { try_instant_view: false });
-    } else {
-        window.open(url, '_blank');
-    }
-};
 
 export const MiniVideoCard = ({ title, image, link, progress, accessType, onLockedClick, duration, starsRequired }: { title: string, image: string, link: string, progress: number, accessType: string, onLockedClick?: () => void, duration?: number, starsRequired?: number }) => {
     const navigate = useNavigate();

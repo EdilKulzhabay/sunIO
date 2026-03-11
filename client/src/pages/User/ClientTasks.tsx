@@ -5,16 +5,9 @@ import { useNavigate } from "react-router-dom";
 import api from "../../api";
 import taskInActiveSun from "../../assets/taskInActiveSun.png";
 import taskActiveSun from "../../assets/taskActiveSun.png";
+import { openExternalLink } from "../../utils/telegramWebApp";
 
 const isExternalLink = (url: string) => url.startsWith('http://') || url.startsWith('https://');
-
-const openExternalLink = (url: string) => {
-    if ((window as any).Telegram?.WebApp) {
-        (window as any).Telegram.WebApp.openLink(url, { try_instant_view: false });
-    } else {
-        window.open(url, '_blank');
-    }
-};
 
 export const ClientTasks = () => {
     const navigate = useNavigate();

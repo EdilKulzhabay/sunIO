@@ -2,13 +2,23 @@ import { BackNav } from "../../components/User/BackNav";
 import { UserLayout } from "../../components/User/UserLayout";
 import api from "../../api";
 import { useState, useEffect } from "react";
+import { SafeExternalLink } from "../../components/User/SafeExternalLink";
 
 const ContactUsBlock = ({ title, content, isLink = false, link = '' }: { title: string, content: string, isLink?: boolean, link?: string }) => {
     return (
-        <div className="bg-[#114E50] rounded-lg p-4">
-            <p className="text-sm text-white/40">{title}</p>
-            <p className="mt-1 text-lg font-medium">{isLink ? <a href={link} target="_blank" rel="noopener noreferrer" className="text-white">{content}</a> : content}</p>
-        </div>
+        <>
+            {isLink ? (
+                <SafeExternalLink href={link} className="bg-[#114E50] rounded-lg p-4 block">
+                    <p className="text-sm text-white/40">{title}</p>
+                    <p className="mt-1 text-lg font-medium">{content}</p>
+                </SafeExternalLink>
+            ) : (
+                <div className="bg-[#114E50] rounded-lg p-4">
+                    <p className="text-sm text-white/40">{title}</p>
+                    <p className="mt-1 text-lg font-medium">{content}</p>
+                </div>
+            )}
+        </>
     );
 };
 

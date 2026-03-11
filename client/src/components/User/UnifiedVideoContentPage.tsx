@@ -9,6 +9,7 @@ import { ClientPurchaseConfirmModal } from "./ClientPurchaseConfirmModal";
 import { ClientInsufficientBonusModal } from "./ClientInsufficientBonusModal";
 import { ClientPaidDynamicModal } from "./ClientPaidDynamicModal";
 import { X } from "lucide-react";
+import { openExternalLink } from "../../utils/telegramWebApp";
 
 type ContentType = 
     | "videoLesson" 
@@ -530,7 +531,7 @@ export const UnifiedVideoContentPage = ({
                     <ClientPaidDynamicModal
                         isOpen={showPaidModal}
                         onClose={handleAccessClose}
-                        item={{ _id: id, title: content.title, price: content.price }}
+                        item={{ _id: id, title: content.title, shortDescription: content.shortDescription, price: content.price }}
                         contentType={contentType}
                         userBalance={user?.balance ?? 0}
                         onPurchaseSuccess={handlePurchaseSuccess}
@@ -603,14 +604,6 @@ export const UnifiedVideoContentPage = ({
                         const videoKey = `${id}-${itemKey}`;
                         const lb = item?.linkButton;
                         const hasLinkButton = lb?.linkButtonText && lb?.linkButtonLink;
-
-                        const openExternalLink = (url: string) => {
-                            if ((window as any).Telegram?.WebApp) {
-                                (window as any).Telegram.WebApp.openLink(url, { try_instant_view: false });
-                            } else {
-                                window.open(url, '_blank');
-                            }
-                        };
 
                         const renderLinkButtonBlock = () =>
                             hasLinkButton ? (

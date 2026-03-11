@@ -7,6 +7,7 @@ import { MyButton } from '../../components/Admin/MyButton';
 import { ArrowLeft } from 'lucide-react';
 import api from '../../api';
 import { toast } from 'react-toastify';
+import { REDIRECT_TO_PAGE_OPTIONS } from '../../constants/redirectToPageOptions';
 
 export const ScheduleForm = () => {
     const { id } = useParams();
@@ -25,36 +26,6 @@ export const ScheduleForm = () => {
         description: '',
         priority: false,
     });
-
-    const INTERNAL_PAGES = [
-        { path: '/client/faq', label: 'FAQ' },
-        { path: '/client/horoscope', label: 'Гороскоп' },
-        { path: '/client/horoscopes', label: 'Гороскопы' },
-        { path: '/client/transit', label: 'Транзит' },
-        { path: '/client/transits', label: 'Транзиты' },
-        { path: '/client/schumann', label: 'Шумановские резонансы' },
-        { path: '/client/contactus', label: 'Связаться с нами' },
-        { path: '/client/practices', label: 'Практики' },
-        { path: '/client/parables-of-life', label: 'Притчи о жизни' },
-        { path: '/client/scientific-discoveries', label: 'Научные открытия' },
-        { path: '/client/health-lab', label: 'Лаборатория здоровья' },
-        { path: '/client/relationship-workshop', label: 'Мастерская отношений' },
-        { path: '/client/spirit-forge', label: 'Кузница духа' },
-        { path: '/client/masters-tower', label: 'Башня мастеров' },
-        { path: '/client/femininity-gazebo', label: 'Беседка женственности' },
-        { path: '/client/consciousness-library', label: 'Библиотека сознания' },
-        { path: '/client/product-catalog', label: 'Каталог продуктов' },
-        { path: '/client/analysis-health', label: 'Анализ здоровья' },
-        { path: '/client/analysis-relationships', label: 'Анализ отношений' },
-        { path: '/client/analysis-realization', label: 'Анализ осознания' },
-        { path: '/client/psychodiagnostics', label: 'Психодиагностика' },
-        { path: '/client/schedule', label: 'Расписание' },
-        { path: '/client/diary', label: 'Дневник' },
-        { path: '/client/navigator', label: 'Навигатор' },
-        { path: '/client/profile', label: 'Профиль' },
-        { path: '/client/beggining-journey', label: 'Начало пути' },
-        { path: '/client/tasks', label: 'Задания' },
-    ];
 
     // Функция для конвертации UTC времени в локальное время Asia/Almaty (UTC+6) для отображения
     const dateToLocalDateTime = (date: Date | string): string => {
@@ -232,9 +203,8 @@ export const ScheduleForm = () => {
                                         onChange={(e) => setFormData({ ...formData, eventLink: e.target.value })}
                                         className="block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 sm:text-sm"
                                     >
-                                        <option value="">— Выберите страницу —</option>
-                                        {INTERNAL_PAGES.map((page) => (
-                                            <option key={page.path} value={page.path}>{page.label}</option>
+                                        {REDIRECT_TO_PAGE_OPTIONS.map((page) => (
+                                            <option key={page.value || 'none'} value={page.value}>{page.title}</option>
                                         ))}
                                     </select>
                                 </div>

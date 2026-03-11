@@ -42,7 +42,8 @@ import {
     ScientificDiscoveriesController,
     ActivationLinkController,
     OperationLogController,
-    DocumentsController
+    DocumentsController,
+    ContentSearchController
 } from "./Controllers/index.js";
 import { authMiddleware } from "./Middlewares/authMiddleware.js";
 import { adminActionLogMiddleware } from "./Middlewares/adminActionLogMiddleware.js";
@@ -218,6 +219,7 @@ app.get("/api/operation-logs/client/:userId", OperationLogController.getClientHi
 // Управление профилем (для авторизованных пользователей)
 app.put("/api/user/profile/update", UserController.updateProfile);
 app.post("/api/user/purchase-content", UserController.purchaseContent);
+app.post("/api/user/support-project", UserController.supportProject);
 
 // ==================== ActivationLink (Ссылки активации) маршруты ====================
 app.post("/api/activation-link", createContentRateLimit, authMiddleware, ActivationLinkController.create);
@@ -235,6 +237,7 @@ app.delete("/api/faq/:id", authMiddleware, FAQController.remove);
 
 app.post("/api/documents", createContentRateLimit, authMiddleware, DocumentsController.create);
 app.get("/api/documents", DocumentsController.getAll);
+app.get("/api/content-search", ContentSearchController.search);
 app.get("/api/documents/:id", DocumentsController.getById);
 app.put("/api/documents/:id", authMiddleware, DocumentsController.update);
 app.delete("/api/documents/:id", authMiddleware, DocumentsController.remove);

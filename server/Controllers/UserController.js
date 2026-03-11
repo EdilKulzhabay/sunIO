@@ -8,7 +8,6 @@ import crypto from 'crypto';
 import { addAdminAction } from "../utils/addAdminAction.js";
 import PurchaseLog from "../Models/PurchaseLog.js";
 import DepositLog from "../Models/DepositLog.js";
-import DepositLog from "../Models/DepositLog.js";
 
 const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",

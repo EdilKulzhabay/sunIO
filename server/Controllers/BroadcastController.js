@@ -1,6 +1,7 @@
 import User from "../Models/User.js";
 import Broadcast from "../Models/Broadcast.js";
 import BroadcastSchedule from "../Models/BroadcastSchedule.js";
+import Diary from "../Models/Diary.js";
 import axios from "axios";
 import { addAdminAction } from "../utils/addAdminAction.js";
 

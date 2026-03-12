@@ -334,7 +334,7 @@ export const ClientProfile = () => {
                                     className="flex items-center gap-x-2 border border-white/40 border-r-0 rounded-bl-full rounded-tl-full py-2 px-2.5 pr-4 text-sm"
                                 >
                                     <p className="text-white">{userData?.balance || 0}</p>
-                                    <img src={ruble} alt="ruble" className="shrink-0 w-2 h-[13px] object-cover" />
+                                    <img src={ruble} alt="ruble" className="shrink-0 h-[13px] object-cover" />
                                 </button>
                             </div>
                         </div>

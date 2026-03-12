@@ -21,6 +21,8 @@ import { MainPageInstructionsModal } from "../../components/User/MainPageInstruc
 import { X } from "lucide-react";
 import { MAIN_INSTRUCTION_STEPS_COUNT } from "../../components/User/MainPageInstructionsModal";
 import { openExternalLink } from "../../utils/telegramWebApp";
+import { toast } from "react-toastify";
+import copyLinkIcon from "../../assets/copyLink.png";
 
 
 // const SmallCard = ({ title, link, img }: { title: string, link: string, img: string }) => {
@@ -90,6 +92,10 @@ export const Main = () => {
     const [modalNotification, setModalNotification] = useState<ModalNotification | null>(null);
     const [notificationIndex, setNotificationIndex] = useState<number | null>(null);
     const [instructionStep, setInstructionStep] = useState(0);
+    const [inviteModalOpen, setInviteModalOpen] = useState(false);
+    const [linkCopied, setLinkCopied] = useState(false);
+    const [communityCount, setCommunityCount] = useState(0);
+    const [displayedCount, setDisplayedCount] = useState(0);
 
     useEffect(() => {
         
@@ -252,6 +258,46 @@ export const Main = () => {
             fetchModalNotifications();
         }
     }, [userData]);
+
+    // Загрузка количества участников сообщества (без админов и anonym)
+    useEffect(() => {
+        let cancelled = false;
+        const fetchCommunityCount = async () => {
+            try {
+                const res = await api.get<{ success: boolean; count: number }>('/api/user/community-count');
+                if (!cancelled && res.data?.success && typeof res.data.count === 'number') {
+                    setCommunityCount(res.data.count);
+                }
+            } catch (e) {
+                if (!cancelled) console.error('Ошибка загрузки community count:', e);
+            }
+        };
+        fetchCommunityCount();
+        return () => { cancelled = true; };
+    }, []);
+
+    // Анимация счётчика от 0 до communityCount
+    useEffect(() => {
+        if (communityCount <= 0) {
+            setDisplayedCount(0);
+            return;
+        }
+        const duration = 1200;
+        const stepMs = 50;
+        const steps = Math.max(1, Math.ceil(duration / stepMs));
+        const stepValue = communityCount / steps;
+        let current = 0;
+        const timer = setInterval(() => {
+            current += stepValue;
+            if (current >= communityCount) {
+                setDisplayedCount(communityCount);
+                clearInterval(timer);
+            } else {
+                setDisplayedCount(Math.floor(current));
+            }
+        }, stepMs);
+        return () => clearInterval(timer);
+    }, [communityCount]);
 
     const fetchModalNotifications = async () => {
         try {
@@ -490,6 +536,21 @@ export const Main = () => {
                     </div>
                 </div>
                 <h1 className="mt-1 text-xl font-bold">Добро пожаловать, {userName ? userName : ""}!</h1>
+                <div className="mt-2 bg-white/10 rounded-xl p-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <div className="font-bold tabular-nums">{displayedCount}</div>
+                        <div className="text-white">Друзей Сообщества</div>
+                    </div>
+                    <div>
+                        <button
+                            type="button"
+                            onClick={() => setInviteModalOpen(true)}
+                            className="bg-white/20 text-white py-2 px-4 rounded-full text-sm"
+                        >
+                            Пригласить
+                        </button>
+                    </div>
+                </div>
                 <div className="grid grid-cols-2 gap-3 mt-5">
                     <div id="main-instruction-navigator">
                         <SmallCard title="Навигатор" link="/client/navigator" img={main1} />
@@ -529,6 +590,67 @@ export const Main = () => {
                         content="Разрешение внутренних конфликтов, соединение со своей энергией и запуск процессов изменений"
                     />
                 </div> */}
+
+                {/* Модалка «Пригласи друга» */}
+                {inviteModalOpen && (
+                    <div className="fixed inset-0 z-50 overflow-y-auto">
+                        <div className="flex items-end justify-center min-h-screen sm:items-center sm:p-4">
+                            <div
+                                className="fixed inset-0 bg-black/60 transition-opacity z-20"
+                                onClick={() => {
+                                    setInviteModalOpen(false)
+                                    setLinkCopied(false)
+                                }}
+                            />
+                            <div
+                                className="relative z-50 w-full max-w-md px-4 pt-6 pb-8 bg-[#114E50] rounded-t-[24px] sm:rounded-[24px] text-left text-white shadow-xl"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setInviteModalOpen(false)
+                                        setLinkCopied(false)
+                                    }}
+                                    className="absolute top-6 right-4 text-white/70 hover:text-white"
+                                >
+                                    <X size={24} />
+                                </button>
+                                <h3 className="text-xl font-bold pr-10">Вместе мы сила!</h3>
+                                <p className="mt-4 text-white/90 text-base">
+                                    Благодаря тебе сообщество «Исцеление осознанием» быстро растёт. Поделись своей реферальной ссылкой с друзьями, чтобы света вокруг тебя стало больше.
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setLinkCopied(true);
+                                        const link = userData?.telegramId
+                                            ? `https://t.me/io_sun_bot?start=${userData.telegramId}`
+                                            : '';
+                                        if (link) {
+                                            navigator.clipboard.writeText(link).then(() => {
+                                                toast.success('Ссылка скопирована');
+                                            }).catch(() => toast.error('Не удалось скопировать'));
+                                        } else {
+                                            toast.warning('Реферальная ссылка недоступна');
+                                        }
+                                    }}
+                                    className="w-full mt-3 py-3 px-4 flex items-start justify-between bg-white/10 rounded-xl"
+                                >
+                                    <div className="text-left">
+                                        <div>Пригласи друга по ссылке</div>
+                                        {linkCopied && userData?.telegramId && (
+                                            <div className="text-sm text-[#00C5AE] mt-1">https://t.me/io_sun_bot?start=${userData.telegramId}</div>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <img src={copyLinkIcon} alt="copy" className="w-5 h-5 object-cover" />
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </UserLayout>
     )

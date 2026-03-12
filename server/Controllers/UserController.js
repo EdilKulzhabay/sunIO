@@ -617,6 +617,20 @@ export const getAllUsers = async (req, res) => {
     }
 };
 
+// Количество участников сообщества (без админов и anonym) — для главной страницы
+export const getCommunityCount = async (req, res) => {
+    try {
+        const count = await User.countDocuments({
+            role: 'user',
+            status: { $ne: 'anonym' },
+        });
+        res.json({ success: true, count });
+    } catch (error) {
+        console.error('Ошибка getCommunityCount:', error);
+        res.status(500).json({ success: false, message: 'Ошибка получения количества' });
+    }
+};
+
 // Экспорт пользователей в Excel
 export const exportUsersToExcel = async (req, res) => {
     try {
@@ -834,7 +848,7 @@ export const updateUser = async (req, res) => {
             balanceAddedAmount = (updateData.balance || 0) - (candidate.balance || 0);
             const notification = {
                 modalTitle: "Пополнение баланса",
-                modalDescription: `Баланс Приложения пополнен на сумму\n${balanceAddedAmount.toLocaleString('ru-RU')} руб.`,
+                modalDescription: `Баланс Приложения пополнен на сумму<br/><strong>${balanceAddedAmount.toLocaleString('ru-RU')} руб.</strong>`,
                 modalButtonText: "Открыть Журнал операций",
                 modalButtonLink: "/client/deposit-log",
             };

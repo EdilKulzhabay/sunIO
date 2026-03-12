@@ -101,23 +101,36 @@ export const ClientContentSearch = () => {
                             />
                         </div>
                         
+                        {searched && results.length > 0 && (
+                            <p className="text-white/60 text-sm mt-2">Результаты поиска</p>
+                        )}
 
-
-                        <div className="mt-6 space-y-3">
+                        <div className="mt-4 space-y-3">
                             {searched && results.length === 0 && (
                                 <p className="text-white/60 text-center">Ничего не найдено</p>
                             )}
+                            
                             {results.map((item) => (
                                 <Link
                                     key={item.link}
                                     to={item.link}
-                                    className="w-full bg-[#114E50] rounded-xl p-4 flex items-center justify-between text-left"
+                                    className="w-full block border-t border-white/10 py-4"
                                 >
-                                    <div>
-                                        <p className="text-white font-medium">{item.title}</p>
-                                        <p className="text-white/60 text-sm mt-0.5">{item.categoryLabel}</p>
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-white">{item.title}</p>
+                                        <div>
+                                            <img src={whiteArrowRight} alt="" className="w-4 h-4 object-cover shrink-0" />
+                                        </div>
                                     </div>
-                                    <img src={whiteArrowRight} alt="" className="w-4 h-4 object-cover shrink-0" />
+
+                                    <div className="mt-4">
+                                        <p className="text-white text-sm">{item.shortDescription}</p>
+                                    </div>
+
+                                    <div className="mt-2">
+                                        <p className="text-white/60 text-sm">{item.categoryLabel}</p>
+                                    </div>
+                                    
                                 </Link>
                             ))}
                         </div>

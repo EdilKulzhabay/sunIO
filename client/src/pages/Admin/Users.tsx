@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { AdminLayout } from '../../components/Admin/AdminLayout';
 import { AdminTable } from '../../components/Admin/AdminTable';
-import { Search, ArrowUpDown, Download, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
+import { Search, ArrowUpDown, Download, ChevronLeft, ChevronRight, Trash2, Copy } from 'lucide-react';
 import api from '../../api';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +10,7 @@ interface User {
     _id: string;
     fullName?: string;
     telegramUserName?: string;
+    telegramId?: string;
     phone?: string;
     mail?: string;
     role: string;
@@ -296,6 +297,31 @@ export const UsersAdmin = () => {
             sortable: true,
             render: (value: number) => {
                 return value || 0;
+            }
+        },
+        { 
+            key: 'referralLink', 
+            label: 'Реферальная ссылка',
+            render: (_: unknown, row: User) => {
+                const link = row.telegramId ? `https://t.me/io_sun_bot?start=${row.telegramId}` : null;
+                if (!link) return <span className="text-gray-400">—</span>;
+                const copyLink = (e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    navigator.clipboard.writeText(link).then(() => toast.success('Ссылка скопирована')).catch(() => toast.error('Не удалось скопировать'));
+                };
+                return (
+                    <div className="flex items-center gap-2 max-w-[220px]">
+                        <span className="truncate text-sm text-blue-600" title={link}>t.me/io_sun_bot?start=…</span>
+                        <button
+                            type="button"
+                            onClick={copyLink}
+                            className="shrink-0 p-1 rounded hover:bg-gray-100 text-gray-500 hover:text-gray-700"
+                            title="Копировать ссылку"
+                        >
+                            <Copy size={14} />
+                        </button>
+                    </div>
+                );
             }
         },
         { 

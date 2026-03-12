@@ -8,6 +8,8 @@ import { toast } from "react-toastify";
 import { X } from "lucide-react";
 import whiteArrowRight from "../../assets/whiteArrowRight.png";
 import { openExternalLink } from "../../utils/telegramWebApp";
+import { Switch } from "../../components/User/Switch";
+import supportKarmaIcon from "../../assets/supportKarma.png";
 
 export const ClientOperationLog = () => {
     const navigate = useNavigate();
@@ -25,6 +27,8 @@ export const ClientOperationLog = () => {
     const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
     const [supportAmount, setSupportAmount] = useState('');
     const [supportLoading, setSupportLoading] = useState(false);
+
+    const [isDocumentsAccepted, setIsDocumentsAccepted] = useState(false);
 
     useEffect(() => {
         const userStr = localStorage.getItem('user');
@@ -170,7 +174,7 @@ export const ClientOperationLog = () => {
                         </button>
                         <div className="mt-4 bg-[#114E50] rounded-xl p-4 text-white flex items-start gap-x-3 w-full">
                             <div className="shrink-0">
-                                <img src={needMoney} alt="wallet" className="w-[30px] h-[30px] object-cover" />
+                                <img src={supportKarmaIcon} alt="supportKarmaIcon" className="w-[30px] h-[30px] object-cover" />
                             </div>
                             <div className="w-full">
                                 <div className="w-full flex items-center justify-between text-xl font-medium">
@@ -191,9 +195,14 @@ export const ClientOperationLog = () => {
                         </div>
                     </div>
                     <div className="mt-3">
+                        <div className="flex items-center justify-between">
+                            <div>Принимаю условие Документов</div>
+                            <Switch checked={isDocumentsAccepted} onChange={() => {setIsDocumentsAccepted(!isDocumentsAccepted);}} />
+                        </div>
                         <button
                             onClick={() => setIsDepositModalOpen(true)}
-                            className="w-full block bg-[#C4841D] text-white py-2.5 text-center font-medium rounded-full"
+                            disabled={!isDocumentsAccepted}
+                            className="mt-3 w-full block bg-[#C4841D] text-white py-2.5 text-center font-medium rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Пополнить баланс картой
                         </button>
@@ -301,7 +310,7 @@ export const ClientOperationLog = () => {
                                 </button>
                                 <div className="text-xl font-semibold mb-4">Поддержка проекта</div>
                                 <div className="mb-3">
-                                    <label className="text-sm text-white/60 mb-1 block">Сумма списания с баланса</label>
+                                    <label className="text-sm text-white/60 mb-1 block">Эта сумма будет направлена на развитие Приложения</label>
                                     <input
                                         type="text"
                                         inputMode="decimal"
@@ -371,7 +380,7 @@ export const ClientOperationLog = () => {
                                 </button>
                                 <div className="text-xl font-semibold mb-4">Поддержка проекта</div>
                                 <div className="mb-4">
-                                    <label className="text-sm text-white/60 mb-1 block">Сумма списания с баланса</label>
+                                    <label className="text-sm text-white/60 mb-1 block">Эта сумма будет направлена на развитие Приложения</label>
                                     <input
                                         type="text"
                                         inputMode="decimal"

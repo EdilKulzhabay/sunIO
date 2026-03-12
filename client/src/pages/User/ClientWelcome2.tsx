@@ -31,7 +31,7 @@ export const ClientWelcome2 = () => {
     return (
         <UserLayout>
             <div className='bg-[#031F23]'>
-                <div className='-mt-5 lg:w-[700px] lg:mx-auto bg-[#031F23]'>
+                <div className='-mt-8 lg:w-[700px] lg:mx-auto bg-[#031F23]'>
                     <div className='relative'>
                         {content?.image && (
                             <div className="relative flex justify-center items-center">
@@ -45,7 +45,7 @@ export const ClientWelcome2 = () => {
                         <div 
                             className="absolute inset-0 z-10 lg:hidden"
                             style={{
-                                background: 'linear-gradient(to top, #3B3B3B00 80%, #3B3B3B 99%)',
+                                background: 'linear-gradient(to top, #3B3B3B00 75%, #3B3B3B 99%)',
                             }}
                         />
                         <div 

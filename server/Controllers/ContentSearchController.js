@@ -53,6 +53,7 @@ export const search = async (req, res) => {
             return docs.map((doc) => ({
                 _id: doc._id.toString(),
                 title: doc.title || '',
+                shortDescription: doc.shortDescription || '',
                 categoryLabel,
                 link: `${clientPath}/${doc._id}`,
             }));

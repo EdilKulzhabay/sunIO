@@ -7,16 +7,13 @@ import { SafeExternalLink } from "../../components/User/SafeExternalLink";
 const ContactUsBlock = ({ title, content, isLink = false, link = '' }: { title: string, content: string, isLink?: boolean, link?: string }) => {
     return (
         <>
-            {content === "manager@psylife.io" && <a href={`mailto:${content}`} className="bg-[#114E50] rounded-lg p-4 block">
-                <p className="text-sm text-white/40">{title}</p>
-                <p className="mt-1 text-lg font-medium">{content}</p>
-            </a>}
-            {isLink && content !== "manager@psylife.io" ? (
+            {isLink ? (
                 <SafeExternalLink href={link} className="bg-[#114E50] rounded-lg p-4 block">
                     <p className="text-sm text-white/40">{title}</p>
                     <p className="mt-1 text-lg font-medium">{content}</p>
                 </SafeExternalLink>
             ) : (
+
                 <div className="bg-[#114E50] rounded-lg p-4">
                     <p className="text-sm text-white/40">{title}</p>
                     <p className="mt-1 text-lg font-medium">{content}</p>

@@ -211,6 +211,11 @@ export const showTelegramBackButton = () => {
  */
 export const openExternalLink = (url: string): void => {
     if (!url?.trim()) return;
+    const lower = url.trim().toLowerCase();
+    if (lower.startsWith('mailto:') || lower.startsWith('tel:')) {
+        window.location.href = url.trim();
+        return;
+    }
     const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
     const tg = window.Telegram?.WebApp;
     if (tg) {

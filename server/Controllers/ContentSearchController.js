@@ -49,7 +49,7 @@ export const search = async (req, res) => {
             if (Model.schema.paths.visibility) {
                 filter.visibility = true;
             }
-            const docs = await Model.find(filter).select('_id title').limit(50).lean();
+            const docs = await Model.find(filter).select('_id title shortDescription').limit(50).lean();
             return docs.map((doc) => ({
                 _id: doc._id.toString(),
                 title: doc.title || '',

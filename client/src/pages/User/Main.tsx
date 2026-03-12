@@ -538,13 +538,16 @@ export const Main = () => {
                 <h1 className="mt-1 text-xl font-bold">Добро пожаловать, {userName ? userName : ""}!</h1>
                 <div className="mt-2 bg-white/10 rounded-xl p-2 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <div className="font-bold tabular-nums">{displayedCount}</div>
+                        <div className="text-[#C4841D] tabular-nums">{displayedCount}</div>
                         <div className="text-white">Друзей Сообщества</div>
                     </div>
                     <div>
                         <button
                             type="button"
-                            onClick={() => setInviteModalOpen(true)}
+                            onClick={() => {
+                                setInviteModalOpen(true)
+                                setLinkCopied(false)
+                            }}
                             className="bg-white/20 text-white py-2 px-4 rounded-full text-sm"
                         >
                             Пригласить

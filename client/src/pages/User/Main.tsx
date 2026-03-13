@@ -46,7 +46,7 @@ const SmallCard = ({ title, link, img }: { title: string, link: string, img: str
     return (
         <Link 
             to={link} 
-            className="min-h-24 flex items-center bg-[#114E50] relative rounded-lg p-4 overflow-hidden"
+            className="h-[68px] flex items-center bg-[#114E50] relative rounded-lg p-4 overflow-hidden"
             style={{
                 backgroundImage: `url(${img})`,
                 backgroundSize: 'cover',

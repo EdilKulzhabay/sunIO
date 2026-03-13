@@ -39,6 +39,18 @@ export const ClientDiary = () => {
     const [userData, setUserData] = useState<any>(null);
     const [diaryNotifyPermission, setDiaryNotifyPermission] = useState(false);
     const calendarContainerRef = useRef<HTMLDivElement | null>(null);
+    const discoveryRef = useRef<HTMLTextAreaElement | null>(null);
+    const achievementRef = useRef<HTMLTextAreaElement | null>(null);
+    const gratitudeRef = useRef<HTMLTextAreaElement | null>(null);
+    const emotionsRef = useRef<HTMLTextAreaElement | null>(null);
+
+    const MIN_TEXTAREA_LINES_PX = 52; // ~2 строки
+
+    const resizeTextarea = (el: HTMLTextAreaElement | null) => {
+        if (!el) return;
+        el.style.height = 'auto';
+        el.style.height = `${Math.max(el.scrollHeight, MIN_TEXTAREA_LINES_PX)}px`;
+    };
 
     const toLocalDateKey = (value: Date | string) => {
         const date = typeof value === 'string' ? new Date(value) : value;
@@ -97,6 +109,14 @@ export const ClientDiary = () => {
         fetchDiaries();
         fetchContent();
     }, [navigate]);
+
+    // Подстроить высоту textarea при загрузке данных (например, из API)
+    useEffect(() => {
+        resizeTextarea(discoveryRef.current);
+        resizeTextarea(achievementRef.current);
+        resizeTextarea(gratitudeRef.current);
+        resizeTextarea(emotionsRef.current);
+    }, [diary.discovery, diary.achievement, diary.gratitude, diary.emotions]);
 
     // Разрешаем копирование и вставку на странице дневника
     useEffect(() => {
@@ -232,7 +252,8 @@ export const ClientDiary = () => {
 
     const handleChange = (e: any) => {
         setDiary({ ...diary, [e.target.name]: e.target.value });
-    }
+        if (e.target instanceof HTMLTextAreaElement) resizeTextarea(e.target);
+    };
 
     const handleToggleDiaryNotifyPermission = async () => {
         if (diaryNotifyPermission) {
@@ -504,50 +525,50 @@ export const ClientDiary = () => {
                             <div className="mt-3 space-y-3">
                                 <div className="p-2 border border-white/40 rounded-lg">
                                     <p className="text-sm font-medium">Осознания</p>
-                                    <textarea 
+                                    <textarea
+                                        ref={discoveryRef}
                                         name="discovery"
                                         value={diary.discovery}
                                         onChange={handleChange}
-                                        className="w-full mt-1 bg-transparent text-white focus:outline-none focus:border-white/80 overflow-y-auto resize-none"
-                                        placeholder="Какие осознания были сегодня?"
                                         rows={2}
-                                        style={{ height: "3rem" }}
+                                        className="w-full mt-1 min-h-[52px] bg-transparent text-white focus:outline-none focus:border-white/80 resize-none overflow-hidden"
+                                        placeholder="Какие осознания были сегодня?"
                                     />
                                 </div>
                                 <div className="p-2 border border-white/40 rounded-lg">
                                     <p className="text-sm font-medium">Достижения</p>
-                                    <textarea 
-                                        name="achievement" 
-                                        value={diary.achievement} 
-                                        onChange={handleChange} 
-                                        className="w-full mt-1 bg-transparent text-white focus:outline-none focus:border-white/80 overflow-y-auto resize-none" 
-                                        placeholder="Чего удалось достичь сегодня?"
+                                    <textarea
+                                        ref={achievementRef}
+                                        name="achievement"
+                                        value={diary.achievement}
+                                        onChange={handleChange}
                                         rows={2}
-                                        style={{ height: "3rem" }}
+                                        className="w-full mt-1 min-h-[52px] bg-transparent text-white focus:outline-none focus:border-white/80 resize-none overflow-hidden"
+                                        placeholder="Чего удалось достичь сегодня?"
                                     />
                                 </div>
                                 <div className="p-2 border border-white/40 rounded-lg">
                                     <p className="text-sm font-medium">Цели и задачи</p>
-                                    <textarea 
-                                        name="gratitude" 
-                                        value={diary.gratitude} 
-                                        onChange={handleChange} 
-                                        className="w-full mt-1 bg-transparent text-white focus:outline-none focus:border-white/80 overflow-y-auto resize-none" 
-                                        placeholder="Какие цели захотел(а) реализовать?"
+                                    <textarea
+                                        ref={gratitudeRef}
+                                        name="gratitude"
+                                        value={diary.gratitude}
+                                        onChange={handleChange}
                                         rows={2}
-                                        style={{ height: "3rem" }}
+                                        className="w-full mt-1 min-h-[52px] bg-transparent text-white focus:outline-none focus:border-white/80 resize-none overflow-hidden"
+                                        placeholder="Какие цели захотел(а) реализовать?"
                                     />
                                 </div>
                                 <div className="p-2 border border-white/40 rounded-lg">
                                     <p className="text-sm font-medium">Эмоции</p>
-                                    <textarea 
-                                        name="emotions" 
-                                        value={diary.emotions ?? ''} 
-                                        onChange={handleChange} 
-                                        className="w-full mt-1 bg-transparent text-white focus:outline-none focus:border-white/80 overflow-y-auto resize-none" 
-                                        placeholder="Какое состояние у меня сегодня?"
+                                    <textarea
+                                        ref={emotionsRef}
+                                        name="emotions"
+                                        value={diary.emotions ?? ''}
+                                        onChange={handleChange}
                                         rows={2}
-                                        style={{ height: "3rem" }}
+                                        className="w-full mt-1 min-h-[52px] bg-transparent text-white focus:outline-none focus:border-white/80 resize-none overflow-hidden"
+                                        placeholder="Какое состояние у меня сегодня?"
                                     />
                                 </div>
                                 <div className="flex items-center justify-between">

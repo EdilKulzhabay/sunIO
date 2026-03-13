@@ -28,6 +28,17 @@ const BroadcastSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    /** Время ежедневной отправки (МСК), формат "HH:mm". Используется для рассылки diaryCheck. */
+    dailyScheduleTime: {
+      type: String,
+      default: '20:00',
+      trim: true,
+    },
+    /** Дата последней отправки ежедневной рассылки (для diaryCheck), чтобы не слать дважды за день. */
+    lastDiaryCheckSentAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

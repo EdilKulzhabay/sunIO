@@ -49,6 +49,7 @@ import {
 import { authMiddleware } from "./Middlewares/authMiddleware.js";
 import { adminActionLogMiddleware } from "./Middlewares/adminActionLogMiddleware.js";
 import User from "./Models/User.js";
+import Broadcast from "./Models/Broadcast.js";
 import { 
     setupSwagger,
     handleSwaggerAuthCheck,
@@ -484,9 +485,23 @@ app.post("/api/subscription/check-expired", authMiddleware, async (req, res) => 
 });
 
 
-// Рассылка diaryCheck каждый день в 20:00 (МСК) — пользователям, не заполнившим дневник сегодня
-cron.schedule('0 20 * * *', async () => {
+// Рассылка diaryCheck — время берётся из рассылки (dailyScheduleTime), по умолчанию 20:00 МСК
+cron.schedule('* * * * *', async () => {
     try {
+        const broadcast = await Broadcast.findOne({ title: 'diaryCheck' }).lean();
+        if (!broadcast) return;
+        const timeStr = (broadcast.dailyScheduleTime || '20:00').trim();
+        const [h, m] = timeStr.split(':').map(Number);
+        if (Number.isNaN(h) || Number.isNaN(m) || h < 0 || h > 23 || m < 0 || m > 59) return;
+        const now = new Date();
+        const moscowTimeStr = now.toLocaleTimeString('en-GB', { timeZone: 'Europe/Moscow', hour: '2-digit', minute: '2-digit', hour12: false });
+        const expected = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        if (moscowTimeStr !== expected) return;
+        const moscowDateStr = now.toLocaleDateString('sv-SE', { timeZone: 'Europe/Moscow' });
+        if (broadcast.lastDiaryCheckSentAt) {
+            const lastStr = new Date(broadcast.lastDiaryCheckSentAt).toLocaleDateString('sv-SE', { timeZone: 'Europe/Moscow' });
+            if (lastStr === moscowDateStr) return;
+        }
         await BroadcastController.sendDiaryCheckBroadcast();
     } catch (error) {
         console.error(`[${new Date().toISOString()}] Ошибка рассылки diaryCheck:`, error);
@@ -495,7 +510,7 @@ cron.schedule('0 20 * * *', async () => {
     timezone: "Europe/Moscow"
 });
 
-console.log('Cron задача рассылки diaryCheck настроена: каждый день в 20:00 (Europe/Moscow)');
+console.log('Cron задача рассылки diaryCheck настроена: время из рассылки (dailyScheduleTime), проверка каждую минуту (МСК)');
 
 // Запуск рассылок по расписанию (каждую минуту)
 cron.schedule('* * * * *', async () => {

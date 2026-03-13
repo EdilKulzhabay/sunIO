@@ -95,7 +95,7 @@ export const DateRangeCalendar = ({
     }
 
     const dayButtonClass = (hasDot: boolean, isToday: boolean, isOtherMonth: boolean, isSelectedDate: boolean) => `
-        h-8 w-full max-w-8 rounded-full text-xs transition-colors relative flex flex-col items-center justify-center mx-auto
+        h-8 w-full max-w-8 rounded-full text-sm transition-colors relative flex flex-col items-center justify-center mx-auto
         ${(isToday && !hasDot) || isSelectedDate ? 'bg-white/40' : ''}
         ${isOtherMonth ? 'text-white/40' : ''}
         hover:bg-white/10
@@ -104,22 +104,22 @@ export const DateRangeCalendar = ({
     return (
         <div className="bg-[#114E50] rounded-lg p-4 text-white">
             <div className="flex items-center justify-between mb-2 pl-[14px] pr-2">
-                <h2 className="font-medium">{MONTHS[month]} {year}</h2>
+                <h2 className="text-lg font-medium">{MONTHS[month]} {year}</h2>
 
                 <div className='flex items-center gap-x-4'>
                     <button onClick={handlePrevMonth} className="p-2 hover:bg-white/10 rounded transition-colors">
-                        <ChevronLeft size={16} />
+                        <ChevronLeft size={18} />
                     </button>
                     
                     <button onClick={handleNextMonth} className="p-2 hover:bg-white/10 rounded transition-colors">
-                        <ChevronRight size={16} />
+                        <ChevronRight size={18} />
                     </button>
                 </div>
             </div>
 
             <div className="grid grid-cols-7 gap-1 mb-1">
                 {DAYS_OF_WEEK.map((day) => (
-                    <div key={day} className="text-center text-xs text-white/60 py-1">{day}</div>
+                    <div key={day} className="text-center text-sm text-white/60 py-1">{day}</div>
                 ))}
             </div>
 

@@ -412,6 +412,9 @@ export const sendDiaryCheckBroadcast = async () => {
             userIds,
         });
 
+        if (result.success) {
+            await Broadcast.findByIdAndUpdate(broadcast._id, { lastDiaryCheckSentAt: new Date() });
+        }
         console.log(`[sendDiaryCheckBroadcast] Завершено: отправлено ${result.sent || 0}, ошибок ${result.failed || 0}`);
         return result;
     } catch (error) {
@@ -512,7 +515,7 @@ export const sendTestMessage = async (req, res) => {
 export const createBroadcast = async (req, res) => {
     try {
         const user = req.user;
-        const { title, imgUrl, content, buttonText, buttonUrl, scheduledAt } = req.body;
+        const { title, imgUrl, content, buttonText, buttonUrl, scheduledAt, dailyScheduleTime } = req.body;
 
         if (!title || !content) {
             return res.status(400).json({
@@ -530,6 +533,11 @@ export const createBroadcast = async (req, res) => {
         }
 
         const scheduledDate = scheduledAt && !Number.isNaN(new Date(scheduledAt).getTime()) ? new Date(scheduledAt) : null;
+        let dailyTime = '20:00';
+        if (dailyScheduleTime && typeof dailyScheduleTime === 'string') {
+            const match = /^([0-1]?[0-9]|2[0-3]):([0-5][0-9])$/.exec(dailyScheduleTime.trim());
+            if (match) dailyTime = `${String(parseInt(match[1], 10)).padStart(2, '0')}:${match[2]}`;
+        }
         const broadcast = new Broadcast({
             title,
             imgUrl: imgUrl || '',
@@ -537,6 +545,7 @@ export const createBroadcast = async (req, res) => {
             buttonText: buttonText || '',
             buttonUrl: buttonUrl || '',
             scheduledAt: scheduledDate,
+            dailyScheduleTime: dailyTime,
         });
 
         await broadcast.save();
@@ -616,7 +625,7 @@ export const updateBroadcast = async (req, res) => {
     try {
         const user = req.user;
         const { id } = req.params;
-        const { title, imgUrl, content, buttonText, buttonUrl, scheduledAt } = req.body;
+        const { title, imgUrl, content, buttonText, buttonUrl, scheduledAt, dailyScheduleTime } = req.body;
 
         const broadcast = await Broadcast.findById(id);
 
@@ -645,6 +654,15 @@ export const updateBroadcast = async (req, res) => {
         if (buttonUrl !== undefined) broadcast.buttonUrl = buttonUrl;
         if (scheduledAt !== undefined) {
             broadcast.scheduledAt = (scheduledAt && !Number.isNaN(new Date(scheduledAt).getTime())) ? new Date(scheduledAt) : null;
+        }
+        if (dailyScheduleTime !== undefined) {
+            const trimmed = String(dailyScheduleTime).trim();
+            if (trimmed === '') {
+                broadcast.dailyScheduleTime = '20:00';
+            } else {
+                const match = /^([0-1]?[0-9]|2[0-3]):([0-5][0-9])$/.exec(trimmed);
+                if (match) broadcast.dailyScheduleTime = `${String(parseInt(match[1], 10)).padStart(2, '0')}:${match[2]}`;
+            }
         }
 
         await broadcast.save();

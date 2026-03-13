@@ -27,6 +27,7 @@ interface SavedBroadcast {
     buttonText?: string;
     buttonUrl?: string;
     scheduledAt?: string;
+    dailyScheduleTime?: string;
     createdAt: string;
     updatedAt: string;
 }
@@ -43,6 +44,7 @@ export const BroadcastFormAdmin = () => {
     const [buttonText, setButtonText] = useState('');
     const [buttonPage, setButtonPage] = useState('');
     const [scheduledAt, setScheduledAt] = useState('');
+    const [dailyScheduleTime, setDailyScheduleTime] = useState('20:00');
 
     const [status, setStatus] = useState('all');
     const [lastActiveFilter, setLastActiveFilter] = useState('all');
@@ -107,6 +109,7 @@ export const BroadcastFormAdmin = () => {
                 } else {
                     setScheduledAt('');
                 }
+                setDailyScheduleTime(broadcast.dailyScheduleTime || '20:00');
             }
         } catch (error: any) {
             toast.error('Ошибка загрузки рассылки');
@@ -212,7 +215,7 @@ export const BroadcastFormAdmin = () => {
 
         try {
             setLoading(true);
-            const payload = {
+            const payload: Record<string, unknown> = {
                 title: title.trim(),
                 imgUrl: imageUrl || '',
                 content: message,
@@ -220,6 +223,7 @@ export const BroadcastFormAdmin = () => {
                 buttonUrl: buttonUrl || '',
                 scheduledAt: scheduledAtIso || null,
             };
+            if (title.trim() === 'diaryCheck') payload.dailyScheduleTime = dailyScheduleTime || '20:00';
 
             const response = isEditing
                 ? await api.put(`/api/broadcast/${id}`, payload)
@@ -520,6 +524,22 @@ export const BroadcastFormAdmin = () => {
                             Если указать время, рассылка будет выполнена автоматически в этот момент.
                         </p>
                     </div>
+                    {title.trim() === 'diaryCheck' && (
+                        <div className="border-t pt-4">
+                            <label className="flex items-center gap-2 text-sm font-medium mb-2">
+                                Время ежедневной отправки напоминания (МСК)
+                            </label>
+                            <input
+                                type="time"
+                                value={dailyScheduleTime}
+                                onChange={(e) => setDailyScheduleTime(e.target.value)}
+                                className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                            <p className="text-xs text-gray-500 mt-2">
+                                Во сколько каждый день отправлять напоминание о заполнении дневника (по Москве).
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">

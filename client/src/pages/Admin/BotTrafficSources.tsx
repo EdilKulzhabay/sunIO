@@ -56,11 +56,6 @@ export const BotTrafficSourcesAdmin = () => {
         { key: 'title', label: 'Название' },
         { key: 'botParameter', label: 'botParameter' },
         {
-            key: 'isActive',
-            label: 'Статус',
-            render: (value: boolean) => value ? 'Активен' : 'Выключен',
-        },
-        {
             key: 'createdAt',
             label: 'Создан',
             render: (value: string) => new Date(value).toLocaleDateString('ru-RU'),

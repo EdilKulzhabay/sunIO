@@ -121,7 +121,7 @@ export const BotTrafficSourceForm = () => {
                         </p>
                     </div>
 
-                    <div>
+                    {/* <div>
                         <label className="block text-sm font-medium text-gray-700">Описание (необязательно)</label>
                         <textarea
                             name="description"
@@ -145,7 +145,7 @@ export const BotTrafficSourceForm = () => {
                         <label htmlFor="isActive" className="text-sm text-gray-700">
                             Активный источник (можно использовать в кампаниях)
                         </label>
-                    </div>
+                    </div> */}
 
                     <div className="flex justify-end gap-3">
                         <button

@@ -24,6 +24,7 @@ interface FormData {
     heartActivation?: boolean;
     healingFamily?: boolean;
     awakeningSpirit?: boolean;
+    botStartSource?: string;
 }
 
 export const UserForm = () => {
@@ -31,6 +32,7 @@ export const UserForm = () => {
     const { id } = useParams();
     const [loading, setLoading] = useState(false);
     const [subscriptionEndDate, setSubscriptionEndDate] = useState('');
+    const [botTrafficSources, setBotTrafficSources] = useState<Array<{ _id: string; title: string; botParameter: string }>>([]);
     const [formData, setFormData] = useState<FormData>({
         fullName: '',
         mail: '',
@@ -46,9 +48,13 @@ export const UserForm = () => {
         : '';
 
     useEffect(() => {
-        if (id) {
-            fetchUser();
-        }
+        const load = async () => {
+            if (id) {
+                await fetchUser();
+            }
+            await fetchBotTrafficSources();
+        };
+        load();
     }, [id]);
 
     const fetchUser = async () => {
@@ -72,6 +78,7 @@ export const UserForm = () => {
                 heartActivation: data.heartActivation || false,
                 healingFamily: data.healingFamily || false,
                 awakeningSpirit: data.awakeningSpirit || false,
+                botStartSource: data.botStartSource || '',
             });
             // Преобразуем subscriptionEndDate из Date в формат DD-MM-YYYY
             if (data.subscriptionEndDate) {
@@ -86,6 +93,20 @@ export const UserForm = () => {
         } catch (error: any) {
             toast.error('Ошибка загрузки пользователя');
             navigate('/admin/users');
+        }
+    };
+
+    const fetchBotTrafficSources = async () => {
+        try {
+            const response = await api.get('/api/bot-traffic-sources');
+            const data = response.data?.data || [];
+            setBotTrafficSources(data.map((item: any) => ({
+                _id: item._id,
+                title: item.title,
+                botParameter: item.botParameter,
+            })));
+        } catch (error: any) {
+            toast.error('Ошибка загрузки источников трафика');
         }
     };
 
@@ -323,6 +344,15 @@ export const UserForm = () => {
                                     ) : (
                                         <span className="text-gray-400 text-sm">Telegram ID не указан</span>
                                     )}
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Источник трафика бота (botTrafficSource)</label>
+                                    <input
+                                        type="text"
+                                        value={botTrafficSources.find((source) => source._id === formData.botStartSource)?.title || ''}
+                                        readOnly
+                                        className="w-full p-2 border rounded-md bg-gray-50 text-gray-600 cursor-not-allowed"
+                                    />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium mb-2">Дата последней активности</label>

@@ -21,6 +21,11 @@ interface User {
     createdAt: string;
     userNumber?: number; // Номер пользователя
     lastActiveDate?: string;
+    botStartSource?: {
+        _id: string;
+        title: string;
+        botParameter: string;
+    };
 }
 
 interface PaginationInfo {
@@ -272,6 +277,14 @@ export const UsersAdmin = () => {
             sortable: true,
             render: (value: number) => {
                 return value || 0;
+            }
+        },
+        { 
+            key: 'botStartSource', 
+            label: 'Источник трафика',
+            render: (_: unknown, row: User) => {
+                if (!row.botStartSource) return '—';
+                return `${row.botStartSource.title} (${row.botStartSource.botParameter})`;
             }
         },
         { 

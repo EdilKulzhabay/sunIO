@@ -592,6 +592,7 @@ export const getAllUsers = async (req, res) => {
         // Получаем пользователей с пагинацией, фильтрацией и сортировкой
         const users = await User.find(filter)
             .select("-password -currentToken -refreshToken")
+            .populate("botStartSource", "title botParameter")
             .sort(sortOptions)
             .skip(skip)
             .limit(limit);

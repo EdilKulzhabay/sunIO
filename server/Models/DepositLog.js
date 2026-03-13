@@ -13,7 +13,6 @@ const DepositLogSchema = new mongoose.Schema({
     invId: {
         type: String,
         required: true,
-        unique: true,
     },
     amount: {
         type: Number,

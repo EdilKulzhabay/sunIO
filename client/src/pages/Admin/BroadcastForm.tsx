@@ -548,20 +548,6 @@ export const BroadcastFormAdmin = () => {
                                     </button>
                                 ))}
                             </div>
-                            <div>
-                                <button
-                                    onClick={() => setStatus('anonym')}
-                                    className={`w-full sm:w-auto p-3 rounded-lg border-2 transition-all ${
-                                        status === 'anonym'
-                                            ? 'border-blue-500 bg-blue-50'
-                                            : 'border-gray-200 hover:border-gray-300'
-                                    }`}
-                                >
-                                    <span className={`text-xs px-2 py-1 rounded inline-block ${getStatusColor('anonym')}`}>
-                                        Анонимы
-                                    </span>
-                                </button>
-                            </div>
                         </div>
                     </div>
 

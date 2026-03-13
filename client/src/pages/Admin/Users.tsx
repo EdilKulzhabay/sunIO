@@ -43,6 +43,8 @@ export const UsersAdmin = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [lastActiveFilter, setLastActiveFilter] = useState<string>('all');
+    const [botSourceFilter, setBotSourceFilter] = useState<string>('all');
+    const [botTrafficSources, setBotTrafficSources] = useState<Array<{ _id: string; title: string; botParameter: string }>>([]);
     const [sortField, setSortField] = useState<string>('');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const [currentPage, setCurrentPage] = useState(1);
@@ -55,13 +57,33 @@ export const UsersAdmin = () => {
     useEffect(() => {
         setCurrentPage(1);
         setSelectedUserIds(new Set());
-    }, [statusFilter, lastActiveFilter, sortField, sortDirection, searchQuery]);
+    }, [statusFilter, lastActiveFilter, sortField, sortDirection, searchQuery, botSourceFilter]);
 
     // Загружаем данные при изменении страницы или параметров
     useEffect(() => {
         fetchUsers(currentPage);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentPage, statusFilter, lastActiveFilter, sortField, sortDirection, searchQuery]);
+    }, [currentPage, statusFilter, lastActiveFilter, sortField, sortDirection, searchQuery, botSourceFilter]);
+
+    // Загружаем список источников трафика один раз
+    useEffect(() => {
+        const fetchSources = async () => {
+            try {
+                const response = await api.get('/api/bot-traffic-sources');
+                const data = response.data?.data || [];
+                setBotTrafficSources(
+                    data.map((item: any) => ({
+                        _id: item._id,
+                        title: item.title,
+                        botParameter: item.botParameter,
+                    }))
+                );
+            } catch (error: any) {
+                toast.error('Ошибка загрузки источников трафика');
+            }
+        };
+        fetchSources();
+    }, []);
 
     const fetchUsers = async (page: number = 1) => {
         setLoading(true);
@@ -77,6 +99,11 @@ export const UsersAdmin = () => {
             }
             if (lastActiveFilter !== 'all') {
                 params.lastActiveFilter = lastActiveFilter;
+            }
+
+            // Фильтр по источнику трафика
+            if (botSourceFilter !== 'all') {
+                params.botStartSourceId = botSourceFilter;
             }
 
             // Добавляем параметры поиска
@@ -284,7 +311,7 @@ export const UsersAdmin = () => {
             label: 'Источник трафика',
             render: (_: unknown, row: User) => {
                 if (!row.botStartSource) return '—';
-                return `${row.botStartSource.title} (${row.botStartSource.botParameter})`;
+                return `${row.botStartSource.botParameter}`;
             }
         },
         { 
@@ -377,7 +404,7 @@ export const UsersAdmin = () => {
                     </div>
 
                     {/* Фильтры */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {/* Фильтр по статусу */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -410,6 +437,25 @@ export const UsersAdmin = () => {
                                 <option value="all">Все</option>
                                 <option value="active">Активные (в течение 15 дней)</option>
                                 <option value="inactive">Неактивные (больше 15 дней)</option>
+                            </select>
+                        </div>
+
+                        {/* Фильтр по источнику трафика */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Источник трафика
+                            </label>
+                            <select
+                                value={botSourceFilter}
+                                onChange={(e) => setBotSourceFilter(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                                <option value="all">Все источники</option>
+                                {botTrafficSources.map((source) => (
+                                    <option key={source._id} value={source._id}>
+                                        {source.botParameter} — {source.title}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 

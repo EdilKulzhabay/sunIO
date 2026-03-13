@@ -526,6 +526,7 @@ export const getAllUsers = async (req, res) => {
         const statusFilter = req.query.statusFilter || 'all';
         const lastActiveFilter = req.query.lastActiveFilter || 'all';
         const searchQuery = req.query.searchQuery || '';
+        const botStartSourceId = req.query.botStartSourceId || '';
 
         // Параметры сортировки
         const sortField = req.query.sortField || '';
@@ -572,6 +573,11 @@ export const getAllUsers = async (req, res) => {
                 { phone: { $regex: query, $options: 'i' } },
                 { mail: { $regex: query, $options: 'i' } }
             ];
+        }
+
+        // Фильтр по источнику трафика бота
+        if (botStartSourceId && botStartSourceId !== 'all') {
+            filter.botStartSource = botStartSourceId;
         }
 
         // Получаем общее количество пользователей с учетом фильтров

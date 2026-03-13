@@ -36,14 +36,17 @@ export const getFilteredUsers = async (req, res) => {
             // Исключаем заблокированных пользователей
             isBlocked: { $ne: true },
         };
-        
-        // Фильтр по статусу (если указан)
+
+        // При фильтре «Все» не считаем анонимов — им рассылки бесполезны (не подключились к Солнцу)
+        if (status === 'all') {
+            filter.status = { $ne: 'anonym' };
+        }
+
+        // Фильтр по статусу (если указан конкретный)
         if (status && status !== 'all') {
             if (status === 'blocked') {
-                // Если фильтр "blocked", показываем только заблокированных
                 filter.isBlocked = true;
             } else {
-                // Иначе исключаем заблокированных и фильтруем по статусу
                 filter.status = status;
                 filter.isBlocked = { $ne: true };
             }
@@ -94,7 +97,7 @@ export const getFilteredUsers = async (req, res) => {
     }
 };
 
-const resolveBroadcastContent = async ({ message, imageUrl, buttonText, broadcastId, broadcastTitle }) => {
+const resolveBroadcastContent = async ({ message, imageUrl, buttonText, buttonUrl, broadcastId, broadcastTitle }) => {
         let savedBroadcast = null;
         if (broadcastId) {
             savedBroadcast = await Broadcast.findById(broadcastId);
@@ -112,16 +115,18 @@ const resolveBroadcastContent = async ({ message, imageUrl, buttonText, broadcas
         finalMessage: message || savedBroadcast?.content || '',
         finalImageUrl: imageUrl || savedBroadcast?.imgUrl || undefined,
         finalButtonText: buttonText || savedBroadcast?.buttonText || undefined,
+        finalButtonUrl: buttonUrl || savedBroadcast?.buttonUrl || undefined,
     };
 };
 
 const executeBroadcast = async (payload) => {
     const { message, status, search, lastActiveFilter, userIds, imageUrl, parseMode, buttonText, buttonUrl, broadcastId, broadcastTitle } = payload;
 
-    const { finalMessage, finalImageUrl, finalButtonText } = await resolveBroadcastContent({
+    const { finalMessage, finalImageUrl, finalButtonText, finalButtonUrl } = await resolveBroadcastContent({
         message,
         imageUrl,
         buttonText,
+        buttonUrl,
         broadcastId,
         broadcastTitle,
     });
@@ -154,11 +159,12 @@ const executeBroadcast = async (payload) => {
         } else {
             filter.isBlocked = { $ne: true };
             filter.notifyPermission = { $ne: false };
-            
-            if (status && status !== 'all') {
-                if (status !== 'blocked') {
-                    filter.status = status;
-                }
+
+            // При отправке «всем» не включаем анонимов (им рассылки бесполезны)
+            if (status === 'all') {
+                filter.status = { $ne: 'anonym' };
+            } else if (status && status !== 'blocked') {
+                filter.status = status;
             }
 
             filter.telegramId = { $exists: true, $ne: null, $ne: '' };
@@ -234,7 +240,7 @@ const executeBroadcast = async (payload) => {
                 imageUrl: finalImageUrl,
                 parseMode: parseMode || 'HTML',
                 buttonText: finalButtonText,
-                buttonUrl: buttonUrl || undefined,
+                buttonUrl: finalButtonUrl || buttonUrl || undefined,
             usersData: usersData,
             }, {
                 headers: {
@@ -259,9 +265,16 @@ const executeBroadcast = async (payload) => {
 
             console.log(`Рассылка завершена. Отправлено: ${totalSent}, Ошибок: ${totalFailed}`);
 
+            let message = "Рассылка завершена";
+            if (totalFailed > 0) {
+                message = `Рассылка завершена. Отправлено: ${totalSent}. Не доставлено (заблокировали бота или недоступны): ${totalFailed}`;
+            } else if (totalSent > 0) {
+                message = `Рассылка отправлена ${totalSent} пользователям`;
+            }
+
         return {
                 success: true,
-                message: "Рассылка завершена",
+                message,
                 sent: totalSent,
                 failed: totalFailed,
                 total: telegramIds.length,

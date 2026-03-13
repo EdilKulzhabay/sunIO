@@ -38,6 +38,7 @@ interface AdminLayoutProps {
 const menuItems = [
     { path: '/admin', label: 'Главная', icon: Home },
     { path: '/admin/users', label: 'Пользователи', icon: Users },
+    { path: '/admin/bot-traffic-sources', label: 'Источники трафика бота', icon: LinkIcon },
     { path: '/admin/admins', label: 'Администраторы', icon: Shield },
     { path: '/admin/action-logs', label: 'Журнал действий', icon: ClipboardList, adminOnly: true },
     { path: '/admin/operation-logs', label: 'Журнал операций', icon: ClipboardList, adminOnly: true },
@@ -63,7 +64,6 @@ const menuItems = [
     { path: '/admin/analysis-relationships', label: 'Разборы - Отношения', icon: HeartHandshake },
     { path: '/admin/analysis-realization', label: 'Разборы - Реализация', icon: Target },
     { path: '/admin/psychodiagnostics', label: 'Психодиагностика', icon: Brain },
-    { path: '/admin/bot-traffic-sources', label: 'Источники трафика бота', icon: LinkIcon },
 ];
 
 export const AdminLayout = ({ children }: AdminLayoutProps) => {

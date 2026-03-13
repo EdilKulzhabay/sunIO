@@ -93,7 +93,6 @@ export const Main = () => {
     const [notificationIndex, setNotificationIndex] = useState<number | null>(null);
     const [instructionStep, setInstructionStep] = useState(0);
     const [inviteModalOpen, setInviteModalOpen] = useState(false);
-    const [linkCopied, setLinkCopied] = useState(false);
     const [communityCount, setCommunityCount] = useState(0);
     const [displayedCount, setDisplayedCount] = useState(0);
 
@@ -282,7 +281,7 @@ export const Main = () => {
             setDisplayedCount(0);
             return;
         }
-        const duration = 1200;
+        const duration = 2200;
         const stepMs = 50;
         const steps = Math.max(1, Math.ceil(duration / stepMs));
         const stepValue = communityCount / steps;
@@ -546,7 +545,6 @@ export const Main = () => {
                             type="button"
                             onClick={() => {
                                 setInviteModalOpen(true)
-                                setLinkCopied(false)
                             }}
                             className="bg-white/20 text-white py-2 px-4 rounded-full text-sm"
                         >
@@ -602,7 +600,6 @@ export const Main = () => {
                                 className="fixed inset-0 bg-black/60 transition-opacity z-20"
                                 onClick={() => {
                                     setInviteModalOpen(false)
-                                    setLinkCopied(false)
                                 }}
                             />
                             <div
@@ -613,7 +610,6 @@ export const Main = () => {
                                     type="button"
                                     onClick={() => {
                                         setInviteModalOpen(false)
-                                        setLinkCopied(false)
                                     }}
                                     className="absolute top-6 right-4 text-white/70 hover:text-white"
                                 >
@@ -626,14 +622,11 @@ export const Main = () => {
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        setLinkCopied(true);
                                         const link = userData?.telegramId
-                                            ? `https://t.me/io_sun_bot?start=${userData.telegramId}`
+                                            ? `t.me/io_sun_bot?start=${userData.telegramId}`
                                             : '';
                                         if (link) {
-                                            navigator.clipboard.writeText(link).then(() => {
-                                                toast.success('Ссылка скопирована');
-                                            }).catch(() => toast.error('Не удалось скопировать'));
+                                            navigator.clipboard.writeText(link)
                                         } else {
                                             toast.warning('Реферальная ссылка недоступна');
                                         }
@@ -642,8 +635,8 @@ export const Main = () => {
                                 >
                                     <div className="text-left">
                                         <div>Пригласи друга по ссылке</div>
-                                        {linkCopied && userData?.telegramId && (
-                                            <div className="text-sm text-[#00C5AE] mt-1">https://t.me/io_sun_bot?start=${userData.telegramId}</div>
+                                        {userData?.telegramId && (
+                                            <div className="text-sm text-[#00C5AE] mt-1">t.me/io_sun_bot?start=${userData.telegramId}</div>
                                         )}
                                     </div>
                                     <div>

@@ -172,7 +172,7 @@ export const ClientOperationLog = () => {
                                 </div>
                             </div>
                         </button>
-                        <div className="mt-4 bg-[#114E50] rounded-xl p-4 text-white flex items-start gap-x-3 w-full">
+                        <div className="mt-3 bg-[#114E50] rounded-xl p-4 text-white flex items-start gap-x-3 w-full">
                             <div className="shrink-0">
                                 <img src={supportKarmaIcon} alt="supportKarmaIcon" className="w-[30px] h-[30px] object-cover" />
                             </div>

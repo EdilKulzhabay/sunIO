@@ -1,5 +1,19 @@
 import DepositLog from '../Models/DepositLog.js';
 import PurchaseLog from '../Models/PurchaseLog.js';
+import Practice from '../Models/Practice.js';
+import ParablesOfLife from '../Models/ParablesOfLife.js';
+import ScientificDiscoveries from '../Models/ScientificDiscoveries.js';
+import HealthLab from '../Models/HealthLab.js';
+import RelationshipWorkshop from '../Models/RelationshipWorkshop.js';
+import SpiritForge from '../Models/SpiritForge.js';
+import MastersTower from '../Models/MastersTower.js';
+import FemininityGazebo from '../Models/FemininityGazebo.js';
+import ConsciousnessLibrary from '../Models/ConsciousnessLibrary.js';
+import ProductCatalog from '../Models/ProductCatalog.js';
+import AnalysisHealth from '../Models/AnalysisHealth.js';
+import AnalysisRelationships from '../Models/AnalysisRelationships.js';
+import AnalysisRealization from '../Models/AnalysisRealization.js';
+import Psychodiagnostics from '../Models/Psychodiagnostics.js';
 
 export const getDeposits = async (req, res) => {
     try {
@@ -150,11 +164,51 @@ export const getClientPurchases = async (req, res) => {
 
         const purchases = await PurchaseLog.find({ userId, paymentType: 'balance' })
             .sort({ createdAt: -1 })
-            .select('_id createdAt amount productTitle');
+            .select('_id createdAt amount productTitle productId')
+            .lean();
+
+        // Попробуем для каждого purchase подобрать ссылку на контент по productId
+        const CONTENT_SOURCES = [
+            { Model: Practice, clientPath: '/client/practice' },
+            { Model: ParablesOfLife, clientPath: '/client/parables-of-life' },
+            { Model: ScientificDiscoveries, clientPath: '/client/scientific-discoveries' },
+            { Model: HealthLab, clientPath: '/client/health-lab' },
+            { Model: RelationshipWorkshop, clientPath: '/client/relationship-workshop' },
+            { Model: SpiritForge, clientPath: '/client/spirit-forge' },
+            { Model: MastersTower, clientPath: '/client/masters-tower' },
+            { Model: FemininityGazebo, clientPath: '/client/femininity-gazebo' },
+            { Model: ConsciousnessLibrary, clientPath: '/client/consciousness-library' },
+            { Model: ProductCatalog, clientPath: '/client/product-catalog' },
+            { Model: AnalysisHealth, clientPath: '/client/analysis-health' },
+            { Model: AnalysisRelationships, clientPath: '/client/analysis-relationships' },
+            { Model: AnalysisRealization, clientPath: '/client/analysis-realization' },
+            { Model: Psychodiagnostics, clientPath: '/client/psychodiagnostics' },
+        ];
+
+        const withLinks = [];
+
+        for (const purchase of purchases) {
+            let link = null;
+            if (purchase.productId) {
+                for (const { Model, clientPath } of CONTENT_SOURCES) {
+                    // exists быстрее, чем findById, и нам не нужны сами данные
+                    // eslint-disable-next-line no-await-in-loop
+                    const exists = await Model.exists({ _id: purchase.productId });
+                    if (exists) {
+                        link = `${clientPath}/${purchase.productId}`;
+                        break;
+                    }
+                }
+            }
+            withLinks.push({
+                ...purchase,
+                link,
+            });
+        }
 
         res.json({
             success: true,
-            data: purchases,
+            data: withLinks,
         });
     } catch (error) {
         console.error('Ошибка получения журнала покупок клиента:', error);

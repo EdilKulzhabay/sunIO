@@ -3,6 +3,7 @@ import star from '../../assets/star.png';
 import { useNavigate } from 'react-router-dom';
 import arrowRight from '../../assets/arrowRight.png';
 import { openExternalLink } from '../../utils/telegramWebApp';
+import needMoney from '../../assets/needMoney.png';
 
 const isExternalLink = (url: string) => url.startsWith('http://') || url.startsWith('https://');
 
@@ -101,12 +102,25 @@ export const MiniVideoCard = ({ title, image, link, progress, accessType, onLock
                         }
                         <div className='self-stretch flex-1'>
                             <div className='flex h-full w-full items-center justify-center gap-x-2 border border-[#00C5AE] rounded-full'>
-                                <p className='text-sm font-medium text-[#00C5AE]'>{starsRequired}</p>
-                                <img
-                                    src={star}
-                                    alt="star"
-                                    className="w-[14px] h-[14px]"
-                                />
+                                {accessType === 'stars' && (
+                                    <>
+                                        <p className='text-sm font-medium text-[#00C5AE]'>{starsRequired}</p>
+                                        <img
+                                            src={star}
+                                            alt="star"
+                                            className="w-[14px] h-[14px]"
+                                        />
+                                    </>
+                                )}
+                                {accessType === 'paid' && (
+                                    <div className='py-2'>
+                                        <img
+                                            src={needMoney}
+                                            alt="needMoney"
+                                            className="w-[14px] h-[14px]"
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

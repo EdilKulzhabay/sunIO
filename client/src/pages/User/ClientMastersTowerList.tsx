@@ -284,7 +284,7 @@ export const ClientMastersTowerList = () => {
                                 <div 
                                     key={mastersTower._id} 
                                     data-card
-                                    className="flex-shrink-0 w-[45vw] sm:w-[35vw] lg:w-[25vw] h-[210px] sm:h-[275px] lg:h-[330px]"
+                                    className="flex-shrink-0 w-[44vw] sm:w-[35vw] lg:w-[25vw] h-[210px] sm:h-[275px] lg:h-[330px]"
                                 >
                                     <MiniVideoCard 
                                         title={mastersTower.title} 

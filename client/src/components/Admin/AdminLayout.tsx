@@ -27,7 +27,8 @@ import {
     Brain,
     MessageSquare,
     FlaskConical,
-    FileText
+    FileText,
+    Link2 as LinkIcon
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -62,6 +63,7 @@ const menuItems = [
     { path: '/admin/analysis-relationships', label: 'Разборы - Отношения', icon: HeartHandshake },
     { path: '/admin/analysis-realization', label: 'Разборы - Реализация', icon: Target },
     { path: '/admin/psychodiagnostics', label: 'Психодиагностика', icon: Brain },
+    { path: '/admin/bot-traffic-sources', label: 'Источники трафика бота', icon: LinkIcon },
 ];
 
 export const AdminLayout = ({ children }: AdminLayoutProps) => {

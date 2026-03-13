@@ -1,4 +1,5 @@
 import User from "../Models/User.js";
+import BotTrafficSource from "../Models/BotTrafficSource.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
@@ -287,12 +288,22 @@ export const createUser = async (req, res) => {
             }
         }
 
+        // Определяем источник трафика и/или реферального пользователя на основе referralTelegramId
+        let botStartSource = null;
+        if (referralTelegramId) {
+            const source = await BotTrafficSource.findOne({ botParameter: referralTelegramId });
+            if (source) {
+                botStartSource = source._id;
+            }
+        }
+
         const doc = new User({
             telegramId,
             telegramUserName,
             status: 'anonym',
             invitedUser: invitedUser,
             profilePhotoUrl,
+            botStartSource,
         });
 
         const user = await doc.save();

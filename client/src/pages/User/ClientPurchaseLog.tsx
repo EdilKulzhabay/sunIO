@@ -1,7 +1,7 @@
 import { UserLayout } from "../../components/User/UserLayout";
 import { BackNav } from "../../components/User/BackNav";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../../api";
 
 export const ClientPurchaseLog = () => {
@@ -90,19 +90,38 @@ export const ClientPurchaseLog = () => {
             <UserLayout>
                 <BackNav title="История покупок" />
                 <div className="flex-1 px-4 space-y-3">
-                    {purchaseLog && purchaseLog.length > 0 && purchaseLog.map((purchase) => (
-                        <div 
-                            key={purchase._id}
-                            className="bg-[#114E50] rounded-xl p-4"
-                        >
-                            <div className="text-white/60 text-sm">
-                                {formatDate(purchase.createdAt)}, {purchase.amount.toLocaleString('ru-RU')} руб.
+                    {purchaseLog && purchaseLog.length > 0 && purchaseLog.map((purchase) => {
+                        const content = (
+                            <div className="bg-[#114E50] rounded-xl p-4">
+                                <div className="text-white/60 text-sm">
+                                    {formatDate(purchase.createdAt)}, {purchase.amount.toLocaleString('ru-RU')} руб.
+                                </div>
+                                <div className="mt-1 text-white font-medium">
+                                    <div>{purchase.productTitle}</div>
+                                </div>
                             </div>
-                            <div className="mt-1 text-white font-medium">
-                                <div>{purchase.productTitle}</div>
+                        );
+
+                        // Если для покупки есть ссылка на контент — делаем весь блок ссылкой
+                        if (purchase.link) {
+                            return (
+                                <Link
+                                    key={purchase._id}
+                                    to={purchase.link}
+                                    className="block"
+                                >
+                                    {content}
+                                </Link>
+                            );
+                        }
+
+                        // Иначе просто показываем блок без перехода (например, поддержка проекта)
+                        return (
+                            <div key={purchase._id}>
+                                {content}
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </UserLayout>
         </div>

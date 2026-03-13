@@ -300,6 +300,31 @@ export const UserForm = () => {
                                     />
                                 </div>
                                 <div>
+                                    <label className="block text-sm font-medium mb-2">Реферальная ссылка</label>
+                                    {formData.telegramId ? (
+                                        <div className="flex items-center gap-2">
+                                            <span className="truncate text-sm text-blue-600">
+                                                {`https://t.me/io_sun_bot?start=${formData.telegramId}`}
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const link = `https://t.me/io_sun_bot?start=${formData.telegramId}`;
+                                                    navigator.clipboard
+                                                        .writeText(link)
+                                                        .then(() => toast.success('Ссылка скопирована'))
+                                                        .catch(() => toast.error('Не удалось скопировать ссылку'));
+                                                }}
+                                                className="px-2 py-1 text-xs border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                                            >
+                                                Скопировать
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <span className="text-gray-400 text-sm">Telegram ID не указан</span>
+                                    )}
+                                </div>
+                                <div>
                                     <label className="block text-sm font-medium mb-2">Дата последней активности</label>
                                     <input
                                         type="text"

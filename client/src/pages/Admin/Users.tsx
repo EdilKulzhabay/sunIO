@@ -239,31 +239,6 @@ export const UsersAdmin = () => {
         { key: 'telegramUserName', label: 'TG Имя' },
         { key: 'mail', label: 'Email' },
         { key: 'phone', label: 'Телефон' },
-        // { 
-        //     key: 'role', 
-        //     label: 'Роль',
-        //     render: (value: string) => {
-        //         const roleLabels: { [key: string]: string } = {
-        //             'user': 'Пользователь',
-        //             'admin': 'Администратор',
-        //             'content_manager': 'Контент-менеджер',
-        //             'client_manager': 'Менеджер по клиентам',
-        //             'manager': 'Менеджер'
-        //         };
-        //         const roleColors: { [key: string]: string } = {
-        //             'user': 'bg-gray-100 text-gray-700',
-        //             'admin': 'bg-purple-100 text-purple-700',
-        //             'content_manager': 'bg-blue-100 text-blue-700',
-        //             'client_manager': 'bg-green-100 text-green-700',
-        //             'manager': 'bg-yellow-100 text-yellow-700'
-        //         };
-        //         return (
-        //             <span className={`px-2 py-1 rounded text-xs ${roleColors[value] || 'bg-gray-100 text-gray-700'}`}>
-        //                 {roleLabels[value] || value}
-        //             </span>
-        //         );
-        //     }
-        // },
         { 
             key: 'status', 
             label: 'Статус',
@@ -297,31 +272,6 @@ export const UsersAdmin = () => {
             sortable: true,
             render: (value: number) => {
                 return value || 0;
-            }
-        },
-        { 
-            key: 'referralLink', 
-            label: 'Реферальная ссылка',
-            render: (_: unknown, row: User) => {
-                const link = row.telegramId ? `https://t.me/io_sun_bot?start=${row.telegramId}` : null;
-                if (!link) return <span className="text-gray-400">—</span>;
-                const copyLink = (e: React.MouseEvent) => {
-                    e.stopPropagation();
-                    navigator.clipboard.writeText(link).then(() => toast.success('Ссылка скопирована')).catch(() => toast.error('Не удалось скопировать'));
-                };
-                return (
-                    <div className="flex items-center gap-2 max-w-[220px]">
-                        <span className="truncate text-sm text-blue-600" title={link}>t.me/io_sun_bot?start=…</span>
-                        <button
-                            type="button"
-                            onClick={copyLink}
-                            className="shrink-0 p-1 rounded hover:bg-gray-100 text-gray-500 hover:text-gray-700"
-                            title="Копировать ссылку"
-                        >
-                            <Copy size={14} />
-                        </button>
-                    </div>
-                );
             }
         },
         { 

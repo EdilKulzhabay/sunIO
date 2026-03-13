@@ -24,7 +24,8 @@ import {
     Navigation,
     Gift,
     MessageSquare,
-    FlaskConical
+    FlaskConical,
+    Link2 as LinkIcon
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -57,6 +58,7 @@ const contentCards = [
     { title: 'Начало путешествия', icon: Compass, path: '/admin/beggining-journey', color: 'bg-sky-500', description: 'Контент начала путешествия' },
     { title: 'Описания навигатора', icon: Navigation, path: '/admin/navigator-descriptions', color: 'bg-blue-600', description: 'Управление описаниями навигатора' },
     { title: 'Политика начисления баллов', icon: Gift, path: '/admin/points-awarding-policy', color: 'bg-amber-600', description: 'Политика начисления баллов' },
+    { title: 'Источники трафика бота', icon: LinkIcon, path: '/admin/bot-traffic-sources', color: 'bg-sky-600', description: 'Справочник источников трафика и ссылок' },
 ];
 
 export const Main = () => {

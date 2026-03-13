@@ -89,7 +89,7 @@ export const VideoCard = ({ title, description, image, link, accessType, progres
                             />
                         </div>
                     )}
-                    {accessType === 'subscription' && (
+                    {accessType === 'paid' && (
                         <div className="w-[45%] flex items-center justify-center px-3 py-1.5 border border-[#00C5AE] rounded-full cursor-pointer">
                             <img
                                 src={needMoney}

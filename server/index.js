@@ -43,7 +43,8 @@ import {
     ActivationLinkController,
     OperationLogController,
     DocumentsController,
-    ContentSearchController
+    ContentSearchController,
+    BotTrafficSourceController
 } from "./Controllers/index.js";
 import { authMiddleware } from "./Middlewares/authMiddleware.js";
 import { adminActionLogMiddleware } from "./Middlewares/adminActionLogMiddleware.js";
@@ -216,6 +217,13 @@ app.get("/api/operation-logs/purchases", authMiddleware, OperationLogController.
 app.get("/api/operation-logs/client/:userId/deposits", OperationLogController.getClientDeposits);
 app.get("/api/operation-logs/client/:userId/purchases", OperationLogController.getClientPurchases);
 app.get("/api/operation-logs/client/:userId", OperationLogController.getClientHistory);
+
+// ==================== BotTrafficSource (источники трафика бота) ====================
+app.post("/api/bot-traffic-sources", createContentRateLimit, authMiddleware, BotTrafficSourceController.create);
+app.get("/api/bot-traffic-sources", authMiddleware, BotTrafficSourceController.getAll);
+app.get("/api/bot-traffic-sources/:id", authMiddleware, BotTrafficSourceController.getById);
+app.put("/api/bot-traffic-sources/:id", authMiddleware, BotTrafficSourceController.update);
+app.delete("/api/bot-traffic-sources/:id", authMiddleware, BotTrafficSourceController.remove);
 
 // Управление профилем (для авторизованных пользователей)
 app.put("/api/user/profile/update", UserController.updateProfile);

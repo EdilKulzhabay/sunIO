@@ -223,8 +223,7 @@ export const ClientSpiritForgeList = () => {
     }
 
     const hasAccessToContentSubscription = (): boolean => {
-        if (userData?.hasPaid && userData?.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date()) return true;
-        return false;
+        return !!(userData?.hasPaid && userData?.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date());
     }
 
     const topItemsCount = spiritForges.filter((s: any) => s.location === 'top').length;
@@ -285,7 +284,7 @@ export const ClientSpiritForgeList = () => {
                                 <div 
                                     key={spiritForge._id} 
                                     data-card
-                                    className="flex-shrink-0 w-[45vw] sm:w-[35vw] lg:w-[25vw] h-[210px] sm:h-[275px] lg:h-[330px]"
+                                    className="flex-shrink-0 w-[44vw] sm:w-[35vw] lg:w-[25vw] h-[210px] sm:h-[275px] lg:h-[330px]"
                                 >
                                     <MiniVideoCard 
                                         title={spiritForge.title} 

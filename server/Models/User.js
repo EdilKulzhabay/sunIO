@@ -216,6 +216,11 @@ const UserSchema = new mongoose.Schema({
     supportKarma: {
         type: Number,
         default: 0,
+    },
+    botStartSource: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'BotTrafficSource',
+        default: null,
     }
 }, {
     timestamps: true

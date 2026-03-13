@@ -33,3 +33,4 @@ export * as ActivationLinkController from "./ActivationLinkController.js";
 export * as OperationLogController from "./OperationLogController.js";
 export * as DocumentsController from "./DocumentsController.js";
 export * as ContentSearchController from "./ContentSearchController.js";
+export * as BotTrafficSourceController from "./BotTrafficSourceController.js";

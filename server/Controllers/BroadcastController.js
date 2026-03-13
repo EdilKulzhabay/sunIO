@@ -658,7 +658,7 @@ export const updateBroadcast = async (req, res) => {
         if (dailyScheduleTime !== undefined) {
             const trimmed = String(dailyScheduleTime).trim();
             if (trimmed === '') {
-                broadcast.dailyScheduleTime = '20:00';
+                broadcast.dailyScheduleTime = '';
             } else {
                 const match = /^([0-1]?[0-9]|2[0-3]):([0-5][0-9])$/.exec(trimmed);
                 if (match) broadcast.dailyScheduleTime = `${String(parseInt(match[1], 10)).padStart(2, '0')}:${match[2]}`;

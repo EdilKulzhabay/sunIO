@@ -490,7 +490,9 @@ cron.schedule('* * * * *', async () => {
     try {
         const broadcast = await Broadcast.findOne({ title: 'diaryCheck' }).lean();
         if (!broadcast) return;
-        const timeStr = (broadcast.dailyScheduleTime || '20:00').trim();
+        const rawTime = broadcast.dailyScheduleTime;
+        if (!rawTime || !String(rawTime).trim()) return;
+        const timeStr = (rawTime || '20:00').trim();
         const [h, m] = timeStr.split(':').map(Number);
         if (Number.isNaN(h) || Number.isNaN(m) || h < 0 || h > 23 || m < 0 || m > 59) return;
         const now = new Date();

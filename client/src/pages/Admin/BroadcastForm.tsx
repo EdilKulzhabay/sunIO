@@ -44,6 +44,7 @@ export const BroadcastFormAdmin = () => {
     const [buttonText, setButtonText] = useState('');
     const [buttonPage, setButtonPage] = useState('');
     const [scheduledAt, setScheduledAt] = useState('');
+    const [runEveryDay, setRunEveryDay] = useState(false);
     const [dailyScheduleTime, setDailyScheduleTime] = useState('20:00');
 
     const [status, setStatus] = useState('all');
@@ -109,7 +110,9 @@ export const BroadcastFormAdmin = () => {
                 } else {
                     setScheduledAt('');
                 }
-                setDailyScheduleTime(broadcast.dailyScheduleTime || '20:00');
+                const dailyTime = broadcast.dailyScheduleTime || '';
+                setRunEveryDay(Boolean(dailyTime && dailyTime.trim()));
+                setDailyScheduleTime(dailyTime && dailyTime.trim() ? dailyTime : '20:00');
             }
         } catch (error: any) {
             toast.error('Ошибка загрузки рассылки');
@@ -223,7 +226,7 @@ export const BroadcastFormAdmin = () => {
                 buttonUrl: buttonUrl || '',
                 scheduledAt: scheduledAtIso || null,
             };
-            if (title.trim() === 'diaryCheck') payload.dailyScheduleTime = dailyScheduleTime || '20:00';
+            payload.dailyScheduleTime = runEveryDay ? (dailyScheduleTime || '20:00') : '';
 
             const response = isEditing
                 ? await api.put(`/api/broadcast/${id}`, payload)
@@ -524,22 +527,31 @@ export const BroadcastFormAdmin = () => {
                             Если указать время, рассылка будет выполнена автоматически в этот момент.
                         </p>
                     </div>
-                    {title.trim() === 'diaryCheck' && (
-                        <div className="border-t pt-4">
-                            <label className="flex items-center gap-2 text-sm font-medium mb-2">
-                                Время ежедневной отправки напоминания (МСК)
-                            </label>
+                    <div className="border-t pt-4">
+                        <label className="flex items-center gap-3 cursor-pointer">
                             <input
-                                type="time"
-                                value={dailyScheduleTime}
-                                onChange={(e) => setDailyScheduleTime(e.target.value)}
-                                className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                type="checkbox"
+                                checked={runEveryDay}
+                                onChange={(e) => setRunEveryDay(e.target.checked)}
+                                className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                             />
-                            <p className="text-xs text-gray-500 mt-2">
-                                Во сколько каждый день отправлять напоминание о заполнении дневника (по Москве).
-                            </p>
-                        </div>
-                    )}
+                            <span className="text-sm font-medium">Рассылка каждый день</span>
+                        </label>
+                        <p className="text-xs text-gray-500 mt-1 ml-7">
+                            Включите, если рассылка должна выполняться ежедневно в указанное время (например, напоминание о дневнике).
+                        </p>
+                        {runEveryDay && (
+                            <div className="mt-3 ml-7">
+                                <label className="block text-sm font-medium mb-2">Время отправки (МСК)</label>
+                                <input
+                                    type="time"
+                                    value={dailyScheduleTime}
+                                    onChange={(e) => setDailyScheduleTime(e.target.value)}
+                                    className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">

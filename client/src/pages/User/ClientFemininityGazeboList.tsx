@@ -280,7 +280,7 @@ export const ClientFemininityGazeboList = () => {
                 </div>
 
                 <div className="px-4 mt-2 pb-10 bg-[#031F23]">
-                    <div ref={cardsContainerRef} className="flex overflow-x-auto gap-4 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
+                    <div ref={cardsContainerRef} className="flex overflow-x-auto gap-4 scrollbar-hide pl-4 pr-4 -mx-4" style={{ scrollbarWidth: 'none' }}>
                         {femininityGazebos.filter((femininityGazebo: any) => femininityGazebo.location === 'top' && femininityGazebo.visibility).sort((a: any, b: any) => a.order - b.order).map((femininityGazebo: any) => (
                                 <div 
                                     key={femininityGazebo._id} 

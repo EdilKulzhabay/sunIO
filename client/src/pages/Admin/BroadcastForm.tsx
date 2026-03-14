@@ -218,15 +218,19 @@ export const BroadcastFormAdmin = () => {
 
         try {
             setLoading(true);
+            const base = (import.meta.env.VITE_APP_URL || '').replace(/\/$/, '');
+            const finalButtonUrl = buttonPage
+                ? base + (buttonPage.startsWith('/') ? buttonPage : '/' + buttonPage)
+                : '';
             const payload: Record<string, unknown> = {
                 title: title.trim(),
                 imgUrl: imageUrl || '',
                 content: message,
                 buttonText: buttonText || '',
-                buttonUrl: buttonUrl || '',
+                buttonUrl: finalButtonUrl,
                 scheduledAt: scheduledAtIso || null,
+                dailyScheduleTime: runEveryDay ? (dailyScheduleTime || '20:00') : '',
             };
-            payload.dailyScheduleTime = runEveryDay ? (dailyScheduleTime || '20:00') : '';
 
             const response = isEditing
                 ? await api.put(`/api/broadcast/${id}`, payload)
@@ -234,6 +238,9 @@ export const BroadcastFormAdmin = () => {
 
             if (response.data.success) {
                 toast.success(isEditing ? 'Рассылка успешно обновлена' : 'Рассылка успешно сохранена');
+                if (isEditing && id) {
+                    fetchBroadcast(id);
+                }
                 if (!isEditing) {
                     navigate(`/admin/broadcast/edit/${response.data.data?._id}`);
                 }
@@ -579,6 +586,24 @@ export const BroadcastFormAdmin = () => {
                                         </div>
                                     </button>
                                 ))}
+                            </div>
+                            <div>
+                                <button
+                                    type="button"
+                                    onClick={() => setStatus('anonym')}
+                                    className={`w-full sm:w-auto p-3 rounded-lg border-2 transition-all ${
+                                        status === 'anonym'
+                                            ? 'border-blue-500 bg-blue-50'
+                                            : 'border-gray-200 hover:border-gray-300'
+                                    }`}
+                                >
+                                    <span className={`text-xs px-2 py-1 rounded inline-block ${getStatusColor('anonym')}`}>
+                                        Анонимы
+                                    </span>
+                                </button>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Отдельно для тех, кто не подключился (инструкция по подключению). В «Все» анонимы не входят.
+                                </p>
                             </div>
                         </div>
                     </div>

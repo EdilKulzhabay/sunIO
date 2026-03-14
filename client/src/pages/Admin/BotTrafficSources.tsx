@@ -26,7 +26,7 @@ export const BotTrafficSourcesAdmin = () => {
     const fetchSources = async () => {
         try {
             const response = await api.get('/api/bot-traffic-sources');
-            const list = response.data.data.sort((a: any, b: any) => a.title.localeCompare(b.title));
+            const list = response.data.data.sort((a: any, b: any) => a.title.localeCompare(b.botParameter));
             setSources(list);
         } catch (error: any) {
             toast.error('Ошибка загрузки источников трафика');
@@ -89,7 +89,7 @@ export const BotTrafficSourcesAdmin = () => {
         <AdminLayout>
             <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-bold text-gray-900">Источники трафика бота</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Источники трафика</h1>
                     <button
                         onClick={handleCreate}
                         className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"

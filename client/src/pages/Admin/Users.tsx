@@ -453,7 +453,7 @@ export const UsersAdmin = () => {
                                 <option value="all">Все источники</option>
                                 {botTrafficSources.map((source) => (
                                     <option key={source._id} value={source._id}>
-                                        {source.botParameter} — {source.title}
+                                        {source.title}
                                     </option>
                                 ))}
                             </select>

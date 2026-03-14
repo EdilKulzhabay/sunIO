@@ -38,7 +38,7 @@ interface AdminLayoutProps {
 const menuItems = [
     { path: '/admin', label: 'Главная', icon: Home },
     { path: '/admin/users', label: 'Пользователи', icon: Users },
-    { path: '/admin/bot-traffic-sources', label: 'Источники трафика бота', icon: LinkIcon },
+    { path: '/admin/bot-traffic-sources', label: 'Источники трафика', icon: LinkIcon },
     { path: '/admin/admins', label: 'Администраторы', icon: Shield },
     { path: '/admin/action-logs', label: 'Журнал действий', icon: ClipboardList, adminOnly: true },
     { path: '/admin/operation-logs', label: 'Журнал операций', icon: ClipboardList, adminOnly: true },

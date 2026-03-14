@@ -651,7 +651,9 @@ export const updateBroadcast = async (req, res) => {
         if (imgUrl !== undefined) broadcast.imgUrl = imgUrl;
         if (content !== undefined) broadcast.content = content;
         if (buttonText !== undefined) broadcast.buttonText = buttonText;
-        if (buttonUrl !== undefined) broadcast.buttonUrl = buttonUrl;
+        if (Object.prototype.hasOwnProperty.call(req.body, 'buttonUrl')) {
+            broadcast.buttonUrl = req.body.buttonUrl != null ? String(req.body.buttonUrl).trim() : '';
+        }
         if (scheduledAt !== undefined) {
             broadcast.scheduledAt = (scheduledAt && !Number.isNaN(new Date(scheduledAt).getTime())) ? new Date(scheduledAt) : null;
         }

@@ -31,6 +31,11 @@ export const RedirectToPageSelector = ({ value, onChange }: RedirectToPageSelect
     const [loadingContent, setLoadingContent] = useState(false);
     const [localCategory, setLocalCategory] = useState('');
 
+    // Синхронизация режима при загрузке значения из родителя (например, при открытии рассылки)
+    useEffect(() => {
+        setMode(detectInitialMode(value));
+    }, [value]);
+
     const categoryOption = CONTENT_CATEGORY_OPTIONS.find(
         (opt) => value?.startsWith(opt.clientPath + '/')
     );

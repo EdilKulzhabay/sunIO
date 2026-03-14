@@ -280,7 +280,7 @@ export const ClientProductCatalogList = () => {
                 </div>
 
                 <div className="px-4 mt-2 pb-10 bg-[#031F23]">
-                    <div ref={cardsContainerRef} className="flex overflow-x-auto gap-4 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
+                    <div ref={cardsContainerRef} className="flex overflow-x-auto gap-4 scrollbar-hide pl-4 pr-4 -mx-4" style={{ scrollbarWidth: 'none' }}>
                         {productCatalogs.filter((productCatalog: any) => productCatalog.location === 'top' && productCatalog.visibility).sort((a: any, b: any) => a.order - b.order).map((productCatalog: any) => (
                                 <div 
                                     key={productCatalog._id} 

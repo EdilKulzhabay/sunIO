@@ -134,7 +134,7 @@ export const DateRangeCalendar = ({
                             onClick={() => handleDateClick(day, true)}
                             className={dayButtonClass(!!dotColor, false, true, selected)}
                         >
-                            <div className={`w-4 h-4 rounded-full flex items-center justify-center ${borderColor ? 'border' : ''}`} style={borderColor ? { borderColor } : undefined}>
+                            <div className={`w-[28px] h-[28px] rounded-full flex items-center justify-center ${borderColor ? 'border' : ''}`} style={borderColor ? { borderColor } : undefined}>
                                 <p>{day}</p>
                             </div>
                             {dotColor && <span className="absolute -bottom-1 w-1.5 h-1.5 rounded-full" style={{ backgroundColor: dotColor }} />}
@@ -153,10 +153,10 @@ export const DateRangeCalendar = ({
                             onClick={() => handleDateClick(day)}
                             className={dayButtonClass(!!dotColor, today, false, selected)}
                         >
-                            <div className={`w-4 h-4 rounded-full flex items-center justify-center ${borderColor ? 'border' : ''}`} style={borderColor ? { borderColor } : undefined}>
+                            <div className={`w-[28px] h-[28px] rounded-full flex items-center justify-center ${borderColor ? 'border' : ''}`} style={borderColor ? { borderColor } : undefined}>
                                 <p>{day}</p>
                             </div>
-                            {dotColor && <span className="absolute -bottom-0.5 w-1.5 h-1.5 rounded-full" style={{ backgroundColor: dotColor }} />}
+                            {dotColor && <span className="absolute -bottom-1 w-1.5 h-1.5 rounded-full" style={{ backgroundColor: dotColor }} />}
                         </button>
                     );
                 })}
@@ -171,10 +171,10 @@ export const DateRangeCalendar = ({
                             onClick={() => handleDateClick(day, false, true)}
                             className={dayButtonClass(!!dotColor, false, true, selected)}
                         >
-                            <div className={`w-4 h-4 rounded-full flex items-center justify-center ${borderColor ? 'border' : ''}`} style={borderColor ? { borderColor } : undefined}>
+                            <div className={`w-[28px] h-[28px] rounded-full flex items-center justify-center ${borderColor ? 'border' : ''}`} style={borderColor ? { borderColor } : undefined}>
                                 <p>{day}</p>
                             </div>
-                            {dotColor && <span className="absolute -bottom-0.5 w-1.5 h-1.5 rounded-full" style={{ backgroundColor: dotColor }} />}
+                            {dotColor && <span className="absolute -bottom-2 w-1.5 h-1.5 rounded-full" style={{ backgroundColor: dotColor }} />}
                         </button>
                     );
                 })}

@@ -318,7 +318,7 @@ export const ClientSchedule = () => {
                 />
             </div>
             <div className="lg:basis-2/3">
-                <div className="mt-6 lg:mt-0 flex items-center justify-between">
+                <div className="mt-3 lg:mt-0 flex items-center justify-between">
                     <div className="text-white/60">{new Date().toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })}</div>
                     <div className="flex items-center gap-x-3">
                         <div className="text-white/60">Все мероприятия</div>
@@ -328,7 +328,7 @@ export const ClientSchedule = () => {
                         />
                     </div>
                 </div>
-                <div className="mt-4 space-y-4">
+                <div className="mt-3 space-y-3">
                     {schedules.length > 0 && schedules.map((schedule: any) => (
                         <div 
                             key={schedule._id}

@@ -583,13 +583,11 @@ export const getAllUsers = async (req, res) => {
         // Получаем общее количество пользователей с учетом фильтров
         const totalUsers = await User.countDocuments(filter);
 
-        // Определяем сортировку
-        let sortOptions = { createdAt: 1 }; // По умолчанию по дате создания (asc)
-        
+        // Определяем сортировку (по умолчанию по полному имени А–Я)
+        let sortOptions = { fullName: 1, createdAt: 1 };
         if (sortField) {
             sortOptions = {};
             sortOptions[sortField] = sortDirection;
-            // Если сортируем не по createdAt, добавляем его как вторичную сортировку
             if (sortField !== 'createdAt') {
                 sortOptions.createdAt = 1;
             }

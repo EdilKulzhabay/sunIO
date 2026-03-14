@@ -511,7 +511,7 @@ export const Main = () => {
             )}
 
             <div className="px-4 pb-10 bg-[#031F23]">
-                <div className="flex items-center justify-between pt-5 pb-4">
+                <div className="flex items-center justify-between pt-3 pb-4">
                     <div className="cursor-pointer" onClick={() => navigate('/client/welcome2')}>
                         <img src={logo} alt="logo" className="w-[104px] h-[40px]" />
                     </div>
@@ -552,7 +552,7 @@ export const Main = () => {
                         </button>
                     </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3 mt-5">
+                <div className="grid grid-cols-2 gap-3 mt-3">
                     <div id="main-instruction-navigator">
                         <SmallCard title="Навигатор" link="/client/navigator" img={main1} />
                     </div>
@@ -636,7 +636,7 @@ export const Main = () => {
                                     <div className="text-left">
                                         <div>Пригласи друга по ссылке</div>
                                         {userData?.telegramId && (
-                                            <div className="text-sm text-[#00C5AE] mt-1">t.me/io_sun_bot?start=${userData.telegramId}</div>
+                                            <div className="text-sm text-[#00C5AE] mt-1">t.me/io_sun_bot?start=userData.telegramId</div>
                                         )}
                                     </div>
                                     <div>

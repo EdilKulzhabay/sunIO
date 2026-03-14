@@ -44,7 +44,7 @@ export function useAutoScrollPreview(
                 timeouts.push(t);
             });
 
-            // Скролл назад (от предпоследней позиции до 0)
+            // Скролл назад до самого начала (включая 0)
             const startBackIdx = uniquePositions.length;
             const backPositions = [...uniquePositions].reverse().slice(1);
             backPositions.forEach((pos, i) => {
@@ -53,6 +53,11 @@ export function useAutoScrollPreview(
                 }, INITIAL_DELAY_MS + (startBackIdx + i) * DELAY_BETWEEN_CARDS_MS);
                 timeouts.push(t);
             });
+            // Гарантированно доскроллить до 0 (при pl-4 первая карточка на 16px, без этого остаётся сдвиг)
+            const tEnd = setTimeout(() => {
+                container.scrollTo({ left: 0, behavior: 'smooth' });
+            }, INITIAL_DELAY_MS + (startBackIdx + backPositions.length) * DELAY_BETWEEN_CARDS_MS);
+            timeouts.push(tEnd);
         };
 
         const initTimer = setTimeout(runScroll, 0);

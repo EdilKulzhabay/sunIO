@@ -636,7 +636,7 @@ export const Main = () => {
                                     <div className="text-left">
                                         <div>Пригласи друга по ссылке</div>
                                         {userData?.telegramId && (
-                                            <div className="text-sm text-[#00C5AE] mt-1">t.me/io_sun_bot?start=userData.telegramId</div>
+                                            <div className="text-sm text-[#00C5AE] mt-1">t.me/io_sun_bot?start={userData.telegramId}</div>
                                         )}
                                     </div>
                                     <div>

@@ -583,32 +583,64 @@ export const getAllUsers = async (req, res) => {
         // Получаем общее количество пользователей с учетом фильтров
         const totalUsers = await User.countDocuments(filter);
 
-        // Определяем сортировку (по умолчанию по полному имени А–Я)
-        let sortOptions = { fullName: 1, createdAt: 1 };
-        if (sortField) {
-            sortOptions = {};
-            sortOptions[sortField] = sortDirection;
-            if (sortField !== 'createdAt') {
-                sortOptions.createdAt = 1;
-            }
-        }
+        // Определяем сортировку (по умолчанию по полному имени А–Я; без fullName — в конец)
+        const sortByFullName = !sortField || sortField === 'fullName';
+        let users;
 
-        // Получаем пользователей с пагинацией, фильтрацией и сортировкой
-        const users = await User.find(filter)
-            .select("-password -currentToken -refreshToken")
-            .populate("botStartSource", "title botParameter")
-            .sort(sortOptions)
-            .skip(skip)
-            .limit(limit);
+        if (sortByFullName) {
+            const pipeline = [
+                { $match: filter },
+                { $addFields: {
+                    _hasFullName: {
+                        $cond: {
+                            if: { $and: [
+                                { $ne: ['$fullName', null] },
+                                { $gt: [{ $strLenCP: { $ifNull: ['$fullName', ''] } }, 0] }
+                            ]},
+                            then: 1,
+                            else: 0
+                        }
+                    }
+                }},
+                { $sort: { _hasFullName: -1, fullName: sortDirection, createdAt: 1 } },
+                { $skip: skip },
+                { $limit: limit },
+                { $lookup: { from: 'bottrafficsources', localField: 'botStartSource', foreignField: '_id', as: 'botStartSourceArr' } },
+                { $addFields: {
+                    botStartSource: {
+                        $cond: {
+                            if: { $gt: [{ $size: { $ifNull: ['$botStartSourceArr', []] } }, 0] },
+                            then: {
+                                $let: {
+                                    vars: { first: { $arrayElemAt: ['$botStartSourceArr', 0] } },
+                                    in: { title: '$$first.title', botParameter: '$$first.botParameter' }
+                                }
+                            },
+                            else: null
+                        }
+                    }
+                }},
+                { $project: { password: 0, currentToken: 0, refreshToken: 0, botStartSourceArr: 0, _hasFullName: 0 } }
+            ];
+            users = await User.aggregate(pipeline);
+        } else {
+            let sortOptions = {};
+            sortOptions[sortField] = sortDirection;
+            if (sortField !== 'createdAt') sortOptions.createdAt = 1;
+            users = await User.find(filter)
+                .select("-password -currentToken -refreshToken")
+                .populate("botStartSource", "title botParameter")
+                .sort(sortOptions)
+                .skip(skip)
+                .limit(limit);
+        }
 
         // Вычисляем номера пользователей
         // Номер основан на позиции в отсортированном списке с учетом фильтров
         const usersWithNumbers = users.map((user, index) => {
             const userNumber = skip + index + 1;
-            return {
-                ...user.toObject(),
-                userNumber
-            };
+            const plain = typeof user.toObject === 'function' ? user.toObject() : user;
+            return { ...plain, userNumber };
         });
 
         res.json({

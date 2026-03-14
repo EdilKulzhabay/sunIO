@@ -26,7 +26,7 @@ export const BotTrafficSourcesAdmin = () => {
     const fetchSources = async () => {
         try {
             const response = await api.get('/api/bot-traffic-sources');
-            const list = response.data.data.sort((a: any, b: any) => a.title.localeCompare(b.botParameter));
+            const list = response.data.data.sort((a: any, b: any) => a.botParameter.localeCompare(b.botParameter));
             setSources(list);
         } catch (error: any) {
             toast.error('Ошибка загрузки источников трафика');

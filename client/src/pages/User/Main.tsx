@@ -95,6 +95,7 @@ export const Main = () => {
     const [inviteModalOpen, setInviteModalOpen] = useState(false);
     const [communityCount, setCommunityCount] = useState(0);
     const [displayedCount, setDisplayedCount] = useState(0);
+    const [linkCopied, setLinkCopied] = useState(false);
 
     useEffect(() => {
         
@@ -511,7 +512,7 @@ export const Main = () => {
             )}
 
             <div className="px-4 pb-10 bg-[#031F23]">
-                <div className="flex items-center justify-between pt-3 pb-2">
+                <div className="flex items-center justify-between pt-3 pb-px">
                     <div className="cursor-pointer" onClick={() => navigate('/client/welcome2')}>
                         <img src={logo} alt="logo" className="w-[104px] h-[40px]" />
                     </div>
@@ -622,6 +623,7 @@ export const Main = () => {
                                 <button
                                     type="button"
                                     onClick={() => {
+                                        setLinkCopied(true);
                                         const link = userData?.telegramId
                                             ? `t.me/io_sun_bot?start=${userData.telegramId}`
                                             : '';
@@ -637,6 +639,9 @@ export const Main = () => {
                                         <div>Пригласи друга по ссылке</div>
                                         {userData?.telegramId && (
                                             <div className="text-sm text-[#00C5AE] mt-1">t.me/io_sun_bot?start={userData.telegramId}</div>
+                                        )}
+                                        {userData?.telegramId && linkCopied && (
+                                            <div className="text-sm text-[#C4841D] mt-1">Ссылка скопирована!</div>
                                         )}
                                     </div>
                                     <div>

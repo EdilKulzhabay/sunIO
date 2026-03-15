@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import User from "../Models/User.js";
 import BotTrafficSource from "../Models/BotTrafficSource.js";
 import bcrypt from "bcrypt";
@@ -575,9 +576,9 @@ export const getAllUsers = async (req, res) => {
             ];
         }
 
-        // Фильтр по источнику трафика бота
-        if (botStartSourceId && botStartSourceId !== 'all') {
-            filter.botStartSource = botStartSourceId;
+        // Фильтр по источнику трафика бота (приводим к ObjectId для $match в aggregate и для find)
+        if (botStartSourceId && botStartSourceId !== 'all' && mongoose.Types.ObjectId.isValid(botStartSourceId)) {
+            filter.botStartSource = new mongoose.Types.ObjectId(botStartSourceId);
         }
 
         // Получаем общее количество пользователей с учетом фильтров

@@ -7,7 +7,7 @@ import { executeUserOperation } from './queue.js';
 const app = express();
 
 // Лимит для рассылок на много пользователей (если перед ботом стоит nginx — задайте client_max_body_size 100m;)
-app.use(express.json({ limit: '100mb' }));
+app.use(express.json({ limit: '500mb' }));
 app.use(cors());
 
 // Функция задержки между отправками (в миллисекундах)

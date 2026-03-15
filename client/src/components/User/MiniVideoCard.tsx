@@ -65,7 +65,7 @@ export const MiniVideoCard = ({ title, image, link, progress, accessType, onLock
             <button onClick={onLockedClick} className="rounded-xl bg-[#114E50] w-full h-full flex-1 flex flex-col">
                 <div className="relative h-[98px] sm:h-[142px] lg:h-[197px]">
                     <img src={`${import.meta.env.VITE_API_URL}${image}`} alt={title} className="w-full h-full rounded-t-lg object-cover" />
-                    <div className="absolute inset-0 bg-black/40 rounded-lg" />
+                    <div className="absolute inset-0 bg-black/40 rounded-t-lg" />
                     <img
                         src={lock}
                         alt="lock"
@@ -101,27 +101,27 @@ export const MiniVideoCard = ({ title, image, link, progress, accessType, onLock
                             : <div className='w-[50%]'></div>
                         }
                         <div className='self-stretch flex-1'>
+                        {accessType === 'stars' && (
                             <div className='flex h-full w-full items-center justify-center gap-x-2 border border-[#00C5AE] rounded-full'>
-                                {accessType === 'stars' && (
-                                    <>
-                                        <p className='text-sm font-medium text-[#00C5AE]'>{starsRequired}</p>
-                                        <img
-                                            src={star}
-                                            alt="star"
-                                            className="w-[14px] h-[14px]"
-                                        />
-                                    </>
-                                )}
-                                {accessType === 'paid' && (
-                                    <div className='py-2'>
-                                        <img
-                                            src={needMoney}
-                                            alt="needMoney"
-                                            className="w-[14px] h-[14px]"
-                                        />
-                                    </div>
-                                )}
+                                <p className='text-sm font-medium text-[#00C5AE]'>{starsRequired}</p>
+                                <img
+                                    src={star}
+                                    alt="star"
+                                    className="w-[14px] h-[14px]"
+                                />
                             </div>
+                        )}
+                        {accessType === 'paid' && (
+                            <div className='flex h-full w-full items-center justify-center gap-x-2 border border-[#00C5AE] rounded-xl'>
+                                <div className='py-2'>
+                                    <img
+                                        src={needMoney}
+                                        alt="needMoney"
+                                        className="w-[14px] h-[14px]"
+                                    />
+                                </div>
+                            </div>
+                        )}
                         </div>
                     </div>
                 </div>

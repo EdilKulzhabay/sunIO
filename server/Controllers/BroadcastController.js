@@ -227,11 +227,16 @@ const executeBroadcast = async (payload) => {
             console.warn('BOT_SERVER_URL не настроен или использует значение по умолчанию');
         }
 
-        const usersData = validUsers.map(user => ({
-            telegramId: String(user.telegramId),
-            telegramUserName: user.telegramUserName || '',
-            profilePhotoUrl: user.profilePhotoUrl || '',
-        }));
+        const PAYLOAD_USERDATA_MAX = 400;
+        const usersData = validUsers.map(user => (
+            telegramIds.length > PAYLOAD_USERDATA_MAX
+                ? { telegramId: String(user.telegramId) }
+                : {
+                    telegramId: String(user.telegramId),
+                    telegramUserName: user.telegramUserName || '',
+                    profilePhotoUrl: user.profilePhotoUrl || '',
+                }
+        ));
 
         try {
             const response = await axios.post(`${BOT_SERVER_URL}/api/bot/broadcast`, {
@@ -241,7 +246,7 @@ const executeBroadcast = async (payload) => {
                 parseMode: parseMode || 'HTML',
                 buttonText: finalButtonText,
                 buttonUrl: finalButtonUrl || buttonUrl || undefined,
-            usersData: usersData,
+                usersData: usersData,
             }, {
                 headers: {
                     "Content-Type": "application/json",

@@ -601,6 +601,7 @@ export const Main = () => {
                                 className="fixed inset-0 bg-black/60 transition-opacity z-20"
                                 onClick={() => {
                                     setInviteModalOpen(false)
+                                    setLinkCopied(false);
                                 }}
                             />
                             <div
@@ -611,6 +612,7 @@ export const Main = () => {
                                     type="button"
                                     onClick={() => {
                                         setInviteModalOpen(false)
+                                        setLinkCopied(false);
                                     }}
                                     className="absolute top-6 right-4 text-white/70 hover:text-white"
                                 >

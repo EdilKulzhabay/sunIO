@@ -27,7 +27,7 @@ export const VideoCard = ({ title, description, image, link, accessType, progres
                 <img 
                     src={`${import.meta.env.VITE_API_URL}${image}`} 
                     alt={title} 
-                    className="w-full h-full rounded-lg object-cover" 
+                    className="w-full h-full rounded-l-lg object-cover" 
                 />
                 {accessType !== 'free' && (
                     <>

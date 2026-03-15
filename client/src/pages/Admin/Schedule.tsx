@@ -36,9 +36,14 @@ export const ScheduleAdmin = () => {
     };
 
     const filteredSchedules = useMemo(() => {
-        const sorted = [...schedules].sort(
-            (a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
-        );
+        // Сверху новые события, снизу старые (по дате начала)
+        const sorted = [...schedules].sort((a, b) => {
+            const tA = new Date(a.startDate).getTime();
+            const tB = new Date(b.startDate).getTime();
+            if (Number.isNaN(tA)) return 1;
+            if (Number.isNaN(tB)) return -1;
+            return tB - tA;
+        });
         if (!searchQuery.trim()) return sorted;
         const q = searchQuery.trim().toLowerCase();
         return sorted.filter((s: any) => s.eventTitle?.toLowerCase().includes(q));

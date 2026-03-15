@@ -511,7 +511,7 @@ export const Main = () => {
             )}
 
             <div className="px-4 pb-10 bg-[#031F23]">
-                <div className="flex items-center justify-between pt-3 pb-4">
+                <div className="flex items-center justify-between pt-3 pb-2">
                     <div className="cursor-pointer" onClick={() => navigate('/client/welcome2')}>
                         <img src={logo} alt="logo" className="w-[104px] h-[40px]" />
                     </div>

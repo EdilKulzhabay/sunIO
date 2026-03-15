@@ -127,7 +127,7 @@ export const ClientFAQ = () => {
                             <div className="shrink-0">
                                 <img src={search} alt="search" className="w-5 h-5 object-cover" />
                             </div>
-                            <div className="text-white font-medium">Найти контент по ключевым словам</div>
+                            <div className="text-white font-medium sm:text-left">Найти контент по ключевым словам</div>
                         </button>
                         {faqs && faqs.length > 0 && (
                             <div className="">

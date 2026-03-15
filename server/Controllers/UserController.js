@@ -879,6 +879,11 @@ export const updateUser = async (req, res) => {
         delete updateData.refreshToken;
         // bonus теперь можно обновлять
 
+        // Пустая строка в botStartSource невалидна для ObjectId — приводим к null
+        if (Object.prototype.hasOwnProperty.call(updateData, 'botStartSource') && (updateData.botStartSource === '' || updateData.botStartSource == null)) {
+            updateData.botStartSource = null;
+        }
+
         const candidate = await User.findById(id)
 
         if ('bonus' in updateData && updateData.bonus !== candidate.bonus && updateData.bonus > candidate.bonus) {
@@ -1333,6 +1338,10 @@ export const updateUserByTelegramId = async (req, res) => {
         // Не позволяем обновлять пароль через этот метод
         delete updateData.currentToken;
         delete updateData.refreshToken;
+
+        if (Object.prototype.hasOwnProperty.call(updateData, 'botStartSource') && (updateData.botStartSource === '' || updateData.botStartSource == null)) {
+            updateData.botStartSource = null;
+        }
 
         if (updateData.password) {
             const salt = await bcrypt.genSalt(10);

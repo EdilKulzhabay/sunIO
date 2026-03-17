@@ -279,9 +279,9 @@ export const createUser = async (req, res) => {
                 invitedUser = inviter._id;
                 
                 // // Добавляем 1 бонус тому, кто пригласил
-                // await User.findByIdAndUpdate(inviter._id, {
-                //     $inc: { bonus: 2, inviteesCount: 1 }
-                // });
+                await User.findByIdAndUpdate(inviter._id, {
+                    $inc: { bonus: 2 }
+                });
 
                 // console.log(`✅ Пользователь ${inviter.telegramId} получил 1 бонус за приглашение пользователя ${telegramId}`);
             } else {
@@ -298,6 +298,11 @@ export const createUser = async (req, res) => {
             }
         }
 
+        let bonus = 0;
+        if (invitedUser) {
+            bonus = 2;
+        }
+
         const doc = new User({
             telegramId,
             telegramUserName,
@@ -305,6 +310,7 @@ export const createUser = async (req, res) => {
             invitedUser: invitedUser,
             profilePhotoUrl,
             botStartSource,
+            bonus,
         });
 
         const user = await doc.save();

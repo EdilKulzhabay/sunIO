@@ -83,7 +83,7 @@ export const ClientContentSearch = () => {
             <div className="flex flex-col bg-[#031F23]">
                 <BackNav title="Поиск контента" />
                 <div
-                    className="flex flex-col mt-2 px-4 pb-10 flex-1 bg-[#031F23]"
+                    className="flex flex-col mt-2 px-4 pb-4 flex-1 bg-[#031F23]"
                     style={{ minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom)}px` }}
                 >
                     <div className="flex-1">
@@ -139,7 +139,7 @@ export const ClientContentSearch = () => {
                     <button
                         onClick={handleSearch}
                         disabled={searchLoading}
-                        className="mt-4 w-full bg-[#C4841D] rounded-xl py-2.5 text-center font-medium text-white disabled:opacity-50"
+                        className="mt-4 w-full bg-[#C4841D] rounded-full py-2.5 text-center font-medium text-white disabled:opacity-50"
                     >
                         {searchLoading ? 'Поиск...' : 'Найти'}
                     </button>

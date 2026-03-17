@@ -128,7 +128,7 @@ export const ClientOperationLog = () => {
             <UserLayout>
                 <BackNav title="Журнал операций" />
                 <div 
-                    className="min-h-screen px-4 pb-10 bg-[#031F23] flex flex-col justify-between"
+                    className="min-h-screen px-4 pb-4 bg-[#031F23] flex flex-col justify-between"
                     style={{ minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom)}px` }}
                 >
                     <div className="flex-1">

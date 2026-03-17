@@ -116,13 +116,13 @@ export const ClientFAQ = () => {
             <div className="flex flex-col bg-[#031F23]">
                 <BackNav title="Часто задаваемые вопросы" />
                 <div 
-                    className="flex flex-col justify-between mt-2 px-4 pb-10 flex-1 bg-[#031F23]"
+                    className="flex flex-col justify-between mt-2 px-4 pb-4 flex-1 bg-[#031F23]"
                     style={{ minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom)}px` }}
                 >
                     <div className="">
                         <button 
                             onClick={() => navigate('/client/content-search')}
-                            className="flex items-center justify-center sm:justify-start sm:px-4 gap-x-2 w-full bg-white/10 rounded-full py-2.5 text-white mb-4"
+                            className="flex items-center pl-4 justify-start sm:px-4 gap-x-2 w-full bg-white/10 rounded-full py-2.5 text-white mb-4"
                         >
                             <div className="shrink-0">
                                 <img src={search} alt="search" className="w-5 h-5 object-cover" />

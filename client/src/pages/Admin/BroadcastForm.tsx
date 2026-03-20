@@ -65,6 +65,9 @@ export const BroadcastFormAdmin = () => {
 
     const buttonUrl = useMemo(() => {
         if (!buttonPage) return '';
+        if (buttonPage.startsWith('http://') || buttonPage.startsWith('https://')) {
+            return buttonPage;
+        }
         const base = (import.meta.env.VITE_APP_URL || '').replace(/\/$/, '');
         return base + (buttonPage.startsWith('/') ? buttonPage : '/' + buttonPage);
     }, [buttonPage]);
@@ -96,10 +99,18 @@ export const BroadcastFormAdmin = () => {
                 setButtonText(broadcast.buttonText || '');
                 if (broadcast.buttonUrl) {
                     const base = (import.meta.env.VITE_APP_URL || '').replace(/\/$/, '');
-                    const path = broadcast.buttonUrl.startsWith(base)
-                        ? broadcast.buttonUrl.slice(base.length) || '/'
-                        : broadcast.buttonUrl;
-                    setButtonPage(path.startsWith('/') ? path : '/' + path);
+                    const rawUrl = String(broadcast.buttonUrl).trim();
+                    if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) {
+                        if (base && rawUrl.startsWith(base)) {
+                            const path = rawUrl.slice(base.length) || '/';
+                            setButtonPage(path.startsWith('/') ? path : '/' + path);
+                        } else {
+                            // Внешнюю ссылку сохраняем как есть, иначе селектор ошибочно считает её внутренней
+                            setButtonPage(rawUrl);
+                        }
+                    } else {
+                        setButtonPage(rawUrl.startsWith('/') ? rawUrl : '/' + rawUrl);
+                    }
                 } else {
                     setButtonPage('');
                 }
@@ -218,9 +229,13 @@ export const BroadcastFormAdmin = () => {
 
         try {
             setLoading(true);
-            const base = (import.meta.env.VITE_APP_URL || '').replace(/\/$/, '');
             const finalButtonUrl = buttonPage
-                ? base + (buttonPage.startsWith('/') ? buttonPage : '/' + buttonPage)
+                ? ((buttonPage.startsWith('http://') || buttonPage.startsWith('https://'))
+                    ? buttonPage
+                    : (() => {
+                        const base = (import.meta.env.VITE_APP_URL || '').replace(/\/$/, '');
+                        return base + (buttonPage.startsWith('/') ? buttonPage : '/' + buttonPage);
+                    })())
                 : '';
             const payload: Record<string, unknown> = {
                 title: title.trim(),

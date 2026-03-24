@@ -24,7 +24,8 @@ interface SecureKinescopePlayerProps {
         | 'analysis-health'
         | 'analysis-relationships'
         | 'analysis-realization'
-        | 'psychodiagnostics';
+        | 'psychodiagnostics'
+        | 'broadcast-recording';
     contentId: string;
     duration?: number; // Длительность в минутах из данных контента
     onProgressUpdate?: (progress: number, duration?: number) => void; // progress в %, duration в секундах

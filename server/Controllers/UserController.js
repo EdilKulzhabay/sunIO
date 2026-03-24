@@ -940,6 +940,21 @@ export const updateUser = async (req, res) => {
 
         delete updateData.completedActivations;
 
+        const THIN_BODY_ACTIVATION_FIELDS = [
+            "ethericBodyActivation",
+            "astralBodyActivation",
+            "mentalBodyActivation",
+            "karmicBodyActivation",
+            "buddhicBodyActivation",
+            "atmicBodyActivation",
+        ];
+        for (const key of THIN_BODY_ACTIVATION_FIELDS) {
+            if (Object.prototype.hasOwnProperty.call(updateData, key)) {
+                const v = updateData[key];
+                updateData[key] = v === true || v === "true" || v === 1 || v === "1";
+            }
+        }
+
         const candidate = await User.findById(id)
 
         if ('bonus' in updateData && updateData.bonus !== candidate.bonus && updateData.bonus > candidate.bonus) {

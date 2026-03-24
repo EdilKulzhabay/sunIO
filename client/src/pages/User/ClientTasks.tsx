@@ -247,16 +247,15 @@ export const ClientTasks = () => {
                         <div className="flex items-center justify-between gap-1 mt-4">
                             {LEVEL_IMAGES.map((src, idx) => {
                                 const step = idx + 1;
-                                const revealed = thinCount >= step;
+                                const unlocked = thinCount >= step;
                                 return (
                                     <div key={step} className="relative w-[44px] h-[62px] shrink-0">
-                                        <img src={src} alt={'Уровень ' + step} className="w-full h-full object-contain" />
-                                        {!revealed && (
-                                            <div
-                                                className="absolute inset-0 rounded bg-black/55 pointer-events-none"
-                                                aria-hidden
-                                            />
-                                        )}
+                                        <img
+                                            src={src}
+                                            alt={'Уровень ' + step}
+                                            className="w-full h-full object-contain transition-opacity duration-300"
+                                            style={{ opacity: unlocked ? 1 : 0.3 }}
+                                        />
                                     </div>
                                 );
                             })}

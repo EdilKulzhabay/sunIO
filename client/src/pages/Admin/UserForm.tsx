@@ -57,6 +57,12 @@ export const UserForm = () => {
         paymentLink: '',
         paymentId: '',
         lastActiveDate: "",
+        ethericBodyActivation: false,
+        astralBodyActivation: false,
+        mentalBodyActivation: false,
+        karmicBodyActivation: false,
+        buddhicBodyActivation: false,
+        atmicBodyActivation: false,
     });
     const lastActiveDateDisplay = formData.lastActiveDate
         ? new Date(formData.lastActiveDate).toLocaleString('ru-RU')
@@ -94,6 +100,12 @@ export const UserForm = () => {
                 healingFamily: data.healingFamily || false,
                 awakeningSpirit: data.awakeningSpirit || false,
                 botStartSource: data.botStartSource || '',
+                ethericBodyActivation: !!data.ethericBodyActivation,
+                astralBodyActivation: !!data.astralBodyActivation,
+                mentalBodyActivation: !!data.mentalBodyActivation,
+                karmicBodyActivation: !!data.karmicBodyActivation,
+                buddhicBodyActivation: !!data.buddhicBodyActivation,
+                atmicBodyActivation: !!data.atmicBodyActivation,
             });
             // Преобразуем subscriptionEndDate из Date в формат DD-MM-YYYY
             if (data.subscriptionEndDate) {
@@ -145,6 +157,12 @@ export const UserForm = () => {
             const payload: FormData = {
                 ...formData,
                 lastActiveDate: formData.lastActiveDate || undefined,
+                ethericBodyActivation: !!formData.ethericBodyActivation,
+                astralBodyActivation: !!formData.astralBodyActivation,
+                mentalBodyActivation: !!formData.mentalBodyActivation,
+                karmicBodyActivation: !!formData.karmicBodyActivation,
+                buddhicBodyActivation: !!formData.buddhicBodyActivation,
+                atmicBodyActivation: !!formData.atmicBodyActivation,
             };
 
             if (id) {

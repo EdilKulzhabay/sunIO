@@ -25,6 +25,7 @@ const VideoProgressSchema = new mongoose.Schema(
         'analysis-relationships',
         'analysis-realization',
         'psychodiagnostics',
+        'broadcast-recording',
       ],
       required: true,
     },

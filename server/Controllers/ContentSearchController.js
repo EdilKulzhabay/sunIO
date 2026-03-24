@@ -4,6 +4,7 @@
  */
 
 import Practice from '../Models/Practice.js';
+import BroadcastRecording from '../Models/BroadcastRecording.js';
 import ParablesOfLife from '../Models/ParablesOfLife.js';
 import ScientificDiscoveries from '../Models/ScientificDiscoveries.js';
 import HealthLab from '../Models/HealthLab.js';
@@ -20,6 +21,7 @@ import Psychodiagnostics from '../Models/Psychodiagnostics.js';
 
 const CONTENT_SOURCES = [
     { Model: Practice, categoryLabel: 'Практики', clientPath: '/client/practice' },
+    { Model: BroadcastRecording, categoryLabel: 'Записи эфиров', clientPath: '/client/broadcast-recording' },
     { Model: ParablesOfLife, categoryLabel: 'Притчи о жизни', clientPath: '/client/parables-of-life' },
     { Model: ScientificDiscoveries, categoryLabel: 'Научные открытия', clientPath: '/client/scientific-discoveries' },
     { Model: HealthLab, categoryLabel: 'Лаборатория здоровья', clientPath: '/client/health-lab' },

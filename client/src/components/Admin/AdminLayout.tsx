@@ -28,7 +28,9 @@ import {
     MessageSquare,
     FlaskConical,
     FileText,
-    Link2 as LinkIcon
+    Link2 as LinkIcon,
+    Video,
+    Layers
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -49,10 +51,12 @@ const menuItems = [
     { path: '/admin/faq', label: 'FAQ', icon: HelpCircle },
     { path: '/admin/documents', label: 'Документы', icon: FileText },
     { path: '/admin/practice', label: 'Практики', icon: Dumbbell },
+    { path: '/admin/broadcast-recordings', label: 'Записи эфиров', icon: Video },
     { path: '/admin/parables-of-life', label: 'Притчи о жизни', icon: MessageSquare },
     { path: '/admin/scientific-discoveries', label: 'Научные открытия', icon: FlaskConical },
     { path: '/admin/schedule', label: 'Расписание', icon: Calendar },
     { path: '/admin/activation-links', label: 'Ссылки активации', icon: Link2 },
+    { path: '/admin/levels', label: 'Уровни', icon: Layers },
     { path: '/admin/health-lab', label: 'Лаборатория здоровья', icon: Heart },
     { path: '/admin/relationship-workshop', label: 'Мастерская отношений', icon: Users2 },
     { path: '/admin/spirit-forge', label: 'Кузница Духа', icon: Flame },

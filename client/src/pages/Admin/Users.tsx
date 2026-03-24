@@ -530,6 +530,18 @@ export const UsersAdmin = () => {
                             {sortField === 'lastActiveDate' && (sortDirection === 'asc' ? ' ↑' : ' ↓')}
                         </button>
                         <button
+                            onClick={() => handleSort('createdAt')}
+                            className={`flex items-center gap-2 px-3 py-1 rounded-lg text-sm transition-colors ${
+                                sortField === 'createdAt'
+                                    ? 'bg-blue-100 text-blue-700'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                        >
+                            <ArrowUpDown size={16} />
+                            Дата регистрации
+                            {sortField === 'createdAt' && (sortDirection === 'asc' ? ' ↑' : ' ↓')}
+                        </button>
+                        <button
                             onClick={() => handleSort('notifyPermission')}
                             className={`flex items-center gap-2 px-3 py-1 rounded-lg text-sm transition-colors ${
                                 sortField === 'notifyPermission' 
@@ -541,7 +553,7 @@ export const UsersAdmin = () => {
                             Уведомления
                             {sortField === 'notifyPermission' && (sortDirection === 'asc' ? ' ↑' : ' ↓')}
                         </button>
-                        {(sortField === 'bonus' || sortField === 'subscriptionEndDate' || sortField === 'inviteesCount' || sortField === 'lastActiveDate' || sortField === 'notifyPermission') && (
+                        {(sortField === 'bonus' || sortField === 'subscriptionEndDate' || sortField === 'inviteesCount' || sortField === 'lastActiveDate' || sortField === 'createdAt' || sortField === 'notifyPermission') && (
                             <button
                                 onClick={() => {
                                     setSortField('');

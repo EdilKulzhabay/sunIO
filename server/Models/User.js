@@ -166,7 +166,13 @@ const UserSchema = new mongoose.Schema({
             showUpTo: {
                 type: Date,
                 default: null,
-            }
+            },
+            /** Для массовых уведомлений из админки — учёт статистики закрытие/кнопка */
+            campaignId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'ModalNotificationCampaign',
+                default: null,
+            },
         }
     ],
     lastActiveDate: {
@@ -194,6 +200,30 @@ const UserSchema = new mongoose.Schema({
         default: false,
     },
     awakeningSpirit: {
+        type: Boolean,
+        default: false,
+    },
+    ethericBodyActivation: {
+        type: Boolean,
+        default: false,
+    },
+    astralBodyActivation: {
+        type: Boolean,
+        default: false,
+    },
+    mentalBodyActivation: {
+        type: Boolean,
+        default: false,
+    },
+    karmicBodyActivation: {
+        type: Boolean,
+        default: false,
+    },
+    buddhicBodyActivation: {
+        type: Boolean,
+        default: false,
+    },
+    atmicBodyActivation: {
         type: Boolean,
         default: false,
     },

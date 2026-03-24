@@ -23,7 +23,8 @@ interface ClientPurchaseConfirmModalProps {
         | 'analysis-health'
         | 'analysis-relationships'
         | 'analysis-realization'
-        | 'psychodiagnostics';
+        | 'psychodiagnostics'
+        | 'broadcast-recording';
     contentTitle: string;
     starsRequired: number;
     userBonus: number;

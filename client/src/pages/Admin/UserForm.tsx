@@ -7,6 +7,15 @@ import api from '../../api';
 import { toast } from 'react-toastify';
 import { useNavigate, useParams } from 'react-router-dom';
 
+const COMPLETED_BODY_ACTIVATIONS = [
+    { key: 'ethericBodyActivation' as const, label: 'Активация эфирного тела' },
+    { key: 'astralBodyActivation' as const, label: 'Активация астрального тела' },
+    { key: 'mentalBodyActivation' as const, label: 'Активация ментального тела' },
+    { key: 'karmicBodyActivation' as const, label: 'Активация кармического тела' },
+    { key: 'buddhicBodyActivation' as const, label: 'Активация будхиального тела' },
+    { key: 'atmicBodyActivation' as const, label: 'Активация атманического тела' },
+];
+
 interface FormData {
     fullName: string;
     mail: string;
@@ -25,6 +34,12 @@ interface FormData {
     healingFamily?: boolean;
     awakeningSpirit?: boolean;
     botStartSource?: string;
+    ethericBodyActivation?: boolean;
+    astralBodyActivation?: boolean;
+    mentalBodyActivation?: boolean;
+    karmicBodyActivation?: boolean;
+    buddhicBodyActivation?: boolean;
+    atmicBodyActivation?: boolean;
 }
 
 export const UserForm = () => {
@@ -492,6 +507,32 @@ export const UserForm = () => {
                                             ? 'bg-green-100 text-green-700'
                                             : 'bg-gray-100 text-gray-500'
                                     }`}>
+                                        {formData[key] ? 'Активировано' : 'Не активировано'}
+                                    </span>
+                                </label>
+                            ))}
+                        </div>
+                    )}
+
+                    {id && (
+                        <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
+                            <h2 className="text-xl font-semibold text-gray-900">Пройденные активации</h2>
+                            {COMPLETED_BODY_ACTIVATIONS.map(({ key, label }) => (
+                                <label key={key} className="flex items-center gap-3 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={formData[key] || false}
+                                        onChange={(e) => setFormData({ ...formData, [key]: e.target.checked })}
+                                        className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <span className="text-sm font-medium text-gray-700">{label}</span>
+                                    <span
+                                        className={`ml-auto px-3 py-1 rounded-full text-xs font-medium ${
+                                            formData[key]
+                                                ? 'bg-green-100 text-green-700'
+                                                : 'bg-gray-100 text-gray-500'
+                                        }`}
+                                    >
                                         {formData[key] ? 'Активировано' : 'Не активировано'}
                                     </span>
                                 </label>

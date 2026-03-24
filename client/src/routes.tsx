@@ -12,6 +12,8 @@ import { DocumentsAdmin } from "./pages/Admin/Documents";
 import { DocumentsForm } from "./pages/Admin/DocumentsForm";
 import { PracticeAdmin } from "./pages/Admin/Practice";
 import { PracticeForm } from "./pages/Admin/PracticeForm";
+import { BroadcastRecordingAdmin } from "./pages/Admin/BroadcastRecording";
+import { BroadcastRecordingForm } from "./pages/Admin/BroadcastRecordingForm";
 import { ParablesOfLifeAdmin } from "./pages/Admin/ParablesOfLife";
 import { ParablesOfLifeForm } from "./pages/Admin/ParablesOfLifeForm";
 import { ScientificDiscoveriesAdmin } from "./pages/Admin/ScientificDiscoveries";
@@ -20,6 +22,8 @@ import { ScheduleAdmin } from "./pages/Admin/Schedule";
 import { ScheduleForm } from "./pages/Admin/ScheduleForm";
 import { ActivationLinksAdmin } from "./pages/Admin/ActivationLinks";
 import { ActivationLinkForm } from "./pages/Admin/ActivationLinkForm";
+import { LevelsAdmin } from "./pages/Admin/Levels";
+import { LevelForm } from "./pages/Admin/LevelForm";
 import { HealthLabAdmin } from "./pages/Admin/HealthLab";
 import { HealthLabForm } from "./pages/Admin/HealthLabForm";
 import { RelationshipWorkshopAdmin } from "./pages/Admin/RelationshipWorkshop";
@@ -83,6 +87,8 @@ import { ClientSchumann } from "./pages/User/ClientSchumann";
 import { ClientContactUs } from "./pages/User/ClientContactUs";
 import { ClientPracticesList } from "./pages/User/ClientPracticesList";
 import { ClientPractice } from "./pages/User/ClientPractice";
+import { ClientBroadcastRecordingsList } from "./pages/User/ClientBroadcastRecordingsList";
+import { ClientBroadcastRecording } from "./pages/User/ClientBroadcastRecording";
 import { ClientParablesOfLifeList } from "./pages/User/ClientParablesOfLifeList";
 import { ClientParablesOfLife } from "./pages/User/ClientParablesOfLife";
 import { ClientScientificDiscoveriesList } from "./pages/User/ClientScientificDiscoveriesList";
@@ -213,6 +219,14 @@ export const routes = createBrowserRouter([
     {
         path: "/client/practice/:id",
         element: <RootLayout><TelegramGuard><ProtectedRoute><ClientPractice /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/broadcast-recordings",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientBroadcastRecordingsList /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/broadcast-recording/:id",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientBroadcastRecording /></ProtectedRoute></TelegramGuard></RootLayout>,
     },
     {
         path: "/client/parables-of-life",
@@ -439,6 +453,18 @@ export const routes = createBrowserRouter([
         element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><PracticeForm /></ProtectedRoute></RootLayout>,
     },
     {
+        path: "/admin/broadcast-recordings",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><BroadcastRecordingAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/broadcast-recordings/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><BroadcastRecordingForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/broadcast-recordings/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><BroadcastRecordingForm /></ProtectedRoute></RootLayout>,
+    },
+    {
         path: "/admin/parables-of-life",
         element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ParablesOfLifeAdmin /></ProtectedRoute></RootLayout>,
     },
@@ -485,6 +511,18 @@ export const routes = createBrowserRouter([
     {
         path: "/admin/activation-links/edit/:id",
         element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><ActivationLinkForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/levels",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><LevelsAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/levels/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><LevelForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/levels/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><LevelForm /></ProtectedRoute></RootLayout>,
     },
     // ==================== HealthLab (Лаборатория здоровья) ====================
     {

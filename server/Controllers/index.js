@@ -1,6 +1,7 @@
 export * as UserController from "./UserController.js";
 export * as FAQController from "./FAQController.js";
 export * as PracticeController from "./PracticeController.js";
+export * as BroadcastRecordingController from "./BroadcastRecordingController.js";
 export * as ScheduleController from "./ScheduleController.js";
 export * as DynamicContentController from "./DynamicContentController.js";
 export * as WelcomeController from "./WelcomeController.js";
@@ -34,3 +35,4 @@ export * as OperationLogController from "./OperationLogController.js";
 export * as DocumentsController from "./DocumentsController.js";
 export * as ContentSearchController from "./ContentSearchController.js";
 export * as BotTrafficSourceController from "./BotTrafficSourceController.js";
+export * as LevelController from "./LevelController.js";

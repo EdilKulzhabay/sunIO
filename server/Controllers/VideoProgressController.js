@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import VideoProgress from '../Models/VideoProgress.js';
 import User from '../Models/User.js';
 import Practice from '../Models/Practice.js';
+import BroadcastRecording from '../Models/BroadcastRecording.js';
 import ParablesOfLife from '../Models/ParablesOfLife.js';
 import ScientificDiscoveries from '../Models/ScientificDiscoveries.js';
 import HealthLab from '../Models/HealthLab.js';
@@ -240,6 +241,7 @@ export const awardPointsForVideo = async (req, res) => {
         const contentIdObj = typeof contentId === 'string' ? contentId : contentId;
         switch (contentType) {
             case 'practice': content = await Practice.findById(contentIdObj); break;
+            case 'broadcast-recording': content = await BroadcastRecording.findById(contentIdObj); break;
             case 'parables-of-life': content = await ParablesOfLife.findById(contentIdObj); break;
             case 'scientific-discoveries': content = await ScientificDiscoveries.findById(contentIdObj); break;
             case 'health-lab':
@@ -354,6 +356,9 @@ export const awardBonusOnPlay = async (req, res) => {
         switch (contentType) {
             case 'practice':
                 content = await Practice.findById(contentId);
+                break;
+            case 'broadcast-recording':
+                content = await BroadcastRecording.findById(contentId);
                 break;
             case 'parables-of-life':
                 content = await ParablesOfLife.findById(contentId);

@@ -27,7 +27,8 @@ type ContentType =
     | "analysis-health"
     | "analysis-relationships"
     | "analysis-realization"
-    | "psychodiagnostics";
+    | "psychodiagnostics"
+    | "broadcast-recording";
 
 interface NormalizedContent {
     title: string;

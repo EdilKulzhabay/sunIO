@@ -31,9 +31,33 @@ export const RedirectToPageSelector = ({ value, onChange }: RedirectToPageSelect
     const [loadingContent, setLoadingContent] = useState(false);
     const [localCategory, setLocalCategory] = useState('');
 
-    // Синхронизация режима при загрузке значения из родителя (например, при открытии рассылки)
+    // Синхронизация режима при изменении value из родителя — без сброса при вводе внешней ссылки по буквам
+    // и без перевода «Внешняя ссылка» → «Не перенаправлять» при очистке поля (onChange('')).
     useEffect(() => {
-        setMode(detectInitialMode(value));
+        setMode((prev) => {
+            const next = detectInitialMode(value);
+            const empty = !value?.trim();
+
+            if (empty) {
+                if (prev === 'external' || prev === 'page' || prev === 'content') {
+                    return prev;
+                }
+                return next;
+            }
+
+            if (prev === 'external') {
+                const v = value.trim();
+                const looksLikeExternal =
+                    v.startsWith('http://') ||
+                    v.startsWith('https://') ||
+                    /^https?:\/\//i.test(v);
+                if (!looksLikeExternal) {
+                    return 'external';
+                }
+            }
+
+            return next;
+        });
     }, [value]);
 
     const categoryOption = CONTENT_CATEGORY_OPTIONS.find(
@@ -174,7 +198,9 @@ export const RedirectToPageSelector = ({ value, onChange }: RedirectToPageSelect
                 <div>
                     <label className="block text-sm font-medium mb-1">URL</label>
                     <input
-                        type="url"
+                        type="text"
+                        inputMode="url"
+                        autoComplete="url"
                         value={value || ''}
                         onChange={(e) => handleExternalLinkChange(e.target.value)}
                         placeholder="https://..."

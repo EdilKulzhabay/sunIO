@@ -1,7 +1,5 @@
-import { useState, useEffect } from 'react';
 import { MyInput } from './MyInput';
-import api from '../../api';
-import { CONTENT_CATEGORY_OPTIONS } from '../../constants/contentCategoryOptions';
+import { RedirectToPageSelector } from './RedirectToPageSelector';
 
 export interface LinkButtonValue {
     linkButtonText?: string | null;
@@ -14,68 +12,38 @@ interface ContentLinkButtonEditorProps {
     onChange: (value: LinkButtonValue | null) => void;
 }
 
+function linkTypeFromUrl(link: string): 'internal' | 'external' {
+    const t = (link || '').trim();
+    if (t.startsWith('http://') || t.startsWith('https://')) {
+        return 'external';
+    }
+    return 'internal';
+}
+
+/**
+ * Текст кнопки + выбор страницы/контента/внешней ссылки через RedirectToPageSelector
+ * (как в рассылках и модальных уведомлениях).
+ */
 export const ContentLinkButtonEditor = ({ value, onChange }: ContentLinkButtonEditorProps) => {
-    const [contentItems, setContentItems] = useState<{ _id: string; title: string }[]>([]);
-    const [loadingContent, setLoadingContent] = useState(false);
-    const [localCategory, setLocalCategory] = useState('');
-
-    const type = value?.linkButtonType || 'internal';
-    const categoryOption = CONTENT_CATEGORY_OPTIONS.find(
-        (opt) => value?.linkButtonLink?.startsWith(opt.clientPath + '/')
-    );
-    const selectedCategory = categoryOption?.apiPath || localCategory;
-    const selectedItemId = categoryOption
-        ? value?.linkButtonLink?.replace(categoryOption.clientPath + '/', '') || ''
-        : '';
-
-    useEffect(() => {
-        if (type !== 'internal' || !selectedCategory) {
-            setContentItems([]);
-            setLocalCategory('');
-            return;
-        }
-        const fetchItems = async () => {
-            setLoadingContent(true);
-            try {
-                const response = await api.get(selectedCategory);
-                const data = response.data?.data;
-                setContentItems(Array.isArray(data) ? data : []);
-            } catch {
-                setContentItems([]);
-            } finally {
-                setLoadingContent(false);
-            }
-        };
-        fetchItems();
-    }, [type, selectedCategory]);
-
-    const handleTypeChange = (newType: 'internal' | 'external') => {
-        setLocalCategory('');
+    const handleTextChange = (text: string) => {
         onChange({
             ...value,
-            linkButtonType: newType,
-            linkButtonLink: newType === 'external' ? value?.linkButtonLink : '',
+            linkButtonText: text || null,
+            linkButtonLink: value?.linkButtonLink ?? null,
+            linkButtonType: value?.linkButtonLink
+                ? linkTypeFromUrl(value.linkButtonLink)
+                : value?.linkButtonType || 'internal',
         });
     };
 
-    const handleTextChange = (text: string) => {
-        onChange({ ...value, linkButtonText: text || null });
-    };
-
-    const handleExternalLinkChange = (url: string) => {
-        onChange({ ...value, linkButtonLink: url || null });
-    };
-
-    const handleCategoryChange = (apiPath: string) => {
-        setLocalCategory(apiPath);
-        onChange({ ...value, linkButtonLink: '' });
-    };
-
-    const handleItemChange = (itemId: string) => {
-        const opt = CONTENT_CATEGORY_OPTIONS.find((o) => o.apiPath === selectedCategory);
-        const link = opt && itemId ? `${opt.clientPath}/${itemId}` : '';
-        setLocalCategory('');
-        onChange({ ...value, linkButtonLink: link || null });
+    const handleLinkChange = (link: string) => {
+        const linkButtonLink = link || null;
+        onChange({
+            ...value,
+            linkButtonText: value?.linkButtonText ?? null,
+            linkButtonLink,
+            linkButtonType: linkTypeFromUrl(link),
+        });
     };
 
     return (
@@ -93,65 +61,12 @@ export const ContentLinkButtonEditor = ({ value, onChange }: ContentLinkButtonEd
             />
 
             <div>
-                <label className="block text-sm font-medium mb-2">Тип ссылки</label>
-                <select
-                    value={type}
-                    onChange={(e) => handleTypeChange(e.target.value as 'internal' | 'external')}
-                    className="w-full p-2 rounded-md border border-gray-300"
-                >
-                    <option value="internal">Внутренняя</option>
-                    <option value="external">Внешняя</option>
-                </select>
-            </div>
-
-            {type === 'external' && (
-                <MyInput
-                    label="URL ссылки"
-                    type="url"
+                <label className="block text-sm font-medium mb-2">Куда ведёт кнопка</label>
+                <RedirectToPageSelector
                     value={value?.linkButtonLink || ''}
-                    onChange={(e) => handleExternalLinkChange(e.target.value)}
-                    placeholder="https://..."
+                    onChange={handleLinkChange}
                 />
-            )}
-
-            {type === 'internal' && (
-                <>
-                    <div>
-                        <label className="block text-sm font-medium mb-2">Категория контента</label>
-                        <select
-                            value={selectedCategory}
-                            onChange={(e) => handleCategoryChange(e.target.value)}
-                            className="w-full p-2 rounded-md border border-gray-300"
-                        >
-                            <option value="">Выберите категорию</option>
-                            {CONTENT_CATEGORY_OPTIONS.map((opt) => (
-                                <option key={opt.apiPath} value={opt.apiPath}>
-                                    {opt.title}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {selectedCategory && (
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Контент</label>
-                            <select
-                                value={selectedItemId}
-                                onChange={(e) => handleItemChange(e.target.value)}
-                                className="w-full p-2 rounded-md border border-gray-300"
-                                disabled={loadingContent}
-                            >
-                                <option value="">Выберите контент</option>
-                                {contentItems.map((item) => (
-                                    <option key={item._id} value={item._id}>
-                                        {item.title || item._id}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    )}
-                </>
-            )}
+            </div>
         </div>
     );
 };

@@ -1,7 +1,12 @@
-import { Telegraf } from 'telegraf';
+import { Telegraf, Input } from 'telegraf';
 import 'dotenv/config';
 import axios from 'axios';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { executeUserOperation } from './queue.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const RESTART_IMAGE_PATH = path.join(__dirname, 'assets', 'restart.jpg');
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
@@ -125,6 +130,38 @@ bot.action('consent_accept', async (ctx) => {
         }
       );
     });
+
+    const chatId = ctx.chat.id;
+    setTimeout(() => {
+      (async () => {
+        try {
+          const me = await bot.telegram.getMe();
+          const botUsername = me.username || process.env.BOT_USERNAME;
+          if (!botUsername) {
+            console.error('Не задан username бота: укажите BOT_USERNAME в .env или проверьте токен.');
+            return;
+          }
+          const startHref = `https://t.me/${botUsername}`;
+          const caption =
+            'Если получено такое сообщение с ошибкой, то тебе необходимо нажать ' +
+            `<a href="${startHref}">/start</a>` +
+            ', а затем снова принять комплект документов и повторить регистрацию по кнопке ☀️ Открыть Солнце';
+
+          await executeUserOperation(async () => {
+            return await bot.telegram.sendPhoto(chatId, Input.fromLocalFile(RESTART_IMAGE_PATH), {
+              caption,
+              parse_mode: 'HTML'
+            });
+          });
+        } catch (err) {
+          if (err.response?.error_code === 403) {
+            console.log(`⚠️ Пользователь ${telegramId} заблокировал бота (отложенное сообщение с restart.jpg).`);
+            return;
+          }
+          console.error(`Ошибка отложенного сообщения с restart.jpg пользователю ${telegramId}:`, err.message);
+        }
+      })();
+    }, 2 * 60 * 1000);
   } catch (error) {
     if (error.response?.error_code === 403) {
       console.log(`⚠️ Пользователь ${telegramId} заблокировал бота.`);

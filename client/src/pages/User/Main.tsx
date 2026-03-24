@@ -314,10 +314,13 @@ export const Main = () => {
     };
 
     const handleModalClose = async () => {
+        if (!userData?.telegramId || notificationIndex === null || !modalNotification) return;
         try {
             await api.post('/api/modal-notification/remove', {
                 notificationIndex: notificationIndex,
-                telegramId: userData.telegramId
+                telegramId: userData.telegramId,
+                notificationId: modalNotification._id,
+                interactionAction: 'dismiss' as const,
             });
             setModalNotification(null);
             setNotificationIndex(null);
@@ -372,7 +375,9 @@ export const Main = () => {
             // Удаляем уведомление с сервера
             await api.post('/api/modal-notification/remove', {
                 notificationIndex: notificationIndex,
-                telegramId: userData.telegramId
+                telegramId: userData.telegramId,
+                notificationId: modalNotification._id,
+                interactionAction: 'button' as const,
             });
 
             // Закрываем текущее модальное окно

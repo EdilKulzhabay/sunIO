@@ -12,6 +12,7 @@ import {
     UserController,
     FAQController,
     PracticeController,
+    BroadcastRecordingController,
     ScheduleController,
     DynamicContentController,
     WelcomeController,
@@ -44,11 +45,13 @@ import {
     OperationLogController,
     DocumentsController,
     ContentSearchController,
-    BotTrafficSourceController
+    BotTrafficSourceController,
+    LevelController
 } from "./Controllers/index.js";
 import { authMiddleware } from "./Middlewares/authMiddleware.js";
 import { adminActionLogMiddleware } from "./Middlewares/adminActionLogMiddleware.js";
 import User from "./Models/User.js";
+import { migrateLegacyCompletedActivationsIfNeeded } from "./Controllers/UserController.js";
 import Broadcast from "./Models/Broadcast.js";
 import { 
     setupSwagger,
@@ -70,7 +73,7 @@ mongoose
     });
 
 const app = express();
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: '500mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.text());
 app.use(cookieParser());
@@ -170,6 +173,7 @@ app.post("/api/user/transfer-bonus", UserController.transferBonus);
 
 app.get("/api/user/me", authMiddleware, async (req, res) => {
     try {
+        await migrateLegacyCompletedActivationsIfNeeded(req.userId);
         const user = await User.findById(req.userId).select("-password -currentToken -refreshToken");
         if (!user) {
             return res.status(404).json({ success: false, message: "Пользователь не найден" });
@@ -238,6 +242,13 @@ app.get("/api/activation-link/:id", ActivationLinkController.getById);
 app.put("/api/activation-link/:id", authMiddleware, ActivationLinkController.update);
 app.delete("/api/activation-link/:id", authMiddleware, ActivationLinkController.remove);
 
+// ==================== Уровни (задания / активации тонких тел) ====================
+app.get("/api/levels", LevelController.getAll);
+app.get("/api/levels/:id", LevelController.getById);
+app.post("/api/levels", createContentRateLimit, authMiddleware, LevelController.create);
+app.put("/api/levels/:id", authMiddleware, LevelController.update);
+app.delete("/api/levels/:id", authMiddleware, LevelController.remove);
+
 // ==================== FAQ маршруты ====================
 app.post("/api/faq", createContentRateLimit, authMiddleware, FAQController.create);
 app.get("/api/faq", FAQController.getAll);
@@ -258,6 +269,13 @@ app.get("/api/practice", PracticeController.getAll);
 app.get("/api/practice/:id", PracticeController.getById);
 app.put("/api/practice/:id", authMiddleware, PracticeController.update);
 app.delete("/api/practice/:id", authMiddleware, PracticeController.remove);
+
+// ==================== Записи эфиров (BroadcastRecording) ====================
+app.post("/api/broadcast-recording", createContentRateLimit, authMiddleware, BroadcastRecordingController.create);
+app.get("/api/broadcast-recording", BroadcastRecordingController.getAll);
+app.get("/api/broadcast-recording/:id", BroadcastRecordingController.getById);
+app.put("/api/broadcast-recording/:id", authMiddleware, BroadcastRecordingController.update);
+app.delete("/api/broadcast-recording/:id", authMiddleware, BroadcastRecordingController.remove);
 
 // ==================== ParablesOfLife (Притчи о жизни) маршруты ====================
 app.post("/api/parables-of-life", createContentRateLimit, authMiddleware, ParablesOfLifeController.create);
@@ -418,6 +436,7 @@ app.delete("/api/broadcast/:id", authMiddleware, BroadcastController.deleteBroad
 
 // ==================== Modal Notification маршруты ====================
 app.post("/api/modal-notification/users", ModalNotificationController.getFilteredUsers);
+app.get("/api/modal-notification/campaigns", authMiddleware, ModalNotificationController.listModalCampaigns);
 app.post("/api/modal-notification/create", createContentRateLimit, authMiddleware, ModalNotificationController.createModalNotification);
 app.post("/api/modal-notification/my", ModalNotificationController.getUserModalNotifications);
 app.post("/api/modal-notification/remove", ModalNotificationController.removeModalNotification);
@@ -518,6 +537,7 @@ console.log('Cron задача рассылки diaryCheck настроена: �
 cron.schedule('* * * * *', async () => {
     try {
         await BroadcastController.processScheduledBroadcasts();
+        await ModalNotificationController.processScheduledModalNotifications();
     } catch (error) {
         console.error(`[${new Date().toISOString()}] Ошибка обработки запланированных рассылок:`, error);
     }

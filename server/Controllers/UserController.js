@@ -8,6 +8,7 @@ import XLSX from "xlsx";
 import axios from "axios";
 import crypto from 'crypto';
 import { addAdminAction } from "../utils/addAdminAction.js";
+import { resolveProfilePhotoUrl } from "../utils/profilePhotoDownload.js";
 import PurchaseLog from "../Models/PurchaseLog.js";
 import DepositLog from "../Models/DepositLog.js";
 
@@ -262,7 +263,15 @@ export const createUser = async (req, res) => {
         console.log("createUser req.body: ", req.body);
 
         if (candidate) {
-            await User.findByIdAndUpdate(candidate._id, { profilePhotoUrl });
+            if (profilePhotoUrl) {
+                const localPhotoUrl = await resolveProfilePhotoUrl(
+                    profilePhotoUrl,
+                    telegramId
+                );
+                await User.findByIdAndUpdate(candidate._id, {
+                    profilePhotoUrl: localPhotoUrl,
+                });
+            }
             return res.status(200).json({
                 success: false,
                 message: "Пользователь существует, пропускаем создание пользователя",
@@ -303,12 +312,20 @@ export const createUser = async (req, res) => {
             bonus = 2;
         }
 
+        let storedProfilePhotoUrl = null;
+        if (profilePhotoUrl) {
+            storedProfilePhotoUrl = await resolveProfilePhotoUrl(
+                profilePhotoUrl,
+                telegramId
+            );
+        }
+
         const doc = new User({
             telegramId,
             telegramUserName,
             status: 'anonym',
             invitedUser: invitedUser,
-            profilePhotoUrl,
+            profilePhotoUrl: storedProfilePhotoUrl,
             botStartSource,
             bonus,
         });
@@ -770,10 +787,40 @@ export const exportUsersToExcel = async (req, res) => {
     }
 };
 
+const LEGACY_ACTIVATION_TO_FIELD = {
+    ethericBody: "ethericBodyActivation",
+    astralBody: "astralBodyActivation",
+    mentalBody: "mentalBodyActivation",
+    karmicBody: "karmicBodyActivation",
+    buddhicBody: "buddhicBodyActivation",
+    atmicBody: "atmicBodyActivation",
+};
+
+/** Одноразовая миграция старого поля completedActivations[] → boolean-поля */
+export async function migrateLegacyCompletedActivationsIfNeeded(id) {
+    if (!mongoose.Types.ObjectId.isValid(id)) return;
+    const oid = new mongoose.Types.ObjectId(id);
+    const raw = await User.collection.findOne({ _id: oid });
+    if (!raw || !Array.isArray(raw.completedActivations) || raw.completedActivations.length === 0) {
+        return;
+    }
+    const $set = {};
+    for (const k of raw.completedActivations) {
+        const f = LEGACY_ACTIVATION_TO_FIELD[k];
+        if (f) $set[f] = true;
+    }
+    const update = Object.keys($set).length
+        ? { $set: $set, $unset: { completedActivations: "" } }
+        : { $unset: { completedActivations: "" } };
+    await User.collection.updateOne({ _id: oid }, update);
+}
+
 // Получить пользователя по ID (только для админа)
 export const getUserById = async (req, res) => {
     try {
         const { id } = req.params;
+
+        await migrateLegacyCompletedActivationsIfNeeded(id);
 
         const user = await User.findById(id).select("-password -currentToken -refreshToken");
 
@@ -890,6 +937,8 @@ export const updateUser = async (req, res) => {
         if (Object.prototype.hasOwnProperty.call(updateData, 'botStartSource') && (updateData.botStartSource === '' || updateData.botStartSource == null)) {
             updateData.botStartSource = null;
         }
+
+        delete updateData.completedActivations;
 
         const candidate = await User.findById(id)
 
@@ -1514,9 +1563,11 @@ export const purchaseContent = async (req, res) => {
         const AnalysisRelationships = (await import("../Models/AnalysisRelationships.js")).default;
         const AnalysisRealization = (await import("../Models/AnalysisRealization.js")).default;
         const Psychodiagnostics = (await import("../Models/Psychodiagnostics.js")).default;
+        const BroadcastRecording = (await import("../Models/BroadcastRecording.js")).default;
 
         const contentModels = {
             'practice': Practice,
+            'broadcast-recording': BroadcastRecording,
             'parables-of-life': ParablesOfLife,
             'scientific-discoveries': ScientificDiscoveries,
             'health-lab': HealthLab,
@@ -1582,6 +1633,7 @@ export const purchaseContent = async (req, res) => {
             'analysis-relationships': 'Анализ отношений',
             'analysis-realization': 'Анализ реализации',
             'psychodiagnostics': 'Психодиагностика',
+            'broadcast-recording': 'Записи эфиров',
         };
 
         const sectionLabel = contentTypeLabels[contentType] || contentType;

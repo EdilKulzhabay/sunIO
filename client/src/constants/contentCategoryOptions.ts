@@ -4,6 +4,7 @@
  */
 export const CONTENT_CATEGORY_OPTIONS: { title: string; apiPath: string; clientPath: string }[] = [
     { title: 'Практики', apiPath: '/api/practice', clientPath: '/client/practice' },
+    { title: 'Записи эфиров', apiPath: '/api/broadcast-recording', clientPath: '/client/broadcast-recording' },
     { title: 'Притчи о жизни', apiPath: '/api/parables-of-life', clientPath: '/client/parables-of-life' },
     { title: 'Научные открытия', apiPath: '/api/scientific-discoveries', clientPath: '/client/scientific-discoveries' },
     { title: 'Лаборатория здоровья', apiPath: '/api/health-lab', clientPath: '/client/health-lab' },

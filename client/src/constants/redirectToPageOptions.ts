@@ -10,6 +10,7 @@ export const REDIRECT_TO_PAGE_OPTIONS: { title: string; value: string }[] = [
     { title: 'Главная приложения', value: '/' },
     { title: 'Документы', value: '/client/documents' },
     { title: 'Журнал операций', value: '/client/operation-log' },
+    { title: 'Записи эфиров', value: '/client/broadcast-recordings' },
     { title: 'Задания', value: '/client/tasks' },
     { title: 'История пополнений', value: '/client/deposit-log' },
     { title: 'История покупок', value: '/client/purchase-log' },

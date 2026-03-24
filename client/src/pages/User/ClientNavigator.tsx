@@ -150,7 +150,7 @@ export const ClientNavigator = () => {
                             } else {
                                 navigate("/client/consciousness-library")
                             }
-                        }} className="absolute top-[10%] left-[50%] w-[95px] h-[61px] z-20 lg:w-[176px] lg:h-[72px] lg:top-[25%] lg:left-[49%] cursor-pointer">
+                        }} className="absolute top-[10%] left-[50%] w-[95px] h-[61px] z-20 lg:w-[176px] lg:h-[72px] md:top-[15%] md:left-[60%] lg:top-[25%] lg:left-[49%] cursor-pointer">
                             <img src={navigatorConsciousnessLibraryMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
                             <img src={navigatorConsciousnessLibraryDesktop} alt="" className="object-cover w-full h-full hidden lg:block" />
                         </button>
@@ -161,7 +161,7 @@ export const ClientNavigator = () => {
                             } else {
                                 navigate("/client/spirit-forge")
                             }
-                        }} className="absolute top-[28%] left-[32%] w-[72px] h-[61px] z-20 lg:w-[140px] lg:h-[72px] lg:top-[44%] lg:left-[37%] cursor-pointer">
+                        }} className="absolute top-[28%] left-[32%] w-[72px] h-[61px] z-20 lg:w-[140px] lg:h-[72px] md:top-[30%] md:left-[40%] lg:top-[44%] lg:left-[37%] cursor-pointer">
                             <img src={navigatorSpiritForgeMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
                             <img src={navigatorSpiritForgeDesktop} alt="" className="object-cover w-full h-full hidden lg:block" />
                         </button>
@@ -183,7 +183,7 @@ export const ClientNavigator = () => {
                             } else {
                                 navigate("/client/masters-tower")
                             }
-                        }} className="absolute top-[43%] left-[72%] w-[78px] h-[61px] z-20 lg:w-[129px] lg:h-[93px] lg:top-[63%] lg:left-[75%] cursor-pointer">
+                        }} className="absolute top-[43%] left-[72%] w-[78px] h-[61px] z-20 lg:w-[129px] lg:h-[93px] md:top-[43%] md:left-[75%] lg:top-[63%] lg:left-[75%] cursor-pointer">
                             <img src={navigatorMastersTowerMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
                             <img src={navigatorMastersTowerDesktop} alt="" className="object-cover w-full h-full hidden lg:block" />
                         </button>
@@ -205,13 +205,13 @@ export const ClientNavigator = () => {
                             } else {
                                 navigate("/client/femininity-gazebo")
                             }
-                        }} className="absolute top-[69%] left-[66%] w-[115px] h-[61px] z-20 lg:w-[186px] lg:h-[93px] lg:top-[74%] lg:left-[84%] cursor-pointer">
+                        }} className="absolute top-[69%] left-[66%] w-[115px] h-[61px] z-20 lg:w-[186px] lg:h-[93px] md:top-[69%] md:left-[75%] lg:top-[74%] lg:left-[84%] cursor-pointer">
                             <img src={navigatorFemininityGazeboMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
                             <img src={navigatorFemininityGazeboDesktop} alt="" className="object-cover w-full h-full hidden lg:block" />
                         </button>
                         <button onClick={() => {
                             navigate("/client/beggining-journey")
-                        }} className="absolute top-[78%] left-[27%] w-[99px] h-[61px] z-20 lg:w-[183px] lg:h-[72px] lg:top-[82%] lg:left-[35%] cursor-pointer">
+                        }} className="absolute top-[78%] left-[27%] w-[99px] h-[61px] z-20 lg:w-[183px] lg:h-[72px] md:top-[78%] md:left-[38%] lg:top-[82%] lg:left-[35%] cursor-pointer">
                             <img src={navigatorBegginingJourneyMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
                             <img src={navigatorBegginingJourneyDesktop} alt="" className="object-cover w-full h-full hidden lg:block" />
                         </button>

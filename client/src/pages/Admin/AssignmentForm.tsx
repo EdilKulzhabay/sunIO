@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AdminLayout } from '../../components/Admin/AdminLayout';
+import { RedirectToPageSelector } from '../../components/Admin/RedirectToPageSelector';
 import { MyInput } from '../../components/Admin/MyInput';
 import { MyButton } from '../../components/Admin/MyButton';
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
@@ -163,14 +164,12 @@ export const AssignmentForm = () => {
                                     placeholder="Кратко, что сделать"
                                     required
                                 />
-                                <MyInput
-                                    label="Ссылка на контент (например /client/practice/...)"
-                                    type="text"
-                                    value={step.contentLink}
-                                    onChange={(e) => updateStep(index, { contentLink: e.target.value })}
-                                    placeholder="/client/practice/..."
-                                    required
-                                />
+                                <div className="pt-1">
+                                    <RedirectToPageSelector
+                                        value={step.contentLink}
+                                        onChange={(val) => updateStep(index, { contentLink: val })}
+                                    />
+                                </div>
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
                                         type="checkbox"

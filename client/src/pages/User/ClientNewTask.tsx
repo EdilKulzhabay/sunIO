@@ -62,9 +62,25 @@ export const ClientNewTask = () => {
 
     const loadProgress = useCallback(async (assignmentId: string) => {
         if (!assignmentId) return;
+        const userStr = localStorage.getItem("user");
+        let userId = "";
+        if (userStr) {
+            try {
+                userId = JSON.parse(userStr)._id || "";
+            } catch {
+                /* ignore */
+            }
+        }
+        if (!userId) {
+            toast.error("Не найден профиль пользователя. Откройте приложение заново.");
+            setSteps([]);
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         try {
-            const res = await api.get(`/api/assignments/user/${assignmentId}/progress`);
+            const res = await api.get(`/api/assignments/${assignmentId}/user-progress/${userId}`);
             const d = res.data?.data;
             if (d) {
                 setTaskTitle(d.request || "");
@@ -77,12 +93,8 @@ export const ClientNewTask = () => {
                     }))
                 );
             }
-        } catch (e: any) {
-            if (e.response?.status === 401) {
-                toast.error("Войдите в аккаунт, чтобы видеть прогресс");
-            } else {
-                toast.error("Не удалось загрузить задание");
-            }
+        } catch {
+            toast.error("Не удалось загрузить задание");
             setSteps([]);
         } finally {
             setLoading(false);
@@ -117,10 +129,24 @@ export const ClientNewTask = () => {
 
     const toggleUserStep = async (stepIndex: number, completed: boolean) => {
         if (!selectedId) return;
+        const userStr = localStorage.getItem("user");
+        let userId = "";
+        if (userStr) {
+            try {
+                userId = JSON.parse(userStr)._id || "";
+            } catch {
+                /* ignore */
+            }
+        }
+        if (!userId) {
+            toast.error("Не найден профиль пользователя");
+            return;
+        }
         try {
-            const res = await api.patch(`/api/assignments/user/${selectedId}/steps/${stepIndex}/toggle`, {
-                completed,
-            });
+            const res = await api.patch(
+                `/api/assignments/${selectedId}/user-progress/${userId}/steps/${stepIndex}/toggle`,
+                { completed }
+            );
             const d = res.data?.data;
             if (d?.steps) {
                 setSteps(

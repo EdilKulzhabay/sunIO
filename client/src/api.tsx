@@ -10,6 +10,11 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
+    const base = config.baseURL || "";
+    if (typeof config.url === "string" && base.replace(/\/$/, "").endsWith("/api") && config.url.startsWith("/api/")) {
+        config.url = config.url.replace(/^\/api/, "") || "/";
+    }
+
     const token = window.localStorage.getItem("token");
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;

@@ -563,7 +563,7 @@ export const Main = () => {
                         <SmallCard title="Навигатор" link="/client/navigator" img={main1} />
                     </div>
                     <div id="main-instruction-tasks">
-                        <SmallCard title="Задания" link="/client/tasks" img={main2} />
+                        <SmallCard title="Задания" link="/client/new-task" img={main2} />
                     </div>
                     <div id="main-instruction-diary">
                         <SmallCard title={`Осознания`} link="/client/diary" img={main3} />

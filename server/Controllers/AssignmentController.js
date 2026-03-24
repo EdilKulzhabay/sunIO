@@ -312,6 +312,52 @@ export const getForUser = async (req, res) => {
     }
 };
 
+/**
+ * Прогресс по заданию для пользователя без JWT (как GET /api/user/:id для Telegram).
+ * GET /api/assignments/:id/user-progress/:userId
+ */
+export const getUserProgressByUserId = async (req, res) => {
+    try {
+        const { id: assignmentId, userId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(assignmentId) || !mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ success: false, message: "Неверный id" });
+        }
+
+        const assignment = await Assignment.findById(assignmentId);
+        if (!assignment) {
+            return res.status(404).json({
+                success: false,
+                message: "Задание не найдено",
+            });
+        }
+
+        const completed = await syncAssignmentProgress(userId, assignment);
+
+        const steps = assignment.steps.map((s, i) => ({
+            stepDescription: s.stepDescription,
+            contentLink: s.contentLink,
+            userControlled: s.userControlled,
+            completed: !!completed[i],
+        }));
+
+        res.json({
+            success: true,
+            data: {
+                _id: assignment._id,
+                request: assignment.request,
+                steps,
+            },
+        });
+    } catch (error) {
+        console.log("Ошибка в AssignmentController.getUserProgressByUserId:", error);
+        res.status(500).json({
+            success: false,
+            message: "Ошибка при загрузке задания",
+            error: error.message,
+        });
+    }
+};
+
 /** Ручная отметка шага (только userControlled) */
 export const toggleUserControlledStep = async (req, res) => {
     try {
@@ -389,6 +435,86 @@ export const toggleUserControlledStep = async (req, res) => {
         });
     } catch (error) {
         console.log("Ошибка в AssignmentController.toggleUserControlledStep:", error);
+        res.status(500).json({
+            success: false,
+            message: "Ошибка при сохранении шага",
+            error: error.message,
+        });
+    }
+};
+
+/**
+ * Ручная отметка шага без JWT — userId в URL (тот же контракт безопасности, что публичный прогресс).
+ * PATCH /api/assignments/:id/user-progress/:userId/steps/:stepIndex/toggle
+ */
+export const toggleUserControlledStepByUserId = async (req, res) => {
+    try {
+        const { id: assignmentId, userId, stepIndex } = req.params;
+        const { completed } = req.body;
+
+        if (!mongoose.Types.ObjectId.isValid(assignmentId) || !mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ success: false, message: "Неверный id" });
+        }
+
+        const idx = parseInt(stepIndex, 10);
+        if (Number.isNaN(idx) || idx < 0) {
+            return res.status(400).json({ success: false, message: "Неверный индекс шага" });
+        }
+
+        const assignment = await Assignment.findById(assignmentId);
+        if (!assignment) {
+            return res.status(404).json({
+                success: false,
+                message: "Задание не найдено",
+            });
+        }
+
+        if (idx >= assignment.steps.length) {
+            return res.status(400).json({
+                success: false,
+                message: "Шаг не существует",
+            });
+        }
+
+        if (!assignment.steps[idx].userControlled) {
+            return res.status(400).json({
+                success: false,
+                message: "Этот шаг нельзя отметить вручную",
+            });
+        }
+
+        const progressDoc = await UserAssignmentProgress.findOne({
+            userId,
+            assignmentId: assignment._id,
+        });
+        const arr = alignCompletedSteps(progressDoc?.completedSteps, assignment.steps.length);
+        arr[idx] = completed === true || completed === "true" || completed === 1;
+
+        await UserAssignmentProgress.findOneAndUpdate(
+            { userId, assignmentId: assignment._id },
+            { $set: { completedSteps: arr } },
+            { upsert: true, new: true }
+        );
+
+        const merged = await syncAssignmentProgress(userId, assignment);
+
+        const steps = assignment.steps.map((s, i) => ({
+            stepDescription: s.stepDescription,
+            contentLink: s.contentLink,
+            userControlled: s.userControlled,
+            completed: !!merged[i],
+        }));
+
+        res.json({
+            success: true,
+            data: {
+                _id: assignment._id,
+                request: assignment.request,
+                steps,
+            },
+        });
+    } catch (error) {
+        console.log("Ошибка в AssignmentController.toggleUserControlledStepByUserId:", error);
         res.status(500).json({
             success: false,
             message: "Ошибка при сохранении шага",

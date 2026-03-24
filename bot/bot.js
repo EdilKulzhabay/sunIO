@@ -16,12 +16,15 @@ export default bot;
 // Храним startParam для каждого пользователя, чтобы передать после согласия
 const pendingStartParams = new Map();
 
+// Deep link из подсказки с restart.jpg — не реферал, только повторный /start
+const RESTART_HINT_START_PARAM = 'reopen';
+
 bot.start(async (ctx) => {
   const chatId = ctx.chat.id;
   const telegramId = ctx.from.id;
 
   const startParam = ctx.startParam || (ctx.message?.text?.split(' ')[1] || null);
-  if (startParam) {
+  if (startParam && startParam !== RESTART_HINT_START_PARAM) {
     pendingStartParams.set(String(telegramId), startParam);
   }
 
@@ -141,7 +144,7 @@ bot.action('consent_accept', async (ctx) => {
             console.error('Не задан username бота: укажите BOT_USERNAME в .env или проверьте токен.');
             return;
           }
-          const startHref = `https://t.me/${botUsername}`;
+          const startHref = `https://t.me/${botUsername}?start=${RESTART_HINT_START_PARAM}`;
           const caption =
             'Если получено такое сообщение с ошибкой, то тебе необходимо нажать ' +
             `<a href="${startHref}">/start</a>` +

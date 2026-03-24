@@ -30,7 +30,8 @@ import {
     FileText,
     Link2 as LinkIcon,
     Video,
-    Layers
+    Layers,
+    ListChecks
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -57,6 +58,7 @@ const menuItems = [
     { path: '/admin/schedule', label: 'Расписание', icon: Calendar },
     { path: '/admin/activation-links', label: 'Ссылки активации', icon: Link2 },
     { path: '/admin/levels', label: 'Уровни', icon: Layers },
+    { path: '/admin/assignments', label: 'Задания', icon: ListChecks },
     { path: '/admin/health-lab', label: 'Лаборатория здоровья', icon: Heart },
     { path: '/admin/relationship-workshop', label: 'Мастерская отношений', icon: Users2 },
     { path: '/admin/spirit-forge', label: 'Кузница Духа', icon: Flame },

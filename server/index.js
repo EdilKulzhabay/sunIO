@@ -46,7 +46,8 @@ import {
     DocumentsController,
     ContentSearchController,
     BotTrafficSourceController,
-    LevelController
+    LevelController,
+    AssignmentController
 } from "./Controllers/index.js";
 import { authMiddleware } from "./Middlewares/authMiddleware.js";
 import { adminActionLogMiddleware } from "./Middlewares/adminActionLogMiddleware.js";
@@ -248,6 +249,15 @@ app.get("/api/levels/:id", LevelController.getById);
 app.post("/api/levels", createContentRateLimit, authMiddleware, LevelController.create);
 app.put("/api/levels/:id", authMiddleware, LevelController.update);
 app.delete("/api/levels/:id", authMiddleware, LevelController.remove);
+
+// ==================== Задания (assignments) ====================
+app.get("/api/assignments", AssignmentController.getAll);
+app.get("/api/assignments/user/:id/progress", authMiddleware, AssignmentController.getForUser);
+app.patch("/api/assignments/user/:id/steps/:stepIndex/toggle", authMiddleware, AssignmentController.toggleUserControlledStep);
+app.get("/api/assignments/:id", AssignmentController.getById);
+app.post("/api/assignments", createContentRateLimit, authMiddleware, AssignmentController.create);
+app.put("/api/assignments/:id", authMiddleware, AssignmentController.update);
+app.delete("/api/assignments/:id", authMiddleware, AssignmentController.remove);
 
 // ==================== FAQ маршруты ====================
 app.post("/api/faq", createContentRateLimit, authMiddleware, FAQController.create);

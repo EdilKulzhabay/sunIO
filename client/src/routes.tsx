@@ -24,6 +24,8 @@ import { ActivationLinksAdmin } from "./pages/Admin/ActivationLinks";
 import { ActivationLinkForm } from "./pages/Admin/ActivationLinkForm";
 import { LevelsAdmin } from "./pages/Admin/Levels";
 import { LevelForm } from "./pages/Admin/LevelForm";
+import { AssignmentsAdmin } from "./pages/Admin/Assignments";
+import { AssignmentForm } from "./pages/Admin/AssignmentForm";
 import { HealthLabAdmin } from "./pages/Admin/HealthLab";
 import { HealthLabForm } from "./pages/Admin/HealthLabForm";
 import { RelationshipWorkshopAdmin } from "./pages/Admin/RelationshipWorkshop";
@@ -128,6 +130,7 @@ import { ClientNavigator } from "./pages/User/ClientNavigator";
 import { ClientBegginingJourney } from "./pages/User/ClientBegginingJourney";
 import { ClientConnectError } from "./pages/User/ClientConnectError";
 import { ClientTasks } from "./pages/User/ClientTasks";
+import { ClientNewTask } from "./pages/User/ClientNewTask";
 import { ClientRegion } from "./pages/User/ClientRegion";
 import { ClientAppTemporarilyUnavailable } from "./pages/User/ClientAppTemporarilyUnavailable";
 import { ClientDocuments } from "./pages/User/ClientDocuments";
@@ -357,6 +360,10 @@ export const routes = createBrowserRouter([
         element: <RootLayout><TelegramGuard><ProtectedRoute><ClientTasks /></ProtectedRoute></TelegramGuard></RootLayout>,
     },
     {
+        path: "/client/new-task",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientNewTask /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
         path: "/client/region",
         element: <RootLayout><TelegramGuard><ProtectedRoute><ClientRegion /></ProtectedRoute></TelegramGuard></RootLayout>,
     },
@@ -523,6 +530,18 @@ export const routes = createBrowserRouter([
     {
         path: "/admin/levels/edit/:id",
         element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><LevelForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/assignments",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><AssignmentsAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/assignments/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><AssignmentForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/assignments/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><AssignmentForm /></ProtectedRoute></RootLayout>,
     },
     // ==================== HealthLab (Лаборатория здоровья) ====================
     {

@@ -36,3 +36,4 @@ export * as DocumentsController from "./DocumentsController.js";
 export * as ContentSearchController from "./ContentSearchController.js";
 export * as BotTrafficSourceController from "./BotTrafficSourceController.js";
 export * as LevelController from "./LevelController.js";
+export * as AssignmentController from "./AssignmentController.js";

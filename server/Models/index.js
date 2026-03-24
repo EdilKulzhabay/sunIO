@@ -27,6 +27,8 @@ import DepositLog from './DepositLog.js';
 import PurchaseLog from './PurchaseLog.js';
 import Documents from './Documents.js';
 import Level from './Level.js';
+import Assignment from './Assignment.js';
+import UserAssignmentProgress from './UserAssignmentProgress.js';
 
 export {
     User,
@@ -57,5 +59,7 @@ export {
     DepositLog,
     PurchaseLog,
     Documents,
-    Level
+    Level,
+    Assignment,
+    UserAssignmentProgress
 };

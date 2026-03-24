@@ -226,6 +226,7 @@ export const ClientTasks = () => {
                         ))}
                     </div>
 
+                    {levelRow && (
                     <div className="mt-4 bg-[#114E50] rounded-lg p-4">
                         <div className="text-white text-lg font-medium">
                             Твой уровень — {levelRow?.title ?? '—'}
@@ -234,13 +235,6 @@ export const ClientTasks = () => {
                             <div
                                 className="text-white text-sm mt-2 prose prose-invert prose-sm max-w-none [&_a]:text-cyan-300"
                                 dangerouslySetInnerHTML={{ __html: levelRow.mainContent }}
-                            />
-                        ) : null}
-
-                        {levelRow?.content ? (
-                            <div
-                                className="text-white text-sm mt-3 prose prose-invert prose-sm max-w-none [&_a]:text-cyan-300"
-                                dangerouslySetInnerHTML={{ __html: levelRow.content }}
                             />
                         ) : null}
 
@@ -260,7 +254,15 @@ export const ClientTasks = () => {
                                 );
                             })}
                         </div>
+
+                        {levelRow?.content ? (
+                            <div
+                                className="text-white text-sm mt-3 prose prose-invert prose-sm max-w-none [&_a]:text-cyan-300"
+                                dangerouslySetInnerHTML={{ __html: levelRow.content }}
+                            />
+                        ) : null}
                     </div>
+                    )}
 
                     {/* <div className="mt-6">
                         <p className="text-white">Позже здесь появятся задания, которые помогут вам пройти по оптимальному пути Активации.</p>

@@ -1,6 +1,7 @@
 import { UserLayout } from "../../components/User/UserLayout";
 import { BackNav } from "../../components/User/BackNav";
-import { useState, useEffect, useCallback, useMemo, type KeyboardEvent } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, type KeyboardEvent } from "react";
+import { flushSync } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import api from "../../api";
 import { openExternalLink } from "../../utils/telegramWebApp";
@@ -62,10 +63,57 @@ function getCategoryTitle(link: string): string {
     return "Контент";
 }
 
-function truncatePathLabel(text: string, max = 14): string {
+const PATH_LABEL_LINE_MAX = 15;
+
+/**
+ * Две строки подписи на карте: у каждой не больше PATH_LABEL_LINE_MAX символов,
+ * перенос по пробелам (слова не режем). Если текста больше — «…» в конце второй строки.
+ */
+function pathLabelLines(text: string, maxPerLine = PATH_LABEL_LINE_MAX): string[] {
     const s = (text || "").trim();
-    if (s.length <= max) return s;
-    return `${s.slice(0, max)}…`;
+    if (!s) return [""];
+
+    const words = s.split(/\s+/).filter(Boolean);
+
+    function greedyLine(ws: string[]): { line: string; rest: string[] } {
+        if (ws.length === 0) return { line: "", rest: [] };
+        if (ws[0].length > maxPerLine) {
+            return { line: ws[0], rest: ws.slice(1) };
+        }
+        let line = ws[0];
+        let i = 1;
+        while (i < ws.length) {
+            const next = `${line} ${ws[i]}`;
+            if (next.length <= maxPerLine) {
+                line = next;
+                i++;
+            } else break;
+        }
+        return { line, rest: ws.slice(i) };
+    }
+
+    const { line: line1, rest: rest1 } = greedyLine(words);
+    if (rest1.length === 0) return [line1];
+
+    const { line: line2, rest: rest2 } = greedyLine(rest1);
+    if (rest2.length === 0) return [line1, line2];
+
+    const ellipsis = "…";
+    const parts = line2.split(/\s+/).filter(Boolean);
+    const stack = [...parts];
+    let line2WithMore = "";
+    while (stack.length > 0) {
+        const cand = `${stack.join(" ")}${ellipsis}`;
+        if (cand.length <= maxPerLine) {
+            line2WithMore = cand;
+            break;
+        }
+        stack.pop();
+    }
+    if (!line2WithMore) {
+        line2WithMore = line2;
+    }
+    return [line1, line2WithMore];
 }
 
 const PATH_COLOR_DONE = "#00C5AE";
@@ -116,10 +164,14 @@ function PathProgress({
     }, [points, yLine]);
 
     return (
-        <div className="w-full py-1 px-5">
+        <div className="w-full touch-pan-y py-1 px-5">
+            {/*
+              pointer-events-none на svg: жесты скролла не «липнут» ко всей области графика (Telegram WebView).
+              Кликабельны только группы с pointer-events-auto + touch-pan-y.
+            */}
             <svg
                 viewBox={`0 0 ${w} ${h}`}
-                className="mx-auto block w-full"
+                className="pointer-events-none mx-auto block w-full"
                 aria-label="Маршрут по шагам"
             >
                 {pathD ? (
@@ -131,6 +183,7 @@ function PathProgress({
                         strokeDasharray="4 5"
                         strokeLinecap="round"
                         vectorEffect="non-scaling-stroke"
+                        pointerEvents="none"
                     />
                 ) : null}
                 {points.map((p, i) => {
@@ -154,7 +207,12 @@ function PathProgress({
                             key={i}
                             role={onStepClick ? "button" : undefined}
                             tabIndex={onStepClick ? 0 : undefined}
-                            style={{ cursor: onStepClick ? "pointer" : "default" }}
+                            className="pointer-events-auto touch-pan-y outline-none focus:outline-none"
+                            style={{
+                                cursor: onStepClick ? "pointer" : "default",
+                                outline: "none",
+                                WebkitTapHighlightColor: "transparent",
+                            }}
                             onClick={() => onStepClick?.(i)}
                             onKeyDown={onStepClick ? handleKey : undefined}
                         >
@@ -167,7 +225,11 @@ function PathProgress({
                                 fontSize="9"
                                 fontWeight="500"
                             >
-                                {truncatePathLabel(steps[i]?.description ?? "", 14)}
+                                {pathLabelLines(steps[i]?.description ?? "").map((line, li) => (
+                                    <tspan key={li} x={p.x} dy={li === 0 ? 0 : "1.15em"}>
+                                        {line}
+                                    </tspan>
+                                ))}
                             </text>
                             <circle cx={p.x} cy={p.y} r={DOT_R} fill={fill} />
                         </g>
@@ -187,6 +249,7 @@ export const ClientNewTask = () => {
     const [steps, setSteps] = useState<StepRow[]>([]);
     const [introHtml, setIntroHtml] = useState<string>("");
     const [openSteps, setOpenSteps] = useState<Record<number, boolean>>({});
+    const stepSectionRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
     useEffect(() => {
         const userStr = localStorage.getItem("user");
@@ -295,12 +358,22 @@ export const ClientNewTask = () => {
     }, [selectedId, steps.length]);
 
     const focusStepFromPath = useCallback((index: number) => {
-        setOpenSteps(() => {
-            const next: Record<number, boolean> = {};
-            steps.forEach((_, i) => {
-                next[i] = i === index;
+        if (index < 0 || index >= steps.length) return;
+        flushSync(() => {
+            setOpenSteps(() => {
+                const next: Record<number, boolean> = {};
+                steps.forEach((_, i) => {
+                    next[i] = i === index;
+                });
+                return next;
             });
-            return next;
+        });
+        const scrollToStep = () => {
+            const el = stepSectionRefs.current[index];
+            el?.scrollIntoView({ behavior: "smooth", block: "start" });
+        };
+        requestAnimationFrame(() => {
+            requestAnimationFrame(scrollToStep);
         });
     }, [steps]);
 
@@ -445,7 +518,10 @@ export const ClientNewTask = () => {
                                             return (
                                                 <div
                                                     key={`${selectedId}-${index}`}
-                                                    className="rounded-2xl bg-[#114E50] border border-white/10 overflow-hidden shadow-md"
+                                                    ref={(el) => {
+                                                        stepSectionRefs.current[index] = el;
+                                                    }}
+                                                    className="scroll-mt-3 rounded-2xl bg-[#114E50] border border-white/10 overflow-hidden shadow-md"
                                                 >
                                                     <button
                                                         type="button"

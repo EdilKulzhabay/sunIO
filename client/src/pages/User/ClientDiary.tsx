@@ -560,7 +560,7 @@ export const ClientDiary = () => {
                                     />
                                 </div>
                                 <div className="p-2 border border-white/40 rounded-lg">
-                                    <p className="text-sm font-medium">Эмоции</p>
+                                    <p className="text-sm font-medium">Эмоции и энергия</p>
                                     <textarea
                                         ref={emotionsRef}
                                         name="emotions"
@@ -629,7 +629,7 @@ export const ClientDiary = () => {
                                                 <p className="mt-1.5">{diary.gratitude}</p>
                                             </div>
                                             <div className="p-2 border border-white/40 rounded-lg overflow-y-scroll">
-                                                <p className="text-sm font-medium">Эмоции</p>
+                                                <p className="text-sm font-medium">Эмоции и энергия</p>
                                                 <p className="mt-1.5">{diary.emotions || ''}</p>
                                             </div>
                                             <div className="flex items-center justify-between">

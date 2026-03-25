@@ -96,6 +96,7 @@ export const DateRangeCalendar = ({
 
     const dayButtonClass = (hasDot: boolean, isToday: boolean, isOtherMonth: boolean, isSelectedDate: boolean) => `
         h-8 w-full max-w-8 rounded-full text-sm transition-colors relative flex flex-col items-center justify-center mx-auto
+        ${isToday ? 'bg-white/20' : ''}
         ${(isToday && !hasDot) || isSelectedDate ? 'bg-white/40' : ''}
         ${isOtherMonth ? 'text-white/40' : ''}
         hover:bg-white/10

@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
 
 /**
- * Прогресс по шагам задания для пользователя.
- * completedSteps[i] соответствует assignment.steps[i]
+ * Прогресс по заданию для пользователя.
+ * completedSteps[i][j] — пункт j внутри шага i (соответствует assignment.steps[i].contents[j])
+ * Legacy: completedSteps[i] как boolean — при чтении преобразуется в контроллере.
  */
 const UserAssignmentProgressSchema = new mongoose.Schema(
     {
@@ -19,7 +20,7 @@ const UserAssignmentProgressSchema = new mongoose.Schema(
             index: true,
         },
         completedSteps: {
-            type: [Boolean],
+            type: mongoose.Schema.Types.Mixed,
             default: [],
         },
     },

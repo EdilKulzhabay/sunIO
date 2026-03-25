@@ -1,21 +1,51 @@
 import { UserLayout } from "../../components/User/UserLayout";
 import { BackNav } from "../../components/User/BackNav";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, type KeyboardEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api";
 import { openExternalLink } from "../../utils/telegramWebApp";
 import { toast } from "react-toastify";
 import { Check, ChevronDown } from "lucide-react";
 import { CONTENT_CATEGORY_OPTIONS } from "../../constants/contentCategoryOptions";
+import arrowDown from "../../assets/arrowDown.png";
 
 const isExternalLink = (url: string) => url.startsWith("http://") || url.startsWith("https://");
 
-type StepRow = {
+type ContentItemRow = {
     stepDescription: string;
     contentLink: string;
     userControlled: boolean;
     completed: boolean;
 };
+
+type StepRow = {
+    description: string;
+    contents: ContentItemRow[];
+};
+
+function mapStepsFromApi(raw: unknown): StepRow[] {
+    if (!Array.isArray(raw)) return [];
+    return raw.map((s: any) => ({
+        description: typeof s?.description === "string" ? s.description : "",
+        contents: Array.isArray(s?.contents)
+            ? s.contents.map((c: any) => ({
+                  stepDescription: c?.stepDescription || "",
+                  contentLink: c?.contentLink || "",
+                  userControlled: !!c?.userControlled,
+                  completed: !!c?.completed,
+              }))
+            : [],
+    }));
+}
+
+function getStepDotStatus(step: StepRow): "done" | "partial" | "none" {
+    const items = step.contents || [];
+    if (items.length === 0) return "none";
+    const done = items.filter((c) => c.completed).length;
+    if (done === 0) return "none";
+    if (done === items.length) return "done";
+    return "partial";
+}
 
 function getCategoryTitle(link: string): string {
     const t = (link || "").trim();
@@ -44,15 +74,15 @@ const PATH_COLOR_TODO = "#9AA5A7";
 const DOT_R = 4;
 
 /** Точки на одной горизонтали; линия — плавные дуги (квадратичные Безье). Точки 8×8px (r=4). */
-function PathProgress({ steps }: { steps: StepRow[] }) {
+function PathProgress({
+    steps,
+    onStepClick,
+}: {
+    steps: StepRow[];
+    onStepClick?: (index: number) => void;
+}) {
     const n = steps.length;
     if (n === 0) return null;
-
-    const currentIdx = useMemo(() => {
-        const i = steps.findIndex((s) => !s.completed);
-        if (i === -1) return -1;
-        return i;
-    }, [steps]);
 
     const w = 320;
     const h = 100;
@@ -87,7 +117,11 @@ function PathProgress({ steps }: { steps: StepRow[] }) {
 
     return (
         <div className="w-full py-1 px-5">
-            <svg viewBox={`0 0 ${w} ${h}`} className="mx-auto block w-full" aria-hidden>
+            <svg
+                viewBox={`0 0 ${w} ${h}`}
+                className="mx-auto block w-full"
+                aria-label="Маршрут по шагам"
+            >
                 {pathD ? (
                     <path
                         d={pathD}
@@ -100,14 +134,30 @@ function PathProgress({ steps }: { steps: StepRow[] }) {
                     />
                 ) : null}
                 {points.map((p, i) => {
-                    const done = steps[i]?.completed;
-                    const isCurrent = currentIdx !== -1 && i === currentIdx && !done;
-                    const isDone = !!done;
-                    const fill = isDone ? PATH_COLOR_DONE : isCurrent ? PATH_COLOR_CURRENT : PATH_COLOR_TODO;
+                    const status = getStepDotStatus(steps[i]);
+                    const fill =
+                        status === "done"
+                            ? PATH_COLOR_DONE
+                            : status === "partial"
+                              ? PATH_COLOR_CURRENT
+                              : PATH_COLOR_TODO;
                     const labelAbove = i % 2 === 0;
                     const labelY = labelAbove ? p.y - labelOffsetY : p.y + labelOffsetY;
+                    const handleKey = (e: KeyboardEvent<SVGGElement>) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            onStepClick?.(i);
+                        }
+                    };
                     return (
-                        <g key={i}>
+                        <g
+                            key={i}
+                            role={onStepClick ? "button" : undefined}
+                            tabIndex={onStepClick ? 0 : undefined}
+                            style={{ cursor: onStepClick ? "pointer" : "default" }}
+                            onClick={() => onStepClick?.(i)}
+                            onKeyDown={onStepClick ? handleKey : undefined}
+                        >
                             <text
                                 x={p.x}
                                 y={labelY}
@@ -117,7 +167,7 @@ function PathProgress({ steps }: { steps: StepRow[] }) {
                                 fontSize="9"
                                 fontWeight="500"
                             >
-                                {truncatePathLabel(steps[i]?.stepDescription ?? "", 14)}
+                                {truncatePathLabel(steps[i]?.description ?? "", 14)}
                             </text>
                             <circle cx={p.x} cy={p.y} r={DOT_R} fill={fill} />
                         </g>
@@ -210,14 +260,7 @@ export const ClientNewTask = () => {
             const res = await api.get(`/api/assignments/${assignmentId}/user-progress/${userId}`);
             const d = res.data?.data;
             if (d) {
-                setSteps(
-                    (d.steps || []).map((s: any) => ({
-                        stepDescription: s.stepDescription || "",
-                        contentLink: s.contentLink || "",
-                        userControlled: !!s.userControlled,
-                        completed: !!s.completed,
-                    }))
-                );
+                setSteps(mapStepsFromApi(d.steps));
             }
         } catch {
             toast.error("Не удалось загрузить задание");
@@ -246,10 +289,20 @@ export const ClientNewTask = () => {
     useEffect(() => {
         const next: Record<number, boolean> = {};
         steps.forEach((_, i) => {
-            next[i] = i < 3;
+            next[i] = false;
         });
         setOpenSteps(next);
     }, [selectedId, steps.length]);
+
+    const focusStepFromPath = useCallback((index: number) => {
+        setOpenSteps(() => {
+            const next: Record<number, boolean> = {};
+            steps.forEach((_, i) => {
+                next[i] = i === index;
+            });
+            return next;
+        });
+    }, [steps]);
 
     const openStepToggle = (index: number) => {
         setOpenSteps((prev) => ({ ...prev, [index]: !prev[index] }));
@@ -265,7 +318,7 @@ export const ClientNewTask = () => {
         }
     };
 
-    const toggleUserStep = async (stepIndex: number, completed: boolean) => {
+    const toggleUserContent = async (stepIndex: number, contentIndex: number, completed: boolean) => {
         if (!selectedId) return;
         const userStr = localStorage.getItem("user");
         let userId = "";
@@ -282,24 +335,22 @@ export const ClientNewTask = () => {
         }
         try {
             const res = await api.patch(
-                `/api/assignments/${selectedId}/user-progress/${userId}/steps/${stepIndex}/toggle`,
+                `/api/assignments/${selectedId}/user-progress/${userId}/steps/${stepIndex}/contents/${contentIndex}/toggle`,
                 { completed }
             );
             const d = res.data?.data;
             if (d?.steps) {
-                setSteps(
-                    d.steps.map((s: any) => ({
-                        stepDescription: s.stepDescription || "",
-                        contentLink: s.contentLink || "",
-                        userControlled: !!s.userControlled,
-                        completed: !!s.completed,
-                    }))
-                );
+                setSteps(mapStepsFromApi(d.steps));
             }
         } catch {
             toast.error("Не удалось сохранить");
         }
     };
+
+    const selectedRequestLabel = useMemo(
+        () => assignments.find((a) => a._id === selectedId)?.request ?? "",
+        [assignments, selectedId]
+    );
 
     if (listLoading) {
         return (
@@ -344,12 +395,28 @@ export const ClientNewTask = () => {
                                 <label className="block text-sm text-white/60 mb-2">
                                     Выбери свой запрос
                                 </label>
-                                <div className="rounded-full border pr-5 border-white/40">
+                                <div className="relative flex min-h-[52px] items-stretch rounded-full border border-white/40 overflow-hidden">
+                                    {/* Видимая строка: клики не ловим — только отображение */}
+                                    <div className="flex min-w-0 flex-1 items-center px-4 py-3.5 pointer-events-none">
+                                        <span className="w-full truncate text-left text-base text-white">
+                                            {selectedRequestLabel || "—"}
+                                        </span>
+                                    </div>
+                                    <div className="flex shrink-0 items-center pr-5 pointer-events-none">
+                                        <img src={arrowDown} alt="" className="h-4 w-4" />
+                                    </div>
+                                    {/* Нативный select на весь блок — в WebView открывается по тапу везде, в т.ч. по иконке */}
                                     <select
+                                        id="assignment-request-select"
                                         value={selectedId}
                                         onChange={(e) => setSelectedId(e.target.value)}
-                                        className="w-full bg-transparent text-white px-4 py-3.5 outline-none cursor-pointer"
-                                        style={{ backgroundImage: "none" }}
+                                        className="absolute inset-0 z-10 h-full min-h-[52px] w-full cursor-pointer opacity-0 appearance-none text-base"
+                                        style={{
+                                            WebkitAppearance: "none",
+                                            MozAppearance: "none",
+                                            backgroundImage: "none",
+                                        }}
+                                        aria-label="Выбери свой запрос"
                                     >
                                         {assignments.map((a) => (
                                             <option key={a._id} value={a._id} className="bg-[#114E50] text-white">
@@ -368,14 +435,13 @@ export const ClientNewTask = () => {
                                 <>
                                     {steps.length > 0 && (
                                         <div className="">
-                                            <PathProgress steps={steps} />
+                                            <PathProgress steps={steps} onStepClick={focusStepFromPath} />
                                         </div>
                                     )}
 
                                     <div className="space-y-3">
                                         {steps.map((step, index) => {
-                                            const open = openSteps[index] ?? index < 3;
-                                            const category = getCategoryTitle(step.contentLink);
+                                            const open = openSteps[index] ?? false;
                                             return (
                                                 <div
                                                     key={`${selectedId}-${index}`}
@@ -386,8 +452,13 @@ export const ClientNewTask = () => {
                                                         onClick={() => openStepToggle(index)}
                                                         className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left"
                                                     >
-                                                        <span className="text-white font-medium text-lg">
-                                                            Шаг {index + 1}
+                                                        <span className="text-white font-medium text-lg min-w-0 text-left">
+                                                            <span className="block">Шаг {index + 1}</span>
+                                                            {step.description ? (
+                                                                <span className="block text-sm font-normal text-white/70 mt-0.5 line-clamp-2">
+                                                                    {step.description}
+                                                                </span>
+                                                            ) : null}
                                                         </span>
                                                         <ChevronDown
                                                             className={`w-5 h-5 text-white/80 shrink-0 transition-transform duration-200 ${
@@ -398,67 +469,77 @@ export const ClientNewTask = () => {
 
                                                     {open && (
                                                         <div className="px-4 pb-4 pt-0 space-y-3">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    if (step.userControlled) return;
-                                                                    openStepLink(step.contentLink);
-                                                                }}
-                                                                className="w-full flex items-center gap-3 text-left rounded-xl p-3 border border-white/10"
-                                                            >
-                                                                <div className="flex-1 min-w-0">
-                                                                    <div className="text-[11px] tracking-wide text-white/45 mb-1">
-                                                                        {category}
-                                                                    </div>
-                                                                    <div className="text-white text-[15px] leading-snug font-medium">
-                                                                        {step.stepDescription}
-                                                                    </div>
-                                                                </div>
-                                                                <div
-                                                                    className="shrink-0 pt-0.5"
-                                                                    onClick={(e) => e.stopPropagation()}
-                                                                >
-                                                                    {step.userControlled ? (
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={() =>
-                                                                                toggleUserStep(index, !step.completed)
-                                                                            }
-                                                                            className={`flex h-9 w-9 items-center justify-center rounded-full border-2 transition-colors ${
-                                                                                step.completed
-                                                                                    ? "border-teal-400 bg-teal-500/90 text-[#031F23]"
-                                                                                    : "border-white/35 bg-transparent"
-                                                                            }`}
-                                                                            aria-label={
-                                                                                step.completed
-                                                                                    ? "Выполнено"
-                                                                                    : "Отметить выполненным"
-                                                                            }
-                                                                        >
-                                                                            {step.completed ? (
-                                                                                <Check className="w-5 h-5 stroke-[3]" />
-                                                                            ) : null}
-                                                                        </button>
-                                                                    ) : (
-                                                                        <div
-                                                                            className={`flex h-4 w-4 items-center justify-center rounded-[6px] ${
-                                                                                step.completed
-                                                                                    ? "bg-[#C4841D] text-white"
-                                                                                    : "border-white/60 border-[2px] bg-transparent"
-                                                                            }`}
-                                                                            title={
-                                                                                step.completed
-                                                                                    ? "Выполнено"
-                                                                                    : "Откройте контент и досмотрите видео"
-                                                                            }
-                                                                        >
-                                                                            {step.completed ? (
-                                                                                <Check className="w-[16px] h-[14px]" />
-                                                                            ) : null}
+                                                            {step.contents.map((item, contentIndex) => {
+                                                                const category = getCategoryTitle(item.contentLink);
+                                                                return (
+                                                                    <button
+                                                                        key={contentIndex}
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            if (item.userControlled) return;
+                                                                            openStepLink(item.contentLink);
+                                                                        }}
+                                                                        className="w-full flex items-center gap-3 text-left rounded-xl p-3 border border-white/10"
+                                                                    >
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <div className="text-[11px] tracking-wide text-white/45 mb-1">
+                                                                                {category}
+                                                                            </div>
+                                                                            <div className="text-white text-[15px] leading-snug font-medium">
+                                                                                {item.stepDescription}
+                                                                            </div>
                                                                         </div>
-                                                                    )}
-                                                                </div>
-                                                            </button>
+                                                                        <div
+                                                                            className="shrink-0 pt-0.5"
+                                                                            onClick={(e) => e.stopPropagation()}
+                                                                        >
+                                                                            {item.userControlled ? (
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() =>
+                                                                                        toggleUserContent(
+                                                                                            index,
+                                                                                            contentIndex,
+                                                                                            !item.completed
+                                                                                        )
+                                                                                    }
+                                                                                    className={`flex h-4 w-4 items-center justify-center rounded-[6px] ${
+                                                                                        item.completed
+                                                                                            ? "bg-[#C4841D] text-white"
+                                                                                            : "border-white/60 border-[2px] bg-transparent"
+                                                                                    }`}
+                                                                                    aria-label={
+                                                                                        item.completed
+                                                                                            ? "Выполнено"
+                                                                                            : "Отметить выполненным"
+                                                                                    }
+                                                                                >
+                                                                                    {item.completed ? (
+                                                                                        <Check className="w-5 h-5 stroke-[3]" />
+                                                                                    ) : null}
+                                                                                </button>
+                                                                            ) : (
+                                                                                <div
+                                                                                    className={`flex h-4 w-4 items-center justify-center rounded-[6px] ${
+                                                                                        item.completed
+                                                                                            ? "bg-[#C4841D] text-white"
+                                                                                            : "border-white/60 border-[2px] bg-transparent"
+                                                                                    }`}
+                                                                                    title={
+                                                                                        item.completed
+                                                                                            ? "Выполнено"
+                                                                                            : "Откройте контент и досмотрите видео"
+                                                                                    }
+                                                                                >
+                                                                                    {item.completed ? (
+                                                                                        <Check className="w-[16px] h-[14px]" />
+                                                                                    ) : null}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    </button>
+                                                                );
+                                                            })}
                                                         </div>
                                                     )}
                                                 </div>

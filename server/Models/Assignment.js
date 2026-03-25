@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const AssignmentStepSchema = new mongoose.Schema(
+const AssignmentContentItemSchema = new mongoose.Schema(
     {
         stepDescription: {
             type: String,
@@ -19,12 +19,33 @@ const AssignmentStepSchema = new mongoose.Schema(
     { _id: false }
 );
 
+const AssignmentStepSchema = new mongoose.Schema(
+    {
+        /** Текст шага на карте маршрута и в заголовке аккордеона */
+        description: {
+            type: String,
+            default: "",
+        },
+        /** Несколько ссылок / пунктов внутри одного шага */
+        contents: {
+            type: [AssignmentContentItemSchema],
+            default: [],
+            validate: [(v) => Array.isArray(v) && v.length > 0, "Нужен хотя бы один пункт"],
+        },
+    },
+    { _id: false }
+);
+
 const AssignmentSchema = new mongoose.Schema(
     {
         /** Запрос (название / тема задания) */
         request: {
             type: String,
             required: true,
+        },
+        description: {
+            type: String,
+            default: "",
         },
         steps: {
             type: [AssignmentStepSchema],

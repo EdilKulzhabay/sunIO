@@ -253,9 +253,18 @@ app.delete("/api/levels/:id", authMiddleware, LevelController.remove);
 // ==================== Задания (assignments) ====================
 app.get("/api/assignments", AssignmentController.getAll);
 app.get("/api/assignments/user/:id/progress", authMiddleware, AssignmentController.getForUser);
+app.patch(
+    "/api/assignments/user/:id/steps/:stepIndex/contents/:contentIndex/toggle",
+    authMiddleware,
+    AssignmentController.toggleUserControlledStep
+);
 app.patch("/api/assignments/user/:id/steps/:stepIndex/toggle", authMiddleware, AssignmentController.toggleUserControlledStep);
 /** Без JWT: userId в пути (клиент Telegram с user в localStorage), см. GET /api/user/:id */
 app.get("/api/assignments/:id/user-progress/:userId", AssignmentController.getUserProgressByUserId);
+app.patch(
+    "/api/assignments/:id/user-progress/:userId/steps/:stepIndex/contents/:contentIndex/toggle",
+    AssignmentController.toggleUserControlledStepByUserId
+);
 app.patch("/api/assignments/:id/user-progress/:userId/steps/:stepIndex/toggle", AssignmentController.toggleUserControlledStepByUserId);
 app.get("/api/assignments/:id", AssignmentController.getById);
 app.post("/api/assignments", createContentRateLimit, authMiddleware, AssignmentController.create);

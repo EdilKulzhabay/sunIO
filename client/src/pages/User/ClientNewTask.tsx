@@ -567,78 +567,88 @@ export const ClientNewTask = () => {
                                                                 const category = getCategoryTitle(item.contentLink);
                                                                 const rowClass =
                                                                     "w-full flex items-center gap-3 text-left rounded-xl p-3 border border-white/10";
-                                                                const rowInner = (
-                                                                    <>
-                                                                        <div className="flex-1 min-w-0">
-                                                                            <div className="text-[11px] tracking-wide text-white/45 mb-1">
-                                                                                {category}
-                                                                            </div>
-                                                                            <div>
-                                                                                <div className="text-white text-[15px] leading-snug font-medium">
-                                                                                    {item.stepDescription}
-                                                                                </div>
-                                                                                {item.userControlled && (
-                                                                                    <div className="text-[11px] tracking-wide text-[#00C5AE]">
-                                                                                        После выполнения сделай отметку
-                                                                                    </div>
-                                                                                )}
-                                                                            </div>
+                                                                const textBlock = (
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <div className="text-[11px] tracking-wide text-white/45 mb-1">
+                                                                            {category}
                                                                         </div>
-                                                                        <div className="shrink-0 pt-0.5">
-                                                                            {item.userControlled ? (
-                                                                                <button
-                                                                                    type="button"
-                                                                                    onClick={() =>
-                                                                                        toggleUserContent(
-                                                                                            index,
-                                                                                            contentIndex,
-                                                                                            !item.completed
-                                                                                        )
-                                                                                    }
-                                                                                    className={`flex h-4 w-4 items-center justify-center rounded-[6px] ${
-                                                                                        item.completed
-                                                                                            ? "bg-[#C4841D] text-white"
-                                                                                            : "border-white/60 border-[2px] bg-transparent"
-                                                                                    }`}
-                                                                                    aria-label={
-                                                                                        item.completed
-                                                                                            ? "Выполнено"
-                                                                                            : "Отметить выполненным"
-                                                                                    }
-                                                                                >
-                                                                                    {item.completed ? (
-                                                                                        <Check className="w-5 h-5 stroke-[3]" />
-                                                                                    ) : null}
-                                                                                </button>
-                                                                            ) : (
-                                                                                <div
-                                                                                    className={`flex h-4 w-4 items-center justify-center rounded-[6px] ${
-                                                                                        item.completed
-                                                                                            ? "bg-[#C4841D] text-white"
-                                                                                            : "border-white/60 border-[2px] bg-transparent"
-                                                                                    }`}
-                                                                                    title={
-                                                                                        item.completed
-                                                                                            ? "Выполнено"
-                                                                                            : "Откройте контент и досмотрите видео"
-                                                                                    }
-                                                                                >
-                                                                                    {item.completed ? (
-                                                                                        <Check className="w-[16px] h-[14px]" />
-                                                                                    ) : null}
+                                                                        <div>
+                                                                            <div className="text-white text-[15px] leading-snug font-medium">
+                                                                                {item.stepDescription}
+                                                                            </div>
+                                                                            {item.userControlled && (
+                                                                                <div className="text-[11px] tracking-wide text-[#00C5AE]">
+                                                                                    После выполнения сделай отметку
                                                                                 </div>
                                                                             )}
                                                                         </div>
-                                                                    </>
-                                                                );
-                                                                return item.userControlled ? (
-                                                                    <div
-                                                                        key={contentIndex}
-                                                                        className={`${rowClass} cursor-default`}
-                                                                    >
-                                                                        {rowInner}
                                                                     </div>
+                                                                );
+                                                                const completionIndicator = item.userControlled ? (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() =>
+                                                                            toggleUserContent(
+                                                                                index,
+                                                                                contentIndex,
+                                                                                !item.completed
+                                                                            )
+                                                                        }
+                                                                        className={`flex h-4 w-4 items-center justify-center rounded-[6px] ${
+                                                                            item.completed
+                                                                                ? "bg-[#C4841D] text-white"
+                                                                                : "border-white/60 border-[2px] bg-transparent"
+                                                                        }`}
+                                                                        aria-label={
+                                                                            item.completed
+                                                                                ? "Выполнено"
+                                                                                : "Отметить выполненным"
+                                                                        }
+                                                                    >
+                                                                        {item.completed ? (
+                                                                            <Check className="w-5 h-5 stroke-[3]" />
+                                                                        ) : null}
+                                                                    </button>
                                                                 ) : (
+                                                                    <div
+                                                                        className={`flex h-4 w-4 items-center justify-center rounded-[6px] ${
+                                                                            item.completed
+                                                                                ? "bg-[#C4841D] text-white"
+                                                                                : "border-white/60 border-[2px] bg-transparent"
+                                                                        }`}
+                                                                        title={
+                                                                            item.completed
+                                                                                ? "Выполнено"
+                                                                                : "Откройте контент и досмотрите видео"
+                                                                        }
+                                                                    >
+                                                                        {item.completed ? (
+                                                                            <Check className="w-[16px] h-[14px]" />
+                                                                        ) : null}
+                                                                    </div>
+                                                                );
+                                                                if (item.userControlled) {
+                                                                    return (
+                                                                        <div
+                                                                            key={contentIndex}
+                                                                            className={rowClass}
+                                                                        >
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() =>
+                                                                                    openStepLink(item.contentLink)
+                                                                                }
+                                                                                className="flex min-w-0 flex-1 items-center rounded-lg text-left outline-none focus-visible:ring-2 focus-visible:ring-white/25"
+                                                                            >
+                                                                                {textBlock}
+                                                                            </button>
+                                                                            <div className="shrink-0 pt-0.5 self-center">
+                                                                                {completionIndicator}
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                }
+                                                                return (
                                                                     <button
                                                                         key={contentIndex}
                                                                         type="button"
@@ -647,7 +657,10 @@ export const ClientNewTask = () => {
                                                                         }
                                                                         className={rowClass}
                                                                     >
-                                                                        {rowInner}
+                                                                        {textBlock}
+                                                                        <div className="shrink-0 pt-0.5">
+                                                                            {completionIndicator}
+                                                                        </div>
                                                                     </button>
                                                                 );
                                                             })}

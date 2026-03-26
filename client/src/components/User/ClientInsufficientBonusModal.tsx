@@ -1,6 +1,5 @@
 import { X } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import star from '../../assets/star.png';
 import api from '../../api';
 
 interface ClientInsufficientBonusModalProps {
@@ -93,7 +92,6 @@ export const BonusPolicyModal = ({ isOpen, onClose, pointsAwardingPolicy }: { is
                     
                     <div className="mt-4">
                     <div className='flex items-center gap-x-3 mb-5'>
-                            <img src={star} alt="star icon" className='w-6 h-6' />
                             <h3 className="text-2xl font-bold">{pointsAwardingPolicy?.title || 'Как это работает?'}</h3>
                         </div>
                         
@@ -110,7 +108,7 @@ export const BonusPolicyModal = ({ isOpen, onClose, pointsAwardingPolicy }: { is
                         </p>
                         <button
                             onClick={onClose}
-                            className="w-full px-6 py-3 bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+                            className="w-full px-6 py-3 bg-[#C4841D] rounded-lg hover:bg-[#C4841D] transition-colors"
                         >
                             Понятно
                         </button>

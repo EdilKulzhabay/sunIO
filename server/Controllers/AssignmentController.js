@@ -2,10 +2,33 @@ import mongoose from "mongoose";
 import Assignment from "../Models/Assignment.js";
 import UserAssignmentProgress from "../Models/UserAssignmentProgress.js";
 import VideoProgress from "../Models/VideoProgress.js";
+import Diary from "../Models/Diary.js";
 import { addAdminAction } from "../utils/addAdminAction.js";
 import { parseClientContentLink } from "../utils/parseClientContentLink.js";
 
 const VIDEO_COMPLETE_THRESHOLD = 80;
+
+/** Считаем «заполнил дневник» по числу записей в коллекции Diary. */
+const DIARY_AUTO_COMPLETE_THRESHOLD = 6;
+
+function normalizeClientPath(link) {
+    if (!link || typeof link !== "string") return "";
+    let path = link.trim();
+    try {
+        if (path.startsWith("http://") || path.startsWith("https://")) {
+            path = new URL(path).pathname;
+        }
+    } catch {
+        return "";
+    }
+    if (!path.startsWith("/")) path = `/${path}`;
+    const noTrail = path.replace(/\/+$/, "");
+    return noTrail === "" ? "/" : noTrail;
+}
+
+function isDiaryAssignmentLink(link) {
+    return normalizeClientPath(link) === "/client/diary";
+}
 
 /** Приводит шаг из БД к виду { description, contents[] } (поддержка старого flat-шага). */
 export function normalizeStep(step) {
@@ -76,10 +99,16 @@ export async function syncAssignmentProgress(userId, assignment) {
     });
     let completed = alignNestedCompleted(progressDoc?.completedSteps, normalizedSteps);
 
+    const diaryEntryCount = await Diary.countDocuments({ user: userId });
+
     for (let i = 0; i < normalizedSteps.length; i++) {
         const contents = normalizedSteps[i].contents;
         for (let j = 0; j < contents.length; j++) {
             const c = contents[j];
+            if (isDiaryAssignmentLink(c.contentLink) && diaryEntryCount > DIARY_AUTO_COMPLETE_THRESHOLD) {
+                completed[i][j] = true;
+                continue;
+            }
             if (c.userControlled) {
                 continue;
             }
@@ -171,9 +200,19 @@ export const create = async (req, res) => {
             return res.status(400).json({ success: false, message: err });
         }
 
+        let orderNum = 0;
+        if (req.body.order !== undefined && req.body.order !== null && req.body.order !== "") {
+            const n = Number(req.body.order);
+            if (!Number.isFinite(n)) {
+                return res.status(400).json({ success: false, message: "Поле «порядок» должно быть числом" });
+            }
+            orderNum = n;
+        }
+
         const doc = new Assignment({
             request: request.trim(),
             description: description !== undefined && description !== null ? String(description).trim() : "",
+            order: orderNum,
             steps: mapBodyStepsToSchema(steps),
         });
         await doc.save();
@@ -197,7 +236,7 @@ export const create = async (req, res) => {
 
 export const getAll = async (req, res) => {
     try {
-        const list = await Assignment.find().sort({ updatedAt: -1 }).lean();
+        const list = await Assignment.find().sort({ order: 1, updatedAt: -1 }).lean();
 
         res.json({
             success: true,
@@ -249,7 +288,7 @@ export const update = async (req, res) => {
     try {
         const user = req.user;
         const { id } = req.params;
-        const { request, description, steps } = req.body;
+        const { request, description, steps, order } = req.body;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ success: false, message: "Неверный id" });
@@ -258,6 +297,13 @@ export const update = async (req, res) => {
         const update = {};
         if (request !== undefined) update.request = String(request).trim();
         if (description !== undefined) update.description = String(description).trim();
+        if (order !== undefined && order !== null && order !== "") {
+            const n = Number(order);
+            if (!Number.isFinite(n)) {
+                return res.status(400).json({ success: false, message: "Поле «порядок» должно быть числом" });
+            }
+            update.order = n;
+        }
         if (steps !== undefined) {
             const err = validateStepsPayload(steps);
             if (err) {

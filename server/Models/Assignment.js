@@ -47,6 +47,10 @@ const AssignmentSchema = new mongoose.Schema(
             type: String,
             default: "",
         },
+        order: {
+            type: Number,
+            default: 0,
+        },
         steps: {
             type: [AssignmentStepSchema],
             default: [],

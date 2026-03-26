@@ -1,6 +1,6 @@
 import { useRef, useEffect, useId } from 'react';
 
-export const MyInput = ({ label, type, value, placeholder, onChange, required, min }: { label: string, type: string, value: string, placeholder?: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, required?: boolean, min?: string }) => {
+export const MyInput = ({ label, type, value, placeholder, onChange, required, min, hasError }: { label: string, type: string, value: string, placeholder?: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, required?: boolean, min?: string, hasError?: boolean }) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const id = useId();
 
@@ -21,7 +21,7 @@ export const MyInput = ({ label, type, value, placeholder, onChange, required, m
                 type={type}
                 value={value}
                 onChange={onChange}
-                className="w-full p-2 rounded-md border border-gray-300"
+                className={`w-full p-2 rounded-md border ${hasError ? 'border-2 border-red-500' : 'border-gray-300'}`}
                 placeholder={placeholder}
                 required={required}
                 min={min}

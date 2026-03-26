@@ -6,6 +6,8 @@ import { REDIRECT_TO_PAGE_OPTIONS } from '../../constants/redirectToPageOptions'
 interface RedirectToPageSelectorProps {
     value: string;
     onChange: (value: string) => void;
+    /** Подсветка рамкой при ошибке валидации (пустая ссылка) */
+    hasError?: boolean;
 }
 
 type LinkMode = 'none' | 'page' | 'content' | 'external';
@@ -25,7 +27,7 @@ function detectInitialMode(value: string): LinkMode {
     return 'none';
 }
 
-export const RedirectToPageSelector = ({ value, onChange }: RedirectToPageSelectorProps) => {
+export const RedirectToPageSelector = ({ value, onChange, hasError }: RedirectToPageSelectorProps) => {
     const [mode, setMode] = useState<LinkMode>(() => detectInitialMode(value));
     const [contentItems, setContentItems] = useState<{ _id: string; title: string }[]>([]);
     const [loadingContent, setLoadingContent] = useState(false);
@@ -123,7 +125,9 @@ export const RedirectToPageSelector = ({ value, onChange }: RedirectToPageSelect
     };
 
     return (
-        <div className="flex flex-col gap-3">
+        <div
+            className={`flex flex-col gap-3 rounded-lg ${hasError ? 'border-2 border-red-500 p-2' : ''}`}
+        >
             <label className="text-sm font-medium">Ссылка перехода</label>
 
             <select

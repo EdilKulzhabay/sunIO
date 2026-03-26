@@ -25,6 +25,22 @@ const emptyContent = (): ContentRow => ({
     userControlled: false,
 });
 
+type ValidationErrors = {
+    request: boolean;
+    stepDescription: Record<number, boolean>;
+    contentStepDescription: Record<string, boolean>;
+    contentLink: Record<string, boolean>;
+};
+
+const emptyValidation = (): ValidationErrors => ({
+    request: false,
+    stepDescription: {},
+    contentStepDescription: {},
+    contentLink: {},
+});
+
+const contentErrKey = (stepIndex: number, contentIndex: number) => `${stepIndex}-${contentIndex}`;
+
 export const AssignmentForm = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -33,9 +49,11 @@ export const AssignmentForm = () => {
 
     const [request, setRequest] = useState('');
     const [assignmentDescription, setAssignmentDescription] = useState('');
+    const [order, setOrder] = useState(0);
     const [steps, setSteps] = useState<StepBlock[]>([
         { description: '', contents: [emptyContent()] },
     ]);
+    const [fieldErrors, setFieldErrors] = useState<ValidationErrors>(() => emptyValidation());
 
     useEffect(() => {
         if (id) {
@@ -50,6 +68,7 @@ export const AssignmentForm = () => {
             const row = response.data.data;
             setRequest(row.request || '');
             setAssignmentDescription(row.description || '');
+            setOrder(typeof row.order === 'number' && Number.isFinite(row.order) ? row.order : 0);
             if (Array.isArray(row.steps) && row.steps.length > 0) {
                 setSteps(
                     row.steps.map((s: any) => {
@@ -84,14 +103,20 @@ export const AssignmentForm = () => {
 
     const addStep = () => {
         setSteps([...steps, { description: '', contents: [emptyContent()] }]);
+        setFieldErrors(emptyValidation());
     };
 
     const removeStep = (index: number) => {
         setSteps(steps.filter((_, i) => i !== index));
+        setFieldErrors(emptyValidation());
     };
 
     const updateStep = (index: number, patch: Partial<StepBlock>) => {
         setSteps(steps.map((s, i) => (i === index ? { ...s, ...patch } : s)));
+        setFieldErrors((prev) => ({
+            ...prev,
+            stepDescription: { ...prev.stepDescription, [index]: false },
+        }));
     };
 
     const addContent = (stepIndex: number) => {
@@ -100,6 +125,7 @@ export const AssignmentForm = () => {
                 i === stepIndex ? { ...s, contents: [...s.contents, emptyContent()] } : s
             )
         );
+        setFieldErrors(emptyValidation());
     };
 
     const removeContent = (stepIndex: number, contentIndex: number) => {
@@ -113,6 +139,7 @@ export const AssignmentForm = () => {
                 };
             })
         );
+        setFieldErrors(emptyValidation());
     };
 
     const updateContent = (stepIndex: number, contentIndex: number, patch: Partial<ContentRow>) => {
@@ -125,30 +152,52 @@ export const AssignmentForm = () => {
                 };
             })
         );
+        const k = contentErrKey(stepIndex, contentIndex);
+        setFieldErrors((prev) => ({
+            ...prev,
+            contentStepDescription: { ...prev.contentStepDescription, [k]: false },
+            contentLink: { ...prev.contentLink, [k]: false },
+        }));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        const next = emptyValidation();
+        let hasAny = false;
         if (!request.trim()) {
-            toast.error('Укажите запрос');
+            next.request = true;
+            hasAny = true;
+        }
+        steps.forEach((s, i) => {
+            if (!s.description.trim()) {
+                next.stepDescription[i] = true;
+                hasAny = true;
+            }
+            s.contents.forEach((c, j) => {
+                const k = contentErrKey(i, j);
+                if (!c.stepDescription.trim()) {
+                    next.contentStepDescription[k] = true;
+                    hasAny = true;
+                }
+                if (!c.contentLink.trim()) {
+                    next.contentLink[k] = true;
+                    hasAny = true;
+                }
+            });
+        });
+        if (hasAny) {
+            setFieldErrors(next);
+            toast.error('Заполните все обязательные поля');
             return;
         }
-        for (const s of steps) {
-            if (!s.description.trim()) {
-                toast.error('У каждого шага нужно описание (для карты маршрута)');
-                return;
-            }
-            if (s.contents.some((c) => !c.stepDescription.trim() || !c.contentLink.trim())) {
-                toast.error('Заполните подпись и ссылку у каждого пункта');
-                return;
-            }
-        }
+        setFieldErrors(emptyValidation());
 
         setLoading(true);
         try {
             const payload = {
                 request: request.trim(),
                 description: assignmentDescription.trim(),
+                order: Number.isFinite(Number(order)) ? Number(order) : 0,
                 steps: steps.map((s) => ({
                     description: s.description.trim(),
                     contents: s.contents.map((c) => ({
@@ -195,9 +244,28 @@ export const AssignmentForm = () => {
                         label="Запрос (тема / название)"
                         type="text"
                         value={request}
-                        onChange={(e) => setRequest(e.target.value)}
+                        onChange={(e) => {
+                            setRequest(e.target.value);
+                            setFieldErrors((prev) => ({ ...prev, request: false }));
+                        }}
                         placeholder="Например: Путь активации"
                         required
+                        hasError={fieldErrors.request}
+                    />
+
+                    <MyInput
+                        label="Порядок в списке (меньше — выше)"
+                        type="number"
+                        value={String(order)}
+                        onChange={(e) => {
+                            const v = e.target.value;
+                            if (v === '' || v === '-') {
+                                setOrder(0);
+                                return;
+                            }
+                            const n = parseInt(v, 10);
+                            setOrder(Number.isNaN(n) ? 0 : n);
+                        }}
                     />
 
                     <div>
@@ -214,17 +282,7 @@ export const AssignmentForm = () => {
                     </div>
 
                     <div className="space-y-4">
-                        <div className="flex justify-between items-center">
-                            <h2 className="text-lg font-semibold text-gray-900">Шаги</h2>
-                            <button
-                                type="button"
-                                onClick={addStep}
-                                className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
-                            >
-                                <Plus size={18} />
-                                Добавить шаг
-                            </button>
-                        </div>
+                        <h2 className="text-lg font-semibold text-gray-900">Шаги</h2>
 
                         {steps.map((step, stepIndex) => (
                             <div
@@ -249,6 +307,7 @@ export const AssignmentForm = () => {
                                     onChange={(e) => updateStep(stepIndex, { description: e.target.value })}
                                     placeholder="Кратко, отображается на схеме"
                                     required
+                                    hasError={!!fieldErrors.stepDescription[stepIndex]}
                                 />
 
                                 <div className="space-y-3 pt-2 border-t border-gray-100">
@@ -262,7 +321,9 @@ export const AssignmentForm = () => {
                                             <Plus size={14} /> Пункт
                                         </button>
                                     </div>
-                                    {step.contents.map((c, contentIndex) => (
+                                    {step.contents.map((c, contentIndex) => {
+                                        const ck = contentErrKey(stepIndex, contentIndex);
+                                        return (
                                         <div
                                             key={contentIndex}
                                             className="rounded-md border border-gray-100 p-3 space-y-2 relative"
@@ -287,6 +348,7 @@ export const AssignmentForm = () => {
                                                     })
                                                 }
                                                 required
+                                                hasError={!!fieldErrors.contentStepDescription[ck]}
                                             />
                                             <div className="pt-1">
                                                 <RedirectToPageSelector
@@ -294,6 +356,7 @@ export const AssignmentForm = () => {
                                                     onChange={(val) =>
                                                         updateContent(stepIndex, contentIndex, { contentLink: val })
                                                     }
+                                                    hasError={!!fieldErrors.contentLink[ck]}
                                                 />
                                             </div>
                                             <label className="flex items-center gap-2 cursor-pointer">
@@ -312,10 +375,19 @@ export const AssignmentForm = () => {
                                                 </span>
                                             </label>
                                         </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </div>
                         ))}
+                        <button
+                            type="button"
+                            onClick={addStep}
+                            className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                        >
+                            <Plus size={18} />
+                            Добавить шаг
+                        </button>
                     </div>
 
                     <div className="flex gap-3 justify-end pt-4">

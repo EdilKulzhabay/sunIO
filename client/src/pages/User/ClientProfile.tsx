@@ -360,11 +360,11 @@ export const ClientProfile = () => {
                                 id="profile-instruction-subscription"
                                 className="mt-4 bg-[#114E50] rounded-lg p-4 space-y-2"
                                 onClick={() => {
-                                    if (userData?.hasPaid && userData?.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date()) {
-                                        console.log('Подписка активна');
-                                    } else {
+                                    // if (userData?.hasPaid && userData?.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date()) {
+                                    //     console.log('Подписка активна');
+                                    // } else {
                                         navigate('/client/masters-tower');
-                                    }
+                                    // }
                                 }}
                             >
                                 <div className="text-xl font-medium">Подписка на Мастерскую Энергий</div>

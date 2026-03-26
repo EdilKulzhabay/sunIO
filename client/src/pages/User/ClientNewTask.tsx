@@ -286,10 +286,16 @@ export const ClientNewTask = () => {
                 const res = await api.get("/api/assignments");
                 const data = res.data?.data ?? res.data?.list ?? [];
                 const rows = Array.isArray(data) ? data : [];
+                rows.sort((a: any, b: any) => {
+                    const oa = Number(a?.order) || 0;
+                    const ob = Number(b?.order) || 0;
+                    if (oa !== ob) return oa - ob;
+                    return (
+                        new Date(b?.updatedAt || 0).getTime() -
+                        new Date(a?.updatedAt || 0).getTime()
+                    );
+                });
                 setAssignments(rows.map((a: any) => ({ _id: a._id, request: a.request })));
-                if (rows.length && !selectedId) {
-                    setSelectedId(rows[0]._id);
-                }
             } catch {
                 toast.error("Не удалось загрузить список заданий");
             } finally {
@@ -334,9 +340,12 @@ export const ClientNewTask = () => {
     }, []);
 
     useEffect(() => {
-        if (selectedId) {
-            loadProgress(selectedId);
+        if (!selectedId) {
+            setSteps([]);
+            setLoading(false);
+            return;
         }
+        loadProgress(selectedId);
     }, [selectedId, loadProgress]);
 
     useEffect(() => {
@@ -420,6 +429,8 @@ export const ClientNewTask = () => {
         }
     };
 
+    const PLACEHOLDER_REQUEST = "Нажми на поле и выбери путь";
+
     const selectedRequestLabel = useMemo(
         () => assignments.find((a) => a._id === selectedId)?.request ?? "",
         [assignments, selectedId]
@@ -471,8 +482,12 @@ export const ClientNewTask = () => {
                                 <div className="relative flex min-h-[52px] items-stretch rounded-full border border-white/40 overflow-hidden">
                                     {/* Видимая строка: клики не ловим — только отображение */}
                                     <div className="flex min-w-0 flex-1 items-center px-4 py-3.5 pointer-events-none">
-                                        <span className="w-full truncate text-left text-base text-white">
-                                            {selectedRequestLabel || "—"}
+                                        <span
+                                            className={`w-full truncate text-left text-base ${
+                                                selectedId ? "text-white" : "text-white/55"
+                                            }`}
+                                        >
+                                            {selectedId ? selectedRequestLabel : PLACEHOLDER_REQUEST}
                                         </span>
                                     </div>
                                     <div className="flex shrink-0 items-center pr-5 pointer-events-none">
@@ -491,6 +506,9 @@ export const ClientNewTask = () => {
                                         }}
                                         aria-label="Выбери свой запрос"
                                     >
+                                        <option value="" className="bg-[#114E50] text-white/80">
+                                            {PLACEHOLDER_REQUEST}
+                                        </option>
                                         {assignments.map((a) => (
                                             <option key={a._id} value={a._id} className="bg-[#114E50] text-white">
                                                 {a.request}
@@ -500,11 +518,11 @@ export const ClientNewTask = () => {
                                 </div>
                             </div>
 
-                            {loading ? (
+                            {selectedId && loading ? (
                                 <div className="flex justify-center py-16">
                                     <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-teal-400/80" />
                                 </div>
-                            ) : (
+                            ) : selectedId ? (
                                 <>
                                     {steps.length > 0 && (
                                         <div className="">
@@ -547,28 +565,26 @@ export const ClientNewTask = () => {
                                                         <div className="px-4 pb-4 pt-0 space-y-3">
                                                             {step.contents.map((item, contentIndex) => {
                                                                 const category = getCategoryTitle(item.contentLink);
-                                                                return (
-                                                                    <button
-                                                                        key={contentIndex}
-                                                                        type="button"
-                                                                        onClick={() => {
-                                                                            if (item.userControlled) return;
-                                                                            openStepLink(item.contentLink);
-                                                                        }}
-                                                                        className="w-full flex items-center gap-3 text-left rounded-xl p-3 border border-white/10"
-                                                                    >
+                                                                const rowClass =
+                                                                    "w-full flex items-center gap-3 text-left rounded-xl p-3 border border-white/10";
+                                                                const rowInner = (
+                                                                    <>
                                                                         <div className="flex-1 min-w-0">
                                                                             <div className="text-[11px] tracking-wide text-white/45 mb-1">
                                                                                 {category}
                                                                             </div>
-                                                                            <div className="text-white text-[15px] leading-snug font-medium">
-                                                                                {item.stepDescription}
+                                                                            <div>
+                                                                                <div className="text-white text-[15px] leading-snug font-medium">
+                                                                                    {item.stepDescription}
+                                                                                </div>
+                                                                                {item.userControlled && (
+                                                                                    <div className="text-[11px] tracking-wide text-[#00C5AE]">
+                                                                                        После выполнения сделай отметку
+                                                                                    </div>
+                                                                                )}
                                                                             </div>
                                                                         </div>
-                                                                        <div
-                                                                            className="shrink-0 pt-0.5"
-                                                                            onClick={(e) => e.stopPropagation()}
-                                                                        >
+                                                                        <div className="shrink-0 pt-0.5">
                                                                             {item.userControlled ? (
                                                                                 <button
                                                                                     type="button"
@@ -613,6 +629,25 @@ export const ClientNewTask = () => {
                                                                                 </div>
                                                                             )}
                                                                         </div>
+                                                                    </>
+                                                                );
+                                                                return item.userControlled ? (
+                                                                    <div
+                                                                        key={contentIndex}
+                                                                        className={`${rowClass} cursor-default`}
+                                                                    >
+                                                                        {rowInner}
+                                                                    </div>
+                                                                ) : (
+                                                                    <button
+                                                                        key={contentIndex}
+                                                                        type="button"
+                                                                        onClick={() =>
+                                                                            openStepLink(item.contentLink)
+                                                                        }
+                                                                        className={rowClass}
+                                                                    >
+                                                                        {rowInner}
                                                                     </button>
                                                                 );
                                                             })}
@@ -623,7 +658,7 @@ export const ClientNewTask = () => {
                                         })}
                                     </div>
                                 </>
-                            )}
+                            ) : null}
                         </>
                     )}
                 </div>

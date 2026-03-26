@@ -190,7 +190,7 @@ export const ClientTasks = () => {
             {/* <UserLayout> */}
                 {/* <BackNav title="Задания" /> */}
                 <div 
-                    className="px-4 -mt-2 pb-3 bg-[#031F23]" 
+                    className="px-4 -mt-2 bg-[#031F23]" 
                     data-diary-page
                     style={{
                         userSelect: 'text',

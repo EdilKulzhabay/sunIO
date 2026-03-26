@@ -41,6 +41,11 @@ export const AssignmentsAdmin = () => {
     };
 
     const columns = [
+        {
+            key: 'order',
+            label: '№',
+            render: (value: unknown) => (value !== undefined && value !== null ? String(value) : '0'),
+        },
         { key: 'request', label: 'Запрос' },
         {
             key: 'steps',

@@ -195,7 +195,6 @@ export const ClientProfile = () => {
                 const imageUrl = uploadResponse.data.imageUrl;
                 // Формируем полный URL для отображения
                 const fullUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:3002'}${imageUrl}`;
-                
 
                 updateUserData('profilePhotoUrl', fullUrl);
                 setUploadedPhotoUrl(fullUrl);
@@ -217,7 +216,7 @@ export const ClientProfile = () => {
     // Определяем URL фото для отображения (приоритет: uploadedPhotoUrl > userData?.profilePhotoUrl)
     const getProfilePhotoUrl = () => {
         if (uploadedPhotoUrl) return uploadedPhotoUrl;
-        if (userData?.profilePhotoUrl) return userData.profilePhotoUrl;
+        if (userData?.profilePhotoUrl) return `${import.meta.env.VITE_API_URL || 'http://localhost:3002'}${userData.profilePhotoUrl}`;
         return null;
     }
 

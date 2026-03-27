@@ -3,6 +3,7 @@ import Assignment from "../Models/Assignment.js";
 import UserAssignmentProgress from "../Models/UserAssignmentProgress.js";
 import VideoProgress from "../Models/VideoProgress.js";
 import Diary from "../Models/Diary.js";
+import User from "../Models/User.js";
 import { addAdminAction } from "../utils/addAdminAction.js";
 import { parseClientContentLink } from "../utils/parseClientContentLink.js";
 
@@ -28,6 +29,10 @@ function normalizeClientPath(link) {
 
 function isDiaryAssignmentLink(link) {
     return normalizeClientPath(link) === "/client/diary";
+}
+
+function isMastersTowerAssignmentLink(link) {
+    return normalizeClientPath(link) === "/client/masters-tower";
 }
 
 /** Приводит шаг из БД к виду { description, contents[] } (поддержка старого flat-шага). */
@@ -101,11 +106,26 @@ export async function syncAssignmentProgress(userId, assignment) {
 
     const diaryEntryCount = await Diary.countDocuments({ user: userId });
 
+    const userActivations = await User.findById(userId)
+        .select("bodyActivation heartActivation healingFamily awakeningSpirit")
+        .lean();
+    const mastersTowerAnyActivation = !!(
+        userActivations &&
+        (userActivations.bodyActivation ||
+            userActivations.heartActivation ||
+            userActivations.healingFamily ||
+            userActivations.awakeningSpirit)
+    );
+
     for (let i = 0; i < normalizedSteps.length; i++) {
         const contents = normalizedSteps[i].contents;
         for (let j = 0; j < contents.length; j++) {
             const c = contents[j];
             if (isDiaryAssignmentLink(c.contentLink) && diaryEntryCount > DIARY_AUTO_COMPLETE_THRESHOLD) {
+                completed[i][j] = true;
+                continue;
+            }
+            if (isMastersTowerAssignmentLink(c.contentLink) && mastersTowerAnyActivation) {
                 completed[i][j] = true;
                 continue;
             }

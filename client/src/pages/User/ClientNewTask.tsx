@@ -10,6 +10,17 @@ import { Check, ChevronDown } from "lucide-react";
 import { CONTENT_CATEGORY_OPTIONS } from "../../constants/contentCategoryOptions";
 import arrowDown from "../../assets/arrowDown.png";
 
+const LS_KEY_SELECTED_ASSIGNMENT_ID = "clientNewTaskSelectedAssignmentId";
+
+function readStoredSelectedAssignmentId(): string {
+    try {
+        const v = localStorage.getItem(LS_KEY_SELECTED_ASSIGNMENT_ID);
+        return typeof v === "string" ? v : "";
+    } catch {
+        return "";
+    }
+}
+
 const isExternalLink = (url: string) => url.startsWith("http://") || url.startsWith("https://");
 
 type ContentItemRow = {
@@ -245,11 +256,13 @@ export const ClientNewTask = () => {
     const [loading, setLoading] = useState(true);
     const [listLoading, setListLoading] = useState(true);
     const [assignments, setAssignments] = useState<Array<{ _id: string; request: string }>>([]);
-    const [selectedId, setSelectedId] = useState<string>("");
+    const [selectedId, setSelectedId] = useState<string>(() => readStoredSelectedAssignmentId());
     const [steps, setSteps] = useState<StepRow[]>([]);
     const [introHtml, setIntroHtml] = useState<string>("");
     const [openSteps, setOpenSteps] = useState<Record<number, boolean>>({});
+    const [assignmentRequestOpen, setAssignmentRequestOpen] = useState(false);
     const stepSectionRefs = useRef<Record<number, HTMLDivElement | null>>({});
+    const assignmentRequestDropdownRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         const userStr = localStorage.getItem("user");
@@ -306,6 +319,39 @@ export const ClientNewTask = () => {
         loadList();
     }, []);
 
+    useEffect(() => {
+        if (listLoading) return;
+        if (assignments.length === 0) {
+            setSelectedId("");
+        }
+    }, [listLoading, assignments.length]);
+
+    useEffect(() => {
+        if (assignments.length === 0) return;
+        setSelectedId((prev) => {
+            if (!prev) return prev;
+            if (assignments.some((a) => a._id === prev)) return prev;
+            try {
+                localStorage.removeItem(LS_KEY_SELECTED_ASSIGNMENT_ID);
+            } catch {
+                /* ignore */
+            }
+            return "";
+        });
+    }, [assignments]);
+
+    useEffect(() => {
+        try {
+            if (selectedId) {
+                localStorage.setItem(LS_KEY_SELECTED_ASSIGNMENT_ID, selectedId);
+            } else {
+                localStorage.removeItem(LS_KEY_SELECTED_ASSIGNMENT_ID);
+            }
+        } catch {
+            /* ignore */
+        }
+    }, [selectedId]);
+
     const loadProgress = useCallback(async (assignmentId: string) => {
         if (!assignmentId) return;
         const userStr = localStorage.getItem("user");
@@ -357,6 +403,27 @@ export const ClientNewTask = () => {
         document.addEventListener("visibilitychange", onVis);
         return () => document.removeEventListener("visibilitychange", onVis);
     }, [selectedId, loadProgress]);
+
+    useEffect(() => {
+        if (!assignmentRequestOpen) return;
+        const close = (e: PointerEvent) => {
+            const el = assignmentRequestDropdownRef.current;
+            if (el && !el.contains(e.target as Node)) {
+                setAssignmentRequestOpen(false);
+            }
+        };
+        document.addEventListener("pointerdown", close, true);
+        return () => document.removeEventListener("pointerdown", close, true);
+    }, [assignmentRequestOpen]);
+
+    useEffect(() => {
+        if (!assignmentRequestOpen) return;
+        const onKey = (e: globalThis.KeyboardEvent) => {
+            if (e.key === "Escape") setAssignmentRequestOpen(false);
+        };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+    }, [assignmentRequestOpen]);
 
     useEffect(() => {
         const next: Record<number, boolean> = {};
@@ -476,45 +543,82 @@ export const ClientNewTask = () => {
                     ) : (
                         <>
                             <div className="mt-6">
-                                <label className="block text-sm text-white/60 mb-2">
+                                <label
+                                    htmlFor="assignment-request-select"
+                                    className="block text-sm text-white/60 mb-2"
+                                >
                                     Выбери свой запрос
                                 </label>
-                                <div className="relative flex min-h-[52px] items-stretch rounded-full border border-white/40 overflow-hidden">
-                                    {/* Видимая строка: клики не ловим — только отображение */}
-                                    <div className="flex min-w-0 flex-1 items-center px-4 py-3.5 pointer-events-none">
-                                        <span
-                                            className={`w-full truncate text-left text-base ${
-                                                selectedId ? "text-white" : "text-white/55"
-                                            }`}
-                                        >
-                                            {selectedId ? selectedRequestLabel : PLACEHOLDER_REQUEST}
-                                        </span>
-                                    </div>
-                                    <div className="flex shrink-0 items-center pr-5 pointer-events-none">
-                                        <img src={arrowDown} alt="" className="h-4 w-4" />
-                                    </div>
-                                    {/* Нативный select на весь блок — в WebView открывается по тапу везде, в т.ч. по иконке */}
-                                    <select
+                                <div ref={assignmentRequestDropdownRef} className="relative z-20 w-full">
+                                    <button
+                                        type="button"
                                         id="assignment-request-select"
-                                        value={selectedId}
-                                        onChange={(e) => setSelectedId(e.target.value)}
-                                        className="absolute inset-0 z-10 h-full min-h-[52px] w-full cursor-pointer opacity-0 appearance-none text-base"
-                                        style={{
-                                            WebkitAppearance: "none",
-                                            MozAppearance: "none",
-                                            backgroundImage: "none",
-                                        }}
-                                        aria-label="Выбери свой запрос"
+                                        aria-haspopup="listbox"
+                                        aria-expanded={assignmentRequestOpen}
+                                        onClick={() => setAssignmentRequestOpen((o) => !o)}
+                                        className="relative flex min-h-[52px] w-full cursor-pointer items-stretch rounded-full border border-white/40 bg-transparent text-left outline-none focus-visible:ring-2 focus-visible:ring-white/35"
                                     >
-                                        <option value="" className="bg-[#114E50] text-white/80">
-                                            {PLACEHOLDER_REQUEST}
-                                        </option>
-                                        {assignments.map((a) => (
-                                            <option key={a._id} value={a._id} className="bg-[#114E50] text-white">
-                                                {a.request}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        <span className="flex min-w-0 flex-1 items-center px-4 py-3.5">
+                                            <span
+                                                className={`w-full truncate text-base ${
+                                                    selectedId ? "text-white" : "text-white/55"
+                                                }`}
+                                            >
+                                                {selectedId ? selectedRequestLabel : PLACEHOLDER_REQUEST}
+                                            </span>
+                                        </span>
+                                        <span className="flex shrink-0 items-center pr-5">
+                                            <span
+                                                className={`inline-block transition-transform duration-200 ${
+                                                    assignmentRequestOpen ? "rotate-180" : ""
+                                                }`}
+                                            >
+                                                <img src={arrowDown} alt="" className="h-4 w-4" />
+                                            </span>
+                                        </span>
+                                    </button>
+                                    {assignmentRequestOpen && (
+                                        <div
+                                            role="listbox"
+                                            aria-labelledby="assignment-request-select"
+                                            className="absolute left-0 right-0 top-full z-30 mt-1 flex h-[200px] w-full flex-col overflow-y-auto rounded-xl border border-black/10 bg-white py-1 shadow-lg"
+                                        >
+                                            <button
+                                                type="button"
+                                                role="option"
+                                                aria-selected={selectedId === ""}
+                                                className={`w-full shrink-0 px-4 py-3 text-left text-sm text-[#031F23]/60 hover:bg-black/[0.04] ${
+                                                    selectedId === "" ? "bg-black/[0.06] font-medium" : ""
+                                                }`}
+                                                onClick={() => {
+                                                    setSelectedId("");
+                                                    setAssignmentRequestOpen(false);
+                                                }}
+                                            >
+                                                {PLACEHOLDER_REQUEST}
+                                            </button>
+                                            {assignments.map((a) => (
+                                                <button
+                                                    key={a._id}
+                                                    type="button"
+                                                    role="option"
+                                                    aria-selected={selectedId === a._id}
+                                                    className={`w-full shrink-0 px-4 pt-3 text-left text-sm text-[#031F23] hover:bg-black/[0.04] ${
+                                                        selectedId === a._id
+                                                            ? "bg-black/[0.06] font-medium"
+                                                            : ""
+                                                    }`}
+                                                    onClick={() => {
+                                                        setSelectedId(a._id);
+                                                        setAssignmentRequestOpen(false);
+                                                    }}
+                                                >
+                                                    <p>{a.request}</p>
+                                                    <div className="w-full h-[1px] bg-black/10 mt-3" />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 

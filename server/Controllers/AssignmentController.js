@@ -35,6 +35,36 @@ function isMastersTowerAssignmentLink(link) {
     return normalizeClientPath(link) === "/client/masters-tower";
 }
 
+/** Хотя бы одна активация «башни мастеров» в профиле пользователя. */
+function hasAnyMastersTowerBodyActivation(user) {
+    if (!user) return false;
+    return !!(
+        user.ethericBodyActivation ||
+        user.astralBodyActivation ||
+        user.mentalBodyActivation ||
+        user.karmicBodyActivation ||
+        user.buddhicBodyActivation ||
+        user.atmicBodyActivation
+    );
+}
+
+const TRAINING_STEP_BODY = "Тренинг «Активация тела»";
+const TRAINING_STEP_HEALTH = "Тренинг «Активация здоровья»";
+const TRAINING_STEP_ROD = "Тренинг «Активация Рода»";
+const TRAINING_STEP_SPIRIT = "Тренинг «Пробуждение Духа»";
+
+/** Галочка по подписи пункта и флагам профиля (тренинги активаций). */
+function isTrainingStepAutoCompleteByUserFlag(user, stepDescription) {
+    if (!user) return false;
+    const t = typeof stepDescription === "string" ? stepDescription.trim() : "";
+    if (!t) return false;
+    if (t === TRAINING_STEP_BODY) return !!user.bodyActivation;
+    if (t === TRAINING_STEP_HEALTH) return !!user.heartActivation;
+    if (t === TRAINING_STEP_ROD) return !!user.healingFamily;
+    if (t === TRAINING_STEP_SPIRIT) return !!user.awakeningSpirit;
+    return false;
+}
+
 /** Приводит шаг из БД к виду { description, contents[] } (поддержка старого flat-шага). */
 export function normalizeStep(step) {
     if (!step) return { description: "", contents: [] };
@@ -106,16 +136,12 @@ export async function syncAssignmentProgress(userId, assignment) {
 
     const diaryEntryCount = await Diary.countDocuments({ user: userId });
 
-    const userActivations = await User.findById(userId)
-        .select("bodyActivation heartActivation healingFamily awakeningSpirit")
+    const userForProgress = await User.findById(userId)
+        .select(
+            "ethericBodyActivation astralBodyActivation mentalBodyActivation karmicBodyActivation buddhicBodyActivation atmicBodyActivation bodyActivation heartActivation healingFamily awakeningSpirit"
+        )
         .lean();
-    const mastersTowerAnyActivation = !!(
-        userActivations &&
-        (userActivations.bodyActivation ||
-            userActivations.heartActivation ||
-            userActivations.healingFamily ||
-            userActivations.awakeningSpirit)
-    );
+    const mastersTowerAutoComplete = hasAnyMastersTowerBodyActivation(userForProgress);
 
     for (let i = 0; i < normalizedSteps.length; i++) {
         const contents = normalizedSteps[i].contents;
@@ -125,7 +151,11 @@ export async function syncAssignmentProgress(userId, assignment) {
                 completed[i][j] = true;
                 continue;
             }
-            if (isMastersTowerAssignmentLink(c.contentLink) && mastersTowerAnyActivation) {
+            if (isMastersTowerAssignmentLink(c.contentLink) && mastersTowerAutoComplete) {
+                completed[i][j] = true;
+                continue;
+            }
+            if (isTrainingStepAutoCompleteByUserFlag(userForProgress, c.stepDescription)) {
                 completed[i][j] = true;
                 continue;
             }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isTelegramWebView } from '../utils/telegramWebApp';
+import { ClientPageViewTracker } from './ClientPageViewTracker';
 
 interface TelegramGuardProps {
     children: React.ReactNode;
@@ -44,6 +45,11 @@ export const TelegramGuard = ({ children }: TelegramGuardProps) => {
         return null;
     }
 
-    return <>{children}</>;
+    return (
+        <>
+            <ClientPageViewTracker />
+            {children}
+        </>
+    );
 };
 

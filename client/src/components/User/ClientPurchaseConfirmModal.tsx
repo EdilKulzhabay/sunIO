@@ -28,7 +28,9 @@ interface ClientPurchaseConfirmModalProps {
     contentTitle: string;
     starsRequired: number;
     userBonus: number;
-    onPurchaseSuccess: () => void;
+    onPurchaseSuccess?: () => void | Promise<void>;
+    /** По умолчанию true: после успеха вызывается onClose. false — только onPurchaseSuccess (родитель закрывает модалку). */
+    closeOnPurchaseSuccess?: boolean;
 }
 
 export const ClientPurchaseConfirmModal = ({ 
@@ -40,6 +42,7 @@ export const ClientPurchaseConfirmModal = ({
     starsRequired,
     userBonus,
     onPurchaseSuccess,
+    closeOnPurchaseSuccess = true,
 }: ClientPurchaseConfirmModalProps) => {
     const [loading, setLoading] = useState(false);
 
@@ -58,8 +61,8 @@ export const ClientPurchaseConfirmModal = ({
 
             if (response.data.success) {
                 toast.success('Контент успешно приобретен!');
-                onPurchaseSuccess();
-                onClose();
+                await Promise.resolve(onPurchaseSuccess?.());
+                if (closeOnPurchaseSuccess) onClose();
             }
         } catch (error: any) {
             toast.error(error.response?.data?.message || 'Ошибка при покупке контента');

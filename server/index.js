@@ -47,9 +47,10 @@ import {
     ContentSearchController,
     BotTrafficSourceController,
     LevelController,
-    AssignmentController
+    AssignmentController,
+    ClientPageAnalyticsController
 } from "./Controllers/index.js";
-import { authMiddleware } from "./Middlewares/authMiddleware.js";
+import { authMiddleware, optionalAuthMiddleware, requireStaffAnalyticsMiddleware } from "./Middlewares/authMiddleware.js";
 import { adminActionLogMiddleware } from "./Middlewares/adminActionLogMiddleware.js";
 import User from "./Models/User.js";
 import { migrateLegacyCompletedActivationsIfNeeded } from "./Controllers/UserController.js";
@@ -137,6 +138,21 @@ const createContentRateLimit = rateLimit({
     }
 });
 
+const clientPageViewRateLimit = rateLimit({
+    windowMs: 60 * 1000,
+    max: 180,
+    message: {
+        success: false,
+        message: "Слишком много событий аналитики. Повторите позже.",
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => {
+        if (req.userId) return `client-pv:user:${req.userId}`;
+        return ipKeyGenerator(req);
+    },
+});
+
 // ==================== Swagger UI маршруты ====================
 // Маршрут для проверки пароля Swagger
 app.post('/swagger-auth/check', express.json(), handleSwaggerAuthCheck);
@@ -216,6 +232,32 @@ app.put("/api/admin/:id/unblock", authMiddleware, UserController.unblockAdmin);
 
 // Журнал действий админа (только для admin)
 app.get("/api/admin-action-logs", authMiddleware, AdminActionLogController.getAll);
+
+// Аналитика просмотров клиентских страниц (Telegram WebApp)
+app.post(
+    "/api/client-analytics/page-view",
+    optionalAuthMiddleware,
+    clientPageViewRateLimit,
+    ClientPageAnalyticsController.recordPageView
+);
+app.get(
+    "/api/client-analytics/admin/summary",
+    authMiddleware,
+    requireStaffAnalyticsMiddleware,
+    ClientPageAnalyticsController.getSummaryByPath
+);
+app.get(
+    "/api/client-analytics/admin/user/:userId",
+    authMiddleware,
+    requireStaffAnalyticsMiddleware,
+    ClientPageAnalyticsController.getByUserId
+);
+app.get(
+    "/api/client-analytics/admin/top-users",
+    authMiddleware,
+    requireStaffAnalyticsMiddleware,
+    ClientPageAnalyticsController.getTopUsers
+);
 
 // Журнал операций (для admin)
 app.get("/api/operation-logs/deposits", authMiddleware, OperationLogController.getDeposits);

@@ -8,6 +8,7 @@ import { Switch } from "./Switch";
 import { ClientPurchaseConfirmModal } from "./ClientPurchaseConfirmModal";
 import { ClientInsufficientBonusModal } from "./ClientInsufficientBonusModal";
 import { ClientPaidDynamicModal } from "./ClientPaidDynamicModal";
+import { ClientSubscriptionDynamicModal } from "./ClientSubscriptionDynamicModal";
 import { X } from "lucide-react";
 import { openExternalLink } from "../../utils/telegramWebApp";
 
@@ -332,6 +333,24 @@ export const UnifiedVideoContentPage = ({
     const [showAccessDeniedModal, setShowAccessDeniedModal] = useState(false);
 
     const [showPaidModal, setShowPaidModal] = useState(false);
+    const [clubLockedHtml, setClubLockedHtml] = useState("");
+    const [lockedOfferModal, setLockedOfferModal] = useState<{
+        open: boolean;
+        accessType: "subscription" | "stars";
+    }>({ open: false, accessType: "subscription" });
+
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const res = await api.get("/api/dynamic-content/name/content-suns");
+                const html = res.data?.data?.content;
+                if (typeof html === "string") setClubLockedHtml(html);
+            } catch {
+                /* текст из админки необязателен — кнопки в модалке всё равно есть */
+            }
+        };
+        load();
+    }, []);
 
     useEffect(() => {
         if (loading || !content || !user || hasAccess) return;
@@ -354,8 +373,40 @@ export const UnifiedVideoContentPage = ({
         navigate('/main', { replace: true });
     };
 
+    const handleAccessDeniedBuy = useCallback(() => {
+        if (!content) return;
+        const at = content.accessType;
+        if (at === "subscription") {
+            setShowAccessDeniedModal(false);
+            setLockedOfferModal({ open: true, accessType: "subscription" });
+            return;
+        }
+        if (at === "paid") {
+            setShowAccessDeniedModal(false);
+            setShowPaidModal(true);
+            return;
+        }
+        if (at === "stars" && !user?.emailConfirmed) {
+            setShowAccessDeniedModal(false);
+            setLockedOfferModal({ open: true, accessType: "stars" });
+        }
+    }, [content, user?.emailConfirmed]);
+
+    const handleLockedOfferModalClose = () => {
+        setLockedOfferModal((m) => ({ ...m, open: false }));
+        setShowAccessDeniedModal(true);
+    };
+
+    const handlePaidModalClose = () => {
+        setShowPaidModal(false);
+        setShowAccessDeniedModal(true);
+    };
+
     const handlePurchaseSuccess = async () => {
         setShowPurchaseModal(false);
+        setShowPaidModal(false);
+        setShowAccessDeniedModal(false);
+        setLockedOfferModal((m) => ({ ...m, open: false }));
         await fetchUserData();
         await fetchContent();
     };
@@ -517,6 +568,7 @@ export const UnifiedVideoContentPage = ({
                             starsRequired={content.starsRequired || 0}
                             userBonus={user?.bonus || 0}
                             onPurchaseSuccess={handlePurchaseSuccess}
+                            closeOnPurchaseSuccess={false}
                         />
                         <ClientInsufficientBonusModal
                             isOpen={showInsufficientBonusModal}
@@ -528,16 +580,29 @@ export const UnifiedVideoContentPage = ({
                     </>
                 )}
 
-                {accessType === 'paid' && showPaidModal && content && (
+                {accessType === "paid" && showPaidModal && content && (
                     <ClientPaidDynamicModal
                         isOpen={showPaidModal}
-                        onClose={handleAccessClose}
-                        item={{ _id: id, title: content.title, shortDescription: content.shortDescription, price: content.price }}
+                        onClose={handlePaidModalClose}
+                        item={{
+                            _id: id,
+                            title: content.title,
+                            shortDescription: content.shortDescription,
+                            price: content.price,
+                        }}
                         contentType={contentType}
                         userBalance={user?.balance ?? 0}
                         onPurchaseSuccess={handlePurchaseSuccess}
+                        closeOnPurchaseSuccess={false}
                     />
                 )}
+
+                <ClientSubscriptionDynamicModal
+                    isOpen={lockedOfferModal.open}
+                    onClose={handleLockedOfferModalClose}
+                    content={clubLockedHtml}
+                    accessType={lockedOfferModal.accessType}
+                />
 
                 {showAccessDeniedModal && (
                     <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -551,41 +616,79 @@ export const UnifiedVideoContentPage = ({
                                     <X size={24} />
                                 </button>
                                 <div className="text-xl font-semibold mb-2">{content.title}</div>
-                                <div className="text-white mt-2">
-                                    {accessType === 'subscription' && <p>Этот контент доступен только по подписке.</p>}
-                                    {accessType === 'paid' && <p>Функционал доступа к платному контенту внутри Приложения будет скоро доступен.</p>}
-                                    {accessType === 'stars' && !user?.emailConfirmed && <p>Для доступа к этому контенту необходимо зарегистрироваться.</p>}
+                                <div className="text-white mt-2 space-y-2">
+                                    {accessType === "subscription" && (
+                                        <p>Этот контент доступен только по подписке. Нажмите «Купить», чтобы перейти к оформлению.</p>
+                                    )}
+                                    {accessType === "paid" && (
+                                        <p>
+                                            Контент можно приобрести за баланс в приложении. Нажмите «Купить», чтобы оплатить и
+                                            открыть просмотр.
+                                        </p>
+                                    )}
+                                    {accessType === "stars" && !user?.emailConfirmed && (
+                                        <p>Для доступа нужна регистрация и Солнца. Нажмите «Купить», чтобы перейти к регистрации.</p>
+                                    )}
                                 </div>
-                                <button
-                                    onClick={handleAccessClose}
-                                    className="w-full mt-4 py-3 bg-[#C4841D] text-white font-medium rounded-full transition-colors"
-                                >
-                                    Закрыть
-                                </button>
+                                <div className="mt-4 flex flex-col gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={handleAccessDeniedBuy}
+                                        className="w-full py-3 bg-[#C4841D] text-white font-medium rounded-full transition-colors"
+                                    >
+                                        Купить
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleAccessClose}
+                                        className="w-full py-3 border border-white/50 text-white font-medium rounded-full transition-colors"
+                                    >
+                                        Закрыть
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div className="hidden sm:flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center">
                             <div className="fixed inset-0 bg-black/60 transition-opacity" />
                             <div
                                 className="relative p-8 inline-block align-middle bg-[#114E50] rounded-lg text-left text-white overflow-hidden shadow-xl transform transition-all"
-                                style={{ maxWidth: '500px', width: '100%' }}
+                                style={{ maxWidth: "500px", width: "100%" }}
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <button onClick={handleAccessClose} className="absolute top-8 right-8 cursor-pointer">
                                     <X size={32} />
                                 </button>
                                 <div className="text-xl font-semibold mb-2">{content.title}</div>
-                                <div className="text-white mt-2">
-                                    {accessType === 'subscription' && <p>Этот контент доступен только по подписке.</p>}
-                                    {accessType === 'paid' && <p>Функционал доступа к платному контенту внутри Приложения будет скоро доступен.</p>}
-                                    {accessType === 'stars' && !user?.emailConfirmed && <p>Для доступа к этому контенту необходимо зарегистрироваться.</p>}
+                                <div className="text-white mt-2 space-y-2">
+                                    {accessType === "subscription" && (
+                                        <p>Этот контент доступен только по подписке. Нажмите «Купить», чтобы перейти к оформлению.</p>
+                                    )}
+                                    {accessType === "paid" && (
+                                        <p>
+                                            Контент можно приобрести за баланс в приложении. Нажмите «Купить», чтобы оплатить и
+                                            открыть просмотр.
+                                        </p>
+                                    )}
+                                    {accessType === "stars" && !user?.emailConfirmed && (
+                                        <p>Для доступа нужна регистрация и Солнца. Нажмите «Купить», чтобы перейти к регистрации.</p>
+                                    )}
                                 </div>
-                                <button
-                                    onClick={handleAccessClose}
-                                    className="w-full mt-4 py-3 bg-[#C4841D] text-white font-medium rounded-full transition-colors"
-                                >
-                                    Закрыть
-                                </button>
+                                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                                    <button
+                                        type="button"
+                                        onClick={handleAccessClose}
+                                        className="w-full sm:w-auto min-w-[140px] py-3 border border-white/50 text-white font-medium rounded-full transition-colors px-6"
+                                    >
+                                        Закрыть
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleAccessDeniedBuy}
+                                        className="w-full sm:w-auto min-w-[140px] py-3 bg-[#C4841D] text-white font-medium rounded-full transition-colors px-6"
+                                    >
+                                        Купить
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

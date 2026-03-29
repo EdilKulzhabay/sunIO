@@ -20,6 +20,8 @@ interface ClientPaidDynamicModalProps {
     contentType?: string;
     userBalance?: number;
     onPurchaseSuccess?: () => void;
+    /** По умолчанию true: после успеха вызывается onClose. false — только onPurchaseSuccess. */
+    closeOnPurchaseSuccess?: boolean;
 }
 
 export const ClientPaidDynamicModal = ({
@@ -29,6 +31,7 @@ export const ClientPaidDynamicModal = ({
     contentType,
     userBalance = 0,
     onPurchaseSuccess,
+    closeOnPurchaseSuccess = true,
 }: ClientPaidDynamicModalProps) => {
     const [loading, setLoading] = useState(false);
 
@@ -57,8 +60,8 @@ export const ClientPaidDynamicModal = ({
                 if (response.data.user) {
                     localStorage.setItem('user', JSON.stringify({ ...user, ...response.data.user }));
                 }
-                onPurchaseSuccess?.();
-                onClose();
+                await Promise.resolve(onPurchaseSuccess?.());
+                if (closeOnPurchaseSuccess) onClose();
             } else {
                 toast.error(response.data.message || 'Ошибка при покупке');
             }

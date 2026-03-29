@@ -139,6 +139,7 @@ import { ClientDepositLog } from "./pages/User/ClientDepositLog";
 import { ClientPurchaseLog } from "./pages/User/ClientPurchaseLog";
 import { ClientWelcome2 } from "./pages/User/ClientWelcome2";
 import { ClientContentSearch } from "./pages/User/ClientContentSearch";
+import { ClientChooseYourPath } from "./pages/User/ClientChooseYourPath";
 
 // Компонент-обертка для всех маршрутов
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
@@ -418,6 +419,10 @@ export const routes = createBrowserRouter([
     {
         path: "/client/content-search",
         element: <RootLayout><TelegramGuard><ProtectedRoute><ClientContentSearch /></ProtectedRoute></TelegramGuard></RootLayout>,
+    },
+    {
+        path: "/client/choose-your-path",
+        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientChooseYourPath /></ProtectedRoute></TelegramGuard></RootLayout>,
     },
     {
         path: "/admin",

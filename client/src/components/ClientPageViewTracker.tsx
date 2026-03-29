@@ -22,9 +22,21 @@ export const ClientPageViewTracker = () => {
         if (prev === path && now - at < 600) return;
         dedupeRef.current = { path, at: now };
 
-        api.post("/api/client-analytics/page-view", { path }).catch(() => {
-            /* аналитика не должна ломать приложение */
-        });
+        let telegramId: string | undefined;
+        try {
+            const u = JSON.parse(localStorage.getItem("user") || "{}");
+            if (u?.telegramId != null && String(u.telegramId).trim() !== "") {
+                telegramId = String(u.telegramId).trim();
+            }
+        } catch {
+            /* ignore */
+        }
+
+        api
+            .post("/api/client-analytics/page-view", { path, ...(telegramId ? { telegramId } : {}) })
+            .catch(() => {
+                /* аналитика не должна ломать приложение */
+            });
     }, [location.pathname, location.key]);
 
     return null;

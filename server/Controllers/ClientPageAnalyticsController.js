@@ -13,6 +13,15 @@ function sanitizePath(raw) {
     return t;
 }
 
+/** Telegram numeric id из тела запроса (доп. к JWT), до 64 символов */
+function sanitizeTelegramId(raw) {
+    if (raw === undefined || raw === null) return null;
+    const s = String(raw).trim();
+    if (!s || s.length > 64) return null;
+    if (!/^\d+$/.test(s)) return null;
+    return s;
+}
+
 export const recordPageView = async (req, res) => {
     try {
         const path = sanitizePath(req.body?.path);
@@ -31,8 +40,13 @@ export const recordPageView = async (req, res) => {
         if (req.userId && mongoose.Types.ObjectId.isValid(req.userId)) {
             doc.userId = req.userId;
         }
-        if (req.user?.telegramId) {
-            doc.telegramId = String(req.user.telegramId).slice(0, 64);
+
+        const fromAuth = req.user?.telegramId ? String(req.user.telegramId).slice(0, 64) : null;
+        const fromBody = sanitizeTelegramId(req.body?.telegramId);
+        if (fromAuth) {
+            doc.telegramId = fromAuth;
+        } else if (fromBody) {
+            doc.telegramId = fromBody;
         }
 
         await ClientPageView.create(doc);

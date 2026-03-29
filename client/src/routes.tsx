@@ -61,6 +61,7 @@ import { NavigatorDescriptionsForm } from "./pages/Admin/NavigatorDescriptionsFo
 import { PointsAwardingPolicyAdmin } from "./pages/Admin/PointsAwardingPolicy";
 import { PointsAwardingPolicyForm } from "./pages/Admin/PointsAwardingPolicyForm";
 import { BotTrafficSourcesAdmin } from "./pages/Admin/BotTrafficSources";
+import { ClientPageAnalytics } from "./pages/Admin/ClientPageAnalytics";
 import { BotTrafficSourceForm } from "./pages/Admin/BotTrafficSourceForm";
 import { UsersAdmin } from "./pages/Admin/Users";
 import { UserForm } from "./pages/Admin/UserForm";
@@ -774,6 +775,16 @@ export const routes = createBrowserRouter([
     {
         path: "/admin/bot-traffic-sources/edit/:id",
         element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><BotTrafficSourceForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/client-page-analytics",
+        element: (
+            <RootLayout>
+                <ProtectedRoute requiredRole={["admin", "manager", "client_manager"]}>
+                    <ClientPageAnalytics />
+                </ProtectedRoute>
+            </RootLayout>
+        ),
     },
     {
         path: "/admin/users",

@@ -31,7 +31,8 @@ import {
     Link2 as LinkIcon,
     Video,
     Layers,
-    ListChecks
+    ListChecks,
+    BarChart2
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -42,6 +43,12 @@ const menuItems = [
     { path: '/admin', label: 'Главная', icon: Home },
     { path: '/admin/users', label: 'Пользователи', icon: Users },
     { path: '/admin/bot-traffic-sources', label: 'Источники трафика', icon: LinkIcon },
+    {
+        path: '/admin/client-page-analytics',
+        label: 'Просмотры страниц',
+        icon: BarChart2,
+        roles: ['admin', 'manager', 'client_manager'] as const,
+    },
     { path: '/admin/admins', label: 'Администраторы', icon: Shield },
     { path: '/admin/action-logs', label: 'Журнал действий', icon: ClipboardList, adminOnly: true },
     { path: '/admin/operation-logs', label: 'Журнал операций', icon: ClipboardList, adminOnly: true },
@@ -91,7 +98,12 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
                 <nav className="p-4 flex-1 overflow-y-auto">
                     <ul className="space-y-2">
                         {menuItems
-                            .filter((item) => !item.adminOnly || user?.role === 'admin')
+                            .filter((item) => {
+                                if (item.adminOnly && user?.role !== 'admin') return false;
+                                if ('roles' in item && item.roles && !item.roles.includes(user?.role as any))
+                                    return false;
+                                return true;
+                            })
                             .map((item, index) => {
                             // Разделитель
                             if (item.divider) {

@@ -49,6 +49,12 @@ export const recordPageView = async (req, res) => {
             doc.telegramId = fromBody;
         }
 
+        /* Без JWT просмотры раньше сохранялись только с telegramId — привязываем к Mongo userId для отчётов */
+        if (!doc.userId && doc.telegramId) {
+            const u = await User.findOne({ telegramId: doc.telegramId }).select("_id").lean();
+            if (u?._id) doc.userId = u._id;
+        }
+
         await ClientPageView.create(doc);
 
         res.status(201).json({ success: true });
@@ -98,8 +104,19 @@ export const getByUserId = async (req, res) => {
             return res.status(400).json({ success: false, message: "Неверный userId" });
         }
 
+        const oid = new mongoose.Types.ObjectId(userId);
+        const user = await User.findById(userId).select("telegramId").lean();
+
+        const orConditions = [{ userId: oid }];
+        if (user?.telegramId != null) {
+            const tg = String(user.telegramId).trim();
+            if (tg && /^\d+$/.test(tg)) {
+                orConditions.push({ telegramId: tg });
+            }
+        }
+
+        const match = { $or: orConditions };
         const sinceRaw = req.query.since;
-        const match = { userId: new mongoose.Types.ObjectId(userId) };
         if (sinceRaw) {
             const d = new Date(String(sinceRaw));
             if (!Number.isNaN(d.getTime())) {

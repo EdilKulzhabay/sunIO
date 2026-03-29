@@ -426,8 +426,6 @@ export const ClientPageAnalytics = () => {
                                         <span className="text-gray-400 mx-1">·</span>
                                     </>
                                 ) : null}
-                                <span className="font-mono text-gray-700 text-xs">{userDetail.userId}</span>
-                                {' · '}
                                 Всего просмотров (с учётом фильтра даты):{' '}
                                 <span className="font-semibold">{userDetail.totalViews}</span>
                             </p>

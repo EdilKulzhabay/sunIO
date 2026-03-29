@@ -297,10 +297,6 @@ export const ClientPageAnalytics = () => {
                     <h2 className="text-lg font-semibold text-gray-900 mb-4">
                         Просмотры по страницам для пользователя
                     </h2>
-                    <p className="text-sm text-gray-600 mb-4">
-                        Поиск и фильтры — как в разделе «Пользователи». Список обновляется с небольшой задержкой.
-                        MongoDB ID в поле поиска открывает статистику сразу.
-                    </p>
 
                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4 mb-6">
                         <div className="relative">

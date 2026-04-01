@@ -247,6 +247,12 @@ app.get(
     ClientPageAnalyticsController.getSummaryByPath
 );
 app.get(
+    "/api/client-analytics/admin/path-stats",
+    authMiddleware,
+    requireStaffAnalyticsMiddleware,
+    ClientPageAnalyticsController.getPathStats
+);
+app.get(
     "/api/client-analytics/admin/user/:userId",
     authMiddleware,
     requireStaffAnalyticsMiddleware,
@@ -501,6 +507,22 @@ app.delete("/api/broadcast/:id", authMiddleware, BroadcastController.deleteBroad
 // ==================== Modal Notification маршруты ====================
 app.post("/api/modal-notification/users", ModalNotificationController.getFilteredUsers);
 app.get("/api/modal-notification/campaigns", authMiddleware, ModalNotificationController.listModalCampaigns);
+app.get("/api/modal-notification/templates", authMiddleware, ModalNotificationController.getModalTemplates);
+app.post(
+    "/api/modal-notification/templates",
+    createContentRateLimit,
+    authMiddleware,
+    ModalNotificationController.createModalTemplate
+);
+app.put("/api/modal-notification/templates/:id", authMiddleware, ModalNotificationController.updateModalTemplate);
+app.delete("/api/modal-notification/templates/:id", authMiddleware, ModalNotificationController.deleteModalTemplate);
+app.get("/api/modal-notification/scheduled", authMiddleware, ModalNotificationController.getScheduledModalSchedules);
+app.get("/api/modal-notification/sent", authMiddleware, ModalNotificationController.getSentModalSchedules);
+app.delete(
+    "/api/modal-notification/scheduled/:id",
+    authMiddleware,
+    ModalNotificationController.cancelScheduledModalNotification
+);
 app.post("/api/modal-notification/create", createContentRateLimit, authMiddleware, ModalNotificationController.createModalNotification);
 app.post("/api/modal-notification/my", ModalNotificationController.getUserModalNotifications);
 app.post("/api/modal-notification/remove", ModalNotificationController.removeModalNotification);

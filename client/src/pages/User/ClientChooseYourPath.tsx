@@ -170,11 +170,7 @@ export const ClientChooseYourPath = () => {
         () => assignments.find((a) => a._id === selectedId)?.request ?? "",
         [assignments, selectedId]
     );
-
-    const focusStepFromPath = useCallback(() => {
-        navigate("/client/new-task");
-    }, [navigate]);
-
+    
     return (
         <div
             style={{
@@ -182,6 +178,7 @@ export const ClientChooseYourPath = () => {
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 backgroundRepeat: "no-repeat",
+                minHeight: selectedId ? "" : "100vh",
             }}
             className="pb-10 flex flex-col justify-between relative"
         >
@@ -194,7 +191,7 @@ export const ClientChooseYourPath = () => {
                 <img src={sunWithHands} alt="" className="object-cover h-[175px] w-[175px] mb-5" />
             </div>
             <div className="flex-1 min-h-0 px-4">
-                <h1 className="text-[48px] font-semibold text-white leading-tight">Выберите свой путь</h1>
+                <h1 className="text-[48px] font-semibold text-white leading-tight">Выберите свой путь движения</h1>
                 <p className="text-white mt-2 text-sm leading-relaxed">
                     Чтобы начать свой путь в приложении «Солнце», мы создали для тебя инструкцию в формате заданий.
                     Двигаясь по предложенному маршруту, ты будешь приближаться к реализации запроса, а также сможешь
@@ -290,7 +287,7 @@ export const ClientChooseYourPath = () => {
                         ) : selectedId ? (
                             <div className="mt-4 -mx-2">
                                 {steps.length > 0 && (
-                                    <PathProgress steps={steps} onStepClick={focusStepFromPath} />
+                                    <PathProgress steps={steps} onStepClick={() => {}} />
                                 )}
                             </div>
                         ) : null}

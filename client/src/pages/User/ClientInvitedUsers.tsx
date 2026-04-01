@@ -126,9 +126,9 @@ export const ClientInvitedUsers = () => {
             return;
         }
 
-        // Проверка размера файла (максимум 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            alert('Размер файла не должен превышать 5MB');
+        // Проверка размера файла (максимум 20MB)
+        if (file.size > 20 * 1024 * 1024) {
+            alert('Размер файла не должен превышать 20MB');
             return;
         }
 
@@ -150,7 +150,6 @@ export const ClientInvitedUsers = () => {
                 const imageUrl = uploadResponse.data.imageUrl;
                 // Формируем полный URL для отображения
                 const fullUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:3002'}${imageUrl}`;
-                
 
                 updateUserData('profilePhotoUrl', fullUrl);
                 setUploadedPhotoUrl(fullUrl);
@@ -172,7 +171,9 @@ export const ClientInvitedUsers = () => {
     // Определяем URL фото для отображения (приоритет: uploadedPhotoUrl > userData?.profilePhotoUrl)
     const getProfilePhotoUrl = () => {
         if (uploadedPhotoUrl) return uploadedPhotoUrl;
-        if (userData?.profilePhotoUrl) return userData.profilePhotoUrl;
+        if (userData?.profilePhotoUrl) {
+            return `${import.meta.env.VITE_API_URL || 'http://localhost:3002'}${userData.profilePhotoUrl}`;
+        }
         return null;
     }
 

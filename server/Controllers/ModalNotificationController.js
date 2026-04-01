@@ -3,6 +3,7 @@ import User from "../Models/User.js";
 import ModalNotificationCampaign from "../Models/ModalNotificationCampaign.js";
 import ModalNotificationSchedule from "../Models/ModalNotificationSchedule.js";
 import ModalNotificationInteraction from "../Models/ModalNotificationInteraction.js";
+import ModalNotificationTemplate from "../Models/ModalNotificationTemplate.js";
 import { addAdminAction } from "../utils/addAdminAction.js";
 
 // Получить пользователей с фильтрацией по статусу и поиску (для выбора получателей)
@@ -100,7 +101,7 @@ export async function dispatchModalNotifications({
 export const createModalNotification = async (req, res) => {
     try {
         const user = req.user;
-        const {
+        let {
             modalTitle,
             modalDescription,
             modalButtonText,
@@ -109,7 +110,29 @@ export const createModalNotification = async (req, res) => {
             userIds,
             status,
             scheduledAt,
+            templateId,
         } = req.body;
+
+        if (templateId && mongoose.Types.ObjectId.isValid(String(templateId))) {
+            const tpl = await ModalNotificationTemplate.findById(templateId).lean();
+            if (!tpl) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Шаблон не найден",
+                });
+            }
+            const t = (s) => (typeof s === "string" ? s.trim() : "");
+            if (!t(modalTitle)) modalTitle = tpl.modalTitle;
+            if (!t(modalDescription)) modalDescription = tpl.modalDescription;
+            if (!t(modalButtonText)) modalButtonText = tpl.modalButtonText;
+            if (modalButtonLink === undefined || modalButtonLink === null || t(String(modalButtonLink)) === "") {
+                modalButtonLink = tpl.modalButtonLink || "";
+            }
+        }
+
+        modalTitle = typeof modalTitle === "string" ? modalTitle.trim() : modalTitle;
+        modalButtonText = typeof modalButtonText === "string" ? modalButtonText.trim() : modalButtonText;
+        modalButtonLink = typeof modalButtonLink === "string" ? modalButtonLink.trim() : modalButtonLink;
 
         if (!modalTitle || !modalDescription || !modalButtonText) {
             return res.status(400).json({
@@ -188,6 +211,19 @@ export const createModalNotification = async (req, res) => {
 
         await ModalNotificationCampaign.findByIdAndUpdate(campaign._id, {
             recipientCount: count,
+        });
+
+        /* Запись в журнал «Отправленные» (как у BroadcastSchedule после мгновенной отправки) */
+        await ModalNotificationSchedule.create({
+            scheduledAt: new Date(),
+            status: "sent",
+            payload: {
+                campaignId: campaign._id,
+                ...payloadBase,
+            },
+            result: { count },
+            sentAt: new Date(),
+            scheduledBy: user?._id,
         });
 
         await addAdminAction(user._id, `Создал(а) модальное уведомление: "${modalTitle}" (${count} польз.)`);
@@ -430,5 +466,153 @@ export const getUserModalNotifications = async (req, res) => {
             success: false,
             message: "Ошибка получения модальных уведомлений",
         });
+    }
+};
+
+/** Сохранённые шаблоны модальных окон (как сохранённые рассылки) */
+export const getModalTemplates = async (req, res) => {
+    try {
+        const data = await ModalNotificationTemplate.find().sort({ updatedAt: -1 }).lean();
+        res.json({ success: true, data });
+    } catch (error) {
+        console.log("Ошибка в getModalTemplates:", error);
+        res.status(500).json({ success: false, message: "Ошибка загрузки шаблонов" });
+    }
+};
+
+export const createModalTemplate = async (req, res) => {
+    try {
+        const user = req.user;
+        const { title, modalTitle, modalDescription, modalButtonText, modalButtonLink } = req.body;
+        if (!title?.trim() || !modalTitle?.trim() || !modalDescription || !modalButtonText?.trim()) {
+            return res.status(400).json({
+                success: false,
+                message: "Укажите название шаблона и все поля модального окна",
+            });
+        }
+        const existing = await ModalNotificationTemplate.findOne({ title: title.trim() });
+        if (existing) {
+            return res.status(400).json({
+                success: false,
+                message: "Шаблон с таким названием уже существует",
+            });
+        }
+        const doc = await ModalNotificationTemplate.create({
+            title: title.trim(),
+            modalTitle: modalTitle.trim(),
+            modalDescription,
+            modalButtonText: modalButtonText.trim(),
+            modalButtonLink: modalButtonLink && String(modalButtonLink).trim() ? String(modalButtonLink).trim() : "",
+        });
+        await addAdminAction(user._id, `Сохранил(а) шаблон модального уведомления: "${doc.title}"`);
+        res.json({ success: true, data: doc });
+    } catch (error) {
+        console.log("Ошибка в createModalTemplate:", error);
+        res.status(500).json({ success: false, message: "Ошибка сохранения шаблона" });
+    }
+};
+
+export const updateModalTemplate = async (req, res) => {
+    try {
+        const user = req.user;
+        const { id } = req.params;
+        const { title, modalTitle, modalDescription, modalButtonText, modalButtonLink } = req.body;
+        const doc = await ModalNotificationTemplate.findById(id);
+        if (!doc) {
+            return res.status(404).json({ success: false, message: "Шаблон не найден" });
+        }
+        if (title?.trim() && title.trim() !== doc.title) {
+            const clash = await ModalNotificationTemplate.findOne({ title: title.trim() });
+            if (clash) {
+                return res.status(400).json({ success: false, message: "Такое название уже занято" });
+            }
+            doc.title = title.trim();
+        }
+        if (modalTitle !== undefined) doc.modalTitle = modalTitle.trim();
+        if (modalDescription !== undefined) doc.modalDescription = modalDescription;
+        if (modalButtonText !== undefined) doc.modalButtonText = modalButtonText.trim();
+        if (modalButtonLink !== undefined) doc.modalButtonLink = String(modalButtonLink).trim();
+        await doc.save();
+        await addAdminAction(user._id, `Обновил(а) шаблон модального уведомления: "${doc.title}"`);
+        res.json({ success: true, data: doc });
+    } catch (error) {
+        console.log("Ошибка в updateModalTemplate:", error);
+        res.status(500).json({ success: false, message: "Ошибка обновления шаблона" });
+    }
+};
+
+export const deleteModalTemplate = async (req, res) => {
+    try {
+        const user = req.user;
+        const { id } = req.params;
+        const doc = await ModalNotificationTemplate.findByIdAndDelete(id);
+        if (!doc) {
+            return res.status(404).json({ success: false, message: "Шаблон не найден" });
+        }
+        await addAdminAction(user._id, `Удалил(а) шаблон модального уведомления: "${doc.title}"`);
+        res.json({ success: true, message: "Шаблон удалён" });
+    } catch (error) {
+        console.log("Ошибка в deleteModalTemplate:", error);
+        res.status(500).json({ success: false, message: "Ошибка удаления шаблона" });
+    }
+};
+
+export const getScheduledModalSchedules = async (req, res) => {
+    try {
+        const data = await ModalNotificationSchedule.find({ status: "scheduled" })
+            .sort({ scheduledAt: 1 })
+            .populate("scheduledBy", "fullName")
+            .lean();
+        res.json({ success: true, data });
+    } catch (error) {
+        console.log("Ошибка в getScheduledModalSchedules:", error);
+        res.status(500).json({ success: false, message: "Ошибка загрузки запланированных" });
+    }
+};
+
+export const getSentModalSchedules = async (req, res) => {
+    try {
+        const data = await ModalNotificationSchedule.find({ status: "sent" })
+            .sort({ sentAt: -1 })
+            .limit(100)
+            .populate("scheduledBy", "fullName")
+            .lean();
+        res.json({ success: true, data });
+    } catch (error) {
+        console.log("Ошибка в getSentModalSchedules:", error);
+        res.status(500).json({ success: false, message: "Ошибка загрузки отправленных" });
+    }
+};
+
+export const cancelScheduledModalNotification = async (req, res) => {
+    try {
+        const user = req.user;
+        const { id } = req.params;
+        const schedule = await ModalNotificationSchedule.findById(id);
+        if (!schedule) {
+            return res.status(404).json({ success: false, message: "Запись не найдена" });
+        }
+        if (schedule.status !== "scheduled") {
+            return res.status(400).json({
+                success: false,
+                message: "Можно отменить только запланированное уведомление",
+            });
+        }
+        const campaignId = schedule.payload?.campaignId;
+        await ModalNotificationSchedule.findByIdAndDelete(id);
+        if (campaignId && mongoose.Types.ObjectId.isValid(String(campaignId))) {
+            await ModalNotificationCampaign.findByIdAndDelete(campaignId);
+        }
+        const preview = (schedule.payload?.modalTitle || "").substring(0, 50);
+        if (user) {
+            await addAdminAction(
+                user._id,
+                `Отменил(а) запланированное модальное уведомление: "${preview}${preview.length >= 50 ? "..." : ""}"`
+            );
+        }
+        res.json({ success: true, message: "Планирование отменено" });
+    } catch (error) {
+        console.log("Ошибка в cancelScheduledModalNotification:", error);
+        res.status(500).json({ success: false, message: "Ошибка отмены" });
     }
 };

@@ -130,25 +130,25 @@ export const Welcome = () => {
                             </div>
                         )}
                         <div 
-                            className="absolute inset-0 z-10 lg:hidden"
+                            className="absolute inset-0 z-10 xl:hidden"
                             style={{
                                 background: 'linear-gradient(to top, #031F2300 75%, #031F23 99%)',
                             }}
                         />
                         <div 
-                            className="absolute inset-0 z-10 lg:hidden"
+                            className="absolute inset-0 z-10 xl:hidden"
                             style={{
                                 background: 'linear-gradient(to bottom, #031F2300 70%, #031F23 100%)',
                             }}
                         />
                         <div 
-                            className="absolute inset-0 z-10 hidden lg:block"
+                            className="absolute inset-0 z-10 hidden xl:block"
                             style={{
                                 background: 'linear-gradient(to right, #031F2300 70%, #031F23 100%)',
                             }}
                         />
                         <div 
-                            className="absolute inset-0 z-10 hidden lg:block"
+                            className="absolute inset-0 z-10 hidden xl:block"
                             style={{
                                 background: 'linear-gradient(to left, #031F2300 70%, #031F23 100%)',
                             }}

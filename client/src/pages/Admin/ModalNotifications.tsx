@@ -2,7 +2,19 @@ import { useState, useEffect, useMemo } from 'react';
 import { AdminLayout } from '../../components/Admin/AdminLayout';
 import api from '../../api';
 import { toast } from 'react-toastify';
-import { Send, Users, Search, X, MessageSquare, Clock, BarChart3 } from 'lucide-react';
+import {
+    Send,
+    Users,
+    Search,
+    X,
+    MessageSquare,
+    Clock,
+    BarChart3,
+    BookOpen,
+    CalendarClock,
+    Edit,
+    Trash2,
+} from 'lucide-react';
 import { RichTextEditor } from '../../components/Admin/RichTextEditor';
 import { RedirectToPageSelector } from '../../components/Admin/RedirectToPageSelector';
 
@@ -34,6 +46,30 @@ interface ModalCampaignRow {
     stats: CampaignStats;
 }
 
+interface SavedModalTemplate {
+    _id: string;
+    title: string;
+    modalTitle: string;
+    modalDescription: string;
+    modalButtonText: string;
+    modalButtonLink?: string;
+    updatedAt: string;
+}
+
+interface ModalScheduleRow {
+    _id: string;
+    scheduledAt: string;
+    sentAt?: string | null;
+    status: string;
+    payload?: {
+        modalTitle?: string;
+        modalDescription?: string;
+        campaignId?: string;
+    };
+    result?: { count?: number };
+    scheduledBy?: { fullName?: string };
+}
+
 /** Значение datetime-local интерпретируется как московское время → ISO (UTC). */
 function mskLocalToIso(mskDatetimeLocal: string): string | undefined {
     if (!mskDatetimeLocal?.trim()) return undefined;
@@ -57,6 +93,18 @@ function formatMsk(iso?: string | null) {
     }
 }
 
+function stripHtml(html: string) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html || '';
+    return tmp.textContent || tmp.innerText || '';
+}
+
+function getDescriptionPreview(html?: string, maxLen = 120) {
+    if (!html) return '—';
+    const text = stripHtml(html);
+    return text.length > maxLen ? text.substring(0, maxLen) + '…' : text;
+}
+
 export const ModalNotificationsAdmin = () => {
     const [modalTitle, setModalTitle] = useState('');
     const [modalDescription, setModalDescription] = useState('');
@@ -77,6 +125,15 @@ export const ModalNotificationsAdmin = () => {
     const [lastScheduled, setLastScheduled] = useState(false);
     const [campaigns, setCampaigns] = useState<ModalCampaignRow[]>([]);
     const [campaignsLoading, setCampaignsLoading] = useState(false);
+
+    const [savedTemplates, setSavedTemplates] = useState<SavedModalTemplate[]>([]);
+    const [loadingSaved, setLoadingSaved] = useState(false);
+    const [scheduledModalRows, setScheduledModalRows] = useState<ModalScheduleRow[]>([]);
+    const [loadingScheduledRows, setLoadingScheduledRows] = useState(false);
+    const [sentModalRows, setSentModalRows] = useState<ModalScheduleRow[]>([]);
+    const [loadingSentRows, setLoadingSentRows] = useState(false);
+    /** Подставленный из шаблона id — уходит в create как templateId и для «Обновить шаблон» */
+    const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);
 
     const scheduledAtIso = useMemo(() => mskLocalToIso(scheduledSendAt), [scheduledSendAt]);
 
@@ -109,6 +166,60 @@ export const ModalNotificationsAdmin = () => {
         }
     };
 
+    const fetchSavedTemplates = async () => {
+        setLoadingSaved(true);
+        try {
+            const response = await api.get<{ success: boolean; data: SavedModalTemplate[] }>(
+                '/api/modal-notification/templates'
+            );
+            if (response.data.success && response.data.data) {
+                setSavedTemplates(response.data.data);
+            }
+        } catch {
+            toast.error('Ошибка загрузки сохранённых шаблонов');
+        } finally {
+            setLoadingSaved(false);
+        }
+    };
+
+    const fetchScheduledModalRows = async () => {
+        setLoadingScheduledRows(true);
+        try {
+            const response = await api.get<{ success: boolean; data: ModalScheduleRow[] }>(
+                '/api/modal-notification/scheduled'
+            );
+            if (response.data.success && response.data.data) {
+                setScheduledModalRows(response.data.data);
+            }
+        } catch {
+            toast.error('Ошибка загрузки запланированных');
+        } finally {
+            setLoadingScheduledRows(false);
+        }
+    };
+
+    const fetchSentModalRows = async () => {
+        setLoadingSentRows(true);
+        try {
+            const response = await api.get<{ success: boolean; data: ModalScheduleRow[] }>(
+                '/api/modal-notification/sent'
+            );
+            if (response.data.success && response.data.data) {
+                setSentModalRows(response.data.data);
+            }
+        } catch {
+            toast.error('Ошибка загрузки отправленных');
+        } finally {
+            setLoadingSentRows(false);
+        }
+    };
+
+    const refreshTemplateLists = () => {
+        fetchSavedTemplates();
+        fetchScheduledModalRows();
+        fetchSentModalRows();
+    };
+
     useEffect(() => {
         fetchUserCount();
         setSearch('');
@@ -120,6 +231,7 @@ export const ModalNotificationsAdmin = () => {
 
     useEffect(() => {
         fetchCampaigns();
+        refreshTemplateLists();
     }, []);
 
     const handleSearch = async () => {
@@ -198,6 +310,7 @@ export const ModalNotificationsAdmin = () => {
         modalButtonLink: modalButtonLink.trim() || undefined,
         showUpTo: showUpTo || undefined,
         scheduledAt: scheduledAtIso,
+        ...(activeTemplateId ? { templateId: activeTemplateId } : {}),
     });
 
     const validateSchedule = () => {
@@ -220,6 +333,102 @@ export const ModalNotificationsAdmin = () => {
         setScheduledSendAt('');
         setSelectedUsers(new Set());
         setSelectedUsersData(new Map());
+        setActiveTemplateId(null);
+    };
+
+    const applyTemplateToForm = (t: SavedModalTemplate) => {
+        setModalTitle(t.modalTitle);
+        setModalDescription(t.modalDescription);
+        setModalButtonText(t.modalButtonText);
+        setModalButtonLink(t.modalButtonLink?.trim() || '');
+        setActiveTemplateId(t._id);
+        toast.success(`Шаблон «${t.title}» подставлен в форму`);
+    };
+
+    const handleSaveNewTemplate = async () => {
+        if (!modalTitle.trim() || !modalDescription.trim() || !modalButtonText.trim()) {
+            toast.warning('Заполните заголовок, описание и текст кнопки');
+            return;
+        }
+        const title = window.prompt('Краткое название шаблона (для списка, уникальное)');
+        if (!title?.trim()) return;
+        try {
+            const response = await api.post('/api/modal-notification/templates', {
+                title: title.trim(),
+                modalTitle: modalTitle.trim(),
+                modalDescription,
+                modalButtonText: modalButtonText.trim(),
+                modalButtonLink: modalButtonLink.trim() || '',
+            });
+            if (response.data.success) {
+                toast.success('Шаблон сохранён');
+                setActiveTemplateId(response.data.data?._id ?? null);
+                fetchSavedTemplates();
+            } else {
+                toast.error(response.data.message || 'Ошибка сохранения');
+            }
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Ошибка сохранения шаблона');
+        }
+    };
+
+    const handleUpdateTemplate = async () => {
+        if (!activeTemplateId) {
+            toast.warning('Сначала подставьте шаблон из списка или сохраните новый');
+            return;
+        }
+        if (!modalTitle.trim() || !modalDescription.trim() || !modalButtonText.trim()) {
+            toast.warning('Заполните все обязательные поля');
+            return;
+        }
+        try {
+            const response = await api.put(`/api/modal-notification/templates/${activeTemplateId}`, {
+                modalTitle: modalTitle.trim(),
+                modalDescription,
+                modalButtonText: modalButtonText.trim(),
+                modalButtonLink: modalButtonLink.trim() || '',
+            });
+            if (response.data.success) {
+                toast.success('Шаблон обновлён');
+                fetchSavedTemplates();
+            } else {
+                toast.error(response.data.message || 'Ошибка обновления');
+            }
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Ошибка обновления шаблона');
+        }
+    };
+
+    const handleDeleteTemplate = async (id: string, name: string) => {
+        if (!confirm(`Удалить шаблон «${name}»?`)) return;
+        try {
+            const response = await api.delete(`/api/modal-notification/templates/${id}`);
+            if (response.data.success) {
+                toast.success('Шаблон удалён');
+                if (activeTemplateId === id) setActiveTemplateId(null);
+                fetchSavedTemplates();
+            } else {
+                toast.error(response.data.message || 'Ошибка удаления');
+            }
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Ошибка удаления');
+        }
+    };
+
+    const handleCancelScheduledModal = async (id: string) => {
+        if (!confirm('Отменить запланированное модальное уведомление?')) return;
+        try {
+            const response = await api.delete(`/api/modal-notification/scheduled/${id}`);
+            if (response.data.success) {
+                toast.success('Планирование отменено');
+                fetchScheduledModalRows();
+                fetchCampaigns();
+            } else {
+                toast.error(response.data.message || 'Ошибка отмены');
+            }
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Ошибка отмены');
+        }
     };
 
     const handleCreateNotification = async () => {
@@ -258,6 +467,7 @@ export const ModalNotificationsAdmin = () => {
                     }
                     resetForm();
                     fetchCampaigns();
+                    refreshTemplateLists();
                 } else {
                     toast.error(response.data.message || 'Ошибка создания уведомления');
                 }
@@ -313,6 +523,7 @@ export const ModalNotificationsAdmin = () => {
                 }
                 resetForm();
                 fetchCampaigns();
+                refreshTemplateLists();
             } else {
                 toast.error(response.data.message || 'Ошибка создания уведомления');
             }
@@ -406,6 +617,161 @@ export const ModalNotificationsAdmin = () => {
                     </div>
                 )}
 
+                {/* Сохранённые шаблоны */}
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                        <BookOpen size={18} />
+                        <h2 className="text-xl font-semibold text-gray-900">Сохранённые модальные окна</h2>
+                    </div>
+                    {loadingSaved && <p className="text-gray-500 text-center py-4">Загрузка…</p>}
+                    {!loadingSaved && savedTemplates.length > 0 && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {savedTemplates.map((t) => (
+                                <div
+                                    key={t._id}
+                                    className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                                >
+                                    <div className="font-semibold text-gray-900 mb-1">{t.title}</div>
+                                    <div className="text-sm text-gray-700 font-medium line-clamp-1">
+                                        {t.modalTitle}
+                                    </div>
+                                    <div className="text-sm text-gray-600 line-clamp-2 mt-1">
+                                        {getDescriptionPreview(t.modalDescription)}
+                                    </div>
+                                    <div className="mt-2 text-xs text-gray-500">
+                                        Обновлено:{' '}
+                                        {new Date(t.updatedAt).toLocaleDateString('ru-RU')}
+                                    </div>
+                                    <div className="mt-3 flex flex-wrap gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => applyTemplateToForm(t)}
+                                            className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                                        >
+                                            <Edit size={16} />
+                                            В форму
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDeleteTemplate(t._id, t.title)}
+                                            className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                                        >
+                                            <Trash2 size={16} />
+                                            Удалить
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {!loadingSaved && savedTemplates.length === 0 && (
+                        <p className="text-gray-500 text-center py-4">
+                            Нет сохранённых шаблонов — заполните форму ниже и нажмите «Сохранить как
+                            шаблон».
+                        </p>
+                    )}
+                </div>
+
+                {/* Запланированные (очередь) */}
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                        <CalendarClock size={18} />
+                        <h2 className="text-xl font-semibold text-gray-900">
+                            Запланированные модальные уведомления
+                        </h2>
+                    </div>
+                    {loadingScheduledRows && (
+                        <p className="text-gray-500 text-center py-4">Загрузка…</p>
+                    )}
+                    {!loadingScheduledRows && scheduledModalRows.length > 0 && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {scheduledModalRows.map((item) => (
+                                <div
+                                    key={item._id}
+                                    className="border border-amber-200 rounded-lg p-4 bg-amber-50/50 hover:bg-amber-50 transition-colors"
+                                >
+                                    {item.payload?.modalTitle && (
+                                        <div className="font-semibold text-gray-900 mb-1">
+                                            {item.payload.modalTitle}
+                                        </div>
+                                    )}
+                                    <div className="text-sm text-gray-700 line-clamp-2 mb-2">
+                                        {getDescriptionPreview(item.payload?.modalDescription)}
+                                    </div>
+                                    <div className="text-xs text-amber-700 font-medium mb-1">
+                                        {formatMsk(item.scheduledAt)}
+                                    </div>
+                                    {item.scheduledBy?.fullName && (
+                                        <div className="text-xs text-gray-500 mb-2">
+                                            Запланировал: {item.scheduledBy.fullName}
+                                        </div>
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={() => handleCancelScheduledModal(item._id)}
+                                        className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                                    >
+                                        <X size={16} />
+                                        Отменить
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {!loadingScheduledRows && scheduledModalRows.length === 0 && (
+                        <p className="text-gray-500 text-center py-4">Нет запланированных уведомлений</p>
+                    )}
+                </div>
+
+                {/* Отправленные (журнал) */}
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                        <Send size={18} />
+                        <h2 className="text-xl font-semibold text-gray-900">
+                            Отправленные модальные уведомления
+                        </h2>
+                    </div>
+                    {loadingSentRows && <p className="text-gray-500 text-center py-4">Загрузка…</p>}
+                    {!loadingSentRows && sentModalRows.length > 0 && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {sentModalRows.map((item) => (
+                                <div
+                                    key={item._id}
+                                    className="border border-green-200 rounded-lg p-4 bg-green-50/30 hover:bg-green-50/50 transition-colors"
+                                >
+                                    {item.payload?.modalTitle && (
+                                        <div className="font-semibold text-gray-900 mb-1">
+                                            {item.payload.modalTitle}
+                                        </div>
+                                    )}
+                                    <div className="text-sm text-gray-700 line-clamp-2 mb-2">
+                                        {getDescriptionPreview(item.payload?.modalDescription)}
+                                    </div>
+                                    <div className="text-xs text-green-700 font-medium mb-1">
+                                        Показано пользователям:{' '}
+                                        {item.sentAt
+                                            ? new Date(item.sentAt).toLocaleString('ru-RU')
+                                            : '—'}
+                                    </div>
+                                    {item.result != null && (
+                                        <div className="text-xs text-gray-600 mb-1">
+                                            Получили запись в приложении: {item.result.count ?? '—'}
+                                        </div>
+                                    )}
+                                    {item.scheduledBy?.fullName && (
+                                        <div className="text-xs text-gray-500">
+                                            Инициатор: {item.scheduledBy.fullName}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {!loadingSentRows && sentModalRows.length === 0 && (
+                        <p className="text-gray-500 text-center py-4">Пока нет записей об отправках</p>
+                    )}
+                </div>
+
                 <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
                     <div className="flex items-center gap-2 text-gray-900 font-semibold border-b pb-2">
                         <BarChart3 size={20} />
@@ -469,10 +835,13 @@ export const ModalNotificationsAdmin = () => {
                     )}
                     <button
                         type="button"
-                        onClick={() => fetchCampaigns()}
+                        onClick={() => {
+                            fetchCampaigns();
+                            refreshTemplateLists();
+                        }}
                         className="text-sm text-blue-600 hover:underline"
                     >
-                        Обновить статистику
+                        Обновить статистику и списки
                     </button>
                 </div>
 
@@ -703,6 +1072,32 @@ export const ModalNotificationsAdmin = () => {
                         value={modalButtonLink}
                         onChange={(val) => setModalButtonLink(val)}
                     />
+
+                    {activeTemplateId ? (
+                        <p className="text-xs text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+                            Редактируется сохранённый шаблон. При отправке пустые поля подставятся с
+                            сервера по id шаблона. Можно обновить текст шаблонов кнопкой ниже.
+                        </p>
+                    ) : null}
+
+                    <div className="flex flex-wrap gap-2">
+                        <button
+                            type="button"
+                            onClick={handleSaveNewTemplate}
+                            className="px-4 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 text-sm border border-gray-200"
+                        >
+                            Сохранить как шаблон
+                        </button>
+                        {activeTemplateId ? (
+                            <button
+                                type="button"
+                                onClick={handleUpdateTemplate}
+                                className="px-4 py-2 bg-white text-blue-700 border border-blue-300 rounded-lg hover:bg-blue-50 text-sm"
+                            >
+                                Обновить шаблон
+                            </button>
+                        ) : null}
+                    </div>
 
                     <div>
                         <label className="flex items-center gap-2 text-sm font-medium mb-2">

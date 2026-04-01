@@ -1,14 +1,62 @@
 import { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
+import type { ArrowOrigin } from './MainPageInstructionsModal';
+import { DEFAULT_CURVE_BEND } from './MainPageInstructionsModal';
 
-const INSTRUCTION_STEPS = [
-    { title: 'Солнца', description: 'Внутренняя валюта приложения, которую можно обменять на эксклюзивный контент. Нажми на этот блок, чтобы узнать политику получения Солнц', targetId: 'profile-instruction-sun' },
-    { title: 'Подписка на клуб', description: 'Статус подписки на закрытый клуб Мастерская энергий, доступ в который возможен после Активации', targetId: 'profile-instruction-subscription' },
-    { title: 'Реферальная ссылка', description: 'Твоя персональная ссылка для друзей, нажми на цифру, чтобы посмотреть статусы приглашений', targetId: 'profile-instruction-referral-link' },
-    { title: 'Телеграм канал', description: 'Информационный канал, где публикуется интересный контент, которого нет в других социальных сетях', targetId: 'profile-instruction-telegram-channel' },
-    { title: 'Телеграм чат', description: 'Чат проекта, где можно задавать вопросы ведущим проекта и делиться обратной связью', targetId: 'profile-instruction-telegram-chat' },
-    { title: 'Настройка просмотра видео', description: 'В РФ запрещён к использованию YouTube, при включенном параметре будут активны RuTube ссылки', targetId: 'profile-instruction-video-settings' },
-    { title: 'Уведомления', description: 'Разрешаете или нет Приложению отправлять различные уведомления через Телеграм-бота', targetId: 'profile-instruction-notifications' },
+export interface ProfileInstructionStep {
+    title: string;
+    description: string;
+    targetId: string;
+    arrowOrigin?: ArrowOrigin;
+    curveBend?: number;
+}
+
+const INSTRUCTION_STEPS: ProfileInstructionStep[] = [
+    {
+        title: 'Солнца',
+        description:
+            'Внутренняя валюта приложения, которую можно обменять на эксклюзивный контент. Нажми на этот блок, чтобы узнать политику получения Солнц',
+        targetId: 'profile-instruction-sun',
+        curveBend: 52,
+    },
+    {
+        title: 'Подписка на клуб',
+        description:
+            'Статус подписки на закрытый клуб Мастерская энергий, доступ в который возможен после Активации',
+        targetId: 'profile-instruction-subscription',
+        curveBend: -44,
+    },
+    {
+        title: 'Реферальная ссылка',
+        description: 'Твоя персональная ссылка для друзей, нажми на цифру, чтобы посмотреть статусы приглашений',
+        targetId: 'profile-instruction-referral-link',
+        curveBend: 50,
+    },
+    {
+        title: 'Телеграм канал',
+        description:
+            'Информационный канал, где публикуется интересный контент, которого нет в других социальных сетях',
+        targetId: 'profile-instruction-telegram-channel',
+        curveBend: -46,
+    },
+    {
+        title: 'Телеграм чат',
+        description: 'Чат проекта, где можно задавать вопросы ведущим проекта и делиться обратной связью',
+        targetId: 'profile-instruction-telegram-chat',
+        curveBend: 48,
+    },
+    {
+        title: 'Настройка просмотра видео',
+        description: 'В РФ запрещён к использованию YouTube, при включенном параметре будут активны RuTube ссылки',
+        targetId: 'profile-instruction-video-settings',
+        curveBend: -42,
+    },
+    {
+        title: 'Уведомления',
+        description: 'Разрешаете или нет Приложению отправлять различные уведомления через Телеграм-бота',
+        targetId: 'profile-instruction-notifications',
+        curveBend: 54,
+    },
 ];
 
 export const PROFILE_INSTRUCTION_STEPS_COUNT = INSTRUCTION_STEPS.length;
@@ -23,19 +71,38 @@ const ARROW_COLOR = '#00C5AE';
 const CIRCLE_RADIUS = 3.5;
 const LINE_OFFSET_FROM_TARGET = 8;
 
+function quadraticControl(
+    ox: number,
+    oy: number,
+    ex: number,
+    ey: number,
+    bend: number
+): { cx: number; cy: number } {
+    const dx = ex - ox;
+    const dy = ey - oy;
+    const len = Math.sqrt(dx * dx + dy * dy);
+    if (len < 1e-6) return { cx: (ox + ex) / 2, cy: (oy + ey) / 2 };
+    const mx = (ox + ex) / 2;
+    const my = (oy + ey) / 2;
+    const nx = -dy / len;
+    const ny = dx / len;
+    return { cx: mx + bend * nx, cy: my + bend * ny };
+}
+
 export const ProfilePageInstructionsModal = ({ currentStep, onNext, onClose }: ProfilePageInstructionsModalProps) => {
     const modalRef = useRef<HTMLDivElement>(null);
     const closeButtonRef = useRef<HTMLButtonElement>(null);
     const [arrowState, setArrowState] = useState<{
         originX: number;
         originY: number;
+        controlX: number;
+        controlY: number;
         lineEndX: number;
         lineEndY: number;
     } | null>(null);
 
     const step = INSTRUCTION_STEPS[currentStep];
 
-    // Скролл к целевому элементу при смене шага (с задержкой для применения padding)
     useEffect(() => {
         if (!step) return;
         const targetEl = document.getElementById(step.targetId);
@@ -62,9 +129,19 @@ export const ProfilePageInstructionsModal = ({ currentStep, onNext, onClose }: P
             const targetCenterX = targetRect.left + targetRect.width / 2;
             const targetCenterY = targetRect.top + targetRect.height / 2;
 
-            const closeRect = closeBtn?.getBoundingClientRect();
-            const originX = closeRect ? closeRect.left - 20 : modalRect.left + modalRect.width / 2;
-            const originY = closeRect ? closeRect.top + closeRect.height / 2 : modalRect.top + modalRect.height / 2;
+            let originX: number;
+            let originY: number;
+
+            const useLeftOfClose = (step.arrowOrigin ?? 'center') === 'left-of-close' && closeBtn;
+
+            if (useLeftOfClose && closeBtn) {
+                const closeRect = closeBtn.getBoundingClientRect();
+                originX = closeRect.left - 20;
+                originY = closeRect.top + closeRect.height / 2;
+            } else {
+                originX = modalRect.left + modalRect.width / 2;
+                originY = modalRect.top + 20;
+            }
 
             const dx = targetCenterX - originX;
             const dy = targetCenterY - originY;
@@ -77,9 +154,14 @@ export const ProfilePageInstructionsModal = ({ currentStep, onNext, onClose }: P
             const lineEndX = targetCenterX - LINE_OFFSET_FROM_TARGET * ux;
             const lineEndY = targetCenterY - LINE_OFFSET_FROM_TARGET * uy;
 
+            const bend = step.curveBend ?? DEFAULT_CURVE_BEND;
+            const { cx: controlX, cy: controlY } = quadraticControl(originX, originY, lineEndX, lineEndY, bend);
+
             setArrowState({
                 originX,
                 originY,
+                controlX,
+                controlY,
                 lineEndX,
                 lineEndY,
             });
@@ -92,6 +174,8 @@ export const ProfilePageInstructionsModal = ({ currentStep, onNext, onClose }: P
         if (modalRef.current) observer.observe(modalRef.current);
         const closeBtnEl = closeButtonRef.current;
         if (closeBtnEl) observer.observe(closeBtnEl);
+        const targetEl = document.getElementById(step.targetId);
+        if (targetEl) observer.observe(targetEl);
 
         window.addEventListener('scroll', updateArrowPosition, true);
         window.addEventListener('resize', updateArrowPosition);
@@ -102,9 +186,11 @@ export const ProfilePageInstructionsModal = ({ currentStep, onNext, onClose }: P
             window.removeEventListener('scroll', updateArrowPosition, true);
             window.removeEventListener('resize', updateArrowPosition);
         };
-    }, [currentStep, step?.targetId]);
+    }, [currentStep, step?.targetId, step?.arrowOrigin, step?.curveBend]);
 
     if (!step) return null;
+
+    const markerId = `profile-instruction-arrowhead-${currentStep}`;
 
     return (
         <>
@@ -112,7 +198,7 @@ export const ProfilePageInstructionsModal = ({ currentStep, onNext, onClose }: P
 
             <div
                 ref={modalRef}
-                className="fixed z-[9999] left-0 right-0 bottom-0 sm:left-1/2 sm:right-auto sm:bottom-auto sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:max-w-md bg-[#114E50] rounded-t-[24px] sm:rounded-[24px] px-4 pt-6 pb-8 text-left text-white overflow-hidden shadow-xl"
+                className="fixed z-[9999] left-0 right-0 bottom-0 xl:left-1/2 xl:right-auto xl:bottom-auto xl:top-1/2 xl:-translate-x-1/2 xl:-translate-y-1/2 xl:w-full xl:max-w-md bg-[#114E50] rounded-t-[24px] xl:rounded-[24px] px-4 pt-6 pb-8 text-left text-white overflow-hidden shadow-xl"
             >
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
@@ -138,7 +224,6 @@ export const ProfilePageInstructionsModal = ({ currentStep, onNext, onClose }: P
                 </div>
             </div>
 
-            {/* Стрелка: круг у начала (левее крестика) → линия → остриё у элемента */}
             {arrowState && (
                 <svg
                     style={{
@@ -154,7 +239,7 @@ export const ProfilePageInstructionsModal = ({ currentStep, onNext, onClose }: P
                 >
                     <defs>
                         <marker
-                            id="profile-instruction-arrowhead"
+                            id={markerId}
                             markerWidth="6"
                             markerHeight="6"
                             refX="5"
@@ -170,15 +255,13 @@ export const ProfilePageInstructionsModal = ({ currentStep, onNext, onClose }: P
                         r={CIRCLE_RADIUS}
                         fill={ARROW_COLOR}
                     />
-                    <line
-                        x1={arrowState.originX}
-                        y1={arrowState.originY}
-                        x2={arrowState.lineEndX}
-                        y2={arrowState.lineEndY}
+                    <path
+                        d={`M ${arrowState.originX} ${arrowState.originY} Q ${arrowState.controlX} ${arrowState.controlY} ${arrowState.lineEndX} ${arrowState.lineEndY}`}
+                        fill="none"
                         stroke={ARROW_COLOR}
                         strokeWidth={1.5}
                         strokeLinecap="round"
-                        markerEnd="url(#profile-instruction-arrowhead)"
+                        markerEnd={`url(#${markerId})`}
                     />
                 </svg>
             )}

@@ -29,7 +29,25 @@ function countThinActivations(u: Record<string, unknown> | null | undefined): nu
     return THIN_ACTIVATION_KEYS.filter((k) => Boolean(u[k])).length;
 }
 
-const LEVEL_IMAGES = [level1, level2, level3, level4, level5, level6];
+const LEVEL_IMAGES = [{
+    src: level1,
+    link: "6986b24e706333f31e2580f7"
+}, {
+    src: level2,
+    link: "6986b279706333f31e2580ff"
+}, {
+    src: level3,
+    link: "6986b291706333f31e258108"
+}, {
+    src: level4,
+    link: "6986b2b3706333f31e258110"
+}, {
+    src: level5,
+    link: "6986b2c9706333f31e258117"
+}, {
+    src: level6,
+    link: "6986b318706333f31e25812b"
+}];
 
 export const ClientTasks = () => {
     const navigate = useNavigate();
@@ -239,13 +257,13 @@ export const ClientTasks = () => {
                         ) : null}
 
                         <div className="flex items-center justify-between gap-1 mt-4">
-                            {LEVEL_IMAGES.map((src, idx) => {
+                            {LEVEL_IMAGES.map((item, idx) => {
                                 const step = idx + 1;
                                 const unlocked = thinCount >= step;
                                 return (
-                                    <div key={step} className="relative w-[44px] h-[62px] shrink-0">
+                                    <div onClick={() => navigate(item.link)} key={step} className="relative w-[44px] h-[62px] shrink-0 cursor-pointer">
                                         <img
-                                            src={src}
+                                            src={item.src}
                                             alt={'Уровень ' + step}
                                             className="w-full h-full object-contain transition-opacity duration-300"
                                             style={{ opacity: unlocked ? 1 : 0.3 }}

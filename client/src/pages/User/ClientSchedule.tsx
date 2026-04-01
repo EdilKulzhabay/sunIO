@@ -9,7 +9,12 @@ import { RedButton } from "../../components/User/RedButton";
 import { SafeExternalLink } from "../../components/User/SafeExternalLink";
 import { openExternalLink } from "../../utils/telegramWebApp";
 
-export const ClientSchedule = () => {
+interface ClientScheduleProps {
+    /** На главной: компактный лоадер вместо полноэкранного — иначе календарь «пропадает» до ответа API */
+    embedded?: boolean;
+}
+
+export const ClientSchedule = ({ embedded = false }: ClientScheduleProps) => {
     const [userData, setUserData] = useState<any>(null);
     const [schedules, setSchedules] = useState<any>([]);
     const [calendarSchedules, setCalendarSchedules] = useState<any[]>([]);
@@ -300,6 +305,13 @@ export const ClientSchedule = () => {
     }
 
     if (loading) {
+        if (embedded) {
+            return (
+                <div className="flex justify-center items-center min-h-[200px] py-8 rounded-xl bg-[#031F23]/50">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500" />
+                </div>
+            );
+        }
         return (
             <div className="flex justify-center items-center h-screen bg-[#031F23]">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>

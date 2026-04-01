@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AdminLayout } from '../../components/Admin/AdminLayout';
 import api from '../../api';
 import { toast } from 'react-toastify';
 import { RefreshCw, Search } from 'lucide-react';
 import { getClientPageTitle } from '../../utils/clientPathLabels';
+import { CONTENT_CATEGORY_OPTIONS } from '../../constants/contentCategoryOptions';
 
 interface PathRow {
     path: string;
@@ -32,25 +33,11 @@ interface UserListRow {
 const OBJECT_ID_RE = /^[a-fA-F0-9]{24}$/;
 const USER_FETCH_DEBOUNCE_MS = 400;
 
-function sinceQueryParam(dateStr: string): string | undefined {
-    if (!dateStr.trim()) return undefined;
-    const d = new Date(`${dateStr}T00:00:00`);
-    if (Number.isNaN(d.getTime())) return undefined;
-    return d.toISOString();
-}
-
 export const ClientPageAnalytics = () => {
-    const [sinceDate, setSinceDate] = useState('');
     const [loading, setLoading] = useState(false);
     const [summary, setSummary] = useState<SummaryData | null>(null);
 
     const [searchQuery, setSearchQuery] = useState('');
-    const [statusFilter, setStatusFilter] = useState('all');
-    const [lastActiveFilter, setLastActiveFilter] = useState('all');
-    const [botSourceFilter, setBotSourceFilter] = useState('all');
-    const [botTrafficSources, setBotTrafficSources] = useState<
-        Array<{ _id: string; title: string; botParameter: string }>
-    >([]);
 
     const [userSearchResults, setUserSearchResults] = useState<UserListRow[]>([]);
     const [userSearchLoading, setUserSearchLoading] = useState(false);
@@ -62,18 +49,22 @@ export const ClientPageAnalytics = () => {
         byPath: UserPathRow[];
     } | null>(null);
 
-    const analyticsUserIdRef = useRef<string | null>(null);
-    useEffect(() => {
-        analyticsUserIdRef.current = userDetail?.userId ?? null;
-    }, [userDetail]);
-
-    const since = sinceQueryParam(sinceDate);
+    /** Селекторы как в RedirectToPageSelector: раздел + конкретный материал */
+    const [contentCategoryApiPath, setContentCategoryApiPath] = useState('');
+    const [contentItemId, setContentItemId] = useState('');
+    const [contentItems, setContentItems] = useState<{ _id: string; title: string }[]>([]);
+    const [loadingContentItems, setLoadingContentItems] = useState(false);
+    const [contentPathStats, setContentPathStats] = useState<{ path: string; totalViews: number } | null>(
+        null
+    );
+    const [contentPathLoading, setContentPathLoading] = useState(false);
+    /** Синхронизация с кнопкой «Обновить» в шапке */
+    const [analyticsRefreshTick, setAnalyticsRefreshTick] = useState(0);
 
     const fetchSummaryAndTop = useCallback(async () => {
         setLoading(true);
         try {
-            const q = since ? `?since=${encodeURIComponent(since)}` : '';
-            const sumRes = await api.get(`/api/client-analytics/admin/summary${q}`);
+            const sumRes = await api.get('/api/client-analytics/admin/summary');
 
             if (sumRes.data.success) {
                 setSummary(sumRes.data.data);
@@ -85,31 +76,68 @@ export const ClientPageAnalytics = () => {
             setSummary(null);
         } finally {
             setLoading(false);
+            setAnalyticsRefreshTick((t) => t + 1);
         }
-    }, [since]);
+    }, []);
 
     useEffect(() => {
         fetchSummaryAndTop();
     }, [fetchSummaryAndTop]);
 
     useEffect(() => {
+        if (!contentCategoryApiPath) {
+            setContentItems([]);
+            return;
+        }
         const load = async () => {
+            setLoadingContentItems(true);
             try {
-                const response = await api.get('/api/bot-traffic-sources');
-                const data = response.data?.data || [];
-                setBotTrafficSources(
-                    data.map((item: { _id: string; title: string; botParameter: string }) => ({
-                        _id: item._id,
-                        title: item.title,
-                        botParameter: item.botParameter,
-                    }))
-                );
+                const response = await api.get(contentCategoryApiPath);
+                const data = response.data?.data;
+                setContentItems(Array.isArray(data) ? data : []);
             } catch {
-                /* без источников селектор всё равно работает */
+                setContentItems([]);
+            } finally {
+                setLoadingContentItems(false);
             }
         };
         load();
-    }, []);
+    }, [contentCategoryApiPath]);
+
+    useEffect(() => {
+        const opt = CONTENT_CATEGORY_OPTIONS.find((o) => o.apiPath === contentCategoryApiPath);
+        if (!opt || !contentItemId) {
+            setContentPathStats(null);
+            return;
+        }
+        const path = `${opt.clientPath}/${contentItemId}`;
+        let cancelled = false;
+        const load = async () => {
+            setContentPathLoading(true);
+            try {
+                const res = await api.get('/api/client-analytics/admin/path-stats', {
+                    params: { path },
+                });
+                if (cancelled) return;
+                if (res.data.success) {
+                    setContentPathStats(res.data.data);
+                } else {
+                    setContentPathStats(null);
+                }
+            } catch {
+                if (!cancelled) {
+                    toast.error('Не удалось загрузить статистику по контенту');
+                    setContentPathStats(null);
+                }
+            } finally {
+                if (!cancelled) setContentPathLoading(false);
+            }
+        };
+        load();
+        return () => {
+            cancelled = true;
+        };
+    }, [contentCategoryApiPath, contentItemId, analyticsRefreshTick]);
 
     const formatUserListHint = (u: UserListRow) => {
         const parts = [
@@ -131,11 +159,7 @@ export const ClientPageAnalytics = () => {
             setUserDetailLoading(true);
             if (hint !== undefined) setUserDetailHint(hint);
             try {
-                const params = new URLSearchParams();
-                if (since) params.set('since', since);
-                const res = await api.get(
-                    `/api/client-analytics/admin/user/${encodeURIComponent(id)}?${params.toString()}`
-                );
+                const res = await api.get(`/api/client-analytics/admin/user/${encodeURIComponent(id)}`);
                 if (res.data.success) {
                     setUserDetail(res.data.data);
                 } else {
@@ -149,14 +173,8 @@ export const ClientPageAnalytics = () => {
                 setUserDetailLoading(false);
             }
         },
-        [since]
+        []
     );
-
-    useEffect(() => {
-        const id = analyticsUserIdRef.current;
-        if (!id) return;
-        loadUserDetail(id, undefined);
-    }, [since, loadUserDetail]);
 
     useEffect(() => {
         const timer = window.setTimeout(async () => {
@@ -171,9 +189,6 @@ export const ClientPageAnalytics = () => {
             setUserSearchLoading(true);
             try {
                 const params: Record<string, string | number> = { page: 1, limit: 100 };
-                if (statusFilter !== 'all') params.statusFilter = statusFilter;
-                if (lastActiveFilter !== 'all') params.lastActiveFilter = lastActiveFilter;
-                if (botSourceFilter !== 'all') params.botStartSourceId = botSourceFilter;
 
                 const textForApi = q.startsWith('@') ? q.slice(1).trim() : q;
                 if (textForApi) params.searchQuery = textForApi;
@@ -203,7 +218,7 @@ export const ClientPageAnalytics = () => {
         }, USER_FETCH_DEBOUNCE_MS);
 
         return () => window.clearTimeout(timer);
-    }, [searchQuery, statusFilter, lastActiveFilter, botSourceFilter, loadUserDetail]);
+    }, [searchQuery, loadUserDetail]);
 
     const pathCell = (path: string) => (
         <td className="px-4 py-2 text-gray-900 max-w-md" title={path}>
@@ -216,24 +231,13 @@ export const ClientPageAnalytics = () => {
             <div className="space-y-8">
                 <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Просмотры клиентских страниц</h1>
+                        <h1 className="text-3xl font-bold text-gray-900">Учет посещения страниц приложения пользователями</h1>
                         <p className="text-gray-600 mt-1 text-sm">
                             Популярность URL и активность пользователей в Telegram WebApp (события с авторизацией
                             привязаны к пользователю).
                         </p>
                     </div>
                     <div className="flex flex-wrap items-end gap-3">
-                        <div>
-                            <label className="block text-xs font-medium text-gray-500 mb-1">
-                                Учитывать с даты
-                            </label>
-                            <input
-                                type="date"
-                                value={sinceDate}
-                                onChange={(e) => setSinceDate(e.target.value)}
-                                className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                            />
-                        </div>
                         <button
                             type="button"
                             onClick={() => fetchSummaryAndTop()}
@@ -247,7 +251,7 @@ export const ClientPageAnalytics = () => {
                 </div>
 
                 <section className="bg-white rounded-lg shadow p-6">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">Популярные страницы</h2>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-4">Рейтинг страниц</h2>
                     {loading && !summary ? (
                         <p className="text-gray-500">Загрузка…</p>
                     ) : summary ? (
@@ -255,7 +259,6 @@ export const ClientPageAnalytics = () => {
                             <p className="text-sm text-gray-600 mb-4">
                                 Всего событий просмотра:{' '}
                                 <span className="font-semibold text-gray-900">{summary.totalEvents}</span>
-                                {sinceDate ? ` (с ${sinceDate})` : ''}
                             </p>
                             <div className="overflow-x-auto max-h-[480px] overflow-y-auto border border-gray-200 rounded-lg">
                                 <table className="min-w-full text-sm">
@@ -271,7 +274,7 @@ export const ClientPageAnalytics = () => {
                                         {summary.byPath.length === 0 ? (
                                             <tr>
                                                 <td colSpan={2} className="px-4 py-8 text-center text-gray-500">
-                                                    Нет данных за выбранный период
+                                                    Нет данных
                                                 </td>
                                             </tr>
                                         ) : (
@@ -294,71 +297,94 @@ export const ClientPageAnalytics = () => {
                 </section>
 
                 <section className="bg-white rounded-lg shadow p-6">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                        Просмотры по страницам для пользователя
-                    </h2>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-2">Аналитика по контенту</h2>
+                    <p className="text-sm text-gray-600 mb-4">
+                        Выберите раздел и материал — так же, как при настройке ссылки в карточках и
+                        уведомлениях. Считаются открытия страницы этого материала в приложении.
+                    </p>
 
-                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4 mb-6">
-                        <div className="relative">
-                            <Search
-                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                                size={20}
-                            />
-                            <input
-                                type="text"
-                                placeholder="Поиск по имени, TG имени, телефону, email..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                            />
+                    <div className="flex flex-col gap-3 max-w-xl">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Категория</label>
+                            <select
+                                value={contentCategoryApiPath}
+                                onChange={(e) => {
+                                    setContentCategoryApiPath(e.target.value);
+                                    setContentItemId('');
+                                    setContentPathStats(null);
+                                }}
+                                className="w-full p-2 rounded-lg border border-gray-300 text-sm bg-white"
+                            >
+                                <option value="">Выберите категорию</option>
+                                {CONTENT_CATEGORY_OPTIONS.map((opt) => (
+                                    <option key={opt.apiPath} value={opt.apiPath}>
+                                        {opt.title}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {contentCategoryApiPath ? (
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Статус</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Контент</label>
                                 <select
-                                    value={statusFilter}
-                                    onChange={(e) => setStatusFilter(e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                                    value={contentItemId}
+                                    onChange={(e) => setContentItemId(e.target.value)}
+                                    disabled={loadingContentItems}
+                                    className="w-full p-2 rounded-lg border border-gray-300 text-sm bg-white disabled:opacity-60"
                                 >
-                                    <option value="all">Все статусы</option>
-                                    <option value="anonym">Аноним</option>
-                                    <option value="guest">Гость</option>
-                                    <option value="registered">Зарегистрирован</option>
-                                    <option value="client">Клиент</option>
-                                    <option value="blocked">Заблокирован</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Активность</label>
-                                <select
-                                    value={lastActiveFilter}
-                                    onChange={(e) => setLastActiveFilter(e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                                >
-                                    <option value="all">Все</option>
-                                    <option value="active">Активные (в течение 15 дней)</option>
-                                    <option value="inactive">Неактивные (больше 15 дней)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Источник трафика
-                                </label>
-                                <select
-                                    value={botSourceFilter}
-                                    onChange={(e) => setBotSourceFilter(e.target.value)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                                >
-                                    <option value="all">Все источники</option>
-                                    {botTrafficSources.map((source) => (
-                                        <option key={source._id} value={source._id}>
-                                            {source.title}
+                                    <option value="">
+                                        {loadingContentItems ? 'Загрузка…' : 'Выберите контент'}
+                                    </option>
+                                    {contentItems.map((item) => (
+                                        <option key={item._id} value={item._id}>
+                                            {item.title || item._id}
                                         </option>
                                     ))}
                                 </select>
                             </div>
+                        ) : null}
+                    </div>
+
+                    {contentPathLoading && (
+                        <p className="text-sm text-gray-500 mt-4">Загрузка статистики…</p>
+                    )}
+
+                    {contentPathStats && !contentPathLoading ? (
+                        <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                            <p className="text-sm text-gray-700">
+                                Просмотров страницы:{' '}
+                                <span className="font-semibold text-gray-900 tabular-nums">
+                                    {contentPathStats.totalViews}
+                                </span>
+                            </p>
+                            <p className="text-xs text-gray-500 font-mono mt-1 break-all" title={contentPathStats.path}>
+                                {contentPathStats.path}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                                {getClientPageTitle(contentPathStats.path)}
+                            </p>
                         </div>
+                    ) : null}
+                </section>
+
+                <section className="bg-white rounded-lg shadow p-6">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                        Просмотры в разрезе пользователя
+                    </h2>
+
+                    <div className="relative mb-6">
+                        <Search
+                            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                            size={20}
+                        />
+                        <input
+                            type="text"
+                            placeholder="Поиск по имени, TG имени, телефону, email или вставьте ID пользователя…"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                        />
                     </div>
 
                     {userSearchLoading && (
@@ -422,7 +448,7 @@ export const ClientPageAnalytics = () => {
                                         <span className="text-gray-400 mx-1">·</span>
                                     </>
                                 ) : null}
-                                Всего просмотров (с учётом фильтра даты):{' '}
+                                Всего просмотров:{' '}
                                 <span className="font-semibold">{userDetail.totalViews}</span>
                             </p>
                             <div className="overflow-x-auto max-h-[360px] overflow-y-auto border border-gray-200 rounded-lg">

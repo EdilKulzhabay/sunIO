@@ -45,7 +45,7 @@ const menuItems = [
     { path: '/admin/bot-traffic-sources', label: 'Источники трафика', icon: LinkIcon },
     {
         path: '/admin/client-page-analytics',
-        label: 'Просмотры страниц',
+        label: 'Статистика просмотра страниц',
         icon: BarChart2,
         roles: ['admin', 'manager', 'client_manager'] as const,
     },

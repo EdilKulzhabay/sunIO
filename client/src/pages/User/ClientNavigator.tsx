@@ -115,7 +115,7 @@ export const ClientNavigator = () => {
                 </div>
                 
                 <div className="-mt-2 bg-[#031F23]">
-                    <p className="px-4 lg:w-1/2" dangerouslySetInnerHTML={{ __html: content?.content }}></p>
+                    <p className="px-4 xl:w-1/2" dangerouslySetInnerHTML={{ __html: content?.content }}></p>
                     <div className='relative'>
                         <div className="relative flex justify-center items-center lg:hidden">
                             <img 
@@ -183,7 +183,7 @@ export const ClientNavigator = () => {
                             } else {
                                 navigate("/client/masters-tower")
                             }
-                        }} className="absolute top-[43%] left-[72%] w-[78px] h-[61px] z-20 lg:w-[129px] lg:h-[93px] md:top-[43%] md:left-[75%] lg:top-[63%] lg:left-[70%] xl:left-[75%] cursor-pointer">
+                        }} className="absolute top-[43%] left-[72%] w-[78px] h-[61px] z-20 lg:w-[129px] lg:h-[93px] md:top-[43%] md:left-[75%] lg:top-[63%] lg:left-[74%] xl:left-[75%] cursor-pointer">
                             <img src={navigatorMastersTowerMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
                             <img src={navigatorMastersTowerDesktop} alt="" className="object-cover w-full h-full hidden lg:block" />
                         </button>
@@ -205,7 +205,7 @@ export const ClientNavigator = () => {
                             } else {
                                 navigate("/client/femininity-gazebo")
                             }
-                        }} className="absolute top-[69%] left-[66%] w-[115px] h-[61px] z-20 lg:w-[186px] lg:h-[93px] md:top-[69%] md:left-[75%] lg:top-[73%] lg:left-[81%] xl:top-[74%] xl:left-[84%] cursor-pointer">
+                        }} className="absolute top-[69%] left-[66%] w-[115px] h-[61px] z-20 lg:w-[186px] lg:h-[93px] md:top-[69%] md:left-[75%] lg:top-[73%] lg:left-[84%] xl:top-[74%] xl:left-[84%] cursor-pointer">
                             <img src={navigatorFemininityGazeboMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
                             <img src={navigatorFemininityGazeboDesktop} alt="" className="object-cover w-full h-full hidden lg:block" />
                         </button>

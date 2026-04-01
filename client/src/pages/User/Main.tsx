@@ -340,10 +340,11 @@ export const Main = () => {
 
 
     const handleInstructionNext = () => {
-        setInstructionStep((prev) => prev + 1);
-        if (instructionStep === MAIN_INSTRUCTION_STEPS_COUNT - 2) {
-            handleInstructionClose();
+        if (instructionStep >= MAIN_INSTRUCTION_STEPS_COUNT - 1) {
+            void handleInstructionClose();
+            return;
         }
+        setInstructionStep((prev) => prev + 1);
     };
 
     const handleInstructionClose = async () => {
@@ -430,7 +431,11 @@ export const Main = () => {
         </div>
     }
 
-    const showInstructions = userData && userData.showMainPageInstructions !== false && instructionStep >= 0 && instructionStep < 8;
+    const showInstructions =
+        userData &&
+        userData.showMainPageInstructions !== false &&
+        instructionStep >= 0 &&
+        instructionStep < MAIN_INSTRUCTION_STEPS_COUNT;
 
     return (
         <UserLayout>
@@ -574,7 +579,7 @@ export const Main = () => {
                 </div>
 
                 <div id="main-instruction-schedule">
-                    <ClientSchedule />
+                    <ClientSchedule embedded />
                 </div>
 
                 {/* <div className="mt-4 space-y-3">

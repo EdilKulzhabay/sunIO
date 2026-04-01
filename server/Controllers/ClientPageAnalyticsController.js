@@ -96,6 +96,29 @@ export const getSummaryByPath = async (req, res) => {
     }
 };
 
+/** Просмотры по одному точному path (для аналитики конкретного контента) */
+export const getPathStats = async (req, res) => {
+    try {
+        const path = sanitizePath(req.query.path);
+        if (!path) {
+            return res.status(400).json({
+                success: false,
+                message: "Некорректный path",
+            });
+        }
+
+        const totalViews = await ClientPageView.countDocuments({ path });
+
+        res.json({
+            success: true,
+            data: { path, totalViews },
+        });
+    } catch (error) {
+        console.error("ClientPageAnalyticsController.getPathStats:", error);
+        res.status(500).json({ success: false, message: "Ошибка выборки" });
+    }
+};
+
 /** Какие страницы и сколько раз открывал конкретный пользователь */
 export const getByUserId = async (req, res) => {
     try {

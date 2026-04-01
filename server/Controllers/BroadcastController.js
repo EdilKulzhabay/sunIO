@@ -772,6 +772,31 @@ export const getSentBroadcasts = async (req, res) => {
     }
 };
 
+/** Одна запись из журнала отправленных (для просмотра в админке) */
+export const getSentBroadcastById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const schedule = await BroadcastSchedule.findById(id)
+            .populate("scheduledBy", "fullName telegramUserName")
+            .lean();
+
+        if (!schedule || schedule.status !== "sent") {
+            return res.status(404).json({
+                success: false,
+                message: "Отправленная рассылка не найдена",
+            });
+        }
+
+        res.json({ success: true, data: schedule });
+    } catch (error) {
+        console.log("Ошибка в getSentBroadcastById:", error);
+        res.status(500).json({
+            success: false,
+            message: "Ошибка загрузки записи",
+        });
+    }
+};
+
 // Отменить запланированную рассылку
 export const cancelScheduledBroadcast = async (req, res) => {
     try {

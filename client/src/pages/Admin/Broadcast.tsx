@@ -1,9 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '../../components/Admin/AdminLayout';
 import api from '../../api';
 import { toast } from 'react-toastify';
-import { Plus, Edit, Trash2, BookOpen, CalendarClock, Send, XCircle } from 'lucide-react';
+import {
+    Plus,
+    Edit,
+    Trash2,
+    BookOpen,
+    CalendarClock,
+    Send,
+    XCircle,
+    ArrowUp,
+    ArrowDown,
+    ArrowUpDown,
+} from 'lucide-react';
 
 interface SavedBroadcast {
     _id: string;
@@ -33,6 +44,8 @@ interface SentBroadcast {
     scheduledBy?: { fullName?: string };
 }
 
+type SentSortKey = 'sent' | 'failed' | 'total';
+
 export const BroadcastAdmin = () => {
     const [savedBroadcasts, setSavedBroadcasts] = useState<SavedBroadcast[]>([]);
     const [scheduledBroadcasts, setScheduledBroadcasts] = useState<ScheduledBroadcast[]>([]);
@@ -40,6 +53,8 @@ export const BroadcastAdmin = () => {
     const [loading, setLoading] = useState(false);
     const [loadingScheduled, setLoadingScheduled] = useState(false);
     const [loadingSent, setLoadingSent] = useState(false);
+    const [sentSortKey, setSentSortKey] = useState<SentSortKey>('sent');
+    const [sentSortDir, setSentSortDir] = useState<'asc' | 'desc'>('desc');
     const navigate = useNavigate();
 
     const fetchAll = () => {
@@ -141,6 +156,52 @@ export const BroadcastAdmin = () => {
         if (!msg) return '—';
         const text = stripHtml(msg);
         return text.length > maxLen ? text.substring(0, maxLen) + '...' : text;
+    };
+
+    const toggleSentSort = (key: SentSortKey) => {
+        if (sentSortKey === key) {
+            setSentSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+        } else {
+            setSentSortKey(key);
+            setSentSortDir('desc');
+        }
+    };
+
+    const sortedSentBroadcasts = useMemo(() => {
+        const list = [...sentBroadcasts];
+        const mult = sentSortDir === 'asc' ? 1 : -1;
+        const pick = (item: SentBroadcast): number | undefined => {
+            switch (sentSortKey) {
+                case 'sent':
+                    return item.result?.sent;
+                case 'failed':
+                    return item.result?.failed;
+                case 'total':
+                    return item.result?.total;
+                default:
+                    return undefined;
+            }
+        };
+        list.sort((a, b) => {
+            const av = pick(a);
+            const bv = pick(b);
+            if (av === undefined && bv === undefined) return 0;
+            if (av === undefined) return 1;
+            if (bv === undefined) return -1;
+            return mult * (av - bv);
+        });
+        return list;
+    }, [sentBroadcasts, sentSortKey, sentSortDir]);
+
+    const SentSortIcon = ({ column }: { column: SentSortKey }) => {
+        if (sentSortKey !== column) {
+            return <ArrowUpDown size={14} className="opacity-40 shrink-0" aria-hidden />;
+        }
+        return sentSortDir === 'desc' ? (
+            <ArrowDown size={14} className="shrink-0" aria-hidden />
+        ) : (
+            <ArrowUp size={14} className="shrink-0" aria-hidden />
+        );
     };
 
     return (
@@ -263,34 +324,105 @@ export const BroadcastAdmin = () => {
                     </div>
                     {loadingSent && <p className="text-gray-500 text-center py-4">Загрузка...</p>}
                     {!loadingSent && sentBroadcasts.length > 0 && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            {sentBroadcasts.map((item) => (
-                                <div
-                                    key={item._id}
-                                    className="border border-green-200 rounded-lg p-4 bg-green-50/30 hover:bg-green-50/50 transition-colors"
-                                >
-                                    {item.payload?.title && (
-                                        <div className="font-semibold text-gray-900 mb-1">{item.payload.title}</div>
-                                    )}
-                                    <div className="text-sm text-gray-700 line-clamp-2 mb-2">
-                                        {getMessagePreview(item.payload?.message)}
-                                    </div>
-                                    <div className="text-xs text-green-700 font-medium mb-1">
-                                        Отправлено: {new Date(item.sentAt).toLocaleString('ru-RU')}
-                                    </div>
-                                    {item.result && (
-                                        <div className="text-xs text-gray-600 mb-1">
-                                            {item.result.sent ?? 0} доставлено
-                                            {(item.result.failed ?? 0) > 0 && `, ${item.result.failed} ошибок`}
-                                        </div>
-                                    )}
-                                    {item.scheduledBy?.fullName && (
-                                        <div className="text-xs text-gray-500">
-                                            Запланировал: {item.scheduledBy.fullName}
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
+                        <div className="overflow-x-auto border border-gray-200 rounded-lg">
+                            <table className="min-w-full text-sm text-left">
+                                <thead className="bg-gray-50 border-b border-gray-200">
+                                    <tr>
+                                        <th className="px-4 py-3 font-medium text-gray-700 whitespace-nowrap">
+                                            Название
+                                        </th>
+                                        <th className="px-4 py-3 font-medium text-gray-700 min-w-[200px]">
+                                            Описание (текст)
+                                        </th>
+                                        <th className="px-4 py-3 font-medium text-gray-700 whitespace-nowrap">
+                                            Отправлено
+                                        </th>
+                                        <th className="px-4 py-3 text-right tabular-nums">
+                                            <button
+                                                type="button"
+                                                className="inline-flex items-center justify-end gap-1 w-full font-medium text-gray-700 hover:text-gray-900"
+                                                onClick={() => toggleSentSort('sent')}
+                                                title="Сортировать по доставленным"
+                                            >
+                                                Доставлено
+                                                <SentSortIcon column="sent" />
+                                            </button>
+                                        </th>
+                                        <th className="px-4 py-3 text-right tabular-nums">
+                                            <button
+                                                type="button"
+                                                className="inline-flex items-center justify-end gap-1 w-full font-medium text-gray-700 hover:text-gray-900"
+                                                onClick={() => toggleSentSort('failed')}
+                                                title="Сортировать по ошибкам"
+                                            >
+                                                Ошибок
+                                                <SentSortIcon column="failed" />
+                                            </button>
+                                        </th>
+                                        <th className="px-4 py-3 text-right tabular-nums">
+                                            <button
+                                                type="button"
+                                                className="inline-flex items-center justify-end gap-1 w-full font-medium text-gray-700 hover:text-gray-900"
+                                                onClick={() => toggleSentSort('total')}
+                                                title="Сортировать по всего"
+                                            >
+                                                Всего
+                                                <SentSortIcon column="total" />
+                                            </button>
+                                        </th>
+                                        <th className="px-4 py-3 font-medium text-gray-700 whitespace-nowrap">
+                                            Инициатор
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {sortedSentBroadcasts.map((item) => (
+                                        <tr
+                                            key={item._id}
+                                            role="button"
+                                            tabIndex={0}
+                                            onClick={() => navigate(`/admin/broadcast/sent/${item._id}`)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                    e.preventDefault();
+                                                    navigate(`/admin/broadcast/sent/${item._id}`);
+                                                }
+                                            }}
+                                            className="border-b border-gray-100 hover:bg-green-50/60 cursor-pointer transition-colors"
+                                        >
+                                            <td className="px-4 py-3 font-medium text-gray-900 max-w-[220px]">
+                                                <span className="line-clamp-2" title={item.payload?.title || ''}>
+                                                    {item.payload?.title || '—'}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3 text-gray-700 max-w-md">
+                                                <span className="line-clamp-2" title={stripHtml(item.payload?.message || '')}>
+                                                    {getMessagePreview(item.payload?.message, 200)}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
+                                                {item.sentAt
+                                                    ? new Date(item.sentAt).toLocaleString('ru-RU')
+                                                    : '—'}
+                                            </td>
+                                            <td className="px-4 py-3 text-right tabular-nums text-gray-900">
+                                                {item.result?.sent ?? '—'}
+                                            </td>
+                                            <td className="px-4 py-3 text-right tabular-nums text-gray-900">
+                                                {item.result?.failed ?? '—'}
+                                            </td>
+                                            <td className="px-4 py-3 text-right tabular-nums text-gray-700">
+                                                {item.result?.total ?? '—'}
+                                            </td>
+                                            <td className="px-4 py-3 text-gray-600 max-w-[160px]">
+                                                <span className="line-clamp-2" title={item.scheduledBy?.fullName || ''}>
+                                                    {item.scheduledBy?.fullName || '—'}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     )}
                     {!loadingSent && sentBroadcasts.length === 0 && (

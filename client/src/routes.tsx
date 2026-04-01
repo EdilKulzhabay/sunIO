@@ -68,6 +68,7 @@ import { UserForm } from "./pages/Admin/UserForm";
 import { ProfileAdmin } from "./pages/Admin/Profile";
 import { BroadcastAdmin } from "./pages/Admin/Broadcast";
 import { BroadcastFormAdmin } from "./pages/Admin/BroadcastForm";
+import { BroadcastSentView } from "./pages/Admin/BroadcastSentView";
 import { ModalNotificationsAdmin } from "./pages/Admin/ModalNotifications";
 import { AdminsAdmin } from "./pages/Admin/Admins";
 import { AdminForm } from "./pages/Admin/AdminForm";
@@ -809,6 +810,10 @@ export const routes = createBrowserRouter([
     {
         path: "/admin/broadcast/create",
         element: <RootLayout><ProtectedRoute requiredRole={["admin", "client_manager", "manager"]}><BroadcastFormAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/broadcast/sent/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "client_manager", "manager"]}><BroadcastSentView /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/admin/broadcast/edit/:id",

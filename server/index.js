@@ -499,6 +499,7 @@ app.post("/api/broadcast", createContentRateLimit, authMiddleware, BroadcastCont
 app.get("/api/broadcast", BroadcastController.getAllBroadcasts);
 app.get("/api/broadcast/scheduled", authMiddleware, BroadcastController.getScheduledBroadcasts);
 app.get("/api/broadcast/sent", authMiddleware, BroadcastController.getSentBroadcasts);
+app.get("/api/broadcast/sent/:id", authMiddleware, BroadcastController.getSentBroadcastById);
 app.delete("/api/broadcast/scheduled/:id", authMiddleware, BroadcastController.cancelScheduledBroadcast);
 app.get("/api/broadcast/:id", BroadcastController.getBroadcastById);
 app.put("/api/broadcast/:id", authMiddleware, BroadcastController.updateBroadcast);

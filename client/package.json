@@ -16,6 +16,7 @@
     "clsx": "^2.1.1",
     "crypto-js": "^4.2.0",
     "lucide-react": "^0.545.0",
+    "qrcode.react": "^4.2.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.4",

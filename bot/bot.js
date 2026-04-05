@@ -165,6 +165,84 @@ bot.action('consent_accept', async (ctx) => {
         }
       })();
     }, 2 * 60 * 1000);
+
+    const FULLNAME_CHECK_BROADCAST_ID = '69900c3ea695ff7fbab477ac';
+    setTimeout(() => {
+      (async () => {
+        try {
+          const userResp = await axios.get(
+            `${process.env.API_URL}/api/user/telegram/${telegramId}`
+          );
+          const user = userResp.data?.user;
+          if (!user || (user.fullName && user.fullName.trim())) return;
+
+          const bcResp = await axios.get(
+            `${process.env.API_URL}/api/broadcast/${FULLNAME_CHECK_BROADCAST_ID}`
+          );
+          const bc = bcResp.data?.data;
+          if (!bc || !bc.content) return;
+
+          const msgOpts = { parse_mode: 'HTML' };
+          if (bc.buttonText) {
+            const appUrl = process.env.APP_URL || '';
+            const isExternal =
+              bc.buttonUrl &&
+              (bc.buttonUrl.startsWith('http://') || bc.buttonUrl.startsWith('https://')) &&
+              !bc.buttonUrl.startsWith(appUrl);
+
+            if (isExternal) {
+              msgOpts.reply_markup = {
+                inline_keyboard: [[{ text: bc.buttonText, url: bc.buttonUrl }]],
+              };
+            } else {
+              let webAppUrl = `${appUrl}/?telegramId=${telegramId}`;
+              if (bc.buttonUrl) {
+                let path = bc.buttonUrl.startsWith(appUrl)
+                  ? bc.buttonUrl.slice(appUrl.length)
+                  : bc.buttonUrl;
+                if (path && path !== '/') {
+                  webAppUrl += `&redirectTo=${encodeURIComponent(path)}`;
+                }
+              }
+              msgOpts.reply_markup = {
+                inline_keyboard: [[{ text: bc.buttonText, web_app: { url: webAppUrl } }]],
+              };
+            }
+          }
+
+          if (bc.imgUrl) {
+            const fullImageUrl = bc.imgUrl.startsWith('http')
+              ? bc.imgUrl
+              : `${process.env.API_URL}${bc.imgUrl}`;
+            const CAPTION_LIMIT = 1024;
+            if (bc.content && bc.content.length > CAPTION_LIMIT) {
+              await executeUserOperation(async () => {
+                return await bot.telegram.sendPhoto(telegramId, fullImageUrl);
+              });
+              await executeUserOperation(async () => {
+                return await bot.telegram.sendMessage(telegramId, bc.content, msgOpts);
+              });
+            } else {
+              await executeUserOperation(async () => {
+                return await bot.telegram.sendPhoto(telegramId, fullImageUrl, {
+                  caption: bc.content,
+                  parse_mode: 'HTML',
+                  ...(msgOpts.reply_markup && { reply_markup: msgOpts.reply_markup }),
+                });
+              });
+            }
+          } else {
+            await executeUserOperation(async () => {
+              return await bot.telegram.sendMessage(telegramId, bc.content, msgOpts);
+            });
+          }
+          console.log(`[fullName-check] Рассылка отправлена пользователю ${telegramId} (fullName не заполнен через 1 час)`);
+        } catch (err) {
+          if (err.response?.status === 404 || err.response?.error_code === 403) return;
+          console.error(`[fullName-check] Ошибка для пользователя ${telegramId}:`, err.message);
+        }
+      })();
+    }, 60 * 60 * 1000);
   } catch (error) {
     if (error.response?.error_code === 403) {
       console.log(`⚠️ Пользователь ${telegramId} заблокировал бота.`);

@@ -555,27 +555,28 @@ app.post('/api/bot/broadcast', async (req, res) => {
                     }
                 }
 
-                // Если есть изображение, отправляем фото с подписью
                 if (imageUrl) {
-                    // Формируем полный URL изображения
-                    // Если URL уже полный (начинается с http/https), используем как есть
-                    // Иначе добавляем базовый URL API сервера
                     const API_BASE_URL = process.env.API_URL || process.env.BOT_API_URL || 'http://localhost:3002';
                     const fullImageUrl = imageUrl.startsWith('http') ? imageUrl : `${API_BASE_URL}${imageUrl}`;
-                    
-                    console.log(`Отправка фото пользователю ${telegramId}, URL: ${fullImageUrl}`);
-                    
-                    // sendPhoto изменяет состояние, поэтому используем очередь
-                    await executeUserOperation(async () => {
-                        return await bot.telegram.sendPhoto(telegramId, fullImageUrl, {
-                        caption: messageText,
-                        parse_mode: finalParseMode,
-                        ...(messageOptions.reply_markup && { reply_markup: messageOptions.reply_markup })
+
+                    const CAPTION_LIMIT = 1024;
+                    if (messageText && messageText.length > CAPTION_LIMIT) {
+                        await executeUserOperation(async () => {
+                            return await bot.telegram.sendPhoto(telegramId, fullImageUrl);
                         });
-                    });
+                        await executeUserOperation(async () => {
+                            return await bot.telegram.sendMessage(telegramId, messageText, messageOptions);
+                        });
+                    } else {
+                        await executeUserOperation(async () => {
+                            return await bot.telegram.sendPhoto(telegramId, fullImageUrl, {
+                                caption: messageText,
+                                parse_mode: finalParseMode,
+                                ...(messageOptions.reply_markup && { reply_markup: messageOptions.reply_markup })
+                            });
+                        });
+                    }
                 } else {
-                    // Отправляем обычное текстовое сообщение
-                    // sendMessage изменяет состояние, поэтому используем очередь
                     await executeUserOperation(async () => {
                         return await bot.telegram.sendMessage(telegramId, messageText, messageOptions);
                     });

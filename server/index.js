@@ -501,6 +501,7 @@ app.get("/api/broadcast/scheduled", authMiddleware, BroadcastController.getSched
 app.get("/api/broadcast/sent", authMiddleware, BroadcastController.getSentBroadcasts);
 app.get("/api/broadcast/sent/:id", authMiddleware, BroadcastController.getSentBroadcastById);
 app.delete("/api/broadcast/scheduled/:id", authMiddleware, BroadcastController.cancelScheduledBroadcast);
+app.delete("/api/broadcast/sent/:id", authMiddleware, BroadcastController.deleteSentBroadcast);
 app.get("/api/broadcast/:id", BroadcastController.getBroadcastById);
 app.put("/api/broadcast/:id", authMiddleware, BroadcastController.updateBroadcast);
 app.delete("/api/broadcast/:id", authMiddleware, BroadcastController.deleteBroadcast);

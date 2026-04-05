@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { AdminLayout } from '../../components/Admin/AdminLayout';
 import api from '../../api';
 import { toast } from 'react-toastify';
-import { ArrowLeft, Send } from 'lucide-react';
+import { ArrowLeft, Send, Trash2 } from 'lucide-react';
 
 interface SentBroadcastDetail {
     _id: string;
@@ -55,6 +55,33 @@ export const BroadcastSentView = () => {
         load();
     }, [id]);
 
+    const [deleting, setDeleting] = useState(false);
+
+    const handleDelete = async () => {
+        if (!id) return;
+        if (!window.confirm('Удалить запись об этой рассылке? Действие необратимо.')) return;
+        setDeleting(true);
+        try {
+            await api.delete(`/api/broadcast/sent/${encodeURIComponent(id)}`);
+            toast.success('Запись удалена');
+            navigate('/admin/broadcast');
+        } catch {
+            toast.error('Не удалось удалить запись');
+        } finally {
+            setDeleting(false);
+        }
+    };
+
+    const statusLabel = (status?: string) => {
+        switch (status) {
+            case 'guest': return 'Гости';
+            case 'registered': return 'Зарегистрированные';
+            case 'client': return 'Клиенты';
+            case 'anonym': return 'Анонимы';
+            default: return 'Все пользователи';
+        }
+    };
+
     const p = data?.payload;
     const r = data?.result;
 
@@ -70,9 +97,22 @@ export const BroadcastSentView = () => {
                     К списку рассылок
                 </button>
 
-                <div className="flex items-center gap-2">
-                    <Send size={28} className="text-green-600" />
-                    <h1 className="text-3xl font-bold text-gray-900">Отправленная рассылка</h1>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <Send size={28} className="text-green-600" />
+                        <h1 className="text-3xl font-bold text-gray-900">Отправленная рассылка</h1>
+                    </div>
+                    {data && (
+                        <button
+                            type="button"
+                            onClick={handleDelete}
+                            disabled={deleting}
+                            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 text-sm"
+                        >
+                            <Trash2 size={16} />
+                            {deleting ? 'Удаление…' : 'Удалить'}
+                        </button>
+                    )}
                 </div>
                 <p className="text-gray-600 text-sm">Только просмотр — запись из журнала отправок.</p>
 
@@ -110,6 +150,12 @@ export const BroadcastSentView = () => {
                                     {data.scheduledBy?.telegramUserName
                                         ? ` (@${data.scheduledBy.telegramUserName})`
                                         : ''}
+                                </dd>
+                            </div>
+                            <div>
+                                <dt className="text-gray-500">Получатели (по статусу)</dt>
+                                <dd className="font-medium text-gray-900 mt-0.5">
+                                    {statusLabel(p?.status)}
                                 </dd>
                             </div>
                         </dl>
@@ -185,12 +231,6 @@ export const BroadcastSentView = () => {
                             </div>
                         </div>
 
-                        {p?.status && (
-                            <div className="text-sm text-gray-600">
-                                Фильтр получателей (статус):{' '}
-                                <span className="font-medium">{p.status}</span>
-                            </div>
-                        )}
                     </div>
                 )}
 

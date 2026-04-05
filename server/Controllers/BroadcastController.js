@@ -797,6 +797,37 @@ export const getSentBroadcastById = async (req, res) => {
     }
 };
 
+export const deleteSentBroadcast = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const schedule = await BroadcastSchedule.findById(id);
+
+        if (!schedule || schedule.status !== "sent") {
+            return res.status(404).json({
+                success: false,
+                message: "Отправленная рассылка не найдена",
+            });
+        }
+
+        await BroadcastSchedule.findByIdAndDelete(id);
+
+        const user = req.user;
+        if (user) {
+            const { logAdminAction } = await import("./AdminActionLogController.js");
+            const title = schedule.payload?.title || schedule.payload?.broadcastTitle || id;
+            await logAdminAction(user._id, `Удалил(а) запись отправленной рассылки "${title}"`);
+        }
+
+        res.json({ success: true, message: "Запись удалена" });
+    } catch (error) {
+        console.log("Ошибка в deleteSentBroadcast:", error);
+        res.status(500).json({
+            success: false,
+            message: "Ошибка удаления записи",
+        });
+    }
+};
+
 // Отменить запланированную рассылку
 export const cancelScheduledBroadcast = async (req, res) => {
     try {

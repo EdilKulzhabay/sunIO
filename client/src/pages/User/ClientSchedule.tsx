@@ -345,7 +345,7 @@ export const ClientSchedule = ({ embedded = false }: ClientScheduleProps) => {
                         <div 
                             key={schedule._id}
                             ref={(el) => { if (el) scheduleRefsMap.current.set(schedule._id, el); else scheduleRefsMap.current.delete(schedule._id); }}
-                            className="bg-[#114E50] rounded-lg p-4 cursor-pointer hover:bg-[#3a3a3a] transition-colors"
+                            className="bg-[#114E50] rounded-lg p-4 cursor-pointer hover:bg-white/10 transition-colors"
                             onClick={() => handleScheduleClick(schedule)}
                         >
                             <div onClick={() => {}} className="flex items-center justify-between">

@@ -1,10 +1,16 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AdminLayout } from '../../components/Admin/AdminLayout';
 import api from '../../api';
 import { toast } from 'react-toastify';
 import { RefreshCw, Search } from 'lucide-react';
-import { getClientPageTitle } from '../../utils/clientPathLabels';
+import {
+    getClientPageTitle,
+    getClientPageSection,
+    getAllSections,
+    isExcludedPath,
+    extractContentId,
+} from '../../utils/clientPathLabels';
 import { CONTENT_CATEGORY_OPTIONS } from '../../constants/contentCategoryOptions';
 
 interface PathRow {
@@ -37,6 +43,9 @@ export const ClientPageAnalytics = () => {
     const [loading, setLoading] = useState(false);
     const [summary, setSummary] = useState<SummaryData | null>(null);
 
+    const [sectionFilter, setSectionFilter] = useState('');
+    const [userSectionFilter, setUserSectionFilter] = useState('');
+
     const [searchQuery, setSearchQuery] = useState('');
 
     const [userSearchResults, setUserSearchResults] = useState<UserListRow[]>([]);
@@ -49,17 +58,32 @@ export const ClientPageAnalytics = () => {
         byPath: UserPathRow[];
     } | null>(null);
 
-    /** Селекторы как в RedirectToPageSelector: раздел + конкретный материал */
-    const [contentCategoryApiPath, setContentCategoryApiPath] = useState('');
-    const [contentItemId, setContentItemId] = useState('');
-    const [contentItems, setContentItems] = useState<{ _id: string; title: string }[]>([]);
-    const [loadingContentItems, setLoadingContentItems] = useState(false);
-    const [contentPathStats, setContentPathStats] = useState<{ path: string; totalViews: number } | null>(
-        null
-    );
-    const [contentPathLoading, setContentPathLoading] = useState(false);
-    /** Синхронизация с кнопкой «Обновить» в шапке */
-    const [analyticsRefreshTick, setAnalyticsRefreshTick] = useState(0);
+    const [titleMap, setTitleMap] = useState<Map<string, string>>(new Map());
+
+    const sections = useMemo(() => getAllSections(), []);
+
+    useEffect(() => {
+        const load = async () => {
+            const map = new Map<string, string>();
+            await Promise.all(
+                CONTENT_CATEGORY_OPTIONS.map(async (opt) => {
+                    try {
+                        const res = await api.get(opt.apiPath);
+                        const items: { _id: string; title?: string }[] = Array.isArray(res.data?.data)
+                            ? res.data.data
+                            : [];
+                        items.forEach((item) => {
+                            if (item.title) map.set(item._id, item.title);
+                        });
+                    } catch {
+                        /* ignore */
+                    }
+                })
+            );
+            setTitleMap(map);
+        };
+        load();
+    }, []);
 
     const fetchSummaryAndTop = useCallback(async () => {
         setLoading(true);
@@ -76,7 +100,6 @@ export const ClientPageAnalytics = () => {
             setSummary(null);
         } finally {
             setLoading(false);
-            setAnalyticsRefreshTick((t) => t + 1);
         }
     }, []);
 
@@ -84,60 +107,29 @@ export const ClientPageAnalytics = () => {
         fetchSummaryAndTop();
     }, [fetchSummaryAndTop]);
 
-    useEffect(() => {
-        if (!contentCategoryApiPath) {
-            setContentItems([]);
-            return;
-        }
-        const load = async () => {
-            setLoadingContentItems(true);
-            try {
-                const response = await api.get(contentCategoryApiPath);
-                const data = response.data?.data;
-                setContentItems(Array.isArray(data) ? data : []);
-            } catch {
-                setContentItems([]);
-            } finally {
-                setLoadingContentItems(false);
-            }
-        };
-        load();
-    }, [contentCategoryApiPath]);
+    const filteredSummaryPaths = useMemo(() => {
+        if (!summary) return [];
+        return summary.byPath
+            .filter((row) => !isExcludedPath(row.path))
+            .filter((row) => !sectionFilter || getClientPageSection(row.path) === sectionFilter);
+    }, [summary, sectionFilter]);
 
-    useEffect(() => {
-        const opt = CONTENT_CATEGORY_OPTIONS.find((o) => o.apiPath === contentCategoryApiPath);
-        if (!opt || !contentItemId) {
-            setContentPathStats(null);
-            return;
-        }
-        const path = `${opt.clientPath}/${contentItemId}`;
-        let cancelled = false;
-        const load = async () => {
-            setContentPathLoading(true);
-            try {
-                const res = await api.get('/api/client-analytics/admin/path-stats', {
-                    params: { path },
-                });
-                if (cancelled) return;
-                if (res.data.success) {
-                    setContentPathStats(res.data.data);
-                } else {
-                    setContentPathStats(null);
-                }
-            } catch {
-                if (!cancelled) {
-                    toast.error('Не удалось загрузить статистику по контенту');
-                    setContentPathStats(null);
-                }
-            } finally {
-                if (!cancelled) setContentPathLoading(false);
-            }
-        };
-        load();
-        return () => {
-            cancelled = true;
-        };
-    }, [contentCategoryApiPath, contentItemId, analyticsRefreshTick]);
+    const filteredTotalViews = useMemo(
+        () => filteredSummaryPaths.reduce((acc, r) => acc + r.totalViews, 0),
+        [filteredSummaryPaths]
+    );
+
+    const filteredUserPaths = useMemo(() => {
+        if (!userDetail) return [];
+        return userDetail.byPath
+            .filter((row) => !isExcludedPath(row.path))
+            .filter((row) => !userSectionFilter || getClientPageSection(row.path) === userSectionFilter);
+    }, [userDetail, userSectionFilter]);
+
+    const filteredUserTotalViews = useMemo(
+        () => filteredUserPaths.reduce((acc, r) => acc + r.views, 0),
+        [filteredUserPaths]
+    );
 
     const formatUserListHint = (u: UserListRow) => {
         const parts = [
@@ -220,10 +212,28 @@ export const ClientPageAnalytics = () => {
         return () => window.clearTimeout(timer);
     }, [searchQuery, loadUserDetail]);
 
-    const pathCell = (path: string) => (
-        <td className="px-4 py-2 text-gray-900 max-w-md" title={path}>
-            {getClientPageTitle(path)}
-        </td>
+    const renderTitle = (path: string) => {
+        const contentId = extractContentId(path);
+        const title = getClientPageTitle(path, titleMap);
+        if (contentId && !titleMap.has(contentId)) {
+            return <span className="text-gray-400 italic">{title}</span>;
+        }
+        return title;
+    };
+
+    const sectionFilterSelect = (value: string, onChange: (v: string) => void) => (
+        <select
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="p-2 rounded-lg border border-gray-300 text-sm bg-white min-w-[200px]"
+        >
+            <option value="">Все разделы</option>
+            {sections.map((s) => (
+                <option key={s} value={s}>
+                    {s}
+                </option>
+            ))}
+        </select>
     );
 
     return (
@@ -251,36 +261,45 @@ export const ClientPageAnalytics = () => {
                 </div>
 
                 <section className="bg-white rounded-lg shadow p-6">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">Рейтинг страниц</h2>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                        <h2 className="text-lg font-semibold text-gray-900">Рейтинг страниц</h2>
+                        {sectionFilterSelect(sectionFilter, setSectionFilter)}
+                    </div>
                     {loading && !summary ? (
                         <p className="text-gray-500">Загрузка…</p>
                     ) : summary ? (
                         <>
                             <p className="text-sm text-gray-600 mb-4">
                                 Всего событий просмотра:{' '}
-                                <span className="font-semibold text-gray-900">{summary.totalEvents}</span>
+                                <span className="font-semibold text-gray-900">{filteredTotalViews}</span>
                             </p>
                             <div className="overflow-x-auto max-h-[480px] overflow-y-auto border border-gray-200 rounded-lg">
                                 <table className="min-w-full text-sm">
                                     <thead className="bg-gray-50 sticky top-0">
                                         <tr>
+                                            <th className="text-left px-4 py-2 font-medium text-gray-700">Раздел</th>
                                             <th className="text-left px-4 py-2 font-medium text-gray-700">Страница</th>
                                             <th className="text-right px-4 py-2 font-medium text-gray-700 w-32">
-                                                Просмотров
+                                                Просмотры
                                             </th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {summary.byPath.length === 0 ? (
+                                        {filteredSummaryPaths.length === 0 ? (
                                             <tr>
-                                                <td colSpan={2} className="px-4 py-8 text-center text-gray-500">
+                                                <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
                                                     Нет данных
                                                 </td>
                                             </tr>
                                         ) : (
-                                            summary.byPath.map((row) => (
+                                            filteredSummaryPaths.map((row) => (
                                                 <tr key={row.path} className="border-t border-gray-100 hover:bg-gray-50">
-                                                    {pathCell(row.path)}
+                                                    <td className="px-4 py-2 text-gray-600 whitespace-nowrap">
+                                                        {getClientPageSection(row.path)}
+                                                    </td>
+                                                    <td className="px-4 py-2 text-gray-900 max-w-md" title={row.path}>
+                                                        {renderTitle(row.path)}
+                                                    </td>
                                                     <td className="px-4 py-2 text-right tabular-nums">
                                                         {row.totalViews}
                                                     </td>
@@ -294,78 +313,6 @@ export const ClientPageAnalytics = () => {
                     ) : (
                         <p className="text-gray-500">Нет данных</p>
                     )}
-                </section>
-
-                <section className="bg-white rounded-lg shadow p-6">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-2">Аналитика по контенту</h2>
-                    <p className="text-sm text-gray-600 mb-4">
-                        Выберите раздел и материал — так же, как при настройке ссылки в карточках и
-                        уведомлениях. Считаются открытия страницы этого материала в приложении.
-                    </p>
-
-                    <div className="flex flex-col gap-3 max-w-xl">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Категория</label>
-                            <select
-                                value={contentCategoryApiPath}
-                                onChange={(e) => {
-                                    setContentCategoryApiPath(e.target.value);
-                                    setContentItemId('');
-                                    setContentPathStats(null);
-                                }}
-                                className="w-full p-2 rounded-lg border border-gray-300 text-sm bg-white"
-                            >
-                                <option value="">Выберите категорию</option>
-                                {CONTENT_CATEGORY_OPTIONS.map((opt) => (
-                                    <option key={opt.apiPath} value={opt.apiPath}>
-                                        {opt.title}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {contentCategoryApiPath ? (
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Контент</label>
-                                <select
-                                    value={contentItemId}
-                                    onChange={(e) => setContentItemId(e.target.value)}
-                                    disabled={loadingContentItems}
-                                    className="w-full p-2 rounded-lg border border-gray-300 text-sm bg-white disabled:opacity-60"
-                                >
-                                    <option value="">
-                                        {loadingContentItems ? 'Загрузка…' : 'Выберите контент'}
-                                    </option>
-                                    {contentItems.map((item) => (
-                                        <option key={item._id} value={item._id}>
-                                            {item.title || item._id}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        ) : null}
-                    </div>
-
-                    {contentPathLoading && (
-                        <p className="text-sm text-gray-500 mt-4">Загрузка статистики…</p>
-                    )}
-
-                    {contentPathStats && !contentPathLoading ? (
-                        <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-                            <p className="text-sm text-gray-700">
-                                Просмотров страницы:{' '}
-                                <span className="font-semibold text-gray-900 tabular-nums">
-                                    {contentPathStats.totalViews}
-                                </span>
-                            </p>
-                            <p className="text-xs text-gray-500 font-mono mt-1 break-all" title={contentPathStats.path}>
-                                {contentPathStats.path}
-                            </p>
-                            <p className="text-xs text-gray-500 mt-1">
-                                {getClientPageTitle(contentPathStats.path)}
-                            </p>
-                        </div>
-                    ) : null}
                 </section>
 
                 <section className="bg-white rounded-lg shadow p-6">
@@ -441,40 +388,49 @@ export const ClientPageAnalytics = () => {
 
                     {userDetail ? (
                         <>
-                            <p className="text-sm text-gray-600 mb-4">
-                                {userDetailHint ? (
-                                    <>
-                                        <span className="font-medium text-gray-800">{userDetailHint}</span>
-                                        <span className="text-gray-400 mx-1">·</span>
-                                    </>
-                                ) : null}
-                                Всего просмотров:{' '}
-                                <span className="font-semibold">{userDetail.totalViews}</span>
-                            </p>
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                                <p className="text-sm text-gray-600">
+                                    {userDetailHint ? (
+                                        <>
+                                            <span className="font-medium text-gray-800">{userDetailHint}</span>
+                                            <span className="text-gray-400 mx-1">·</span>
+                                        </>
+                                    ) : null}
+                                    Всего просмотров:{' '}
+                                    <span className="font-semibold">{filteredUserTotalViews}</span>
+                                </p>
+                                {sectionFilterSelect(userSectionFilter, setUserSectionFilter)}
+                            </div>
                             <div className="overflow-x-auto max-h-[360px] overflow-y-auto border border-gray-200 rounded-lg">
                                 <table className="min-w-full text-sm">
                                     <thead className="bg-gray-50 sticky top-0">
                                         <tr>
+                                            <th className="text-left px-4 py-2 font-medium text-gray-700">Раздел</th>
                                             <th className="text-left px-4 py-2 font-medium text-gray-700">Страница</th>
                                             <th className="text-right px-4 py-2 font-medium text-gray-700 w-32">
-                                                Раз открывал
+                                                Просмотры
                                             </th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {userDetail.byPath.length === 0 ? (
+                                        {filteredUserPaths.length === 0 ? (
                                             <tr>
-                                                <td colSpan={2} className="px-4 py-6 text-center text-gray-500">
+                                                <td colSpan={3} className="px-4 py-6 text-center text-gray-500">
                                                     Нет записей
                                                 </td>
                                             </tr>
                                         ) : (
-                                            userDetail.byPath.map((row) => (
+                                            filteredUserPaths.map((row) => (
                                                 <tr
                                                     key={row.path}
                                                     className="border-t border-gray-100 hover:bg-gray-50"
                                                 >
-                                                    {pathCell(row.path)}
+                                                    <td className="px-4 py-2 text-gray-600 whitespace-nowrap">
+                                                        {getClientPageSection(row.path)}
+                                                    </td>
+                                                    <td className="px-4 py-2 text-gray-900 max-w-md" title={row.path}>
+                                                        {renderTitle(row.path)}
+                                                    </td>
                                                     <td className="px-4 py-2 text-right tabular-nums">{row.views}</td>
                                                 </tr>
                                             ))

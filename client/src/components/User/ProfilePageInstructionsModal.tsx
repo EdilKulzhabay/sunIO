@@ -13,49 +13,56 @@ export interface ProfileInstructionStep {
 
 const INSTRUCTION_STEPS: ProfileInstructionStep[] = [
     {
+        title: 'Внутренний баланс',
+        description:
+            'Пополнение внутреннего баланса и история покупок продуктов в Приложении',
+        targetId: 'profile-instruction-balance',
+        curveBend: 48,
+    },
+    {
         title: 'Солнца',
         description:
             'Внутренняя валюта приложения, которую можно обменять на эксклюзивный контент. Нажми на этот блок, чтобы узнать политику получения Солнц',
         targetId: 'profile-instruction-sun',
-        curveBend: 52,
+        curveBend: -52,
     },
     {
         title: 'Подписка на клуб',
         description:
             'Статус подписки на закрытый клуб Мастерская энергий, доступ в который возможен после Активации',
         targetId: 'profile-instruction-subscription',
-        curveBend: -44,
+        curveBend: 44,
     },
     {
         title: 'Реферальная ссылка',
         description: 'Твоя персональная ссылка для друзей, нажми на цифру, чтобы посмотреть статусы приглашений',
         targetId: 'profile-instruction-referral-link',
-        curveBend: 50,
+        curveBend: -50,
     },
     {
         title: 'Телеграм канал',
         description:
             'Информационный канал, где публикуется интересный контент, которого нет в других социальных сетях',
         targetId: 'profile-instruction-telegram-channel',
-        curveBend: -46,
+        curveBend: 46,
     },
     {
         title: 'Телеграм чат',
         description: 'Чат проекта, где можно задавать вопросы ведущим проекта и делиться обратной связью',
         targetId: 'profile-instruction-telegram-chat',
-        curveBend: 48,
+        curveBend: -48,
     },
     {
         title: 'Настройка просмотра видео',
         description: 'В РФ запрещён к использованию YouTube, при включенном параметре будут активны RuTube ссылки',
         targetId: 'profile-instruction-video-settings',
-        curveBend: -42,
+        curveBend: 42,
     },
     {
         title: 'Уведомления',
         description: 'Разрешаете или нет Приложению отправлять различные уведомления через Телеграм-бота',
         targetId: 'profile-instruction-notifications',
-        curveBend: 54,
+        curveBend: -54,
     },
 ];
 
@@ -68,8 +75,8 @@ interface ProfilePageInstructionsModalProps {
 }
 
 const ARROW_COLOR = '#00C5AE';
-const CIRCLE_RADIUS = 3.5;
-const LINE_OFFSET_FROM_TARGET = 8;
+const CIRCLE_RADIUS = 6;
+const LINE_OFFSET_FROM_TARGET = 22;
 
 function quadraticControl(
     ox: number,

@@ -32,7 +32,7 @@ const BroadcastSchema = new mongoose.Schema(
     dailyScheduleTime: {
       type: String,
       default: '20:00',
-      trim: true,
+      trim: false,
     },
     /** Дата последней отправки ежедневной рассылки (для diaryCheck), чтобы не слать дважды за день. */
     lastDiaryCheckSentAt: {

@@ -531,6 +531,11 @@ export const BroadcastFormAdmin = () => {
                                 <p className="text-xs text-gray-500 mt-2">
                                     При нажатии на кнопку пользователь откроет приложение сразу на выбранной странице.
                                 </p>
+                                {buttonPage && !buttonPage.startsWith('http://') && !buttonPage.startsWith('https://') && (
+                                    <p className="text-xs text-blue-600 mt-1 break-all">
+                                        Полная ссылка: {buttonUrl}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>

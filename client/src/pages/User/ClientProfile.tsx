@@ -327,7 +327,7 @@ export const ClientProfile = () => {
                                 </div>
                                 <div>{userData?.mail || ""}</div>
                             </div>
-                            <div className="ml-auto">
+                            <div id="profile-instruction-balance" className="ml-auto">
                                 <button
                                     onClick={() => navigate('/client/operation-log')}
                                     className="flex items-center gap-x-2 border border-white/40 border-r-0 rounded-bl-full rounded-tl-full py-2 px-2.5 pr-4 text-sm"

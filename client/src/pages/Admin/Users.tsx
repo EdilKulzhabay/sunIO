@@ -351,6 +351,11 @@ export const UsersAdmin = () => {
             label: 'Уведомления',
             render: (value: boolean) => value ? 'Вкл.' : 'Выкл.'
         },
+        {
+            key: 'selectedAssignmentRequest',
+            label: 'Запрос',
+            render: (value: string) => value || '—'
+        },
     ];
 
     return (

@@ -105,7 +105,20 @@ export const ClientChooseYourPath = () => {
         } catch {
             /* ignore */
         }
-    }, [selectedId]);
+
+        const requestText = assignments.find((a) => a._id === selectedId)?.request ?? '';
+        const userStr = localStorage.getItem("user");
+        let userId = "";
+        if (userStr) {
+            try { userId = JSON.parse(userStr)._id || ""; } catch { /* ignore */ }
+        }
+        if (userId) {
+            api.put("/api/user/profile/update", {
+                userId,
+                selectedAssignmentRequest: requestText,
+            }).catch(() => { /* ignore */ });
+        }
+    }, [selectedId, assignments]);
 
     const loadProgress = useCallback(async (assignmentId: string) => {
         if (!assignmentId) return;

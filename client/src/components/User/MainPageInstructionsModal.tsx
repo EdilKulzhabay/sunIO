@@ -92,8 +92,8 @@ interface MainPageInstructionsModalProps {
 }
 
 const ARROW_COLOR = '#00C5AE';
-const CIRCLE_RADIUS = 3.5;
-const LINE_OFFSET_FROM_TARGET = 8;
+const CIRCLE_RADIUS = 6;
+const LINE_OFFSET_FROM_TARGET = 22;
 
 /** Контрольная точка Q для дуги от (ox,oy) до (ex,ey); bend — смещение вдоль левой нормали к хорде */
 function quadraticControl(
@@ -165,7 +165,7 @@ export const MainPageInstructionsModal = ({ currentStep, onNext, onClose }: Main
                 originY = closeRect.top + closeRect.height / 2;
             } else {
                 originX = modalRect.left + modalRect.width / 2;
-                originY = modalRect.top + modalRect.height / 2;
+                originY = modalRect.top ;
             }
 
             const dx = targetCenterX - originX;

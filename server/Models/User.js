@@ -251,7 +251,11 @@ const UserSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'BotTrafficSource',
         default: null,
-    }
+    },
+    selectedAssignmentRequest: {
+        type: String,
+        default: '',
+    },
 }, {
     timestamps: true
 });

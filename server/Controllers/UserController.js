@@ -659,12 +659,22 @@ export const getAllUsers = async (req, res) => {
                 .limit(limit);
         }
 
-        // Вычисляем номера пользователей
-        // Номер основан на позиции в отсортированном списке с учетом фильтров
+        const userIds = users.map(u => u._id);
+        const referralCounts = await User.aggregate([
+            { $match: { invitedUser: { $in: userIds }, status: { $ne: 'anonym' } } },
+            { $group: { _id: '$invitedUser', count: { $sum: 1 } } },
+        ]);
+        const referralCountMap = new Map(referralCounts.map(r => [r._id.toString(), r.count]));
+
         const usersWithNumbers = users.map((user, index) => {
             const userNumber = skip + index + 1;
             const plain = typeof user.toObject === 'function' ? user.toObject() : user;
-            return { ...plain, userNumber };
+            const id = (user._id || plain._id).toString();
+            return {
+                ...plain,
+                userNumber,
+                inviteesCount: referralCountMap.get(id) || 0,
+            };
         });
 
         res.json({
@@ -1363,7 +1373,7 @@ export const bulkDeleteByFilter = async (req, res) => {
 // Обновить профиль текущего пользователя
 export const updateProfile = async (req, res) => {
     try {
-        const { fullName, phone, profilePhotoUrl, userId, showMainPageInstructions, showProfilePageInstructions } = req.body;
+        const { fullName, phone, profilePhotoUrl, userId, showMainPageInstructions, showProfilePageInstructions, selectedAssignmentRequest } = req.body;
 
         // Формируем объект для обновления
         const updateData = {};
@@ -1372,6 +1382,7 @@ export const updateProfile = async (req, res) => {
         if (profilePhotoUrl !== undefined) updateData.profilePhotoUrl = profilePhotoUrl;
         if (showMainPageInstructions !== undefined) updateData.showMainPageInstructions = showMainPageInstructions;
         if (showProfilePageInstructions !== undefined) updateData.showProfilePageInstructions = showProfilePageInstructions;
+        if (selectedAssignmentRequest !== undefined) updateData.selectedAssignmentRequest = selectedAssignmentRequest;
 
         const user = await User.findByIdAndUpdate(
             userId,

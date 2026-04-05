@@ -13,8 +13,26 @@ export const getAll = async (req, res) => {
         const limit = parseInt(req.query.limit, 10) || 100;
         const skip = (page - 1) * limit;
 
-        const totalLogs = await AdminActionLog.countDocuments();
-        const logs = await AdminActionLog.find()
+        const filter = {};
+
+        const { search, dateFrom, dateTo } = req.query;
+
+        if (dateFrom || dateTo) {
+            filter.createdAt = {};
+            if (dateFrom) filter.createdAt.$gte = new Date(dateFrom);
+            if (dateTo) {
+                const end = new Date(dateTo);
+                end.setHours(23, 59, 59, 999);
+                filter.createdAt.$lte = end;
+            }
+        }
+
+        if (search && search.trim()) {
+            filter.action = { $regex: search.trim(), $options: 'i' };
+        }
+
+        const totalLogs = await AdminActionLog.countDocuments(filter);
+        const logs = await AdminActionLog.find(filter)
             .populate('admin', 'fullName mail role')
             .sort({ createdAt: -1 })
             .skip(skip)

@@ -23,6 +23,7 @@ import { MAIN_INSTRUCTION_STEPS_COUNT } from "../../components/User/MainPageInst
 import { openExternalLink } from "../../utils/telegramWebApp";
 import { toast } from "react-toastify";
 import copyLinkIcon from "../../assets/copyLink.png";
+import { QRCodeSVG } from "qrcode.react";
 
 
 // const SmallCard = ({ title, link, img }: { title: string, link: string, img: string }) => {
@@ -46,7 +47,7 @@ const SmallCard = ({ title, link, img }: { title: string, link: string, img: str
     return (
         <Link 
             to={link} 
-            className="h-[68px] flex items-center bg-[#114E50] relative rounded-lg p-4 overflow-hidden"
+            className="h-[68px] flex items-center bg-[#114E50] relative rounded-lg p-4 overflow-hidden hover:bg-white/10"
             style={{
                 backgroundImage: `url(${img})`,
                 backgroundSize: 'cover',
@@ -659,7 +660,20 @@ export const Main = () => {
                                     <div>
                                         <img src={copyLinkIcon} alt="copy" className="w-5 h-5 object-cover" />
                                     </div>
+                                    
                                 </button>
+                                {userData?.telegramId && (
+                                    <div className="mt-4 px-4 flex justify-center">
+                                        <QRCodeSVG
+                                            value={`https://t.me/io_sun_bot?start=${userData.telegramId}`}
+                                            size={256}
+                                            bgColor="#114E50"
+                                            fgColor="#FFFFFF"
+                                            level="M"
+                                            className="w-full h-auto rounded-xl"
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

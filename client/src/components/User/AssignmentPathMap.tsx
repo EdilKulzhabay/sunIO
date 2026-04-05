@@ -138,6 +138,7 @@ export function PathProgress({
                 className="pointer-events-none mx-auto block w-full"
                 aria-label="Маршрут по шагам"
             >
+                <style>{`@media (min-width: 768px) { .path-step-label { font-size: 4.5px; } }`}</style>
                 {pathD ? (
                     <path
                         d={pathD}
@@ -181,6 +182,7 @@ export function PathProgress({
                             onKeyDown={onStepClick ? handleKey : undefined}
                         >
                             <text
+                                className="path-step-label"
                                 x={p.x}
                                 y={labelY}
                                 textAnchor="middle"

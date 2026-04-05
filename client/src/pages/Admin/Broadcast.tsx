@@ -44,7 +44,7 @@ interface SentBroadcast {
     scheduledBy?: { fullName?: string };
 }
 
-type SentSortKey = 'sent' | 'failed' | 'total';
+type SentSortKey = 'sentAt' | 'sent' | 'failed' | 'total';
 
 export const BroadcastAdmin = () => {
     const [savedBroadcasts, setSavedBroadcasts] = useState<SavedBroadcast[]>([]);
@@ -53,7 +53,7 @@ export const BroadcastAdmin = () => {
     const [loading, setLoading] = useState(false);
     const [loadingScheduled, setLoadingScheduled] = useState(false);
     const [loadingSent, setLoadingSent] = useState(false);
-    const [sentSortKey, setSentSortKey] = useState<SentSortKey>('sent');
+    const [sentSortKey, setSentSortKey] = useState<SentSortKey>('sentAt');
     const [sentSortDir, setSentSortDir] = useState<'asc' | 'desc'>('desc');
     const navigate = useNavigate();
 
@@ -170,6 +170,16 @@ export const BroadcastAdmin = () => {
     const sortedSentBroadcasts = useMemo(() => {
         const list = [...sentBroadcasts];
         const mult = sentSortDir === 'asc' ? 1 : -1;
+
+        if (sentSortKey === 'sentAt') {
+            list.sort((a, b) => {
+                const da = a.sentAt ? new Date(a.sentAt).getTime() : 0;
+                const db = b.sentAt ? new Date(b.sentAt).getTime() : 0;
+                return mult * (da - db);
+            });
+            return list;
+        }
+
         const pick = (item: SentBroadcast): number | undefined => {
             switch (sentSortKey) {
                 case 'sent':
@@ -334,8 +344,16 @@ export const BroadcastAdmin = () => {
                                         <th className="px-4 py-3 font-medium text-gray-700 min-w-[200px]">
                                             Описание (текст)
                                         </th>
-                                        <th className="px-4 py-3 font-medium text-gray-700 whitespace-nowrap">
-                                            Отправлено
+                                        <th className="px-4 py-3 whitespace-nowrap">
+                                            <button
+                                                type="button"
+                                                className="inline-flex items-center gap-1 font-medium text-gray-700 hover:text-gray-900"
+                                                onClick={() => toggleSentSort('sentAt')}
+                                                title="Сортировать по дате отправки"
+                                            >
+                                                Отправлено
+                                                <SentSortIcon column="sentAt" />
+                                            </button>
                                         </th>
                                         <th className="px-4 py-3 text-right tabular-nums">
                                             <button

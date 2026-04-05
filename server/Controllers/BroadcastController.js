@@ -813,9 +813,9 @@ export const deleteSentBroadcast = async (req, res) => {
 
         const user = req.user;
         if (user) {
-            const { logAdminAction } = await import("./AdminActionLogController.js");
+            const { addAdminAction } = await import("../utils/addAdminAction.js");
             const title = schedule.payload?.title || schedule.payload?.broadcastTitle || id;
-            await logAdminAction(user._id, `Удалил(а) запись отправленной рассылки "${title}"`);
+            await addAdminAction(user._id, `Удалил(а) запись отправленной рассылки "${title}"`);
         }
 
         res.json({ success: true, message: "Запись удалена" });

@@ -147,7 +147,7 @@ export const ProfilePageInstructionsModal = ({ currentStep, onNext, onClose }: P
                 originY = closeRect.top + closeRect.height / 2;
             } else {
                 originX = modalRect.left + modalRect.width / 2;
-                originY = modalRect.top + 20;
+                originY = modalRect.top;
             }
 
             const dx = targetCenterX - originX;

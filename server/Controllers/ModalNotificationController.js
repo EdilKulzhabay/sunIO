@@ -480,6 +480,20 @@ export const getModalTemplates = async (req, res) => {
     }
 };
 
+export const getModalTemplateById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const doc = await ModalNotificationTemplate.findById(id).lean();
+        if (!doc) {
+            return res.status(404).json({ success: false, message: "Шаблон не найден" });
+        }
+        res.json({ success: true, data: doc });
+    } catch (error) {
+        console.log("Ошибка в getModalTemplateById:", error);
+        res.status(500).json({ success: false, message: "Ошибка загрузки шаблона" });
+    }
+};
+
 export const createModalTemplate = async (req, res) => {
     try {
         const user = req.user;

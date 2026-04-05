@@ -9,6 +9,7 @@ export interface ProfileInstructionStep {
     targetId: string;
     arrowOrigin?: ArrowOrigin;
     curveBend?: number;
+    targetOffsetY?: number;
 }
 
 const INSTRUCTION_STEPS: ProfileInstructionStep[] = [
@@ -63,6 +64,7 @@ const INSTRUCTION_STEPS: ProfileInstructionStep[] = [
         description: 'Разрешаете или нет Приложению отправлять различные уведомления через Телеграм-бота',
         targetId: 'profile-instruction-notifications',
         curveBend: -54,
+        targetOffsetY: -8,
     },
 ];
 
@@ -115,7 +117,11 @@ export const ProfilePageInstructionsModal = ({ currentStep, onNext, onClose }: P
         const targetEl = document.getElementById(step.targetId);
         if (targetEl) {
             const timer = setTimeout(() => {
-                targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const rect = targetEl.getBoundingClientRect();
+                const inView = rect.top >= 0 && rect.bottom <= window.innerHeight;
+                if (!inView) {
+                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
             }, 150);
             return () => clearTimeout(timer);
         }
@@ -134,7 +140,7 @@ export const ProfilePageInstructionsModal = ({ currentStep, onNext, onClose }: P
             const modalRect = modalEl.getBoundingClientRect();
 
             const targetCenterX = targetRect.left + targetRect.width / 2;
-            const targetCenterY = targetRect.top + targetRect.height / 2;
+            const targetCenterY = targetRect.top + targetRect.height / 2 + (step.targetOffsetY ?? 0);
 
             let originX: number;
             let originY: number;
@@ -210,7 +216,7 @@ export const ProfilePageInstructionsModal = ({ currentStep, onNext, onClose }: P
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                         <h3 className="text-xl font-bold mb-2">{step.title}</h3>
-                        <p className="text-gray-300 text-base leading-relaxed">{step.description}</p>
+                        
                     </div>
                     <button
                         ref={closeButtonRef}
@@ -221,6 +227,7 @@ export const ProfilePageInstructionsModal = ({ currentStep, onNext, onClose }: P
                         <X size={24} />
                     </button>
                 </div>
+                <p className="text-gray-300 text-base leading-relaxed">{step.description}</p>
                 <div className="mt-6 flex items-center justify-between">
                     <button
                         onClick={onNext}

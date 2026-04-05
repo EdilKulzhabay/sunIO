@@ -253,12 +253,7 @@ export const BroadcastFormAdmin = () => {
 
             if (response.data.success) {
                 toast.success(isEditing ? 'Рассылка успешно обновлена' : 'Рассылка успешно сохранена');
-                if (isEditing && id) {
-                    fetchBroadcast(id);
-                }
-                if (!isEditing) {
-                    navigate(`/admin/broadcast/edit/${response.data.data?._id}`);
-                }
+                navigate('/admin/broadcast');
             } else {
                 toast.error(response.data.message || 'Ошибка сохранения рассылки');
             }
@@ -307,12 +302,7 @@ export const BroadcastFormAdmin = () => {
                 
                 if (response.data.success) {
                     toast.success(response.data.message || 'Рассылка выполнена');
-                    if (!scheduledAtIso) {
-                        setMessage('');
-                        setImageUrl('');
-                        setButtonText('');
-                        setButtonPage('');
-                    }
+                    navigate('/admin/broadcast');
                 } else {
                     toast.error(response.data.message || 'Ошибка отправки рассылки');
                 }
@@ -348,7 +338,7 @@ export const BroadcastFormAdmin = () => {
             const response = await api.post('/api/broadcast/send', { 
                 title: title.trim() || undefined,
                 message: finalMessage || undefined,
-                status: status === 'all' ? undefined : status,
+                status: status,
                 lastActiveFilter: lastActiveFilter === 'all' ? undefined : lastActiveFilter,
                 imageUrl: imageUrl || undefined,
                 parseMode: parseMode,
@@ -359,12 +349,7 @@ export const BroadcastFormAdmin = () => {
             
             if (response.data.success) {
                 toast.success(response.data.message || 'Рассылка выполнена');
-                if (!scheduledAtIso) {
-                    setMessage('');
-                    setImageUrl('');
-                    setButtonText('');
-                    setButtonPage('');
-                }
+                navigate('/admin/broadcast');
             } else {
                 toast.error(response.data.message || 'Ошибка отправки рассылки');
             }

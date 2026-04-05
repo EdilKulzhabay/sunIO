@@ -38,6 +38,14 @@ const ScheduleSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    reminder24hSentAt: {
+      type: Date,
+      default: null,
+    },
+    reminder1hSentAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

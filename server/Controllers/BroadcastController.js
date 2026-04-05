@@ -2,6 +2,7 @@ import User from "../Models/User.js";
 import Broadcast from "../Models/Broadcast.js";
 import BroadcastSchedule from "../Models/BroadcastSchedule.js";
 import Diary from "../Models/Diary.js";
+import Schedule from "../Models/Schedule.js";
 import axios from "axios";
 import { addAdminAction } from "../utils/addAdminAction.js";
 
@@ -37,12 +38,10 @@ export const getFilteredUsers = async (req, res) => {
             isBlocked: { $ne: true },
         };
 
-        // При фильтре «Все» не считаем анонимов — им рассылки бесполезны (не подключились к Солнцу)
-        if (status === 'all') {
+        if (!status || status === 'all') {
             filter.status = { $ne: 'anonym' };
         }
 
-        // Фильтр по статусу (если указан конкретный)
         if (status && status !== 'all') {
             if (status === 'blocked') {
                 filter.isBlocked = true;
@@ -119,7 +118,7 @@ const resolveBroadcastContent = async ({ message, imageUrl, buttonText, buttonUr
     };
 };
 
-const executeBroadcast = async (payload) => {
+export const executeBroadcast = async (payload) => {
     const { message, status, search, lastActiveFilter, userIds, imageUrl, parseMode, buttonText, buttonUrl, broadcastId, broadcastTitle } = payload;
 
     const { finalMessage, finalImageUrl, finalButtonText, finalButtonUrl } = await resolveBroadcastContent({
@@ -160,10 +159,9 @@ const executeBroadcast = async (payload) => {
             filter.isBlocked = { $ne: true };
             filter.notifyPermission = { $ne: false };
 
-            // При отправке «всем» не включаем анонимов (им рассылки бесполезны)
-            if (status === 'all') {
+            if (!status || status === 'all') {
                 filter.status = { $ne: 'anonym' };
-            } else if (status && status !== 'blocked') {
+            } else if (status !== 'blocked') {
                 filter.status = status;
             }
 
@@ -867,6 +865,85 @@ export const cancelScheduledBroadcast = async (req, res) => {
             success: false,
             message: "Ошибка при отмене рассылки",
         });
+    }
+};
+
+const SCHEDULE_REMINDER_BROADCAST_ID = '69d09143ddf042774c8cd27c';
+
+export const sendScheduleReminders = async () => {
+    try {
+        const broadcast = await Broadcast.findById(SCHEDULE_REMINDER_BROADCAST_ID).lean();
+        if (!broadcast || !broadcast.content) {
+            return;
+        }
+
+        const now = new Date();
+
+        const window24hStart = new Date(now.getTime() + 23 * 60 * 60 * 1000);
+        const window24hEnd = new Date(now.getTime() + 25 * 60 * 60 * 1000);
+
+        const window1hStart = new Date(now.getTime() + 30 * 60 * 1000);
+        const window1hEnd = new Date(now.getTime() + 90 * 60 * 1000);
+
+        const events = await Schedule.find({
+            $or: [
+                { startDate: { $gte: window24hStart, $lte: window24hEnd }, reminder24hSentAt: null },
+                { startDate: { $gte: window1hStart, $lte: window1hEnd }, reminder1hSentAt: null },
+            ],
+        }).lean();
+
+        if (events.length === 0) return;
+
+        for (const event of events) {
+            const is24h = event.startDate >= window24hStart && event.startDate <= window24hEnd && !event.reminder24hSentAt;
+            const is1h = event.startDate >= window1hStart && event.startDate <= window1hEnd && !event.reminder1hSentAt;
+
+            if (!is24h && !is1h) continue;
+
+            const subscribers = await User.find({
+                'scheduleSubscriptions.scheduleId': event._id,
+                telegramId: { $exists: true, $ne: null, $ne: '' },
+                isBlocked: { $ne: true },
+                notifyPermission: { $ne: false },
+            }).select('_id telegramId');
+
+            if (subscribers.length === 0) {
+                if (is24h) await Schedule.updateOne({ _id: event._id }, { reminder24hSentAt: now });
+                if (is1h) await Schedule.updateOne({ _id: event._id }, { reminder1hSentAt: now });
+                continue;
+            }
+
+            const eventTitle = event.eventTitle || '';
+            const rawDescription = event.description || '';
+            const eventDescription = rawDescription.replace(/<[^>]*>/g, '');
+
+            let content = broadcast.content
+                .replace('[Название события]', eventTitle)
+                .replace('[Описание события]', eventDescription);
+
+            const userIds = subscribers.map(u => u._id);
+
+            try {
+                await executeBroadcast({
+                    message: content,
+                    userIds,
+                    imageUrl: broadcast.imgUrl || undefined,
+                    parseMode: 'HTML',
+                    buttonText: broadcast.buttonText || undefined,
+                    buttonUrl: broadcast.buttonUrl || undefined,
+                });
+
+                const label = is1h ? '1ч' : '24ч';
+                console.log(`[schedule-reminder] Напоминание (${label}) отправлено для события "${eventTitle}" — ${subscribers.length} подписчиков`);
+            } catch (err) {
+                console.error(`[schedule-reminder] Ошибка отправки для события "${eventTitle}":`, err.message);
+            }
+
+            if (is24h) await Schedule.updateOne({ _id: event._id }, { reminder24hSentAt: now });
+            if (is1h) await Schedule.updateOne({ _id: event._id }, { reminder1hSentAt: now });
+        }
+    } catch (error) {
+        console.error('[schedule-reminder] Ошибка в sendScheduleReminders:', error);
     }
 };
 

@@ -19,7 +19,7 @@ export const MiniVideoCard = ({ title, image, link, progress, accessType, onLock
     return (
         <>
         {accessType === 'free' ? (
-            <button onClick={handleFreeClick} className="rounded-xl bg-[#114E50] w-full h-full flex flex-col">
+            <button onClick={handleFreeClick} className="rounded-xl bg-[#114E50] w-full h-full flex flex-col hover:bg-white/10 hover:cursor-pointer">
                 <div className="relative h-[98px] sm:h-[142px] lg:h-[197px]">
                     <img src={`${import.meta.env.VITE_API_URL}${image}`} alt={title} className="w-full h-full rounded-t-lg object-cover" />
                 </div>
@@ -62,7 +62,7 @@ export const MiniVideoCard = ({ title, image, link, progress, accessType, onLock
                 </div>
             </button>
         ) : (
-            <button onClick={onLockedClick} className="rounded-xl bg-[#114E50] w-full h-full flex-1 flex flex-col">
+            <button onClick={onLockedClick} className="rounded-xl bg-[#114E50] w-full h-full flex-1 flex flex-col hover:bg-white/10 hover:cursor-pointer">
                 <div className="relative h-[98px] sm:h-[142px] lg:h-[197px]">
                     <img src={`${import.meta.env.VITE_API_URL}${image}`} alt={title} className="w-full h-full rounded-t-lg object-cover" />
                     <div className="absolute inset-0 bg-black/40 rounded-t-lg" />

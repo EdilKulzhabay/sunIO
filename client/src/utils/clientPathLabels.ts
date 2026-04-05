@@ -4,16 +4,14 @@
  */
 const EXACT: Record<string, string> = {
     '/main': 'Главная страница',
-    '/client/faq': 'FAQ',
-    '/client/horoscope': 'Гороскоп',
-    '/client/horoscopes': 'Гороскопы',
+    '/client/faq': 'Частые вопросы',
     '/client/transit': 'Транзит',
     '/client/transits': 'Транзиты',
     '/client/schumann': 'Резонанс Шумана',
     '/client/contactus': 'Связаться с нами',
     '/client/practices': 'Практики',
     '/client/broadcast-recordings': 'Записи эфиров',
-    '/client/parables-of-life': 'Притчи о жизни',
+    '/client/parables-of-life': 'Притчи',
     '/client/scientific-discoveries': 'Научные открытия',
     '/client/health-lab': 'Лаборатория здоровья',
     '/client/relationship-workshop': 'Мастерская отношений',
@@ -26,7 +24,7 @@ const EXACT: Record<string, string> = {
     '/client/analysis-relationships': 'Разборы — отношения',
     '/client/analysis-realization': 'Разборы — реализация',
     '/client/psychodiagnostics': 'Психодиагностика',
-    '/client/schedule': 'Расписание',
+    '/client/schedule': 'Осознание',
     '/client/diary': 'Дневник осознаний',
     '/client/navigator': 'Навигатор',
     '/client/profile': 'Профиль',
@@ -42,11 +40,10 @@ const EXACT: Record<string, string> = {
 };
 
 const PREFIX_RULES: Array<{ re: RegExp; section: string; fallbackTitle: string }> = [
-    { re: /^\/client\/horoscope\/[^/]+$/, section: 'Гороскопы', fallbackTitle: 'Гороскоп' },
     { re: /^\/client\/transit\/[^/]+$/, section: 'Транзиты', fallbackTitle: 'Транзит' },
     { re: /^\/client\/practice\/[^/]+$/, section: 'Практики', fallbackTitle: 'Практика' },
     { re: /^\/client\/broadcast-recording\/[^/]+$/, section: 'Записи эфиров', fallbackTitle: 'Запись эфира' },
-    { re: /^\/client\/parables-of-life\/[^/]+$/, section: 'Притчи о жизни', fallbackTitle: 'Притча о жизни' },
+    { re: /^\/client\/parables-of-life\/[^/]+$/, section: 'Притчи', fallbackTitle: 'Притча' },
     { re: /^\/client\/scientific-discoveries\/[^/]+$/, section: 'Научные открытия', fallbackTitle: 'Научное открытие' },
     { re: /^\/client\/health-lab\/[^/]+$/, section: 'Лаборатория здоровья', fallbackTitle: 'Лаборатория здоровья' },
     { re: /^\/client\/relationship-workshop\/[^/]+$/, section: 'Мастерская отношений', fallbackTitle: 'Мастерская отношений' },
@@ -67,40 +64,44 @@ const EXCLUDED_PATHS = new Set([
     '/client/ease-launch',
     '/client/choose-your-path',
     '/client/connect-error',
-    '/about',
     '/client/register',
     '/client/welcome2',
     '/client/app-temporarily-unavailable',
     '/client/blocked-browser',
     '/client-performance',
     '/client/beggining-journey',
+    '/client/login',
+]);
+
+/** Страницы главного меню — без отдельной категории */
+const MAIN_MENU_PATHS = new Set([
+    '/main',
+    '/client/faq',
+    '/about',
+    '/client/content-search',
+    '/client/contactus',
+    '/client/product-catalog',
+    '/client/profile',
+    '/client/invited-users',
+    '/client/operation-log',
+    '/client/deposit-log',
+    '/client/purchase-log',
+    '/client/documents',
+    '/client/navigator',
+    '/client/diary',
+    '/client/practices',
+    '/client/tasks',
+    '/client/new-task',
+    '/client/blocked-user',
+    '/client/schedule',
 ]);
 
 const SECTION_EXACT: Record<string, string> = {
-    '/main': 'Основное',
-    '/client/faq': 'Основное',
-    '/client/contactus': 'Основное',
-    '/client/content-search': 'Основное',
-    '/client/blocked-user': 'Основное',
-    '/client/profile': 'Профиль',
-    '/client/invited-users': 'Профиль',
-    '/client/documents': 'Профиль',
-    '/client/operation-log': 'Профиль',
-    '/client/deposit-log': 'Профиль',
-    '/client/purchase-log': 'Профиль',
-    '/client/schedule': 'Расписание',
-    '/client/navigator': 'Навигатор',
-    '/client/diary': 'Дневник осознаний',
-    '/client/tasks': 'Задания',
-    '/client/new-task': 'Задания',
-    '/client/horoscope': 'Гороскопы',
-    '/client/horoscopes': 'Гороскопы',
     '/client/transit': 'Транзиты',
     '/client/transits': 'Транзиты',
     '/client/schumann': 'Резонанс Шумана',
-    '/client/practices': 'Практики',
     '/client/broadcast-recordings': 'Записи эфиров',
-    '/client/parables-of-life': 'Притчи о жизни',
+    '/client/parables-of-life': 'Притчи',
     '/client/scientific-discoveries': 'Научные открытия',
     '/client/health-lab': 'Лаборатория здоровья',
     '/client/relationship-workshop': 'Мастерская отношений',
@@ -108,12 +109,13 @@ const SECTION_EXACT: Record<string, string> = {
     '/client/masters-tower': 'Башня мастеров',
     '/client/femininity-gazebo': 'Беседка женственности',
     '/client/consciousness-library': 'Библиотека сознания',
-    '/client/product-catalog': 'Каталог продуктов',
     '/client/analysis-health': 'Разборы — здоровье',
     '/client/analysis-relationships': 'Разборы — отношения',
     '/client/analysis-realization': 'Разборы — реализация',
     '/client/psychodiagnostics': 'Психодиагностика',
 };
+
+const MAIN_MENU_SECTION = 'Главное меню';
 
 export function normalizePathname(raw: string): string {
     let p = (raw || '').trim().split('?')[0].split('#')[0];
@@ -142,6 +144,7 @@ export function isExcludedPath(rawPath: string): boolean {
 /** Раздел, к которому принадлежит путь */
 export function getClientPageSection(rawPath: string): string {
     const path = normalizePathname(rawPath);
+    if (MAIN_MENU_PATHS.has(path)) return MAIN_MENU_SECTION;
     if (SECTION_EXACT[path]) return SECTION_EXACT[path];
     for (const { re, section } of PREFIX_RULES) {
         if (re.test(path)) return section;
@@ -149,20 +152,13 @@ export function getClientPageSection(rawPath: string): string {
     return 'Другое';
 }
 
-/** Все уникальные разделы для фильтра */
+/** Все уникальные разделы для фильтра (алфавитный порядок) */
 export function getAllSections(): string[] {
-    const set = new Set<string>(Object.values(SECTION_EXACT));
+    const set = new Set<string>();
+    set.add(MAIN_MENU_SECTION);
+    for (const v of Object.values(SECTION_EXACT)) set.add(v);
     for (const { section } of PREFIX_RULES) set.add(section);
-    const ordered = [
-        'Основное', 'Профиль', 'Расписание', 'Навигатор', 'Дневник осознаний',
-        'Задания', 'Гороскопы', 'Транзиты', 'Резонанс Шумана',
-        'Практики', 'Записи эфиров', 'Притчи о жизни', 'Научные открытия',
-        'Лаборатория здоровья', 'Мастерская отношений', 'Кузница духа',
-        'Башня мастеров', 'Беседка женственности', 'Библиотека сознания',
-        'Каталог продуктов', 'Разборы — здоровье', 'Разборы — отношения',
-        'Разборы — реализация', 'Психодиагностика',
-    ];
-    return ordered.filter((s) => set.has(s));
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'ru'));
 }
 
 /**

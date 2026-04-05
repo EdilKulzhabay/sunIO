@@ -510,6 +510,7 @@ app.delete("/api/broadcast/:id", authMiddleware, BroadcastController.deleteBroad
 app.post("/api/modal-notification/users", ModalNotificationController.getFilteredUsers);
 app.get("/api/modal-notification/campaigns", authMiddleware, ModalNotificationController.listModalCampaigns);
 app.get("/api/modal-notification/templates", authMiddleware, ModalNotificationController.getModalTemplates);
+app.get("/api/modal-notification/templates/:id", authMiddleware, ModalNotificationController.getModalTemplateById);
 app.post(
     "/api/modal-notification/templates",
     createContentRateLimit,
@@ -634,6 +635,17 @@ cron.schedule('* * * * *', async () => {
 });
 
 console.log('Cron задача для рассылок настроена: проверка каждую минуту');
+
+// Напоминания о событиях из календаря (за 24ч и за 1ч)
+cron.schedule('* * * * *', async () => {
+    try {
+        await BroadcastController.sendScheduleReminders();
+    } catch (error) {
+        console.error(`[${new Date().toISOString()}] Ошибка напоминаний о событиях:`, error);
+    }
+});
+
+console.log('Cron задача напоминаний о событиях настроена: проверка каждую минуту');
 
 app.listen(process.env.PORT, () => {
     console.log(`Server is running on port ${process.env.PORT}`);

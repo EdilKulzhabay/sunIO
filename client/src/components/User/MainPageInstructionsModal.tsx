@@ -9,12 +9,8 @@ export interface InstructionStep {
     targetId: string;
     /** Откуда выходит линия: центр модалки (по умолчанию) или слева от крестика */
     arrowOrigin?: ArrowOrigin;
-    /**
-     * Изгиб дуги (px): смещение контрольной точки квадратичной Безье вдоль нормали к хорде.
-     * 0 — почти прямая; положительное — дуга в одну сторону, отрицательное — в другую.
-     * Если не задано — используется DEFAULT_CURVE_BEND.
-     */
     curveBend?: number;
+    originOffsetX?: number;
 }
 
 /** Дуга по умолчанию, если в шаге не указан `curveBend` (можно импортировать и подставлять в свои шаги). */
@@ -26,7 +22,8 @@ const INSTRUCTION_STEPS: InstructionStep[] = [
         description:
             'Настройки Приложения, внутренний баланс, пригласительная ссылка, ссылки на ресурсы',
         targetId: 'main-instruction-profile',
-        curveBend: 52,
+        curveBend: 60,
+        originOffsetX: 6,
     },
     {
         title: 'Часто задаваемые вопросы',
@@ -151,7 +148,7 @@ export const MainPageInstructionsModal = ({ currentStep, onNext, onClose }: Main
             const targetRect = targetEl.getBoundingClientRect();
             const modalRect = modalEl.getBoundingClientRect();
 
-            const targetCenterX = targetRect.left + targetRect.width / 2;
+            const targetCenterX = targetRect.left + targetRect.width / 2 + (step.originOffsetX ?? 0);
             const targetCenterY = targetRect.top + targetRect.height / 2;
 
             let originX: number;
@@ -165,7 +162,7 @@ export const MainPageInstructionsModal = ({ currentStep, onNext, onClose }: Main
                 originY = closeRect.top + closeRect.height / 2;
             } else {
                 originX = modalRect.left + modalRect.width / 2;
-                originY = modalRect.top ;
+                originY = modalRect.top;
             }
 
             const dx = targetCenterX - originX;
@@ -230,7 +227,7 @@ export const MainPageInstructionsModal = ({ currentStep, onNext, onClose }: Main
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                         <h3 className="text-xl font-bold mb-2">{step.title}</h3>
-                        <p className="text-gray-300 text-base leading-relaxed">{step.description}</p>
+                        
                     </div>
                     <button
                         ref={closeButtonRef}
@@ -241,6 +238,7 @@ export const MainPageInstructionsModal = ({ currentStep, onNext, onClose }: Main
                         <X size={24} />
                     </button>
                 </div>
+                <p className="text-gray-300 text-base leading-relaxed">{step.description}</p>
                 <div className="mt-6">
                     <button
                         onClick={onNext}

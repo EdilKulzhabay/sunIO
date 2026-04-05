@@ -3,6 +3,7 @@
  * Совпадает с path в routes.tsx (Telegram WebApp).
  */
 const EXACT: Record<string, string> = {
+    '/main': 'Главная страница',
     '/client/faq': 'FAQ',
     '/client/horoscope': 'Гороскоп',
     '/client/horoscopes': 'Гороскопы',
@@ -31,7 +32,6 @@ const EXACT: Record<string, string> = {
     '/client/profile': 'Профиль',
     '/client/tasks': 'Задания',
     '/client/new-task': 'Задания',
-    '/client/app-temporarily-unavailable': 'Приложение недоступно',
     '/client/blocked-user': 'Заблокирован',
     '/client/invited-users': 'Приглашённые',
     '/client/documents': 'Документы',
@@ -62,6 +62,7 @@ const PREFIX_RULES: Array<{ re: RegExp; section: string; fallbackTitle: string }
 ];
 
 const EXCLUDED_PATHS = new Set([
+    '/',
     '/client/region',
     '/client/ease-launch',
     '/client/choose-your-path',
@@ -70,13 +71,17 @@ const EXCLUDED_PATHS = new Set([
     '/client/register',
     '/client/welcome2',
     '/client/app-temporarily-unavailable',
+    '/client/blocked-browser',
+    '/client-performance',
+    '/client/beggining-journey',
 ]);
 
 const SECTION_EXACT: Record<string, string> = {
-    '/': 'Основное',
     '/main': 'Основное',
-    '/client/login': 'Основное',
     '/client/faq': 'Основное',
+    '/client/contactus': 'Основное',
+    '/client/content-search': 'Основное',
+    '/client/blocked-user': 'Основное',
     '/client/profile': 'Профиль',
     '/client/invited-users': 'Профиль',
     '/client/documents': 'Профиль',
@@ -84,16 +89,10 @@ const SECTION_EXACT: Record<string, string> = {
     '/client/deposit-log': 'Профиль',
     '/client/purchase-log': 'Профиль',
     '/client/schedule': 'Расписание',
-    '/client/diary': 'Дневник осознаний',
     '/client/navigator': 'Навигатор',
+    '/client/diary': 'Дневник осознаний',
     '/client/tasks': 'Задания',
     '/client/new-task': 'Задания',
-    '/client/beggining-journey': 'Начало пути',
-    '/client/contactus': 'Основное',
-    '/client/content-search': 'Основное',
-    '/client/blocked-user': 'Основное',
-    '/client/blocked-browser': 'Основное',
-    '/client-performance': 'Основное',
     '/client/horoscope': 'Гороскопы',
     '/client/horoscopes': 'Гороскопы',
     '/client/transit': 'Транзиты',
@@ -156,7 +155,7 @@ export function getAllSections(): string[] {
     for (const { section } of PREFIX_RULES) set.add(section);
     const ordered = [
         'Основное', 'Профиль', 'Расписание', 'Навигатор', 'Дневник осознаний',
-        'Задания', 'Начало пути', 'Гороскопы', 'Транзиты', 'Резонанс Шумана',
+        'Задания', 'Гороскопы', 'Транзиты', 'Резонанс Шумана',
         'Практики', 'Записи эфиров', 'Притчи о жизни', 'Научные открытия',
         'Лаборатория здоровья', 'Мастерская отношений', 'Кузница духа',
         'Башня мастеров', 'Беседка женственности', 'Библиотека сознания',

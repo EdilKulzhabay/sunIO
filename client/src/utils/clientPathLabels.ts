@@ -5,8 +5,6 @@
 const EXACT: Record<string, string> = {
     '/main': 'Главная страница',
     '/client/faq': 'Частые вопросы',
-    '/client/transit': 'Транзит',
-    '/client/transits': 'Транзиты',
     '/client/contactus': 'Связаться с нами',
     '/client/practices': 'Практики',
     '/client/broadcast-recordings': 'Записи эфиров',
@@ -39,7 +37,6 @@ const EXACT: Record<string, string> = {
 };
 
 const PREFIX_RULES: Array<{ re: RegExp; section: string; fallbackTitle: string }> = [
-    { re: /^\/client\/transit\/[^/]+$/, section: 'Транзиты', fallbackTitle: 'Транзит' },
     { re: /^\/client\/practice\/[^/]+$/, section: 'Практики', fallbackTitle: 'Практика' },
     { re: /^\/client\/broadcast-recording\/[^/]+$/, section: 'Записи эфиров', fallbackTitle: 'Запись эфира' },
     { re: /^\/client\/parables-of-life\/[^/]+$/, section: 'Притчи', fallbackTitle: 'Притча' },

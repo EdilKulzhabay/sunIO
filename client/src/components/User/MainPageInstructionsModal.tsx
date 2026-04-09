@@ -32,6 +32,13 @@ const INSTRUCTION_STEPS: InstructionStep[] = [
         curveBend: -44,
     },
     {
+        title: 'Дизайн Человека',
+        description: 'Узнай, какой у тебя Дизайн Человека и как он влияет на твою жизнь',
+        targetId: 'main-instruction-human-design',
+        curveBend: 52,
+        originOffsetX: 6,
+    },
+    {
         title: 'Каталог платных продуктов',
         description: 'Перечень платных продуктов для покупок через списание с внутреннего баланса Приложения',
         targetId: 'main-instruction-product-catalog',

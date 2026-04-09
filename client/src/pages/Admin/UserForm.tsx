@@ -588,21 +588,39 @@ export const UserForm = () => {
                     )}
 
                     {/* Дизайн Человека */}
-                    {id && (formData.hdBirthDate || formData.hdBirthTime || formData.hdBirthCity) && (
+                    {id && (
                         <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
                             <h2 className="text-xl font-semibold text-gray-900">Дизайн Человека</h2>
                             <div className="grid grid-cols-3 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Дата рождения</label>
-                                    <p className="text-sm text-gray-900">{formData.hdBirthDate || '—'}</p>
+                                    <input
+                                        type="text"
+                                        value={formData.hdBirthDate || ''}
+                                        onChange={(e) => setFormData({ ...formData, hdBirthDate: e.target.value })}
+                                        placeholder="DD.MM.YYYY"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500"
+                                    />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Время рождения</label>
-                                    <p className="text-sm text-gray-900">{formData.hdBirthTime || '—'}</p>
+                                    <input
+                                        type="text"
+                                        value={formData.hdBirthTime || ''}
+                                        onChange={(e) => setFormData({ ...formData, hdBirthTime: e.target.value })}
+                                        placeholder="HH.MM"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500"
+                                    />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Город рождения</label>
-                                    <p className="text-sm text-gray-900">{formData.hdBirthCity || '—'}</p>
+                                    <input
+                                        type="text"
+                                        value={formData.hdBirthCity || ''}
+                                        onChange={(e) => setFormData({ ...formData, hdBirthCity: e.target.value })}
+                                        placeholder="Город"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500"
+                                    />
                                 </div>
                             </div>
                         </div>

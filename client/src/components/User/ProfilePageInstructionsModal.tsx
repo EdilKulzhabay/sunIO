@@ -64,7 +64,7 @@ const INSTRUCTION_STEPS: ProfileInstructionStep[] = [
         description: 'Разрешаете или нет Приложению отправлять различные уведомления через Телеграм-бота',
         targetId: 'profile-instruction-notifications',
         curveBend: -54,
-        targetOffsetY: -8,
+        targetOffsetY: -20,
     },
 ];
 

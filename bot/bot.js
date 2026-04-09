@@ -182,17 +182,24 @@ bot.action('consent_accept', async (ctx) => {
           const bc = bcResp.data?.data;
           if (!bc || !bc.content) return;
 
+          let content = bc.content
+            .replace(/<\/div>\s*<div>/gi, '\n\n')
+            .replace(/<\/?div>/gi, '');
+
           const msgOpts = { parse_mode: 'HTML' };
-          if (bc.buttonText) {
+          if (bc.buttonText && bc.buttonUrl) {
             const appUrl = process.env.APP_URL || '';
             const isExternal =
               bc.buttonUrl &&
-              (bc.buttonUrl.startsWith('http://') || bc.buttonUrl.startsWith('https://')) &&
+              (bc.buttonUrl.startsWith('http://') ||
+                bc.buttonUrl.startsWith('https://') ||
+                bc.buttonUrl.startsWith('t.me/')) &&
               !bc.buttonUrl.startsWith(appUrl);
 
             if (isExternal) {
+              const btnUrl = bc.buttonUrl.startsWith('http') ? bc.buttonUrl : `https://${bc.buttonUrl}`;
               msgOpts.reply_markup = {
-                inline_keyboard: [[{ text: bc.buttonText, url: bc.buttonUrl }]],
+                inline_keyboard: [[{ text: bc.buttonText, url: btnUrl }]],
               };
             } else {
               let webAppUrl = `${appUrl}/?telegramId=${telegramId}`;
@@ -215,17 +222,17 @@ bot.action('consent_accept', async (ctx) => {
               ? bc.imgUrl
               : `${process.env.API_URL}${bc.imgUrl}`;
             const CAPTION_LIMIT = 1024;
-            if (bc.content && bc.content.length > CAPTION_LIMIT) {
+            if (content && content.length > CAPTION_LIMIT) {
               await executeUserOperation(async () => {
                 return await bot.telegram.sendPhoto(telegramId, fullImageUrl);
               });
               await executeUserOperation(async () => {
-                return await bot.telegram.sendMessage(telegramId, bc.content, msgOpts);
+                return await bot.telegram.sendMessage(telegramId, content, msgOpts);
               });
             } else {
               await executeUserOperation(async () => {
                 return await bot.telegram.sendPhoto(telegramId, fullImageUrl, {
-                  caption: bc.content,
+                  caption: content,
                   parse_mode: 'HTML',
                   ...(msgOpts.reply_markup && { reply_markup: msgOpts.reply_markup }),
                 });
@@ -233,7 +240,7 @@ bot.action('consent_accept', async (ctx) => {
             }
           } else {
             await executeUserOperation(async () => {
-              return await bot.telegram.sendMessage(telegramId, bc.content, msgOpts);
+              return await bot.telegram.sendMessage(telegramId, content, msgOpts);
             });
           }
           console.log(`[fullName-check] Рассылка отправлена пользователю ${telegramId} (fullName не заполнен через 1 час)`);

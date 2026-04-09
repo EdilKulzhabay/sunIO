@@ -16,9 +16,9 @@ const REFERRAL_LEVELS = [
     { min: 0, max: 5, label: 'Новичок', icon: referralLevel1 },
     { min: 5, max: 10, label: 'Знакомый', icon: referralLevel2 },
     { min: 10, max: 25, label: 'Друг', icon: referralLevel3 },
-    { min: 25, max: 50, label: 'Наставник', icon: referralLevel4 },
-    { min: 50, max: 75, label: 'Лидер', icon: referralLevel5 },
-    { min: 75, max: 100, label: 'Амбассадор', icon: referralLevel6 },
+    { min: 25, max: 50, label: 'Амбассадор', icon: referralLevel4 },
+    { min: 50, max: 75, label: 'Легенда', icon: referralLevel5 },
+    { min: 75, max: 100, label: 'Мессионер', icon: referralLevel6 },
 ];
 
 function getReferralLevel(count: number) {
@@ -219,7 +219,7 @@ export const ClientHumanDesign = () => {
                         <div className="mt-3 bg-[#114E50] rounded-xl p-4 flex items-center gap-x-5 justify-between">
                             <div className="flex-1">
                                 <div className="text-white text-xl font-medium">
-                                    Твой статус - {levelInfo.label}
+                                    Твой статус — {levelInfo.label}
                                 </div>
                                 <div className="mt-1 w-full">
                                     <div className="flex items-center justify-between text-white text-sm">
@@ -230,7 +230,7 @@ export const ClientHumanDesign = () => {
                                         <div className="h-full bg-white rounded-full" style={{ width: `${progressPercent}%` }}></div>
                                     </div>
                                 </div>
-                                <div className="text-white text-sm mt-1">
+                                <div className="text-white text-xs mt-1">
                                     Пригласи ещё друзей для повышения статуса
                                 </div>
                             </div>
@@ -281,31 +281,49 @@ export const ClientHumanDesign = () => {
 
                         {/* Поля ввода данных рождения */}
                         <div className="mt-3 grid grid-cols-3 gap-x-3">
-                            <div className="col-span-1">
+                            <div className="col-span-1 flex flex-col">
+                                <label className="text-white/60 text-xs mb-1 text-center leading-tight">Дата<br/>рождения</label>
                                 <input
                                     type="text"
-                                    placeholder="Дата рождения"
+                                    inputMode="numeric"
+                                    placeholder="DD.MM.YYYY"
                                     value={birthDate}
-                                    onChange={(e) => setBirthDate(e.target.value)}
-                                    className="w-full bg-[#114E50] py-3 px-4 rounded-xl text-white placeholder-white/60 outline-none"
+                                    onChange={(e) => {
+                                        const digits = e.target.value.replace(/\D/g, '').slice(0, 8);
+                                        let formatted = digits;
+                                        if (digits.length > 4) formatted = digits.slice(0, 2) + '.' + digits.slice(2, 4) + '.' + digits.slice(4);
+                                        else if (digits.length > 2) formatted = digits.slice(0, 2) + '.' + digits.slice(2);
+                                        setBirthDate(formatted);
+                                    }}
+                                    maxLength={10}
+                                    className="w-full bg-[#114E50] py-3 px-3 rounded-xl text-white text-center placeholder-white/60 outline-none text-sm"
                                 />
                             </div>
-                            <div className="col-span-1">
+                            <div className="col-span-1 flex flex-col">
+                                <label className="text-white/60 text-xs mb-1 text-center leading-tight">Время<br/>рождения</label>
                                 <input
                                     type="text"
-                                    placeholder="Время рождения"
+                                    inputMode="numeric"
+                                    placeholder="HH.MM"
                                     value={birthTime}
-                                    onChange={(e) => setBirthTime(e.target.value)}
-                                    className="w-full bg-[#114E50] py-3 px-4 rounded-xl text-white placeholder-white/60 outline-none"
+                                    onChange={(e) => {
+                                        const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+                                        let formatted = digits;
+                                        if (digits.length > 2) formatted = digits.slice(0, 2) + '.' + digits.slice(2);
+                                        setBirthTime(formatted);
+                                    }}
+                                    maxLength={5}
+                                    className="w-full bg-[#114E50] py-3 px-3 rounded-xl text-white text-center placeholder-white/60 outline-none text-sm"
                                 />
                             </div>
-                            <div className="col-span-1">
+                            <div className="col-span-1 flex flex-col">
+                                <label className="text-white/60 text-xs mb-1 text-center leading-tight">Город<br/>рождения</label>
                                 <input
                                     type="text"
-                                    placeholder="Город рождения"
+                                    placeholder="Город"
                                     value={birthCity}
                                     onChange={(e) => setBirthCity(e.target.value)}
-                                    className="w-full bg-[#114E50] py-3 px-4 rounded-xl text-white placeholder-white/60 outline-none"
+                                    className="w-full bg-[#114E50] py-3 px-3 rounded-xl text-white text-center placeholder-white/60 outline-none text-sm"
                                 />
                             </div>
                         </div>

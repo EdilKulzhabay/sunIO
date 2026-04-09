@@ -122,6 +122,7 @@ export const UserForm = () => {
                 hdBirthDate: data.hdBirthDate || '',
                 hdBirthTime: data.hdBirthTime || '',
                 hdBirthCity: data.hdBirthCity || '',
+                selectedAssignmentRequest: data.selectedAssignmentRequest || '',
             });
             if (data.telegramId) {
                 fetchReferrals(data.telegramId);

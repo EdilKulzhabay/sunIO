@@ -11,17 +11,6 @@ import { CONTENT_CATEGORY_OPTIONS } from "../../constants/contentCategoryOptions
 import arrowDown from "../../assets/arrowDown.png";
 import { PathProgress, mapStepsFromApi, type StepRow } from "../../components/User/AssignmentPathMap";
 
-const LS_KEY_SELECTED_ASSIGNMENT_ID = "clientNewTaskSelectedAssignmentId";
-
-function readStoredSelectedAssignmentId(): string {
-    try {
-        const v = localStorage.getItem(LS_KEY_SELECTED_ASSIGNMENT_ID);
-        return typeof v === "string" ? v : "";
-    } catch {
-        return "";
-    }
-}
-
 const isExternalLink = (url: string) => url.startsWith("http://") || url.startsWith("https://");
 
 function getCategoryTitle(link: string): string {
@@ -44,8 +33,9 @@ export const ClientNewTask = () => {
     const [loading, setLoading] = useState(true);
     const [listLoading, setListLoading] = useState(true);
     const [assignments, setAssignments] = useState<Array<{ _id: string; request: string }>>([]);
-    const [selectedId, setSelectedId] = useState<string>(() => readStoredSelectedAssignmentId());
+    const [selectedId, setSelectedId] = useState<string>("");
     const [steps, setSteps] = useState<StepRow[]>([]);
+    const [userLoaded, setUserLoaded] = useState(false);
     const [introHtml, setIntroHtml] = useState<string>("");
     const [openSteps, setOpenSteps] = useState<Record<number, boolean>>({});
     const [assignmentRequestOpen, setAssignmentRequestOpen] = useState(false);
@@ -96,49 +86,49 @@ export const ClientNewTask = () => {
                         new Date(a?.updatedAt || 0).getTime()
                     );
                 });
-                setAssignments(rows.map((a: any) => ({ _id: a._id, request: a.request })));
+                const mapped = rows.map((a: any) => ({ _id: a._id, request: a.request }));
+                setAssignments(mapped);
+
+                const userStr = localStorage.getItem("user");
+                if (userStr) {
+                    try {
+                        const user = JSON.parse(userStr);
+                        if (user._id) {
+                            const userRes = await api.get(`/api/user/${user._id}`);
+                            const savedRequest = userRes.data?.data?.selectedAssignmentRequest;
+                            if (savedRequest) {
+                                const match = mapped.find((a: any) => a.request === savedRequest);
+                                if (match) setSelectedId(match._id);
+                            }
+                        }
+                    } catch { /* ignore */ }
+                }
             } catch {
                 toast.error("Не удалось загрузить список заданий");
             } finally {
                 setListLoading(false);
                 setLoading(false);
+                setUserLoaded(true);
             }
         };
         loadList();
     }, []);
 
     useEffect(() => {
-        if (listLoading) return;
-        if (assignments.length === 0) {
-            setSelectedId("");
+        if (!userLoaded) return;
+        const requestText = assignments.find((a) => a._id === selectedId)?.request ?? '';
+        const userStr = localStorage.getItem("user");
+        let userId = "";
+        if (userStr) {
+            try { userId = JSON.parse(userStr)._id || ""; } catch { /* ignore */ }
         }
-    }, [listLoading, assignments.length]);
-
-    useEffect(() => {
-        if (assignments.length === 0) return;
-        setSelectedId((prev) => {
-            if (!prev) return prev;
-            if (assignments.some((a) => a._id === prev)) return prev;
-            try {
-                localStorage.removeItem(LS_KEY_SELECTED_ASSIGNMENT_ID);
-            } catch {
-                /* ignore */
-            }
-            return "";
-        });
-    }, [assignments]);
-
-    useEffect(() => {
-        try {
-            if (selectedId) {
-                localStorage.setItem(LS_KEY_SELECTED_ASSIGNMENT_ID, selectedId);
-            } else {
-                localStorage.removeItem(LS_KEY_SELECTED_ASSIGNMENT_ID);
-            }
-        } catch {
-            /* ignore */
+        if (userId) {
+            api.put("/api/user/profile/update", {
+                userId,
+                selectedAssignmentRequest: requestText,
+            }).catch(() => { /* ignore */ });
         }
-    }, [selectedId]);
+    }, [selectedId, assignments, userLoaded]);
 
     const loadProgress = useCallback(async (assignmentId: string) => {
         if (!assignmentId) return;

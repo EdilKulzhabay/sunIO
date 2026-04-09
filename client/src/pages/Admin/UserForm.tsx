@@ -50,6 +50,7 @@ interface FormData {
     hdBirthDate?: string;
     hdBirthTime?: string;
     hdBirthCity?: string;
+    selectedAssignmentRequest?: string;
 }
 
 export const UserForm = () => {
@@ -424,6 +425,15 @@ export const UserForm = () => {
                                     <input
                                         type="text"
                                         value={lastActiveDateDisplay}
+                                        readOnly
+                                        className="w-full p-2 border rounded-md bg-gray-50 text-gray-600 cursor-not-allowed"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Запрос</label>
+                                    <input
+                                        type="text"
+                                        value={formData.selectedAssignmentRequest || ''}
                                         readOnly
                                         className="w-full p-2 border rounded-md bg-gray-50 text-gray-600 cursor-not-allowed"
                                     />

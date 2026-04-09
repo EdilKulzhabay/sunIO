@@ -13,6 +13,7 @@ interface BotTrafficSource {
     description?: string;
     isActive: boolean;
     createdAt: string;
+    registrationCount?: number;
 }
 
 export const BotTrafficSourcesAdmin = () => {
@@ -54,16 +55,11 @@ export const BotTrafficSourcesAdmin = () => {
     };
 
     const columns = [
-        { key: 'title', label: 'Название' },
-        { key: 'botParameter', label: 'botParameter' },
-        {
-            key: 'createdAt',
-            label: 'Создан',
-            render: (value: string) => new Date(value).toLocaleDateString('ru-RU'),
-        },
+        { key: 'title', label: 'Название источника' },
+        { key: 'botParameter', label: 'Параметр' },
         {
             key: 'link',
-            label: 'Ссылка для рекламы',
+            label: 'UTM ССЫЛКА',
             render: (_: unknown, item: BotTrafficSource) => {
                 const link = `https://t.me/io_sun_bot?start=${item.botParameter}`;
                 const copyLink = () => {
@@ -82,6 +78,13 @@ export const BotTrafficSourcesAdmin = () => {
                     </button>
                 );
             },
+        },
+        {
+            key: 'registrationCount',
+            label: 'Регистрации',
+            render: (_: unknown, item: BotTrafficSource) => (
+                <span className="font-medium tabular-nums">{item.registrationCount ?? 0}</span>
+            ),
         },
     ];
 

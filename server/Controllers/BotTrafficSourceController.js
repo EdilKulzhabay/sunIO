@@ -1,4 +1,5 @@
 import BotTrafficSource from "../Models/BotTrafficSource.js";
+import User from "../Models/User.js";
 import { addAdminAction } from "../utils/addAdminAction.js";
 
 // Создать новый источник трафика
@@ -51,12 +52,26 @@ export const create = async (req, res) => {
 // Получить все источники
 export const getAll = async (req, res) => {
     try {
-        const sources = await BotTrafficSource.find().sort({ createdAt: -1 });
+        const sources = await BotTrafficSource.find().sort({ createdAt: -1 }).lean();
+
+        const counts = await User.aggregate([
+            { $match: { botStartSource: { $ne: null } } },
+            { $group: { _id: "$botStartSource", count: { $sum: 1 } } },
+        ]);
+        const countMap = new Map();
+        for (const row of counts) {
+            countMap.set(row._id.toString(), row.count);
+        }
+
+        const data = sources.map((s) => ({
+            ...s,
+            registrationCount: countMap.get(s._id.toString()) || 0,
+        }));
 
         res.json({
             success: true,
-            data: sources,
-            count: sources.length,
+            data,
+            count: data.length,
         });
     } catch (error) {
         console.log("Ошибка в BotTrafficSourceController.getAll:", error);

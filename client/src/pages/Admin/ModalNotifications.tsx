@@ -205,22 +205,6 @@ export const ModalNotificationsAdmin = () => {
         }
     };
 
-    const handleDeleteCampaign = async (id: string, title: string) => {
-        if (!confirm(`Удалить кампанию «${title}»?`)) return;
-        try {
-            const response = await api.delete(`/api/modal-notification/campaigns/${id}`);
-            if (response.data.success) {
-                toast.success('Кампания удалена');
-                fetchCampaigns();
-                fetchSentModalRows();
-            } else {
-                toast.error(response.data.message || 'Ошибка удаления');
-            }
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Ошибка удаления');
-        }
-    };
-
     const toggleSentSort = (key: SentSortKey) => {
         if (sentSortKey === key) {
             setSentSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
@@ -542,17 +526,25 @@ export const ModalNotificationsAdmin = () => {
                                                 <SortIcon column="clicked" />
                                             </button>
                                         </th>
-                                        <th className="px-4 py-3 w-10"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {sortedCampaigns.map((c) => (
                                         <tr
                                             key={c._id}
-                                            className="border-b border-gray-100 hover:bg-gray-50"
+                                            role="button"
+                                            tabIndex={0}
+                                            onClick={() => navigate(`/admin/modal-notifications/campaign/${c._id}`)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                    e.preventDefault();
+                                                    navigate(`/admin/modal-notifications/campaign/${c._id}`);
+                                                }
+                                            }}
+                                            className="border-b border-gray-100 hover:bg-green-50/60 cursor-pointer transition-colors"
                                         >
                                             <td
-                                                className="px-4 py-3 max-w-[200px] truncate"
+                                                className="px-4 py-3 max-w-[200px] truncate font-medium text-gray-900"
                                                 title={c.modalTitle}
                                             >
                                                 {c.modalTitle}
@@ -586,16 +578,6 @@ export const ModalNotificationsAdmin = () => {
                                             </td>
                                             <td className="px-4 py-3 text-right tabular-nums font-medium text-gray-800">
                                                 {c.stats.clickedButton}
-                                            </td>
-                                            <td className="px-4 py-3 text-right">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleDeleteCampaign(c._id, c.modalTitle)}
-                                                    className="text-red-500 hover:text-red-700 transition-colors"
-                                                    title="Удалить"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
                                             </td>
                                         </tr>
                                     ))}

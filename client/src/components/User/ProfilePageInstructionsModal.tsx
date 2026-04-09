@@ -60,7 +60,7 @@ const INSTRUCTION_STEPS: ProfileInstructionStep[] = [
         targetId: 'profile-instruction-video-settings',
         curveBend: 42,
         targetOffsetY: -20,
-        originOffsetX: 40,
+        originOffsetX: 55,
     },
     {
         title: 'Уведомления',

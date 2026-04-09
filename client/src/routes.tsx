@@ -71,6 +71,7 @@ import { BroadcastFormAdmin } from "./pages/Admin/BroadcastForm";
 import { BroadcastSentView } from "./pages/Admin/BroadcastSentView";
 import { ModalNotificationsAdmin } from "./pages/Admin/ModalNotifications";
 import { ModalNotificationFormAdmin } from "./pages/Admin/ModalNotificationForm";
+import { ModalNotificationCampaignView } from "./pages/Admin/ModalNotificationCampaignView";
 import { AdminsAdmin } from "./pages/Admin/Admins";
 import { AdminForm } from "./pages/Admin/AdminForm";
 import { AdminActionLogs } from "./pages/Admin/AdminActionLogs";
@@ -836,6 +837,10 @@ export const routes = createBrowserRouter([
     {
         path: "/admin/modal-notifications/edit/:id",
         element: <RootLayout><ProtectedRoute requiredRole={["admin", "client_manager", "manager"]}><ModalNotificationFormAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/modal-notifications/campaign/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "client_manager", "manager"]}><ModalNotificationCampaignView /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/admin/admins",

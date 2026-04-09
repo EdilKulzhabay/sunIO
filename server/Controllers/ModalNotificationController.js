@@ -302,6 +302,52 @@ export const processScheduledModalNotifications = async () => {
     }
 };
 
+/** Получить одну кампанию по ID с подробной статистикой */
+export const getModalCampaignById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const campaign = await ModalNotificationCampaign.findById(id)
+            .populate("createdBy", "fullName telegramUserName")
+            .lean();
+
+        if (!campaign) {
+            return res.status(404).json({ success: false, message: "Кампания не найдена" });
+        }
+
+        const statsAgg = await ModalNotificationInteraction.aggregate([
+            { $match: { campaignId: campaign._id } },
+            {
+                $group: {
+                    _id: "$action",
+                    count: { $sum: 1 },
+                },
+            },
+        ]);
+        const stats = { closedModal: 0, clickedButton: 0 };
+        for (const row of statsAgg) {
+            if (row._id === "dismiss") stats.closedModal = row.count;
+            if (row._id === "button") stats.clickedButton = row.count;
+        }
+
+        const schedule = await ModalNotificationSchedule.findOne({ "payload.campaignId": id })
+            .sort({ createdAt: -1 })
+            .lean();
+
+        res.json({
+            success: true,
+            data: {
+                ...campaign,
+                stats,
+                payload: schedule?.payload || null,
+                result: schedule?.result || null,
+            },
+        });
+    } catch (error) {
+        console.log("Ошибка в getModalCampaignById:", error);
+        res.status(500).json({ success: false, message: "Ошибка загрузки кампании" });
+    }
+};
+
 /** Список кампаний с агрегированной статистикой (закрыли / нажали кнопку) */
 export const listModalCampaigns = async (req, res) => {
     try {

@@ -13,8 +13,8 @@ import referralLevel5 from "../../assets/referralLevel5.png";
 import referralLevel6 from "../../assets/referralLevel6.png";
 
 const REFERRAL_LEVELS = [
-    { min: 0, max: 5, label: 'Новичок', icon: referralLevel1 },
-    { min: 5, max: 10, label: 'Знакомый', icon: referralLevel2 },
+    { min: 0, max: 5, label: 'Гость', icon: referralLevel1 },
+    { min: 5, max: 10, label: 'Участник', icon: referralLevel2 },
     { min: 10, max: 25, label: 'Друг', icon: referralLevel3 },
     { min: 25, max: 50, label: 'Амбассадор', icon: referralLevel4 },
     { min: 50, max: 75, label: 'Легенда', icon: referralLevel5 },
@@ -47,7 +47,7 @@ export const ClientHumanDesign = () => {
     const [birthCity, setBirthCity] = useState('');
     const [saving, setSaving] = useState(false);
 
-    const [modalType, setModalType] = useState<'registration' | 'referrals' | 'success' | null>(null);
+    const [modalType, setModalType] = useState<'registration' | 'referrals' | 'success' | 'update' | null>(null);
 
     const fetchDynamicContentHumanDesignFirstPart = async () => {
         const response = await api.get(`/api/dynamic-content/name/human-design-first-part`);
@@ -120,7 +120,16 @@ export const ClientHumanDesign = () => {
         return Math.min(100, ((invitedUsersCount - levelInfo.min) / range) * 100);
     }, [invitedUsersCount, levelInfo]);
 
+    const hasSavedData = useMemo(() => {
+        return !!(userData?.hdBirthDate || userData?.hdBirthTime || userData?.hdBirthCity);
+    }, [userData]);
+
     const handleSave = async () => {
+        if (hasSavedData) {
+            setModalType('update');
+            return;
+        }
+
         if (!isRegistered) {
             setModalType('registration');
             return;
@@ -239,7 +248,7 @@ export const ClientHumanDesign = () => {
                             </div>
                         </div>
 
-                        <div dangerouslySetInnerHTML={{ __html: dynamicContentHumanDesignSecondPart }}></div>
+                        <div className="mt-3" dangerouslySetInnerHTML={{ __html: dynamicContentHumanDesignSecondPart }}></div>
 
                         {/* Блок приглашения */}
                         <div onClick={() => navigate('/client/invited-users')} className="mt-3 bg-[#114E50] rounded-lg p-4 space-y-2 cursor-pointer">
@@ -277,7 +286,7 @@ export const ClientHumanDesign = () => {
                             )}
                         </div>
 
-                        <div dangerouslySetInnerHTML={{ __html: dynamicContentHumanDesignThirdPart }}></div>
+                        <div className="mt-3" dangerouslySetInnerHTML={{ __html: dynamicContentHumanDesignThirdPart }}></div>
 
                         {/* Поля ввода данных рождения */}
                         <div className="mt-3 grid grid-cols-3 gap-x-3">
@@ -286,7 +295,7 @@ export const ClientHumanDesign = () => {
                                 <input
                                     type="text"
                                     inputMode="numeric"
-                                    placeholder="DD.MM.YYYY"
+                                    placeholder={`Дата\nрождения`}
                                     value={birthDate}
                                     onChange={(e) => {
                                         const digits = e.target.value.replace(/\D/g, '').slice(0, 8);
@@ -304,7 +313,7 @@ export const ClientHumanDesign = () => {
                                 <input
                                     type="text"
                                     inputMode="numeric"
-                                    placeholder="HH.MM"
+                                    placeholder={`Время\nрождения`}
                                     value={birthTime}
                                     onChange={(e) => {
                                         const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
@@ -320,7 +329,7 @@ export const ClientHumanDesign = () => {
                                 <label className="text-white/60 text-xs mb-1 text-center leading-tight">Город<br/>рождения</label>
                                 <input
                                     type="text"
-                                    placeholder="Город"
+                                    placeholder={`Место\nрождения`}
                                     value={birthCity}
                                     onChange={(e) => setBirthCity(e.target.value)}
                                     className="w-full bg-[#114E50] py-3 px-3 rounded-xl text-white text-center placeholder-white/60 outline-none text-sm"
@@ -335,7 +344,7 @@ export const ClientHumanDesign = () => {
                             disabled={saving}
                             className="w-full block mt-4 bg-white/10 text-[#FFFFFF] py-2.5 text-center font-medium rounded-full cursor-pointer disabled:opacity-50"
                         >
-                            {saving ? 'Сохранение...' : 'Сохранить данные'}
+                            {saving ? 'Сохранение...' : hasSavedData ? 'Обновить данные' : 'Сохранить данные'}
                         </button>
                     </div>
                 </div>
@@ -364,12 +373,24 @@ export const ClientHumanDesign = () => {
                                 <>
                                     <h3 className="text-xl font-bold mb-2">Сохранение данных</h3>
                                     <p className="mb-4">Чтобы сохранить данные рождения для получения рекомендаций, нужно пройти регистрацию</p>
+                                    <button
+                                        onClick={() => setModalType(null)}
+                                        className="w-full bg-[#C4841D] text-white py-2.5 text-center font-medium rounded-full mt-2"
+                                    >
+                                        Понятно
+                                    </button>
                                 </>
                             )}
                             {modalType === 'referrals' && (
                                 <>
                                     <h3 className="text-xl font-bold mb-2">Доступ к рекомендациям</h3>
                                     <p className="mb-4">Персональные рекомендации предоставляются только Друзьям Сообщества. Чтобы получить статус Друга, пригласи 10 человек в Приложение «Солнце»</p>
+                                    <button
+                                        onClick={() => setModalType(null)}
+                                        className="w-full bg-[#C4841D] text-white py-2.5 text-center font-medium rounded-full mt-2"
+                                    >
+                                        Понятно
+                                    </button>
                                 </>
                             )}
                             {modalType === 'success' && (
@@ -381,6 +402,18 @@ export const ClientHumanDesign = () => {
                                         className="w-full bg-[#C4841D] text-white py-2.5 text-center font-medium rounded-full mt-2"
                                     >
                                         Понятно
+                                    </button>
+                                </>
+                            )}
+                            {modalType === 'update' && (
+                                <>
+                                    <h3 className="text-xl font-bold mb-2">Обновление данных</h3>
+                                    <p className="mb-4">Обновление данных возможно только администратором системы. Свяжитесь со службой заботы через Telegram или WhatsApp</p>
+                                    <button
+                                        onClick={() => { setModalType(null); navigate('/client/contact-us'); }}
+                                        className="w-full bg-[#C4841D] text-white py-2.5 text-center font-medium rounded-full mt-2"
+                                    >
+                                        Связаться с нами
                                     </button>
                                 </>
                             )}
@@ -426,6 +459,18 @@ export const ClientHumanDesign = () => {
                                         className="w-full bg-[#C4841D] text-white py-2.5 text-center font-medium rounded-full mt-2"
                                     >
                                         Понятно
+                                    </button>
+                                </>
+                            )}
+                            {modalType === 'update' && (
+                                <>
+                                    <h3 className="text-xl font-bold mb-2">Обновление данных</h3>
+                                    <p className="mb-4">Обновление данных возможно только администратором системы. Свяжитесь со службой заботы через Telegram или WhatsApp</p>
+                                    <button
+                                        onClick={() => { setModalType(null); navigate('/client/contact-us'); }}
+                                        className="w-full bg-[#C4841D] text-white py-2.5 text-center font-medium rounded-full mt-2"
+                                    >
+                                        Связаться с нами
                                     </button>
                                 </>
                             )}

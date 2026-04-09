@@ -118,6 +118,9 @@ export const UserForm = () => {
                 karmicBodyActivation: !!data.karmicBodyActivation,
                 buddhicBodyActivation: !!data.buddhicBodyActivation,
                 atmicBodyActivation: !!data.atmicBodyActivation,
+                hdBirthDate: data.hdBirthDate || '',
+                hdBirthTime: data.hdBirthTime || '',
+                hdBirthCity: data.hdBirthCity || '',
             });
             if (data.telegramId) {
                 fetchReferrals(data.telegramId);

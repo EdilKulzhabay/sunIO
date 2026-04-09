@@ -249,7 +249,7 @@ bot.action('consent_accept', async (ctx) => {
           console.error(`[fullName-check] Ошибка для пользователя ${telegramId}:`, err.message);
         }
       })();
-    }, 15 * 60 * 1000);
+    }, 60 * 60 * 1000);
   } catch (error) {
     if (error.response?.error_code === 403) {
       console.log(`⚠️ Пользователь ${telegramId} заблокировал бота.`);

@@ -630,3 +630,30 @@ export const cancelScheduledModalNotification = async (req, res) => {
         res.status(500).json({ success: false, message: "Ошибка отмены" });
     }
 };
+
+export const deleteModalCampaign = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const campaign = await ModalNotificationCampaign.findById(id).lean();
+        if (!campaign) {
+            return res.status(404).json({ success: false, message: "Кампания не найдена" });
+        }
+
+        await ModalNotificationCampaign.findByIdAndDelete(id);
+        await ModalNotificationSchedule.deleteMany({ "payload.campaignId": id });
+
+        const user = req.user;
+        if (user) {
+            const preview = (campaign.modalTitle || "").substring(0, 50);
+            await addAdminAction(
+                user._id,
+                `Удалил(а) кампанию модального уведомления: "${preview}${preview.length >= 50 ? "..." : ""}"`
+            );
+        }
+
+        res.json({ success: true, message: "Кампания удалена" });
+    } catch (error) {
+        console.log("Ошибка в deleteModalCampaign:", error);
+        res.status(500).json({ success: false, message: "Ошибка удаления кампании" });
+    }
+};

@@ -15,6 +15,7 @@ import {
     ArrowUp,
     ArrowDown,
     ArrowUpDown,
+    Search,
 } from 'lucide-react';
 
 interface CampaignStats {
@@ -95,6 +96,7 @@ export const ModalNotificationsAdmin = () => {
 
     const [sentSortKey, setSentSortKey] = useState<SentSortKey>('sentAt');
     const [sentSortDir, setSentSortDir] = useState<'asc' | 'desc'>('desc');
+    const [campaignSearch, setCampaignSearch] = useState('');
 
     const fetchSavedTemplates = async () => {
         setLoadingSaved(true);
@@ -203,6 +205,22 @@ export const ModalNotificationsAdmin = () => {
         }
     };
 
+    const handleDeleteCampaign = async (id: string, title: string) => {
+        if (!confirm(`Удалить кампанию «${title}»?`)) return;
+        try {
+            const response = await api.delete(`/api/modal-notification/campaigns/${id}`);
+            if (response.data.success) {
+                toast.success('Кампания удалена');
+                fetchCampaigns();
+                fetchSentModalRows();
+            } else {
+                toast.error(response.data.message || 'Ошибка удаления');
+            }
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Ошибка удаления');
+        }
+    };
+
     const toggleSentSort = (key: SentSortKey) => {
         if (sentSortKey === key) {
             setSentSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
@@ -213,9 +231,14 @@ export const ModalNotificationsAdmin = () => {
     };
 
     const sortedCampaigns = useMemo(() => {
-        const list = [...campaigns];
-        const mult = sentSortDir === 'asc' ? 1 : -1;
+        let list = [...campaigns];
 
+        if (campaignSearch.trim()) {
+            const q = campaignSearch.trim().toLowerCase();
+            list = list.filter((c) => c.modalTitle?.toLowerCase().includes(q));
+        }
+
+        const mult = sentSortDir === 'asc' ? 1 : -1;
         switch (sentSortKey) {
             case 'sentAt':
                 list.sort((a, b) => {
@@ -235,7 +258,7 @@ export const ModalNotificationsAdmin = () => {
                 break;
         }
         return list;
-    }, [campaigns, sentSortKey, sentSortDir]);
+    }, [campaigns, sentSortKey, sentSortDir, campaignSearch]);
 
     const SortIcon = ({ column }: { column: SentSortKey }) => {
         if (sentSortKey !== column) {
@@ -439,9 +462,30 @@ export const ModalNotificationsAdmin = () => {
 
                 {/* Статистика */}
                 <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
-                    <div className="flex items-center gap-2 text-gray-900 font-semibold border-b pb-2">
-                        <BarChart3 size={20} />
-                        Статистика по кампаниям
+                    <div className="flex items-center justify-between border-b pb-2">
+                        <div className="flex items-center gap-2 text-gray-900 font-semibold">
+                            <BarChart3 size={20} />
+                            Статистика по кампаниям
+                        </div>
+                        <div className="relative w-64">
+                            <input
+                                type="text"
+                                value={campaignSearch}
+                                onChange={(e) => setCampaignSearch(e.target.value)}
+                                placeholder="Поиск по заголовку…"
+                                className="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                            <Search className="absolute left-2.5 top-2.5 text-gray-400" size={16} />
+                            {campaignSearch && (
+                                <button
+                                    type="button"
+                                    onClick={() => setCampaignSearch('')}
+                                    className="absolute right-2.5 top-2.5 text-gray-400 hover:text-gray-600"
+                                >
+                                    <X size={16} />
+                                </button>
+                            )}
+                        </div>
                     </div>
                     {campaignsLoading ? (
                         <p className="text-sm text-gray-500">Загрузка…</p>
@@ -498,6 +542,7 @@ export const ModalNotificationsAdmin = () => {
                                                 <SortIcon column="clicked" />
                                             </button>
                                         </th>
+                                        <th className="px-4 py-3 w-10"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -541,6 +586,16 @@ export const ModalNotificationsAdmin = () => {
                                             </td>
                                             <td className="px-4 py-3 text-right tabular-nums font-medium text-gray-800">
                                                 {c.stats.clickedButton}
+                                            </td>
+                                            <td className="px-4 py-3 text-right">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDeleteCampaign(c._id, c.modalTitle)}
+                                                    className="text-red-500 hover:text-red-700 transition-colors"
+                                                    title="Удалить"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}

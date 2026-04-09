@@ -526,6 +526,7 @@ app.delete(
     authMiddleware,
     ModalNotificationController.cancelScheduledModalNotification
 );
+app.delete("/api/modal-notification/campaigns/:id", authMiddleware, ModalNotificationController.deleteModalCampaign);
 app.post("/api/modal-notification/create", createContentRateLimit, authMiddleware, ModalNotificationController.createModalNotification);
 app.post("/api/modal-notification/my", ModalNotificationController.getUserModalNotifications);
 app.post("/api/modal-notification/remove", ModalNotificationController.removeModalNotification);

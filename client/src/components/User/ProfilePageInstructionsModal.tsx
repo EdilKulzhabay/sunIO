@@ -10,6 +10,7 @@ export interface ProfileInstructionStep {
     arrowOrigin?: ArrowOrigin;
     curveBend?: number;
     targetOffsetY?: number;
+    originOffsetX?: number;
 }
 
 const INSTRUCTION_STEPS: ProfileInstructionStep[] = [
@@ -58,6 +59,8 @@ const INSTRUCTION_STEPS: ProfileInstructionStep[] = [
         description: 'В РФ запрещён к использованию YouTube, при включенном параметре будут активны RuTube ссылки',
         targetId: 'profile-instruction-video-settings',
         curveBend: 42,
+        targetOffsetY: -20,
+        originOffsetX: 40,
     },
     {
         title: 'Уведомления',
@@ -141,7 +144,7 @@ export const ProfilePageInstructionsModal = ({ currentStep, onNext, onClose }: P
             const targetRect = targetEl.getBoundingClientRect();
             const modalRect = modalEl.getBoundingClientRect();
 
-            const targetCenterX = targetRect.left + targetRect.width / 2;
+            const targetCenterX = targetRect.left + targetRect.width / 2 + (step.originOffsetX ?? 0);
             const targetCenterY = targetRect.top + targetRect.height / 2 + (step.targetOffsetY ?? 0);
 
             let originX: number;

@@ -14,6 +14,8 @@ import {
     ArrowUp,
     ArrowDown,
     ArrowUpDown,
+    Search,
+    X,
 } from 'lucide-react';
 
 interface SavedBroadcast {
@@ -55,6 +57,7 @@ export const BroadcastAdmin = () => {
     const [loadingSent, setLoadingSent] = useState(false);
     const [sentSortKey, setSentSortKey] = useState<SentSortKey>('sentAt');
     const [sentSortDir, setSentSortDir] = useState<'asc' | 'desc'>('desc');
+    const [sentSearch, setSentSearch] = useState('');
     const navigate = useNavigate();
 
     const fetchAll = () => {
@@ -168,7 +171,17 @@ export const BroadcastAdmin = () => {
     };
 
     const sortedSentBroadcasts = useMemo(() => {
-        const list = [...sentBroadcasts];
+        let list = [...sentBroadcasts];
+
+        if (sentSearch.trim()) {
+            const q = sentSearch.trim().toLowerCase();
+            list = list.filter((item) => {
+                const title = (item.payload?.title || '').toLowerCase();
+                const message = stripHtml(item.payload?.message || '').toLowerCase();
+                return title.includes(q) || message.includes(q);
+            });
+        }
+
         const mult = sentSortDir === 'asc' ? 1 : -1;
 
         if (sentSortKey === 'sentAt') {
@@ -201,7 +214,7 @@ export const BroadcastAdmin = () => {
             return mult * (av - bv);
         });
         return list;
-    }, [sentBroadcasts, sentSortKey, sentSortDir]);
+    }, [sentBroadcasts, sentSortKey, sentSortDir, sentSearch]);
 
     const SentSortIcon = ({ column }: { column: SentSortKey }) => {
         if (sentSortKey !== column) {
@@ -328,9 +341,30 @@ export const BroadcastAdmin = () => {
 
                 {/* Отправленные рассылки */}
                 <div className="bg-white rounded-lg shadow-sm p-6">
-                    <div className="flex items-center gap-2 mb-4">
-                        <Send size={18} />
-                        <h2 className="text-xl font-semibold text-gray-900">Отправленные рассылки</h2>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                        <div className="flex items-center gap-2">
+                            <Send size={18} />
+                            <h2 className="text-xl font-semibold text-gray-900">Отправленные рассылки</h2>
+                        </div>
+                        <div className="relative w-full sm:w-72">
+                            <input
+                                type="text"
+                                value={sentSearch}
+                                onChange={(e) => setSentSearch(e.target.value)}
+                                placeholder="Поиск по названию…"
+                                className="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                            <Search className="absolute left-2.5 top-2.5 text-gray-400" size={16} />
+                            {sentSearch && (
+                                <button
+                                    type="button"
+                                    onClick={() => setSentSearch('')}
+                                    className="absolute right-2 top-2 text-gray-400 hover:text-gray-600"
+                                >
+                                    <X size={16} />
+                                </button>
+                            )}
+                        </div>
                     </div>
                     {loadingSent && <p className="text-gray-500 text-center py-4">Загрузка...</p>}
                     {!loadingSent && sentBroadcasts.length > 0 && (

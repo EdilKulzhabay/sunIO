@@ -118,7 +118,9 @@ export const ProfilePageInstructionsModal = ({ currentStep, onNext, onClose }: P
         if (targetEl) {
             const timer = setTimeout(() => {
                 const rect = targetEl.getBoundingClientRect();
-                const inView = rect.top >= 0 && rect.bottom <= window.innerHeight;
+                const modalHeight = modalRef.current?.getBoundingClientRect().height ?? 0;
+                const visibleBottom = window.innerHeight - modalHeight;
+                const inView = rect.top >= 0 && rect.bottom <= visibleBottom;
                 if (!inView) {
                     targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }

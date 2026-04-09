@@ -164,7 +164,7 @@ bot.action('consent_accept', async (ctx) => {
           console.error(`Ошибка отложенного сообщения с restart.jpg пользователю ${telegramId}:`, err.message);
         }
       })();
-    }, 2 * 60 * 1000);
+    }, 15 * 60 * 1000);
 
     const FULLNAME_CHECK_BROADCAST_ID = '69900c3ea695ff7fbab477ac';
     setTimeout(() => {
@@ -242,7 +242,7 @@ bot.action('consent_accept', async (ctx) => {
           console.error(`[fullName-check] Ошибка для пользователя ${telegramId}:`, err.message);
         }
       })();
-    }, 60 * 60 * 1000);
+    }, 15 * 60 * 1000);
   } catch (error) {
     if (error.response?.error_code === 403) {
       console.log(`⚠️ Пользователь ${telegramId} заблокировал бота.`);

@@ -56,7 +56,7 @@ const menuItems = [
     { path: '/admin/modal-notifications', label: 'Модальные уведомления', icon: Bell },
     { path: '/admin/profile', label: 'Профиль', icon: User },
     { path: '', label: '', icon: null, divider: true }, // Разделитель
-    { path: '/admin/faq', label: 'FAQ', icon: HelpCircle },
+    { path: '/admin/faq', label: 'Частые вопросы', icon: HelpCircle },
     { path: '/admin/documents', label: 'Документы', icon: FileText },
     { path: '/admin/practice', label: 'Практики', icon: Dumbbell },
     { path: '/admin/broadcast-recordings', label: 'Записи эфиров', icon: Video },

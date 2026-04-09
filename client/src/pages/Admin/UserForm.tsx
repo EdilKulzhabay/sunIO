@@ -16,6 +16,13 @@ const COMPLETED_BODY_ACTIVATIONS = [
     { key: 'atmicBodyActivation' as const, label: 'Активация атманического тела' },
 ];
 
+interface Referral {
+    _id: string;
+    fullName: string;
+    telegramUserName?: string;
+    createdAt: string;
+}
+
 interface FormData {
     fullName: string;
     mail: string;
@@ -40,6 +47,9 @@ interface FormData {
     karmicBodyActivation?: boolean;
     buddhicBodyActivation?: boolean;
     atmicBodyActivation?: boolean;
+    hdBirthDate?: string;
+    hdBirthTime?: string;
+    hdBirthCity?: string;
 }
 
 export const UserForm = () => {
@@ -48,6 +58,8 @@ export const UserForm = () => {
     const [loading, setLoading] = useState(false);
     const [subscriptionEndDate, setSubscriptionEndDate] = useState('');
     const [botTrafficSources, setBotTrafficSources] = useState<Array<{ _id: string; title: string; botParameter: string }>>([]);
+    const [referrals, setReferrals] = useState<Referral[]>([]);
+    const [referralsLoading, setReferralsLoading] = useState(false);
     const [formData, setFormData] = useState<FormData>({
         fullName: '',
         mail: '',
@@ -107,7 +119,9 @@ export const UserForm = () => {
                 buddhicBodyActivation: !!data.buddhicBodyActivation,
                 atmicBodyActivation: !!data.atmicBodyActivation,
             });
-            // Преобразуем subscriptionEndDate из Date в формат DD-MM-YYYY
+            if (data.telegramId) {
+                fetchReferrals(data.telegramId);
+            }
             if (data.subscriptionEndDate) {
                 const date = new Date(data.subscriptionEndDate);
                 const day = String(date.getDate()).padStart(2, '0');
@@ -120,6 +134,21 @@ export const UserForm = () => {
         } catch (error: any) {
             toast.error('Ошибка загрузки пользователя');
             navigate('/admin/users');
+        }
+    };
+
+    const fetchReferrals = async (telegramId: string) => {
+        if (!telegramId) return;
+        setReferralsLoading(true);
+        try {
+            const response = await api.post('/api/user/invited-users', { telegramId });
+            if (response.data.success) {
+                setReferrals(response.data.invitedUsers || []);
+            }
+        } catch {
+            /* ignore */
+        } finally {
+            setReferralsLoading(false);
         }
     };
 
@@ -555,6 +584,70 @@ export const UserForm = () => {
                                     </span>
                                 </label>
                             ))}
+                        </div>
+                    )}
+
+                    {/* Дизайн Человека */}
+                    {id && (formData.hdBirthDate || formData.hdBirthTime || formData.hdBirthCity) && (
+                        <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
+                            <h2 className="text-xl font-semibold text-gray-900">Дизайн Человека</h2>
+                            <div className="grid grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Дата рождения</label>
+                                    <p className="text-sm text-gray-900">{formData.hdBirthDate || '—'}</p>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Время рождения</label>
+                                    <p className="text-sm text-gray-900">{formData.hdBirthTime || '—'}</p>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Город рождения</label>
+                                    <p className="text-sm text-gray-900">{formData.hdBirthCity || '—'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Рефералы */}
+                    {id && (
+                        <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
+                            <h2 className="text-xl font-semibold text-gray-900">
+                                Рефералы {referrals.length > 0 && <span className="text-base font-normal text-gray-500">({referrals.length})</span>}
+                            </h2>
+                            {referralsLoading && (
+                                <p className="text-gray-500 text-center py-4">Загрузка…</p>
+                            )}
+                            {!referralsLoading && referrals.length === 0 && (
+                                <p className="text-gray-500 text-center py-4">Нет рефералов</p>
+                            )}
+                            {!referralsLoading && referrals.length > 0 && (
+                                <div className="overflow-x-auto border border-gray-200 rounded-lg">
+                                    <table className="min-w-full text-sm text-left">
+                                        <thead className="bg-gray-50 border-b border-gray-200">
+                                            <tr>
+                                                <th className="px-4 py-3 font-medium text-gray-700">Полное имя</th>
+                                                <th className="px-4 py-3 font-medium text-gray-700">TG Имя</th>
+                                                <th className="px-4 py-3 font-medium text-gray-700 whitespace-nowrap">Дата регистрации</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {referrals.map((ref) => (
+                                                <tr key={ref._id} className="border-b border-gray-100 hover:bg-gray-50">
+                                                    <td className="px-4 py-3 text-gray-900">{ref.fullName || '—'}</td>
+                                                    <td className="px-4 py-3 text-gray-600">
+                                                        {ref.telegramUserName ? `@${ref.telegramUserName}` : '—'}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
+                                                        {ref.createdAt
+                                                            ? new Date(ref.createdAt).toLocaleDateString('ru-RU')
+                                                            : '—'}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
                         </div>
                     )}
 

@@ -24,6 +24,7 @@ import { openExternalLink } from "../../utils/telegramWebApp";
 import { toast } from "react-toastify";
 import copyLinkIcon from "../../assets/copyLink.png";
 import { QRCodeSVG } from "qrcode.react";
+import humanDesign from "../../assets/humanDesign.png";
 
 
 // const SmallCard = ({ title, link, img }: { title: string, link: string, img: string }) => {
@@ -533,6 +534,9 @@ export const Main = () => {
                         </Link>
                         <Link to="/client/product-catalog" id="main-instruction-product-catalog">
                             <img src={productsCatalog} alt="productsCatalog" className="w-6 h-6" />
+                        </Link>
+                        <Link to="/client/human-design" id="main-instruction-human-design">
+                            <img src={humanDesign} alt="humanDesign" className="w-6 h-6" />
                         </Link>
                         <Link to="/client/faq" id="main-instruction-faq">
                             <img src={faq} alt="faq" className="w-6 h-6" />

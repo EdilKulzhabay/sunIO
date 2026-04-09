@@ -1373,7 +1373,7 @@ export const bulkDeleteByFilter = async (req, res) => {
 // Обновить профиль текущего пользователя
 export const updateProfile = async (req, res) => {
     try {
-        const { fullName, phone, profilePhotoUrl, userId, showMainPageInstructions, showProfilePageInstructions, selectedAssignmentRequest } = req.body;
+        const { fullName, phone, profilePhotoUrl, userId, showMainPageInstructions, showProfilePageInstructions, selectedAssignmentRequest, hdBirthDate, hdBirthTime, hdBirthCity } = req.body;
 
         // Формируем объект для обновления
         const updateData = {};
@@ -1383,6 +1383,9 @@ export const updateProfile = async (req, res) => {
         if (showMainPageInstructions !== undefined) updateData.showMainPageInstructions = showMainPageInstructions;
         if (showProfilePageInstructions !== undefined) updateData.showProfilePageInstructions = showProfilePageInstructions;
         if (selectedAssignmentRequest !== undefined) updateData.selectedAssignmentRequest = selectedAssignmentRequest;
+        if (hdBirthDate !== undefined) updateData.hdBirthDate = hdBirthDate;
+        if (hdBirthTime !== undefined) updateData.hdBirthTime = hdBirthTime;
+        if (hdBirthCity !== undefined) updateData.hdBirthCity = hdBirthCity;
 
         const user = await User.findByIdAndUpdate(
             userId,
@@ -2195,7 +2198,9 @@ export const getInvitedUsers = async (req, res) => {
         if (!user) {
             return res.status(404).json({ success: false, message: 'Пользователь не найден' });
         }
-        const invitedUsers = await User.find({ invitedUser: user._id, status: { $ne: 'anonym' } }).select('telegramId telegramUserName fullName');
+        const invitedUsers = await User.find({ invitedUser: user._id, status: { $ne: 'anonym' } })
+            .select('telegramId telegramUserName fullName createdAt')
+            .sort({ createdAt: -1 });
         res.json({ success: true, invitedUsers });
     } catch (error) {
         console.error('Ошибка в payment:', error);

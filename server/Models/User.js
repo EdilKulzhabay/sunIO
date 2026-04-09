@@ -256,6 +256,18 @@ const UserSchema = new mongoose.Schema({
         type: String,
         default: '',
     },
+    hdBirthDate: {
+        type: String,
+        default: '',
+    },
+    hdBirthTime: {
+        type: String,
+        default: '',
+    },
+    hdBirthCity: {
+        type: String,
+        default: '',
+    },
 }, {
     timestamps: true
 });

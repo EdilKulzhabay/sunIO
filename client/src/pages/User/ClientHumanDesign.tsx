@@ -5,20 +5,20 @@ import { BackNav } from "../../components/User/BackNav";
 import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
 import copyLinkIcon from "../../assets/copyLink.png";
-import level1 from "../../assets/level1.png";
-import level2 from "../../assets/level2.png";
-import level3 from "../../assets/level3.png";
-import level4 from "../../assets/level4.png";
-import level5 from "../../assets/level5.png";
-import level6 from "../../assets/level6.png";
+import referralLevel1 from "../../assets/referralLevel1.png";
+import referralLevel2 from "../../assets/referralLevel2.png";
+import referralLevel3 from "../../assets/referralLevel3.png";
+import referralLevel4 from "../../assets/referralLevel4.png";
+import referralLevel5 from "../../assets/referralLevel5.png";
+import referralLevel6 from "../../assets/referralLevel6.png";
 
 const REFERRAL_LEVELS = [
-    { min: 0, max: 5, label: 'Новичок', icon: level1 },
-    { min: 5, max: 10, label: 'Знакомый', icon: level2 },
-    { min: 10, max: 25, label: 'Друг', icon: level3 },
-    { min: 25, max: 50, label: 'Наставник', icon: level4 },
-    { min: 50, max: 75, label: 'Лидер', icon: level5 },
-    { min: 75, max: 100, label: 'Амбассадор', icon: level6 },
+    { min: 0, max: 5, label: 'Новичок', icon: referralLevel1 },
+    { min: 5, max: 10, label: 'Знакомый', icon: referralLevel2 },
+    { min: 10, max: 25, label: 'Друг', icon: referralLevel3 },
+    { min: 25, max: 50, label: 'Наставник', icon: referralLevel4 },
+    { min: 50, max: 75, label: 'Лидер', icon: referralLevel5 },
+    { min: 75, max: 100, label: 'Амбассадор', icon: referralLevel6 },
 ];
 
 function getReferralLevel(count: number) {

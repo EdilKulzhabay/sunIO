@@ -7,7 +7,6 @@ const EXACT: Record<string, string> = {
     '/client/faq': 'Частые вопросы',
     '/client/transit': 'Транзит',
     '/client/transits': 'Транзиты',
-    '/client/schumann': 'Резонанс Шумана',
     '/client/contactus': 'Связаться с нами',
     '/client/practices': 'Практики',
     '/client/broadcast-recordings': 'Записи эфиров',
@@ -97,9 +96,6 @@ const MAIN_MENU_PATHS = new Set([
 ]);
 
 const SECTION_EXACT: Record<string, string> = {
-    '/client/transit': 'Транзиты',
-    '/client/transits': 'Транзиты',
-    '/client/schumann': 'Резонанс Шумана',
     '/client/broadcast-recordings': 'Записи эфиров',
     '/client/parables-of-life': 'Притчи',
     '/client/scientific-discoveries': 'Научные открытия',

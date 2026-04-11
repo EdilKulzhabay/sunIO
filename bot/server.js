@@ -665,12 +665,15 @@ app.post('/api/bot/add-user', async (req, res) => {
             group: null
         };
 
-        // Отправляем invite-ссылку для канала, если указан
-        if (CHANNEL_ID) {
+        const channelIdForRequest = req.body.channelId ?? CHANNEL_ID;
+        const groupIdForRequest = req.body.groupId ?? GROUP_ID;
+
+        // Отправляем invite-ссылку для канала, если указан (из тела запроса или .env)
+        if (channelIdForRequest) {
             try {
                 // Используем очередь для предотвращения конфликтов с polling
                 await executeUserOperation(async () => {
-                    return await bot.telegram.unbanChatMember(CHANNEL_ID, telegramId, {
+                    return await bot.telegram.unbanChatMember(channelIdForRequest, telegramId, {
                     only_if_banned: true
                     });
                 });
@@ -696,10 +699,10 @@ app.post('/api/bot/add-user', async (req, res) => {
             }
             
             try {
-                console.log(`📤 [API] Отправка invite-ссылки для канала ${CHANNEL_ID}`);
-                results.channel = await sendInviteLinkToUser(CHANNEL_ID, parseInt(telegramId));
+                console.log(`📤 [API] Отправка invite-ссылки для канала ${channelIdForRequest}`);
+                results.channel = await sendInviteLinkToUser(channelIdForRequest, parseInt(telegramId));
             } catch (error) {
-                console.error(`❌ [API] Ошибка отправки invite-ссылки для канала ${CHANNEL_ID}:`, error);
+                console.error(`❌ [API] Ошибка отправки invite-ссылки для канала ${channelIdForRequest}:`, error);
                 results.channel = {
                     success: false,
                     inviteSent: false,
@@ -707,20 +710,20 @@ app.post('/api/bot/add-user', async (req, res) => {
                 };
             }
         } else {
-            console.warn(`⚠️ [API] CHANNEL_ID не указан в переменных окружения`);
+            console.warn(`⚠️ [API] ID канала не указан (ни в запросе, ни CHANNEL_ID в .env)`);
             results.channel = {
                 success: false,
                 inviteSent: false,
-                error: 'CHANNEL_ID не указан в переменных окружения'
+                error: 'ID канала не настроен'
             };
         }
 
         // Отправляем invite-ссылку для группы, если указана
-        if (GROUP_ID) {
+        if (groupIdForRequest) {
             try {
                 // Используем очередь для предотвращения конфликтов с polling
                 await executeUserOperation(async () => {
-                    return await bot.telegram.unbanChatMember(GROUP_ID, telegramId, {
+                    return await bot.telegram.unbanChatMember(groupIdForRequest, telegramId, {
                     only_if_banned: true
                     });
                 });
@@ -746,10 +749,10 @@ app.post('/api/bot/add-user', async (req, res) => {
             }
             
             try {
-                console.log(`📤 [API] Отправка invite-ссылки для группы ${GROUP_ID}`);
-                results.group = await sendInviteLinkToUser(GROUP_ID, parseInt(telegramId));
+                console.log(`📤 [API] Отправка invite-ссылки для группы ${groupIdForRequest}`);
+                results.group = await sendInviteLinkToUser(groupIdForRequest, parseInt(telegramId));
             } catch (error) {
-                console.error(`❌ [API] Ошибка отправки invite-ссылки для группы ${GROUP_ID}:`, error);
+                console.error(`❌ [API] Ошибка отправки invite-ссылки для группы ${groupIdForRequest}:`, error);
                 results.group = {
                     success: false,
                     inviteSent: false,
@@ -757,11 +760,11 @@ app.post('/api/bot/add-user', async (req, res) => {
                 };
             }
         } else {
-            console.warn(`⚠️ [API] GROUP_ID не указан в переменных окружения`);
+            console.warn(`⚠️ [API] ID чата не указан (ни в запросе, ни GROUP_ID в .env)`);
             results.group = {
                 success: false,
                 inviteSent: false,
-                error: 'GROUP_ID не указан в переменных окружения'
+                error: 'ID чата не настроен'
             };
         }
 
@@ -826,13 +829,16 @@ app.post('/api/bot/remove-user', async (req, res) => {
             group: null
         };
 
+        const channelIdForRequest = req.body.channelId ?? CHANNEL_ID;
+        const groupIdForRequest = req.body.groupId ?? GROUP_ID;
+
         // Удаляем из канала, если указан
-        if (CHANNEL_ID) {
+        if (channelIdForRequest) {
             try {
-                console.log(`🗑️ [API] Удаление пользователя из канала ${CHANNEL_ID}`);
-                results.channel = await removeUserFromChat(CHANNEL_ID, parseInt(telegramId));
+                console.log(`🗑️ [API] Удаление пользователя из канала ${channelIdForRequest}`);
+                results.channel = await removeUserFromChat(channelIdForRequest, parseInt(telegramId));
             } catch (error) {
-                console.error(`❌ [API] Ошибка удаления из канала ${CHANNEL_ID}:`, error);
+                console.error(`❌ [API] Ошибка удаления из канала ${channelIdForRequest}:`, error);
                 results.channel = {
                     success: false,
                     removed: false,
@@ -840,21 +846,21 @@ app.post('/api/bot/remove-user', async (req, res) => {
                 };
             }
         } else {
-            console.warn(`⚠️ [API] CHANNEL_ID не указан в переменных окружения`);
+            console.warn(`⚠️ [API] ID канала не указан`);
             results.channel = {
                 success: false,
                 removed: false,
-                error: 'CHANNEL_ID не указан в переменных окружения'
+                error: 'ID канала не настроен'
             };
         }
 
         // Удаляем из группы, если указана
-        if (GROUP_ID) {
+        if (groupIdForRequest) {
             try {
-                console.log(`🗑️ [API] Удаление пользователя из группы ${GROUP_ID}`);
-                results.group = await removeUserFromChat(GROUP_ID, parseInt(telegramId));
+                console.log(`🗑️ [API] Удаление пользователя из группы ${groupIdForRequest}`);
+                results.group = await removeUserFromChat(groupIdForRequest, parseInt(telegramId));
             } catch (error) {
-                console.error(`❌ [API] Ошибка удаления из группы ${GROUP_ID}:`, error);
+                console.error(`❌ [API] Ошибка удаления из группы ${groupIdForRequest}:`, error);
                 results.group = {
                     success: false,
                     removed: false,
@@ -862,11 +868,11 @@ app.post('/api/bot/remove-user', async (req, res) => {
                 };
             }
         } else {
-            console.warn(`⚠️ [API] GROUP_ID не указан в переменных окружения`);
+            console.warn(`⚠️ [API] ID чата не указан`);
             results.group = {
                 success: false,
                 removed: false,
-                error: 'GROUP_ID не указан в переменных окружения'
+                error: 'ID чата не настроен'
             };
         }
 
@@ -898,6 +904,57 @@ app.post('/api/bot/remove-user', async (req, res) => {
                 group: null
             }
         });
+    }
+});
+
+/**
+ * Число участников канала/чата (getChatMemberCount). Только с секретом BOT_API_SECRET.
+ * POST /api/bot/member-counts
+ * Body: { channelId?, groupId? } — при отсутствии берутся CHANNEL_ID / GROUP_ID из .env
+ */
+app.post('/api/bot/member-counts', async (req, res) => {
+    try {
+        const expected = process.env.BOT_API_SECRET;
+        const got = req.headers['x-bot-secret'];
+        if (!expected || got !== expected) {
+            return res.status(403).json({ success: false, message: 'Forbidden' });
+        }
+
+        const channelId = req.body.channelId || CHANNEL_ID;
+        const groupId = req.body.groupId || GROUP_ID;
+
+        const out = {
+            success: true,
+            channel: null,
+            group: null,
+            channelError: null,
+            groupError: null,
+        };
+
+        if (channelId) {
+            try {
+                out.channel = await executeUserOperation(async () => {
+                    return await bot.telegram.getChatMemberCount(channelId);
+                });
+            } catch (e) {
+                out.channelError = e.response?.description || e.message || 'Ошибка Telegram API';
+            }
+        }
+
+        if (groupId) {
+            try {
+                out.group = await executeUserOperation(async () => {
+                    return await bot.telegram.getChatMemberCount(groupId);
+                });
+            } catch (e) {
+                out.groupError = e.response?.description || e.message || 'Ошибка Telegram API';
+            }
+        }
+
+        return res.json(out);
+    } catch (error) {
+        console.error('❌ [API] member-counts:', error);
+        return res.status(500).json({ success: false, message: error.message || 'Ошибка сервера' });
     }
 });
 

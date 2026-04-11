@@ -1,7 +1,7 @@
 import { UserLayout } from "../../components/User/UserLayout"
-import { BackNav } from "../../components/User/BackNav"
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import * as XLSX from "xlsx";
 import api from "../../api";
 import arrowDown from "../../assets/arrowDown.png";
 import { Switch } from "../../components/User/Switch.tsx";
@@ -11,9 +11,18 @@ import calendarLeft from "../../assets/calendarLeft.png";
 import calendarRight from "../../assets/calendarRight.png";
 import greenCheck from "../../assets/greenCheck.png";
 import goldCross from "../../assets/goldCross.png";
+import XLS from "../../assets/XLS.png";
 
 const daysOfWeek = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
 const getWeekdayLabel = (date: Date) => daysOfWeek[(date.getDay() + 6) % 7];
+
+const formatDiaryExportDate = (createdAt: string | Date) => {
+    const d = typeof createdAt === "string" ? new Date(createdAt) : createdAt;
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+};
 const width = window.innerWidth;
 const widthPerDay = (width - 60) / 7;
 
@@ -377,6 +386,31 @@ export const ClientDiary = () => {
         setDiaries(buildDiaryList(allDiaries));
     }, [allDiaries]);
 
+    const handleExportDiariesXls = useCallback(() => {
+        if (!allDiaries.length) {
+            toast.info("Нет записей для экспорта");
+            return;
+        }
+        const sorted = [...allDiaries].sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        const rows = sorted.map((d) => ({
+            Дата: formatDiaryExportDate(d.createdAt),
+            Осознание: d.discovery ?? "",
+            Достижения: d.achievement ?? "",
+            "Цели и задачи": d.gratitude ?? "",
+            "Эмоции и энергия": d.emotions ?? "",
+            Упражнение: d.uselessTask ? "да" : "нет",
+        }));
+        const ws = XLSX.utils.json_to_sheet(rows);
+        ws["!cols"] = [{ wch: 12 }, { wch: 36 }, { wch: 36 }, { wch: 36 }, { wch: 36 }, { wch: 12 }];
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Дневник");
+        const stamp = formatDiaryExportDate(new Date()).replace(/-/g, "-");
+        XLSX.writeFile(wb, `Осознания_${stamp}.xlsx`);
+        toast.success("Файл сохранён");
+    }, [allDiaries]);
+
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen bg-[#031F23]">
@@ -388,7 +422,19 @@ export const ClientDiary = () => {
     return (
         <div>
             <UserLayout>
-                <BackNav title="Осознания" />
+                <div className="flex items-center justify-between p-4">
+                    <h1 className="text-2xl font-semibold">Осознания</h1>
+                    <button
+                        type="button"
+                        onClick={handleExportDiariesXls}
+                        className="w-6 h-6 flex items-center justify-center border border-[#00C5AE] rounded-full hover:cursor-pointer"
+                        title="Скачать дневник в Excel"
+                    >
+                        <div className="ml-px">
+                            <img src={XLS} alt="" className="w-4 h-4" aria-hidden />
+                        </div>
+                    </button>
+                </div>
                 <div 
                     className="px-4 -mt-2 pb-10 bg-[#031F23]" 
                     data-diary-page

@@ -29,6 +29,7 @@ import Documents from './Documents.js';
 import Level from './Level.js';
 import Assignment from './Assignment.js';
 import UserAssignmentProgress from './UserAssignmentProgress.js';
+import ClosedClubSettings from './ClosedClubSettings.js';
 
 export {
     User,
@@ -61,5 +62,6 @@ export {
     Documents,
     Level,
     Assignment,
-    UserAssignmentProgress
+    UserAssignmentProgress,
+    ClosedClubSettings
 };

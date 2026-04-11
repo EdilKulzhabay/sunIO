@@ -38,6 +38,10 @@ export const ClientProfile = () => {
     const [invitedUsersCount, setInvitedUsersCount] = useState(0);
     const [pointsAwardingPolicy, setPointsAwardingPolicy] = useState<any>(null);
     const [instructionStep, setInstructionStep] = useState(0);
+    const [closedClubLinks, setClosedClubLinks] = useState({
+        channelLink: "https://t.me/io_center",
+        chatLink: "https://t.me/+UWaWd3xq3erdWnny",
+    });
 
     const handleInstructionNext = () => {
         setInstructionStep((prev) => prev + 1);
@@ -69,7 +73,23 @@ export const ClientProfile = () => {
         if (response.data.success) {
             setPointsAwardingPolicy(response.data.data[0]);
         }
-    }
+    };
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const res = await api.get("/api/closed-club/public-links");
+                if (res.data?.success && res.data.data) {
+                    setClosedClubLinks({
+                        channelLink: res.data.data.channelLink || "https://t.me/io_center",
+                        chatLink: res.data.data.chatLink || "https://t.me/+UWaWd3xq3erdWnny",
+                    });
+                }
+            } catch {
+                /* оставляем значения по умолчанию */
+            }
+        })();
+    }, []);
 
     useEffect(() => {
         // Проверка на блокировку пользователя
@@ -430,7 +450,7 @@ export const ClientProfile = () => {
                             <div className="mt-4 flex items-center gap-x-2">
                                 <SafeExternalLink
                                     id="profile-instruction-telegram-channel"
-                                    href="https://t.me/io_center"
+                                    href={closedClubLinks.channelLink}
                                     className="basis-1/2 bg-[#114E50] rounded-lg p-4 pr-2 flex items-center justify-between"
                                 >
                                     <div className="font-medium text-sm">Телеграм канал</div>
@@ -438,7 +458,7 @@ export const ClientProfile = () => {
                                 </SafeExternalLink>
                                 <SafeExternalLink
                                     id="profile-instruction-telegram-chat"
-                                    href="https://t.me/+UWaWd3xq3erdWnny"
+                                    href={closedClubLinks.chatLink}
                                     className="basis-1/2 bg-[#114E50] rounded-lg p-4 pr-2 flex items-center justify-between"
                                 >
                                     <div className="font-medium text-sm">Телеграм чат</div>
@@ -521,7 +541,7 @@ export const ClientProfile = () => {
                                             type="text"
                                             value={firstName}
                                             onChange={(e) => setFirstName(e.target.value)}
-                                            className="w-full px-4 py-3 bg-[#114E50] border border-[#555] rounded-lg text-white focus:outline-none focus:border-purple-500"
+                                            className="w-full px-4 py-3 bg-[#114E50] border border-[#555] rounded-lg text-white focus:outline-none focus:border-[#C4841D]"
                                             placeholder="Введите имя"
                                             disabled={updatingName}
                                         />
@@ -532,7 +552,7 @@ export const ClientProfile = () => {
                                             type="text"
                                             value={lastName}
                                             onChange={(e) => setLastName(e.target.value)}
-                                            className="w-full px-4 py-3 bg-[#114E50] border border-[#555] rounded-lg text-white focus:outline-none focus:border-purple-500"
+                                            className="w-full px-4 py-3 bg-[#114E50] border border-[#555] rounded-lg text-white focus:outline-none focus:border-[#C4841D]"
                                             placeholder="Введите фамилию"
                                             disabled={updatingName}
                                         />
@@ -586,7 +606,7 @@ export const ClientProfile = () => {
                                             type="text"
                                             value={firstName}
                                             onChange={(e) => setFirstName(e.target.value)}
-                                            className="w-full px-4 py-3 bg-[#114E50] border border-[#555] rounded-lg text-white focus:outline-none focus:border-purple-500"
+                                            className="w-full px-4 py-3 bg-[#114E50] border border-[#555] rounded-lg text-white focus:outline-none focus:border-[#C4841D]"
                                             placeholder="Введите имя"
                                             disabled={updatingName}
                                         />
@@ -597,7 +617,7 @@ export const ClientProfile = () => {
                                             type="text"
                                             value={lastName}
                                             onChange={(e) => setLastName(e.target.value)}
-                                            className="w-full px-4 py-3 bg-[#114E50] border border-[#555] rounded-lg text-white focus:outline-none focus:border-purple-500"
+                                            className="w-full px-4 py-3 bg-[#114E50] border border-[#555] rounded-lg text-white focus:outline-none focus:border-[#C4841D]"
                                             placeholder="Введите фамилию"
                                             disabled={updatingName}
                                         />

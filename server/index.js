@@ -48,9 +48,11 @@ import {
     BotTrafficSourceController,
     LevelController,
     AssignmentController,
-    ClientPageAnalyticsController
+    ClientPageAnalyticsController,
+    ClosedClubController
 } from "./Controllers/index.js";
 import { authMiddleware, optionalAuthMiddleware, requireStaffAnalyticsMiddleware } from "./Middlewares/authMiddleware.js";
+import { requireRole } from "./Middlewares/roleMiddleware.js";
 import { adminActionLogMiddleware } from "./Middlewares/adminActionLogMiddleware.js";
 import User from "./Models/User.js";
 import { migrateLegacyCompletedActivationsIfNeeded } from "./Controllers/UserController.js";
@@ -73,6 +75,8 @@ mongoose
     .catch((err) => {
         console.log("Mongodb Error", err);
     });
+
+const requireClosedClubAccess = requireRole(["admin", "content_manager", "manager", "client_manager"]);
 
 const app = express();
 app.use(express.json({ limit: '500mb' }));
@@ -278,6 +282,11 @@ app.get("/api/bot-traffic-sources", authMiddleware, BotTrafficSourceController.g
 app.get("/api/bot-traffic-sources/:id", authMiddleware, BotTrafficSourceController.getById);
 app.put("/api/bot-traffic-sources/:id", authMiddleware, BotTrafficSourceController.update);
 app.delete("/api/bot-traffic-sources/:id", authMiddleware, BotTrafficSourceController.remove);
+
+app.get("/api/closed-club/public-links", ClosedClubController.getPublicLinks);
+app.get("/api/closed-club/settings", authMiddleware, requireClosedClubAccess, ClosedClubController.getSettings);
+app.put("/api/closed-club/settings", authMiddleware, requireClosedClubAccess, ClosedClubController.updateSettings);
+app.get("/api/closed-club/members", authMiddleware, requireClosedClubAccess, ClosedClubController.getMembers);
 
 // Управление профилем (для авторизованных пользователей)
 app.put("/api/user/profile/update", UserController.updateProfile);

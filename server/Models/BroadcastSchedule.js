@@ -9,7 +9,7 @@ const BroadcastScheduleSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['scheduled', 'sent', 'failed'],
+      enum: ['scheduled', 'sending', 'sent', 'failed'],
       default: 'scheduled',
       index: true,
     },

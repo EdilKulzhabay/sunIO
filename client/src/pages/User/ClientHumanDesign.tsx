@@ -290,68 +290,50 @@ export const ClientHumanDesign = () => {
 
                         {/* Поля ввода данных рождения */}
                         <div className="mt-3 grid grid-cols-3 gap-x-3">
-                            <div className="col-span-1">
-                                <div className="relative">
-                                    {!birthDate && (
-                                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-white/60 text-sm leading-tight">
-                                            <span>Дата</span>
-                                            <span>рождения</span>
-                                        </div>
-                                    )}
-                                    <input
-                                        type="text"
-                                        inputMode="numeric"
-                                        value={birthDate}
-                                        onChange={(e) => {
-                                            const digits = e.target.value.replace(/\D/g, '').slice(0, 8);
-                                            let formatted = digits;
-                                            if (digits.length > 4) formatted = digits.slice(0, 2) + '.' + digits.slice(2, 4) + '.' + digits.slice(4);
-                                            else if (digits.length > 2) formatted = digits.slice(0, 2) + '.' + digits.slice(2);
-                                            setBirthDate(formatted);
-                                        }}
-                                        maxLength={10}
-                                        className="w-full bg-[#114E50] py-4 px-3 rounded-xl text-white text-center outline-none text-sm"
-                                    />
-                                </div>
+                            <div className="col-span-1 flex flex-col">
+                                <label className="text-white text-xs mb-1 text-center leading-tight">Дата рождения</label>
+                                <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    placeholder={`ДД.ММ.ГГГГ`}
+                                    value={birthDate}
+                                    onChange={(e) => {
+                                        const digits = e.target.value.replace(/\D/g, '').slice(0, 8);
+                                        let formatted = digits;
+                                        if (digits.length > 4) formatted = digits.slice(0, 2) + '.' + digits.slice(2, 4) + '.' + digits.slice(4);
+                                        else if (digits.length > 2) formatted = digits.slice(0, 2) + '.' + digits.slice(2);
+                                        setBirthDate(formatted);
+                                    }}
+                                    maxLength={10}
+                                    className="w-full bg-[#114E50] py-3 px-3 rounded-xl text-white text-center placeholder-white/60 outline-none text-sm"
+                                />
                             </div>
-                            <div className="col-span-1">
-                                <div className="relative">
-                                    {!birthTime && (
-                                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-white/60 text-sm leading-tight">
-                                            <span>Время</span>
-                                            <span>рождения</span>
-                                        </div>
-                                    )}
-                                    <input
-                                        type="text"
-                                        inputMode="numeric"
-                                        value={birthTime}
-                                        onChange={(e) => {
-                                            const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
-                                            let formatted = digits;
-                                            if (digits.length > 2) formatted = digits.slice(0, 2) + '.' + digits.slice(2);
-                                            setBirthTime(formatted);
-                                        }}
-                                        maxLength={5}
-                                        className="w-full bg-[#114E50] py-4 px-3 rounded-xl text-white text-center outline-none text-sm"
-                                    />
-                                </div>
+                            <div className="col-span-1 flex flex-col">
+                                <label className="text-white text-xs mb-1 text-center leading-tight">Время рождения</label>
+                                <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    placeholder={`ЧЧ.ММ`}
+                                    value={birthTime}
+                                    onChange={(e) => {
+                                        const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+                                        let formatted = digits;
+                                        if (digits.length > 2) formatted = digits.slice(0, 2) + '.' + digits.slice(2);
+                                        setBirthTime(formatted);
+                                    }}
+                                    maxLength={5}
+                                    className="w-full bg-[#114E50] py-3 px-3 rounded-xl text-white text-center placeholder-white/60 outline-none text-sm"
+                                />
                             </div>
-                            <div className="col-span-1">
-                                <div className="relative">
-                                    {!birthCity && (
-                                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-white/60 text-sm leading-tight">
-                                            <span>Место</span>
-                                            <span>рождения</span>
-                                        </div>
-                                    )}
-                                    <input
-                                        type="text"
-                                        value={birthCity}
-                                        onChange={(e) => setBirthCity(e.target.value)}
-                                        className="w-full bg-[#114E50] py-4 px-3 rounded-xl text-white text-center outline-none text-sm"
-                                    />
-                                </div>
+                            <div className="col-span-1 flex flex-col">
+                                <label className="text-white text-xs mb-1 text-center leading-tight">Место рождения</label>
+                                <input
+                                    type="text"
+                                    placeholder={`Город`}
+                                    value={birthCity}
+                                    onChange={(e) => setBirthCity(e.target.value)}
+                                    className="w-full bg-[#114E50] py-3 px-3 rounded-xl text-white text-center placeholder-white/60 outline-none text-sm"
+                                />
                             </div>
                         </div>
                     </div>

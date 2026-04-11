@@ -251,10 +251,6 @@ export const ClientRegister = () => {
             </div>
 
             <div className='lg:w-[700px] lg:mx-auto'>
-                <button 
-                    onClick={() => navigate(-1)}
-                    className='w-full mt-4 lg:mt-10 bg-white/10 block text-white py-2.5 text-center font-medium rounded-full'
-                >Назад</button>
                 {codeSent ? (
                     <RedButton
                         text={loading ? 'Подтверждение...' : 'Подтвердить код'}
@@ -270,6 +266,10 @@ export const ClientRegister = () => {
                         disabled={sendingCode || !email.trim()}
                     />
                 )}
+                <button 
+                    onClick={() => navigate(-1)}
+                    className='w-full mt-4 lg:mt-10 bg-white/10 block text-white py-2.5 text-center font-medium rounded-full'
+                >Назад</button>
             </div>
         </div>
     );

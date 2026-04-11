@@ -160,16 +160,16 @@ export const ClientPerfomance = () => {
             )}
 
             <div className='lg:w-[700px] lg:mx-auto'>
-                <button 
-                    onClick={() => navigate(-1)}
-                    className='w-full mt-4 lg:mt-10 bg-white/10 block text-white py-2.5 text-center font-medium rounded-full'
-                >Назад</button>
                 <RedButton 
                     text={loading ? 'Сохранение...' : 'Продолжить'} 
                     onClick={handleContinue} 
                     className='w-full mt-4'
                     disabled={loading || error}
                 />
+                <button 
+                    onClick={() => navigate(-1)}
+                    className='w-full mt-4 lg:mt-10 bg-white/10 block text-white py-2.5 text-center font-medium rounded-full'
+                >Назад</button>
             </div>
         </div>
     );

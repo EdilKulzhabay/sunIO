@@ -449,7 +449,7 @@ export const ClientInvitedUsers = () => {
                                             type="text"
                                             value={firstName}
                                             onChange={(e) => setFirstName(e.target.value)}
-                                            className="w-full px-4 py-3 bg-[#1a1a1a] border border-[#555] rounded-lg text-white focus:outline-none focus:border-purple-500"
+                                            className="w-full px-4 py-3 bg-[#1a1a1a] border border-[#555] rounded-lg text-white focus:outline-none focus:border-[#C4841D]"
                                             placeholder="Введите имя"
                                             disabled={updatingName}
                                         />
@@ -460,7 +460,7 @@ export const ClientInvitedUsers = () => {
                                             type="text"
                                             value={lastName}
                                             onChange={(e) => setLastName(e.target.value)}
-                                            className="w-full px-4 py-3 bg-[#1a1a1a] border border-[#555] rounded-lg text-white focus:outline-none focus:border-purple-500"
+                                            className="w-full px-4 py-3 bg-[#1a1a1a] border border-[#555] rounded-lg text-white focus:outline-none focus:border-[#C4841D]"
                                             placeholder="Введите фамилию"
                                             disabled={updatingName}
                                         />
@@ -514,7 +514,7 @@ export const ClientInvitedUsers = () => {
                                             type="text"
                                             value={firstName}
                                             onChange={(e) => setFirstName(e.target.value)}
-                                            className="w-full px-4 py-3 bg-[#1a1a1a] border border-[#555] rounded-lg text-white focus:outline-none focus:border-purple-500"
+                                            className="w-full px-4 py-3 bg-[#1a1a1a] border border-[#555] rounded-lg text-white focus:outline-none focus:border-[#C4841D]"
                                             placeholder="Введите имя"
                                             disabled={updatingName}
                                         />
@@ -525,7 +525,7 @@ export const ClientInvitedUsers = () => {
                                             type="text"
                                             value={lastName}
                                             onChange={(e) => setLastName(e.target.value)}
-                                            className="w-full px-4 py-3 bg-[#1a1a1a] border border-[#555] rounded-lg text-white focus:outline-none focus:border-purple-500"
+                                            className="w-full px-4 py-3 bg-[#1a1a1a] border border-[#555] rounded-lg text-white focus:outline-none focus:border-[#C4841D]"
                                             placeholder="Введите фамилию"
                                             disabled={updatingName}
                                         />

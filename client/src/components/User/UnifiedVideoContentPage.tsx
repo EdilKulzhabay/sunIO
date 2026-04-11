@@ -53,7 +53,7 @@ interface VideoProgress {
     duration: number;
 }
 
-const getVideoInfo = (url: string): { type: "kinescope" | "youtube" | "rutube" | "unknown"; id: string; privateParam?: string } => {
+const getVideoInfo = (url: string): { type: "kinescope" | "youtube" | "rutube" | "vkvideo" | "unknown"; id: string; privateParam?: string } => {
     if (!url) return { type: "unknown", id: "" };
 
     if (url.includes("kinescope.io")) {
@@ -109,6 +109,19 @@ const getVideoInfo = (url: string): { type: "kinescope" | "youtube" | "rutube" |
         }
     }
 
+    // VK Video embed URL: vkvideo.ru/video_ext.php?oid=...&id=...&hash=...
+    if (url.includes("vkvideo.ru/video_ext.php") || url.includes("vk.com/video_ext.php")) {
+        return { type: "vkvideo", id: url };
+    }
+
+    // VK Video page URL: vkvideo.ru/video-OID_ID or vk.com/video-OID_ID
+    if (url.includes("vkvideo.ru") || url.includes("vk.com/video")) {
+        const match = url.match(/video(-?\d+_\d+)/);
+        if (match) {
+            return { type: "vkvideo", id: match[1] };
+        }
+    }
+
     return { type: "unknown", id: url };
 };
 
@@ -121,6 +134,203 @@ const getRuTubeEmbedUrl = (url: string): string => {
         return `https://rutube.ru/play/embed/${info.id}`;
     }
     return url;
+};
+
+const getVkVideoEmbedUrl = (oidId: string): string => {
+    // oidId format: "-211095106_456239712"
+    const parts = oidId.split("_");
+    if (parts.length !== 2) return "";
+    return `https://vk.com/video_ext.php?oid=${parts[0]}&id=${parts[1]}&hd=2`;
+};
+
+/** Полный src iframe из VK (с hash) или короткий owner_video_id — без hash VK часто отдаёт «Video not found». */
+const resolveVkVideoEmbedUrl = (idOrUrl: string): string => {
+    const s = idOrUrl.trim();
+    if (!s) return "";
+    if (s.includes("video_ext.php")) {
+        try {
+            const withProtocol =
+                s.startsWith("http://") || s.startsWith("https://")
+                    ? s
+                    : `https://${s.replace(/^\/\//, "")}`;
+            const u = new URL(withProtocol);
+            if (!u.pathname.includes("video_ext.php")) return "";
+            return u.toString();
+        } catch {
+            return "";
+        }
+    }
+    return getVkVideoEmbedUrl(s);
+};
+
+const vkVideoEmbedMissingHash = (embedUrl: string): boolean => {
+    try {
+        const u = new URL(embedUrl);
+        if (!u.pathname.includes("video_ext.php")) return true;
+        const hash = u.searchParams.get("hash");
+        return !hash?.trim();
+    } catch {
+        return true;
+    }
+};
+
+/** Ключ для VK API video.get: ownerId_videoId, например -211095106_456239712 */
+const getVkVideosKey = (idOrUrl: string): string => {
+    const s = idOrUrl.trim();
+    if (/^-?\d+_\d+$/.test(s)) return s;
+    if (s.includes("video_ext.php")) {
+        try {
+            const withProtocol =
+                s.startsWith("http://") || s.startsWith("https://")
+                    ? s
+                    : `https://${s.replace(/^\/\//, "")}`;
+            const u = new URL(withProtocol);
+            const oid = u.searchParams.get("oid");
+            const vid = u.searchParams.get("id");
+            if (oid != null && oid !== "" && vid != null && vid !== "") return `${oid}_${vid}`;
+        } catch {
+            return "";
+        }
+    }
+    const m = s.match(/video(-?\d+_\d+)/);
+    return m ? m[1] : "";
+};
+
+const vkResolveInitialPhase = (
+    initialEmbedUrl: string,
+    videosKey: string
+): "resolving" | "done" | "error" => {
+    if (!vkVideoEmbedMissingHash(initialEmbedUrl)) return "done";
+    if (!videosKey) return "error";
+    return "resolving";
+};
+
+/**
+ * Подставляет в iframe URL с hash через сервер (VK video.get).
+ * Если в ссылке уже есть hash — запрос не делается.
+ */
+const VkVideoPlayerResolved = ({
+    videosKey,
+    initialEmbedUrl,
+    onFirstPlay,
+    className,
+    title,
+}: {
+    videosKey: string;
+    initialEmbedUrl: string;
+    onFirstPlay: () => void;
+    className?: string;
+    title?: string;
+}) => {
+    const [embedUrl, setEmbedUrl] = useState(initialEmbedUrl);
+    const [phase, setPhase] = useState<"resolving" | "done" | "error">(() =>
+        vkResolveInitialPhase(initialEmbedUrl, videosKey)
+    );
+
+    useEffect(() => {
+        const hasHash = !vkVideoEmbedMissingHash(initialEmbedUrl);
+        if (hasHash) {
+            setEmbedUrl(initialEmbedUrl);
+            setPhase("done");
+            return;
+        }
+        if (!videosKey) {
+            setPhase("error");
+            return;
+        }
+
+        let cancelled = false;
+        setPhase("resolving");
+        (async () => {
+            try {
+                const { data } = await api.get("/api/vk-video/embed-url", {
+                    params: { videos: videosKey },
+                });
+                if (cancelled) return;
+                if (data?.success && typeof data.embedUrl === "string" && data.embedUrl.length > 0) {
+                    setEmbedUrl(data.embedUrl);
+                    setPhase("done");
+                } else {
+                    setPhase("error");
+                }
+            } catch {
+                if (!cancelled) setPhase("error");
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, [initialEmbedUrl, videosKey]);
+
+    if (phase === "resolving") {
+        return (
+            <div className={`absolute inset-0 flex items-center justify-center bg-[#031F23] rounded-lg ${className}`}>
+                <span className="text-white/70 text-sm">Подключение плеера VK…</span>
+            </div>
+        );
+    }
+
+    if (phase === "error") {
+        return (
+            <div className={`absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[#031F23] rounded-lg px-4 ${className}`}>
+                <p className="text-white/80 text-sm text-center">
+                    Не удалось загрузить встроенный плеер VK. Проверьте на сервере переменную окружения{" "}
+                    <code className="text-white/90">VK_ACCESS_TOKEN</code> (ключ приложения VK с доступом к видео) и
+                    обновите страницу.
+                </p>
+            </div>
+        );
+    }
+
+    return (
+        <VkVideoPlayerWithProgress
+            embedUrl={embedUrl}
+            onFirstPlay={onFirstPlay}
+            className={className}
+            title={title}
+        />
+    );
+};
+
+/** VK Video плеер: 100% и баллы при нажатии Play (overlay-подход, т.к. у VK нет postMessage API) */
+const VkVideoPlayerWithProgress = ({
+    embedUrl,
+    onFirstPlay,
+    className,
+    title,
+}: {
+    embedUrl: string;
+    onFirstPlay: () => void;
+    className?: string;
+    title?: string;
+}) => {
+    const [played, setPlayed] = useState(false);
+
+    const handleClick = () => {
+        if (!played) {
+            setPlayed(true);
+            onFirstPlay();
+        }
+    };
+
+    return (
+        <div className="relative" style={{ width: "100%", height: "100%" }}>
+            <iframe
+                src={embedUrl}
+                title={title || "VK Video player"}
+                allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock"
+                allowFullScreen
+                className={className}
+            />
+            {!played && (
+                <div
+                    onClick={handleClick}
+                    className="absolute inset-0 cursor-pointer z-10"
+                    style={{ background: "transparent" }}
+                />
+            )}
+        </div>
+    );
 };
 
 /** RuTube плеер: как YouTube — 100% и баллы при нажатии воспроизведения (player:changeState → playing) */
@@ -834,6 +1044,29 @@ export const UnifiedVideoContentPage = ({
                                     </div>
                                 </div>
                             );
+                        }
+
+                        // VK Video: URL с hash с сервера (video.get) или уже полная ссылка из контента
+                        if (videoInfo.type === "vkvideo") {
+                            const vkEmbedUrl = resolveVkVideoEmbedUrl(videoInfo.id);
+                            const vkVideosKey = getVkVideosKey(videoInfo.id);
+                            if (vkEmbedUrl) {
+                                return (
+                                    <div key={itemKey}>
+                                        <div className="mt-6">
+                                            <div className="relative w-full rounded-lg overflow-hidden" style={{ paddingBottom: "56.25%" }}>
+                                                <VkVideoPlayerResolved
+                                                    videosKey={vkVideosKey}
+                                                    initialEmbedUrl={vkEmbedUrl}
+                                                    onFirstPlay={() => handleYouTubeRuTubeLoad(videoKey, index, videoDurationSeconds)}
+                                                    className="absolute top-0 left-0 w-full h-full rounded-lg"
+                                                    title={`VK Video player ${index + 1}`}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            }
                         }
 
                         // YouTube по умолчанию — 100% и баллы только при реальном воспроизведении

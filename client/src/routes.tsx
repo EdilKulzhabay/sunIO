@@ -63,6 +63,9 @@ import { PointsAwardingPolicyForm } from "./pages/Admin/PointsAwardingPolicyForm
 import { BotTrafficSourcesAdmin } from "./pages/Admin/BotTrafficSources";
 import { ClientPageAnalytics } from "./pages/Admin/ClientPageAnalytics";
 import { BotTrafficSourceForm } from "./pages/Admin/BotTrafficSourceForm";
+import { ClosedClubHub } from "./pages/Admin/ClosedClubHub";
+import { ClosedClubSectionForm } from "./pages/Admin/ClosedClubSectionForm";
+import { ClosedClubMembers } from "./pages/Admin/ClosedClubMembers";
 import { UsersAdmin } from "./pages/Admin/Users";
 import { UserForm } from "./pages/Admin/UserForm";
 import { ProfileAdmin } from "./pages/Admin/Profile";
@@ -783,6 +786,36 @@ export const routes = createBrowserRouter([
     {
         path: "/admin/bot-traffic-sources/edit/:id",
         element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><BotTrafficSourceForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/closed-club",
+        element: (
+            <RootLayout>
+                <ProtectedRoute requiredRole={["admin", "content_manager", "manager", "client_manager"]}>
+                    <ClosedClubHub />
+                </ProtectedRoute>
+            </RootLayout>
+        ),
+    },
+    {
+        path: "/admin/closed-club/members/:context",
+        element: (
+            <RootLayout>
+                <ProtectedRoute requiredRole={["admin", "content_manager", "manager", "client_manager"]}>
+                    <ClosedClubMembers />
+                </ProtectedRoute>
+            </RootLayout>
+        ),
+    },
+    {
+        path: "/admin/closed-club/:section",
+        element: (
+            <RootLayout>
+                <ProtectedRoute requiredRole={["admin", "content_manager", "manager", "client_manager"]}>
+                    <ClosedClubSectionForm />
+                </ProtectedRoute>
+            </RootLayout>
+        ),
     },
     {
         path: "/admin/client-page-analytics",

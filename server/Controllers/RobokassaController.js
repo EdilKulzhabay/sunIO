@@ -3,6 +3,7 @@ import User from '../Models/User.js';
 import DepositLog from '../Models/DepositLog.js';
 import axios from 'axios';
 import 'dotenv/config';
+import { getClosedClubSettingsDoc } from '../utils/closedClubSettings.js';
 
 export const handleResult = async (req, res) => {
     try {
@@ -85,9 +86,13 @@ const handleSubscriptionResult = async (user, outSum, invId) => {
 
     if (user.telegramId) {
         try {
-            const botResponse = await axios.post(`${process.env.BOT_SERVER_URL}/api/bot/add-user`, {
-                telegramId: user.telegramId
-            }, {
+            const club = await getClosedClubSettingsDoc();
+            const botPayload = {
+                telegramId: user.telegramId,
+                ...(club.channelTelegramId ? { channelId: club.channelTelegramId } : {}),
+                ...(club.groupTelegramId ? { groupId: club.groupTelegramId } : {}),
+            };
+            const botResponse = await axios.post(`${process.env.BOT_SERVER_URL}/api/bot/add-user`, botPayload, {
                 headers: { "Content-Type": "application/json" },
                 timeout: 10000,
             });

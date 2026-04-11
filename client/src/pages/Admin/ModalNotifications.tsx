@@ -60,6 +60,7 @@ interface ModalScheduleRow {
 }
 
 type SentSortKey = 'sentAt' | 'recipients' | 'closed' | 'clicked';
+type SentRowsSortKey = 'sentAt' | 'count';
 
 function formatMsk(iso?: string | null) {
     if (!iso) return '—';
@@ -97,6 +98,10 @@ export const ModalNotificationsAdmin = () => {
     const [sentSortKey, setSentSortKey] = useState<SentSortKey>('sentAt');
     const [sentSortDir, setSentSortDir] = useState<'asc' | 'desc'>('desc');
     const [campaignSearch, setCampaignSearch] = useState('');
+
+    const [sentRowsSortKey, setSentRowsSortKey] = useState<SentRowsSortKey>('sentAt');
+    const [sentRowsSortDir, setSentRowsSortDir] = useState<'asc' | 'desc'>('desc');
+    const [sentRowsSearch, setSentRowsSearch] = useState('');
 
     const fetchSavedTemplates = async () => {
         setLoadingSaved(true);
@@ -212,6 +217,55 @@ export const ModalNotificationsAdmin = () => {
             setSentSortKey(key);
             setSentSortDir('desc');
         }
+    };
+
+    const toggleSentRowsSort = (key: SentRowsSortKey) => {
+        if (sentRowsSortKey === key) {
+            setSentRowsSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+        } else {
+            setSentRowsSortKey(key);
+            setSentRowsSortDir('desc');
+        }
+    };
+
+    const sortedSentModalRows = useMemo(() => {
+        let list = [...sentModalRows];
+
+        if (sentRowsSearch.trim()) {
+            const q = sentRowsSearch.trim().toLowerCase();
+            list = list.filter((item) => {
+                const title = (item.payload?.modalTitle || '').toLowerCase();
+                const desc = stripHtml(item.payload?.modalDescription || '').toLowerCase();
+                return title.includes(q) || desc.includes(q);
+            });
+        }
+
+        const mult = sentRowsSortDir === 'asc' ? 1 : -1;
+        if (sentRowsSortKey === 'sentAt') {
+            list.sort((a, b) => {
+                const da = a.sentAt ? new Date(a.sentAt).getTime() : 0;
+                const db = b.sentAt ? new Date(b.sentAt).getTime() : 0;
+                return mult * (da - db);
+            });
+        } else {
+            list.sort((a, b) => {
+                const av = a.result?.count ?? 0;
+                const bv = b.result?.count ?? 0;
+                return mult * (av - bv);
+            });
+        }
+        return list;
+    }, [sentModalRows, sentRowsSortKey, sentRowsSortDir, sentRowsSearch]);
+
+    const SentRowsSortIcon = ({ column }: { column: SentRowsSortKey }) => {
+        if (sentRowsSortKey !== column) {
+            return <ArrowUpDown size={14} className="opacity-40 shrink-0" aria-hidden />;
+        }
+        return sentRowsSortDir === 'desc' ? (
+            <ArrowDown size={14} className="shrink-0" aria-hidden />
+        ) : (
+            <ArrowUp size={14} className="shrink-0" aria-hidden />
+        );
     };
 
     const sortedCampaigns = useMemo(() => {
@@ -392,49 +446,107 @@ export const ModalNotificationsAdmin = () => {
 
                 {/* Отправленные */}
                 <div className="bg-white rounded-lg shadow-sm p-6">
-                    <div className="flex items-center gap-2 mb-4">
-                        <Send size={18} />
-                        <h2 className="text-xl font-semibold text-gray-900">
-                            Отправленные модальные уведомления
-                        </h2>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                        <div className="flex items-center gap-2">
+                            <Send size={18} />
+                            <h2 className="text-xl font-semibold text-gray-900">
+                                Отправленные модальные уведомления
+                            </h2>
+                        </div>
+                        <div className="relative w-full sm:w-72">
+                            <input
+                                type="text"
+                                value={sentRowsSearch}
+                                onChange={(e) => setSentRowsSearch(e.target.value)}
+                                placeholder="Поиск по заголовку…"
+                                className="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                            <Search className="absolute left-2.5 top-2.5 text-gray-400" size={16} />
+                            {sentRowsSearch && (
+                                <button
+                                    type="button"
+                                    onClick={() => setSentRowsSearch('')}
+                                    className="absolute right-2 top-2 text-gray-400 hover:text-gray-600"
+                                >
+                                    <X size={16} />
+                                </button>
+                            )}
+                        </div>
                     </div>
                     {loadingSentRows && (
                         <p className="text-gray-500 text-center py-4">Загрузка…</p>
                     )}
                     {!loadingSentRows && sentModalRows.length > 0 && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            {sentModalRows.map((item) => (
-                                <div
-                                    key={item._id}
-                                    className="border border-green-200 rounded-lg p-4 bg-green-50/30 hover:bg-green-50/50 transition-colors"
-                                >
-                                    {item.payload?.modalTitle && (
-                                        <div className="font-semibold text-gray-900 mb-1">
-                                            {item.payload.modalTitle}
-                                        </div>
-                                    )}
-                                    <div className="text-sm text-gray-700 line-clamp-2 mb-2">
-                                        {getDescriptionPreview(item.payload?.modalDescription)}
-                                    </div>
-                                    <div className="text-xs text-green-700 font-medium mb-1">
-                                        Показано пользователям:{' '}
-                                        {item.sentAt
-                                            ? new Date(item.sentAt).toLocaleString('ru-RU')
-                                            : '—'}
-                                    </div>
-                                    {item.result != null && (
-                                        <div className="text-xs text-gray-600 mb-1">
-                                            Получили запись в приложении:{' '}
-                                            {item.result.count ?? '—'}
-                                        </div>
-                                    )}
-                                    {item.scheduledBy?.fullName && (
-                                        <div className="text-xs text-gray-500">
-                                            Инициатор: {item.scheduledBy.fullName}
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
+                        <div className="overflow-x-auto border border-gray-200 rounded-lg">
+                            <table className="min-w-full text-sm text-left">
+                                <thead className="bg-gray-50 border-b border-gray-200">
+                                    <tr>
+                                        <th className="px-4 py-3 font-medium text-gray-700 whitespace-nowrap">
+                                            Заголовок
+                                        </th>
+                                        <th className="px-4 py-3 font-medium text-gray-700 min-w-[200px]">
+                                            Описание
+                                        </th>
+                                        <th className="px-4 py-3 whitespace-nowrap">
+                                            <button
+                                                type="button"
+                                                className="inline-flex items-center gap-1 font-medium text-gray-700 hover:text-gray-900"
+                                                onClick={() => toggleSentRowsSort('sentAt')}
+                                                title="Сортировать по дате отправки"
+                                            >
+                                                Отправлено
+                                                <SentRowsSortIcon column="sentAt" />
+                                            </button>
+                                        </th>
+                                        <th className="px-4 py-3 text-right tabular-nums">
+                                            <button
+                                                type="button"
+                                                className="inline-flex items-center justify-end gap-1 w-full font-medium text-gray-700 hover:text-gray-900"
+                                                onClick={() => toggleSentRowsSort('count')}
+                                                title="Сортировать по количеству получателей"
+                                            >
+                                                Получателей
+                                                <SentRowsSortIcon column="count" />
+                                            </button>
+                                        </th>
+                                        <th className="px-4 py-3 font-medium text-gray-700 whitespace-nowrap">
+                                            Инициатор
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {sortedSentModalRows.map((item) => (
+                                        <tr
+                                            key={item._id}
+                                            className="border-b border-gray-100 hover:bg-green-50/60 transition-colors"
+                                        >
+                                            <td className="px-4 py-3 font-medium text-gray-900 max-w-[220px]">
+                                                <span className="line-clamp-2" title={item.payload?.modalTitle || ''}>
+                                                    {item.payload?.modalTitle || '—'}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3 text-gray-700 max-w-md">
+                                                <span className="line-clamp-2" title={stripHtml(item.payload?.modalDescription || '')}>
+                                                    {getDescriptionPreview(item.payload?.modalDescription, 200)}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
+                                                {item.sentAt
+                                                    ? new Date(item.sentAt).toLocaleString('ru-RU')
+                                                    : '—'}
+                                            </td>
+                                            <td className="px-4 py-3 text-right tabular-nums text-gray-900">
+                                                {item.result?.count ?? '—'}
+                                            </td>
+                                            <td className="px-4 py-3 text-gray-600 max-w-[160px]">
+                                                <span className="line-clamp-2" title={item.scheduledBy?.fullName || ''}>
+                                                    {item.scheduledBy?.fullName || '—'}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     )}
                     {!loadingSentRows && sentModalRows.length === 0 && (

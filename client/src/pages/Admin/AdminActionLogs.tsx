@@ -43,11 +43,13 @@ const ACTION_VERBS: Array<{ pattern: RegExp; label: string }> = [
     { pattern: /^Деактивировал\(а\)/,    label: 'Деактивация' },
     { pattern: /^Отправил\(а\)/,         label: 'Отправка' },
     { pattern: /^Запланировал\(а\)/,     label: 'Планирование' },
+    { pattern: /^Запустил\(а\)/,         label: 'Отправка' },
     { pattern: /^Отменил\(а\)/,          label: 'Отмена' },
     { pattern: /^Сохранил\(а\)/,         label: 'Сохранение' },
     { pattern: /^Массовое удаление/,     label: 'Удаление' },
     { pattern: /^Удаление по фильтру/,   label: 'Удаление' },
     { pattern: /^Рассылка отправлена/,    label: 'Отправка' },
+    { pattern: /^Рассылка завершена/,     label: 'Отправка' },
 ];
 
 const CATEGORY_RULES: Array<{ pattern: RegExp; objectType: string; category: string }> = [
@@ -55,7 +57,7 @@ const CATEGORY_RULES: Array<{ pattern: RegExp; objectType: string; category: str
     { pattern: /пользовател/i,                         objectType: 'Пользователь',  category: 'Пользователи' },
     { pattern: /администратор/i,                       objectType: 'Администратор', category: 'Администраторы' },
     { pattern: /запланированную рассылку/i,            objectType: 'Рассылка',      category: 'Рассылки' },
-    { pattern: /рассылку|рассылка/i,                   objectType: 'Рассылка',      category: 'Рассылки' },
+    { pattern: /рассылк[уаиое]/i,                      objectType: 'Рассылка',      category: 'Рассылки' },
     { pattern: /событие/i,                             objectType: 'Событие',       category: 'Календарь событий' },
     { pattern: /запись эфира/i,                        objectType: 'Контент',       category: 'Записи эфиров' },
     { pattern: /Каталог[еа]? продуктов/i,             objectType: 'Контент',       category: 'Каталог продуктов' },

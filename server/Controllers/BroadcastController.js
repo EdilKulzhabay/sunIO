@@ -335,8 +335,9 @@ export const sendBroadcast = async (req, res) => {
                 });
                 await schedule.save();
                 if (user) {
-                    const preview = (payload.message || '').substring(0, 50);
-                    await addAdminAction(user._id, `Запланировал(а) рассылку на ${scheduledDate.toLocaleString('ru-RU')}: "${preview}${preview.length >= 50 ? '...' : ''}"`);
+                    const label = payload.title || (payload.message || '').replace(/<[^>]*>/g, '').substring(0, 50);
+                    const labelTrimmed = label.length >= 50 ? label.substring(0, 50) + '...' : label;
+                    await addAdminAction(user._id, `Запланировал(а) рассылку на ${scheduledDate.toLocaleString('ru-RU')}: "${labelTrimmed}"`);
                 }
                 return res.status(200).json({
                     success: true,
@@ -346,29 +347,58 @@ export const sendBroadcast = async (req, res) => {
             }
         }
 
-        const result = await executeBroadcast(payload);
-        if (!result.success) {
-            return res.status(result.statusCode || 500).json(result);
-        }
-
-        if (user) {
-            const preview = (payload.message || '').substring(0, 50);
-            const sentInfo = result.sent ? ` (отправлено ${result.sent} пользователям)` : '';
-            await addAdminAction(user._id, `Отправил(а) рассылку: "${preview}${preview.length >= 50 ? '...' : ''}"${sentInfo}`);
-        }
-
-        // Сохраняем запись об отправке для раздела «Отправленные рассылки»
-        const sentRecord = new BroadcastSchedule({
+        // Создаём запись со статусом 'sending' ДО начала рассылки,
+        // чтобы она сразу появилась в отчётах
+        const record = new BroadcastSchedule({
             scheduledAt: new Date(),
-            status: 'sent',
+            status: 'sending',
             payload,
-            result,
-            sentAt: new Date(),
             scheduledBy: user?._id,
         });
-        await sentRecord.save();
+        await record.save();
 
-        return res.status(200).json(result);
+        const actionLabel = payload.title || (payload.message || '').replace(/<[^>]*>/g, '').substring(0, 50);
+        const actionLabelTrimmed = actionLabel.length >= 50 ? actionLabel.substring(0, 50) + '...' : actionLabel;
+
+        if (user) {
+            await addAdminAction(user._id, `Запустил(а) рассылку: "${actionLabelTrimmed}"`);
+        }
+
+        // Сразу отвечаем клиенту — рассылка уходит в фон
+        res.status(200).json({
+            success: true,
+            message: "Рассылка запущена. Результат можно посмотреть в отчётах.",
+            broadcastId: record._id,
+        });
+
+        // Выполняем рассылку асинхронно (после ответа клиенту)
+        executeBroadcast(payload)
+            .then(async (result) => {
+                try {
+                    record.result = result;
+                    record.sentAt = new Date();
+                    record.status = result.success ? 'sent' : 'failed';
+                    record.error = result.success ? undefined : (result.message || 'Ошибка отправки');
+                    await record.save();
+
+                    if (user && result.sent) {
+                        await addAdminAction(user._id, `Рассылка завершена: "${actionLabelTrimmed}" (отправлено ${result.sent} пользователям)`);
+                    }
+                } catch (saveErr) {
+                    console.error('Ошибка сохранения результата рассылки:', saveErr);
+                }
+            })
+            .catch(async (err) => {
+                try {
+                    record.status = 'failed';
+                    record.error = err.message || 'Неизвестная ошибка';
+                    record.sentAt = new Date();
+                    await record.save();
+                } catch (saveErr) {
+                    console.error('Ошибка сохранения ошибки рассылки:', saveErr);
+                }
+                console.error('Ошибка выполнения рассылки в фоне:', err);
+            });
     } catch (error) {
         console.log("Ошибка в sendBroadcast:", error);
         res.status(500).json({
@@ -443,9 +473,10 @@ export const processScheduledBroadcasts = async () => {
             if (result.success) {
                 job.status = 'sent';
                 if (job.scheduledBy) {
-                    const preview = (job.payload?.message || '').substring(0, 50);
+                    const label = job.payload?.title || (job.payload?.message || '').replace(/<[^>]*>/g, '').substring(0, 50);
+                    const labelTrimmed = label.length >= 50 ? label.substring(0, 50) + '...' : label;
                     const sentInfo = result.sent ? ` (отправлено ${result.sent} пользователям)` : '';
-                    await addAdminAction(job.scheduledBy, `Рассылка отправлена по расписанию: "${preview}${preview.length >= 50 ? '...' : ''}"${sentInfo}`);
+                    await addAdminAction(job.scheduledBy, `Рассылка отправлена по расписанию: "${labelTrimmed}"${sentInfo}`);
                 }
             } else {
                 job.status = 'failed';
@@ -751,8 +782,8 @@ export const getScheduledBroadcasts = async (req, res) => {
 // Получить отправленные рассылки
 export const getSentBroadcasts = async (req, res) => {
     try {
-        const schedules = await BroadcastSchedule.find({ status: 'sent' })
-            .sort({ sentAt: -1 })
+        const schedules = await BroadcastSchedule.find({ status: { $in: ['sent', 'sending'] } })
+            .sort({ createdAt: -1 })
             .limit(100)
             .populate('scheduledBy', 'fullName');
 
@@ -778,7 +809,7 @@ export const getSentBroadcastById = async (req, res) => {
             .populate("scheduledBy", "fullName telegramUserName")
             .lean();
 
-        if (!schedule || schedule.status !== "sent") {
+        if (!schedule || !['sent', 'sending', 'failed'].includes(schedule.status)) {
             return res.status(404).json({
                 success: false,
                 message: "Отправленная рассылка не найдена",
@@ -800,7 +831,7 @@ export const deleteSentBroadcast = async (req, res) => {
         const { id } = req.params;
         const schedule = await BroadcastSchedule.findById(id);
 
-        if (!schedule || schedule.status !== "sent") {
+        if (!schedule || !['sent', 'sending', 'failed'].includes(schedule.status)) {
             return res.status(404).json({
                 success: false,
                 message: "Отправленная рассылка не найдена",
@@ -812,8 +843,8 @@ export const deleteSentBroadcast = async (req, res) => {
         const user = req.user;
         if (user) {
             const { addAdminAction } = await import("../utils/addAdminAction.js");
-            const title = schedule.payload?.title || schedule.payload?.broadcastTitle || id;
-            await addAdminAction(user._id, `Удалил(а) запись отправленной рассылки "${title}"`);
+            const title = schedule.payload?.title || schedule.payload?.broadcastTitle || (schedule.payload?.message || '').substring(0, 50) || id;
+            await addAdminAction(user._id, `Удалил(а) запись отправленной рассылки: "${title}"`);
         }
 
         res.json({ success: true, message: "Запись удалена" });
@@ -848,11 +879,12 @@ export const cancelScheduledBroadcast = async (req, res) => {
             });
         }
 
-        const preview = (schedule.payload?.message || '').substring(0, 50);
+        const label = schedule.payload?.title || (schedule.payload?.message || '').replace(/<[^>]*>/g, '').substring(0, 50);
+        const labelTrimmed = label.length >= 50 ? label.substring(0, 50) + '...' : label;
         await BroadcastSchedule.findByIdAndDelete(id);
 
         if (user) {
-            await addAdminAction(user._id, `Отменил(а) запланированную рассылку: "${preview}${preview.length >= 50 ? '...' : ''}"`);
+            await addAdminAction(user._id, `Отменил(а) запланированную рассылку: "${labelTrimmed}"`);
         }
 
         res.json({

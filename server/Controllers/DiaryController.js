@@ -247,7 +247,7 @@ export const remove = async (req, res) => {
  * удаляет файл с диска, затем отправляет документ пользователю через Telegram Bot API.
  */
 export const sendDiaryExportViaBot = async (req, res) => {
-    const { userId } = req.body;
+    const { telegramId } = req.body;
     let tmpPath = null;
     try {
         if (!TELEGRAM_API_URL) {
@@ -257,16 +257,11 @@ export const sendDiaryExportViaBot = async (req, res) => {
             });
         }
 
-        const user = await User.findById(userId).select("telegramId").lean();
-        const telegramId = user?.telegramId != null ? String(user.telegramId).trim() : "";
-        if (!telegramId) {
-            return res.status(400).json({
-                success: false,
-                message: "Не привязан Telegram — нельзя отправить файл боту",
-            });
-        }
-
-        const diaries = await Diary.find({ user: userId }).sort({ createdAt: -1 }).lean();
+        console.log("telegramId: ", telegramId);
+        const user = await User.findOne({ telegramId }).select("telegramId").lean();
+        console.log("user: ", user);
+        const diaries = await Diary.find({ user: user._id }).sort({ createdAt: -1 }).lean();
+        console.log("diaries: ", diaries);
         if (!diaries.length) {
             return res.status(400).json({
                 success: false,

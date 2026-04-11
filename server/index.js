@@ -569,7 +569,6 @@ app.get("/api/diary", DiaryController.getAll);
 app.post("/api/diary/my", DiaryController.getMyDiaries);
 app.post(
     "/api/diary/export/send-telegram",
-    authMiddleware,
     DiaryController.sendDiaryExportViaBot
 );
 app.get("/api/diary/:id", DiaryController.getById);

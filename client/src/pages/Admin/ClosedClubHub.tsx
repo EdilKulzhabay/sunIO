@@ -69,7 +69,7 @@ export const ClosedClubHub = () => {
                                     <h2 className="text-lg font-semibold text-gray-900">Телеграм канал</h2>
                                     <p className="text-sm text-gray-500 mt-1 break-all">{links.channelLink || "—"}</p>
                                     <div className="mt-3 text-sm text-gray-600 space-y-1">
-                                        <div>
+                                        {/* <div>
                                             В Telegram:{" "}
                                             <span className="font-medium">
                                                 {overview?.telegramChannelMemberCount ?? "—"}
@@ -77,7 +77,7 @@ export const ClosedClubHub = () => {
                                             {overview?.telegramChannelError ? (
                                                 <span className="text-red-600 ml-2">({overview.telegramChannelError})</span>
                                             ) : null}
-                                        </div>
+                                        </div> */}
                                         <div>
                                             С подпиской в приложении:{" "}
                                             <span className="font-medium">{overview?.appSubscribersWithTelegramCount ?? "—"}</span>
@@ -109,7 +109,7 @@ export const ClosedClubHub = () => {
                                     <h2 className="text-lg font-semibold text-gray-900">Телеграм чат</h2>
                                     <p className="text-sm text-gray-500 mt-1 break-all">{links.chatLink || "—"}</p>
                                     <div className="mt-3 text-sm text-gray-600 space-y-1">
-                                        <div>
+                                        {/* <div>
                                             В Telegram:{" "}
                                             <span className="font-medium">
                                                 {overview?.telegramGroupMemberCount ?? "—"}
@@ -117,7 +117,7 @@ export const ClosedClubHub = () => {
                                             {overview?.telegramGroupError ? (
                                                 <span className="text-red-600 ml-2">({overview.telegramGroupError})</span>
                                             ) : null}
-                                        </div>
+                                        </div> */}
                                         <div>
                                             С подпиской в приложении:{" "}
                                             <span className="font-medium">{overview?.appSubscribersWithTelegramCount ?? "—"}</span>

@@ -313,7 +313,7 @@ export const ClientHumanDesign = () => {
                                 <input
                                     type="text"
                                     inputMode="numeric"
-                                    placeholder={`ЧЧ.ММ`}
+                                    placeholder={`ЧЧ:ММ`}
                                     value={birthTime}
                                     onChange={(e) => {
                                         const digits = e.target.value.replace(/\D/g, '').slice(0, 4);

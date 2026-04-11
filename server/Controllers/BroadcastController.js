@@ -270,7 +270,7 @@ export const executeBroadcast = async (payload) => {
 
             let message = "Рассылка завершена";
             if (totalFailed > 0) {
-                message = `Рассылка завершена. Отправлено: ${totalSent}. Не доставлено (заблокировали бота или недоступны): ${totalFailed}`;
+                message = `Рассылка завершена. Отправлено: ${totalSent}. Не доставлено: ${totalFailed} (блокировка бота, неверный URL картинки/Web App и др. — см. логи бот-сервера)`;
             } else if (totalSent > 0) {
                 message = `Рассылка отправлена ${totalSent} пользователям`;
             }

@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import 'dotenv/config';
+import axios from 'axios';
+import { Input } from 'telegraf';
 import bot from './bot.js';
 import { executeUserOperation } from './queue.js';
 
@@ -16,6 +18,136 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 // Задержка между сообщениями (50 мс = безопасная частота ~20 сообщений/сек)
 // Telegram позволяет до 30 сообщений/сек, но лучше быть консервативнее
 const DELAY_BETWEEN_MESSAGES = 50;
+
+/**
+ * 400 от Telegram при sendPhoto(URL): по ссылке пришёл не image/* (часто HTML-страница ошибки).
+ * Также встречается при невалидной проверке URL для кнопки Web App.
+ * Это НЕ «пользователь заблокировал бота» (для блокировки обычно 403).
+ */
+const isWrongWebPageContentError = (error) => {
+    const desc = String(error?.response?.description ?? error?.message ?? '');
+    return /wrong type of the web page content|wrong file identifier\/http url|failed to get HTTP URL/i.test(
+        desc
+    );
+};
+
+const guessImageFilename = (imageUrl) => {
+    const m = String(imageUrl).match(/\/([^/?#]+\.(jpe?g|png|gif|webp))(?:\?|#|$)/i);
+    return m ? m[1] : 'photo.jpg';
+};
+
+/** Скачивание картинки на сервере бота и отправка буфером — обходит сбои Telegram при запросе URL с CDN/редиректами. */
+async function downloadImageBufferFromUrl(imageUrl) {
+    const res = await axios.get(imageUrl, {
+        responseType: 'arraybuffer',
+        timeout: 90000,
+        maxContentLength: 25 * 1024 * 1024,
+        maxBodyLength: 25 * 1024 * 1024,
+    });
+    const buf = Buffer.from(res.data);
+    const ct = String(res.headers['content-type'] || '')
+        .split(';')[0]
+        .trim()
+        .toLowerCase();
+    if (!ct.startsWith('image/')) {
+        throw new Error(`Ожидался image/*, получено: ${ct || 'пусто'}`);
+    }
+    return buf;
+}
+
+/** Если Telegram не принимает web_app { url }, повтор с обычной ссылкой (откроется во внешнем браузере). */
+function replyMarkupUrlInsteadOfWebApp(reply_markup) {
+    if (!reply_markup?.inline_keyboard) return null;
+    const clone = structuredClone(reply_markup);
+    let changed = false;
+    for (const row of clone.inline_keyboard) {
+        for (const btn of row) {
+            if (btn.web_app?.url) {
+                btn.url = btn.web_app.url;
+                delete btn.web_app;
+                changed = true;
+            }
+        }
+    }
+    return changed ? clone : null;
+}
+
+async function sendMessageWithWebAppFallback(chatId, text, opts) {
+    try {
+        await executeUserOperation(async () => bot.telegram.sendMessage(chatId, text, opts));
+    } catch (error) {
+        if (!isWrongWebPageContentError(error)) throw error;
+        const fb = replyMarkupUrlInsteadOfWebApp(opts.reply_markup);
+        if (!fb) throw error;
+        console.warn(
+            `[broadcast] chat ${chatId}: Web App URL не прошёл проверку Telegram, повтор с кнопкой url`
+        );
+        await executeUserOperation(async () =>
+            bot.telegram.sendMessage(chatId, text, { ...opts, reply_markup: fb })
+        );
+    }
+}
+
+/** Сначала sendPhoto по URL; при 400 «wrong type…» — скачивание на бот-сервере и отправка буфером; при необходимости — кнопка url вместо web_app. */
+async function sendPhotoResilient(chatId, fullImageUrl, photoOpts) {
+    try {
+        await executeUserOperation(async () => bot.telegram.sendPhoto(chatId, fullImageUrl, photoOpts));
+        return;
+    } catch (error) {
+        if (!isWrongWebPageContentError(error)) throw error;
+    }
+
+    let buf;
+    try {
+        buf = await downloadImageBufferFromUrl(fullImageUrl);
+    } catch (downloadErr) {
+        console.error(
+            `[broadcast] Не удалось скачать изображение для повторной отправки (${fullImageUrl}):`,
+            downloadErr.message
+        );
+        throw downloadErr;
+    }
+
+    const filename = guessImageFilename(fullImageUrl);
+
+    try {
+        await executeUserOperation(async () =>
+            bot.telegram.sendPhoto(chatId, Input.fromBuffer(buf, filename), photoOpts)
+        );
+        return;
+    } catch (error) {
+        if (!isWrongWebPageContentError(error)) throw error;
+    }
+
+    const fb = replyMarkupUrlInsteadOfWebApp(photoOpts.reply_markup);
+    if (!fb) {
+        throw new Error(
+            'Telegram отклонил фото (возможно кнопка Web App); fallback url для клавиатуры недоступен'
+        );
+    }
+    console.warn(`[broadcast] chat ${chatId}: повтор sendPhoto с буфером и кнопкой url вместо Web App`);
+    await executeUserOperation(async () =>
+        bot.telegram.sendPhoto(chatId, Input.fromBuffer(Buffer.from(buf), filename), {
+            ...photoOpts,
+            reply_markup: fb,
+        })
+    );
+}
+
+async function sendPhotoUrlOrBufferOnly(chatId, fullImageUrl) {
+    try {
+        await executeUserOperation(async () => bot.telegram.sendPhoto(chatId, fullImageUrl));
+    } catch (error) {
+        if (!isWrongWebPageContentError(error)) throw error;
+        const buf = await downloadImageBufferFromUrl(fullImageUrl);
+        await executeUserOperation(async () =>
+            bot.telegram.sendPhoto(
+                chatId,
+                Input.fromBuffer(buf, guessImageFilename(fullImageUrl))
+            )
+        );
+    }
+}
 
 // Функция для очистки HTML от недопустимых тегов Telegram
 // Telegram поддерживает: <b>, <strong>, <i>, <em>, <u>, <ins>, <s>, <strike>, <del>, 
@@ -561,25 +693,19 @@ app.post('/api/bot/broadcast', async (req, res) => {
 
                     const CAPTION_LIMIT = 1024;
                     if (messageText && messageText.length > CAPTION_LIMIT) {
-                        await executeUserOperation(async () => {
-                            return await bot.telegram.sendPhoto(telegramId, fullImageUrl);
-                        });
-                        await executeUserOperation(async () => {
-                            return await bot.telegram.sendMessage(telegramId, messageText, messageOptions);
-                        });
+                        await sendPhotoUrlOrBufferOnly(telegramId, fullImageUrl);
+                        await sendMessageWithWebAppFallback(telegramId, messageText, messageOptions);
                     } else {
-                        await executeUserOperation(async () => {
-                            return await bot.telegram.sendPhoto(telegramId, fullImageUrl, {
-                                caption: messageText,
-                                parse_mode: finalParseMode,
-                                ...(messageOptions.reply_markup && { reply_markup: messageOptions.reply_markup })
-                            });
+                        await sendPhotoResilient(telegramId, fullImageUrl, {
+                            caption: messageText,
+                            parse_mode: finalParseMode,
+                            ...(messageOptions.reply_markup && {
+                                reply_markup: messageOptions.reply_markup,
+                            }),
                         });
                     }
                 } else {
-                    await executeUserOperation(async () => {
-                        return await bot.telegram.sendMessage(telegramId, messageText, messageOptions);
-                    });
+                    await sendMessageWithWebAppFallback(telegramId, messageText, messageOptions);
                 }
                 
                 results.success.push(telegramId);
@@ -600,10 +726,14 @@ app.post('/api/bot/broadcast', async (req, res) => {
                     await delay(1000); // Задержка 1 секунда при rate limit
                 }
                 
-                // Если пользователь заблокировал бота или не найден, не добавляем большую задержку
-                if (errorCode === 403 || errorCode === 400) {
-                    // Пользователь заблокировал бота или неверный chat_id
-                    console.log(`Пользователь ${telegramId} заблокировал бота или не найден`);
+                if (errorCode === 403) {
+                    console.log(
+                        `Пользователь ${telegramId}: 403 — чаще всего заблокировал бота или запретил сообщения`
+                    );
+                } else if (errorCode === 400) {
+                    console.log(
+                        `Пользователь ${telegramId}: 400 — проверьте URL картинки (должен отдавать image/*) и валидность ссылки Web App в BotFather; это не обязательно блокировка. Описание: ${errorMessage}`
+                    );
                 }
                 
                 results.failed.push({

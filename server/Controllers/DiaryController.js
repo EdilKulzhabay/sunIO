@@ -285,7 +285,7 @@ export const sendDiaryExportViaBot = async (req, res) => {
 
         const excelBuffer = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
         const stamp = formatDiaryExportDate(new Date());
-        const fileName = `Osoznania_${stamp}.xlsx`;
+        const fileName = `Osoznaniya_${stamp}.xlsx`;
 
         tmpPath = path.join(os.tmpdir(), `diary-exp-${randomBytes(16).toString("hex")}.xlsx`);
         await fs.writeFile(tmpPath, excelBuffer);

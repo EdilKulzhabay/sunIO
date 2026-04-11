@@ -1,7 +1,6 @@
 import { UserLayout } from "../../components/User/UserLayout"
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import * as XLSX from "xlsx";
 import api from "../../api";
 import arrowDown from "../../assets/arrowDown.png";
 import { Switch } from "../../components/User/Switch.tsx";
@@ -16,13 +15,6 @@ import XLS from "../../assets/XLS.png";
 const daysOfWeek = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
 const getWeekdayLabel = (date: Date) => daysOfWeek[(date.getDay() + 6) % 7];
 
-const formatDiaryExportDate = (createdAt: string | Date) => {
-    const d = typeof createdAt === "string" ? new Date(createdAt) : createdAt;
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const year = d.getFullYear();
-    return `${day}-${month}-${year}`;
-};
 const width = window.innerWidth;
 const widthPerDay = (width - 60) / 7;
 
@@ -47,6 +39,7 @@ export const ClientDiary = () => {
     const [uselessTaskCount, setUselessTaskCount] = useState(0);
     const [userData, setUserData] = useState<any>(null);
     const [diaryNotifyPermission, setDiaryNotifyPermission] = useState(false);
+    const [exportSending, setExportSending] = useState(false);
     const calendarContainerRef = useRef<HTMLDivElement | null>(null);
     const discoveryRef = useRef<HTMLTextAreaElement | null>(null);
     const achievementRef = useRef<HTMLTextAreaElement | null>(null);
@@ -386,30 +379,26 @@ export const ClientDiary = () => {
         setDiaries(buildDiaryList(allDiaries));
     }, [allDiaries]);
 
-    const handleExportDiariesXls = useCallback(() => {
+    const handleExportDiariesXls = useCallback(async () => {
         if (!allDiaries.length) {
             toast.info("Нет записей для экспорта");
             return;
         }
-        const sorted = [...allDiaries].sort(
-            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-        const rows = sorted.map((d) => ({
-            Дата: formatDiaryExportDate(d.createdAt),
-            Осознание: d.discovery ?? "",
-            Достижения: d.achievement ?? "",
-            "Цели и задачи": d.gratitude ?? "",
-            "Эмоции и энергия": d.emotions ?? "",
-            Упражнение: d.uselessTask ? "да" : "нет",
-        }));
-        const ws = XLSX.utils.json_to_sheet(rows);
-        ws["!cols"] = [{ wch: 12 }, { wch: 36 }, { wch: 36 }, { wch: 36 }, { wch: 36 }, { wch: 12 }];
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Дневник");
-        const stamp = formatDiaryExportDate(new Date()).replace(/-/g, "-");
-        XLSX.writeFile(wb, `Осознания_${stamp}.xlsx`);
-        toast.success("Файл сохранён");
-    }, [allDiaries]);
+        setExportSending(true);
+        try {
+            const response = await api.post("/api/diary/export/send-telegram");
+            if (response.data?.success) {
+                toast.success(response.data.message || "Файл отправлен в чат с ботом");
+            } else {
+                toast.error(response.data?.message || "Не удалось отправить файл");
+            }
+        } catch (e: any) {
+            const msg = e.response?.data?.message || "Ошибка при отправке файла боту";
+            toast.error(msg);
+        } finally {
+            setExportSending(false);
+        }
+    }, [allDiaries.length]);
 
     if (loading) {
         return (
@@ -427,8 +416,9 @@ export const ClientDiary = () => {
                     <button
                         type="button"
                         onClick={handleExportDiariesXls}
-                        className="w-6 h-6 flex items-center justify-center border border-[#00C5AE] rounded-full hover:cursor-pointer"
-                        title="Скачать дневник в Excel"
+                        disabled={exportSending || loading}
+                        className="w-6 h-6 flex items-center justify-center border border-[#00C5AE] rounded-full hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Отправить дневник в Excel в чат с ботом"
                     >
                         <div className="ml-px">
                             <img src={XLS} alt="" className="w-4 h-4" aria-hidden />

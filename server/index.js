@@ -567,6 +567,11 @@ app.post("/api/upload/delete", authMiddleware, UploadController.deleteImage);
 app.post("/api/diary", createContentRateLimit, DiaryController.create);
 app.get("/api/diary", DiaryController.getAll);
 app.post("/api/diary/my", DiaryController.getMyDiaries);
+app.post(
+    "/api/diary/export/send-telegram",
+    authMiddleware,
+    DiaryController.sendDiaryExportViaBot
+);
 app.get("/api/diary/:id", DiaryController.getById);
 app.put("/api/diary/:id", DiaryController.update);
 app.delete("/api/diary/:id", DiaryController.remove);

@@ -1,5 +1,23 @@
+import { randomBytes } from "crypto";
+import fs from "fs/promises";
+import path from "path";
+import os from "os";
+import XLSX from "xlsx";
 import Diary from "../Models/Diary.js";
 import User from "../Models/User.js";
+
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TELEGRAM_API_URL = TELEGRAM_BOT_TOKEN
+    ? `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`
+    : null;
+
+const formatDiaryExportDate = (createdAt) => {
+    const d = createdAt instanceof Date ? createdAt : new Date(createdAt);
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+};
 
 // Создать новую запись дневника
 export const create = async (req, res) => {
@@ -220,6 +238,123 @@ export const remove = async (req, res) => {
             success: false,
             message: "Ошибка при удалении записи дневника",
             error: error.message,
+        });
+    }
+};
+
+/**
+ * Собирает xlsx, кратко хранит во временном файле (освобождение памяти / предсказуемый поток),
+ * удаляет файл с диска, затем отправляет документ пользователю через Telegram Bot API.
+ */
+export const sendDiaryExportViaBot = async (req, res) => {
+    let tmpPath = null;
+    try {
+        if (!req.userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Необходима авторизация",
+            });
+        }
+
+        if (!TELEGRAM_API_URL) {
+            return res.status(503).json({
+                success: false,
+                message: "Отправка через бота временно недоступна",
+            });
+        }
+
+        const user = await User.findById(req.userId).select("telegramId").lean();
+        const telegramId = user?.telegramId != null ? String(user.telegramId).trim() : "";
+        if (!telegramId) {
+            return res.status(400).json({
+                success: false,
+                message: "Не привязан Telegram — нельзя отправить файл боту",
+            });
+        }
+
+        const diaries = await Diary.find({ user: req.userId }).sort({ createdAt: -1 }).lean();
+        if (!diaries.length) {
+            return res.status(400).json({
+                success: false,
+                message: "Нет записей для экспорта",
+            });
+        }
+
+        const rows = diaries.map((d) => ({
+            Дата: formatDiaryExportDate(d.createdAt),
+            Осознание: d.discovery ?? "",
+            Достижения: d.achievement ?? "",
+            "Цели и задачи": d.gratitude ?? "",
+            "Эмоции и энергия": d.emotions ?? "",
+            Упражнение: d.uselessTask ? "да" : "нет",
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(rows);
+        ws["!cols"] = [{ wch: 12 }, { wch: 36 }, { wch: 36 }, { wch: 36 }, { wch: 36 }, { wch: 12 }];
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Дневник");
+
+        const excelBuffer = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
+        const stamp = formatDiaryExportDate(new Date());
+        const fileName = `Osoznania_${stamp}.xlsx`;
+
+        tmpPath = path.join(os.tmpdir(), `diary-exp-${randomBytes(16).toString("hex")}.xlsx`);
+        await fs.writeFile(tmpPath, excelBuffer);
+
+        let filePayload;
+        try {
+            filePayload = await fs.readFile(tmpPath);
+        } finally {
+            await fs.unlink(tmpPath).catch((err) => {
+                console.warn(
+                    "Diary export: не удалось удалить временный файл:",
+                    tmpPath,
+                    err?.message
+                );
+            });
+            tmpPath = null;
+        }
+
+        const form = new FormData();
+        form.append("chat_id", telegramId);
+        form.append(
+            "caption",
+            "Экспорт дневника «Осознания». Скачайте файл во вложении."
+        );
+        form.append(
+            "document",
+            new Blob([filePayload], {
+                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            }),
+            fileName
+        );
+
+        const tgRes = await fetch(`${TELEGRAM_API_URL}/sendDocument`, {
+            method: "POST",
+            body: form,
+        });
+        const tgJson = await tgRes.json();
+
+        if (!tgJson.ok) {
+            console.error("Telegram sendDocument (diary export):", tgJson);
+            return res.status(502).json({
+                success: false,
+                message: tgJson.description || "Не удалось отправить файл в Telegram",
+            });
+        }
+
+        return res.json({
+            success: true,
+            message: "Файл отправлен в чат с ботом",
+        });
+    } catch (error) {
+        console.error("Ошибка в DiaryController.sendDiaryExportViaBot:", error);
+        if (tmpPath) {
+            await fs.unlink(tmpPath).catch(() => {});
+        }
+        return res.status(500).json({
+            success: false,
+            message: "Ошибка при подготовке экспорта",
         });
     }
 };

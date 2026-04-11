@@ -386,7 +386,7 @@ export const ClientDiary = () => {
         }
         setExportSending(true);
         try {
-            const response = await api.post("/api/diary/export/send-telegram");
+            const response = await api.post("/api/diary/export/send-telegram", {userId: userData._id});
             if (response.data?.success) {
                 toast.success(response.data.message || "Файл отправлен в чат с ботом");
             } else {

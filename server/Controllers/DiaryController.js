@@ -266,7 +266,7 @@ export const sendDiaryExportViaBot = async (req, res) => {
             });
         }
 
-        const diaries = await Diary.find({ user: req.userId }).sort({ createdAt: -1 }).lean();
+        const diaries = await Diary.find({ user: userId }).sort({ createdAt: -1 }).lean();
         if (!diaries.length) {
             return res.status(400).json({
                 success: false,

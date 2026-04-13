@@ -15,29 +15,66 @@ export default bot;
 
 /**
  * После /start до нажатия «Да, принимаю»: реферал и/или целевая страница приложения.
- * Deep link с страницей: t.me/bot?start=page_<base64url(utf8 пути)>, путь вида /client/profile
- * (в payload /start допустимы только A–Z, a–z, 0–9, _ и -).
+ *
+ * В параметре start у t.me/bot разрешены только A–Z, a–z, 0–9, _ и - (без / и =).
+ * Варианты page:
+ * 1) Читаемый путь: «слэши» заменены на двойное подчёркивание __
+ *    /client/human-design → start=page_client__human-design
+ * 2) base64url от полного UTF-8 пути (как раньше)
+ *    /client/profile → start=page_L2NsaWVudC9wcm9maWxl
+ * 3) Один сегмент без слэшей: /main → start=page_main
  */
 const pendingStartData = new Map();
 
 // Deep link из подсказки с restart.jpg — не реферал, только повторный /start
 const RESTART_HINT_START_PARAM = 'reopen';
 
+function isSafeAppPath(path) {
+  return (
+    typeof path === 'string' &&
+    path.startsWith('/') &&
+    !path.startsWith('//') &&
+    !path.includes('..')
+  );
+}
+
 function parseDeepLinkStart(startParam) {
   if (startParam == null || startParam === '') return {};
   const trimmed = String(startParam).trim();
   if (trimmed === RESTART_HINT_START_PARAM) return {};
   if (trimmed.startsWith('page_')) {
-    const b64 = trimmed.slice(5);
-    if (!b64) return {};
-    try {
-      const path = Buffer.from(b64, 'base64url').toString('utf8').trim();
-      if (path.startsWith('/') && !path.startsWith('//') && !path.includes('..')) {
+    const rest = trimmed.slice(5);
+    if (!rest) return {};
+    // Символ / в start у Telegram недопустим — если пришёл, deep link мог обрезаться
+    if (rest.includes('/')) {
+      console.warn(
+        '[start] В start нельзя передавать «/». Используйте: page_client__human-design или page_<base64url>'
+      );
+      return {};
+    }
+    // 1) client__human-design → /client/human-design
+    if (rest.includes('__')) {
+      const path = `/${rest.split('__').join('/')}`;
+      if (isSafeAppPath(path)) {
         return { pagePath: path };
       }
-      console.warn('[start] page_: небезопасный или пустой путь после декодирования');
+      return {};
+    }
+    // 2) base64url целого пути
+    try {
+      const path = Buffer.from(rest, 'base64url').toString('utf8').trim();
+      if (isSafeAppPath(path)) {
+        return { pagePath: path };
+      }
     } catch (e) {
       console.warn('[start] page_: ошибка base64url:', e.message);
+    }
+    // 3) один сегмент: main → /main
+    if (/^[A-Za-z0-9_-]+$/.test(rest)) {
+      const path = `/${rest}`;
+      if (isSafeAppPath(path)) {
+        return { pagePath: path };
+      }
     }
     return {};
   }

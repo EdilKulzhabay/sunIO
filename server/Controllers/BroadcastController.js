@@ -282,6 +282,7 @@ export const executeBroadcast = async (payload) => {
                 failed: totalFailed,
                 total: telegramIds.length,
                 failedUsers: results.failed || [],
+                sentTelegramIds: (results.success || []).map((tid) => String(tid)),
         };
         } catch (error) {
             console.error('Ошибка при отправке запроса на бот сервер:', {
@@ -816,7 +817,118 @@ export const getSentBroadcastById = async (req, res) => {
             });
         }
 
-        res.json({ success: true, data: schedule });
+        const payload = schedule.payload || {};
+        let displayImageUrl = payload.imageUrl || '';
+        try {
+            const resolved = await resolveBroadcastContent({
+                message: payload.message,
+                imageUrl: payload.imageUrl,
+                buttonText: payload.buttonText,
+                buttonUrl: payload.buttonUrl,
+                broadcastId: payload.broadcastId,
+                broadcastTitle: payload.broadcastTitle,
+            });
+            if (resolved.finalImageUrl) {
+                displayImageUrl = resolved.finalImageUrl;
+            }
+        } catch {
+            /* шаблон удалён или битый broadcastId — остаётся imageUrl из payload */
+        }
+
+        const recipients = { successful: [], failed: [], note: null };
+        const result = schedule.result || {};
+
+        const enrichByTelegramIds = async (ids) => {
+            const unique = [...new Set(ids.map(String).filter(Boolean))];
+            if (unique.length === 0) return [];
+            const users = await User.find({ telegramId: { $in: unique } })
+                .select("telegramId telegramUserName userName fullName phone status")
+                .lean();
+            const map = new Map(users.map((u) => [String(u.telegramId), u]));
+            return unique.map((tg) => {
+                const u = map.get(String(tg));
+                if (u) {
+                    return {
+                        telegramId: String(u.telegramId),
+                        telegramUserName: u.telegramUserName || "",
+                        userName: u.userName || "",
+                        fullName: u.fullName || "",
+                        phone: u.phone || "",
+                        status: u.status || "",
+                    };
+                }
+                return {
+                    telegramId: String(tg),
+                    telegramUserName: "",
+                    userName: "",
+                    fullName: "",
+                    phone: "",
+                    status: "",
+                    notInDb: true,
+                };
+            });
+        };
+
+        const sentTelegramIds = Array.isArray(result.sentTelegramIds)
+            ? result.sentTelegramIds.map(String)
+            : [];
+
+        if (sentTelegramIds.length > 0) {
+            recipients.successful = await enrichByTelegramIds(sentTelegramIds);
+        } else if (Array.isArray(payload.userIds) && payload.userIds.length > 0) {
+            const users = await User.find({ _id: { $in: payload.userIds } })
+                .select("telegramId telegramUserName userName fullName phone status")
+                .lean();
+            recipients.successful = users
+                .filter((u) => u.telegramId != null && String(u.telegramId).trim() !== "")
+                .map((u) => ({
+                    telegramId: String(u.telegramId),
+                    telegramUserName: u.telegramUserName || "",
+                    userName: u.userName || "",
+                    fullName: u.fullName || "",
+                    phone: u.phone || "",
+                    status: u.status || "",
+                    approximate: true,
+                }));
+            recipients.note =
+                "Список по пользователям из выборки на момент запуска; фактическая доставка могла отличаться (старая запись без сохранения Telegram ID успешных отправок).";
+        } else {
+            recipients.note =
+                "Список получателей не сохранён для этой рассылки (отправка до обновления). Ниже — только ошибки доставки, если они были.";
+        }
+
+        const failedUsers = Array.isArray(result.failedUsers) ? result.failedUsers : [];
+        const failedIds = failedUsers.map((f) => String(f.telegramId)).filter(Boolean);
+        let failedMap = new Map();
+        if (failedIds.length > 0) {
+            const docs = await User.find({ telegramId: { $in: failedIds } })
+                .select("telegramId telegramUserName userName fullName phone status")
+                .lean();
+            failedMap = new Map(docs.map((u) => [String(u.telegramId), u]));
+        }
+
+        recipients.failed = failedUsers.map((f) => {
+            const u = failedMap.get(String(f.telegramId));
+            return {
+                telegramId: String(f.telegramId),
+                error: f.error || "",
+                errorCode: f.errorCode,
+                telegramUserName: u?.telegramUserName || "",
+                userName: u?.userName || "",
+                fullName: u?.fullName || "",
+                phone: u?.phone || "",
+                status: u?.status || "",
+            };
+        });
+
+        res.json({
+            success: true,
+            data: {
+                ...schedule,
+                displayImageUrl: displayImageUrl || undefined,
+                recipients,
+            },
+        });
     } catch (error) {
         console.log("Ошибка в getSentBroadcastById:", error);
         res.status(500).json({
@@ -955,14 +1067,28 @@ export const sendScheduleReminders = async () => {
 
             const userIds = subscribers.map(u => u._id);
 
+            const eventLink =
+                typeof event.eventLink === 'string' ? event.eventLink.trim() : '';
+            const templateButtonUrl =
+                broadcast.buttonUrl != null && String(broadcast.buttonUrl).trim()
+                    ? String(broadcast.buttonUrl).trim()
+                    : '';
+            const reminderButtonUrl = eventLink || templateButtonUrl || undefined;
+            const templateButtonText =
+                broadcast.buttonText != null && String(broadcast.buttonText).trim()
+                    ? String(broadcast.buttonText).trim()
+                    : '';
+            const reminderButtonText =
+                templateButtonText || (reminderButtonUrl ? 'Перейти к событию' : undefined);
+
             try {
                 await executeBroadcast({
                     message: content,
                     userIds,
                     imageUrl: broadcast.imgUrl || undefined,
                     parseMode: 'HTML',
-                    buttonText: broadcast.buttonText || undefined,
-                    buttonUrl: broadcast.buttonUrl || undefined,
+                    buttonText: reminderButtonText,
+                    buttonUrl: reminderButtonUrl,
                 });
 
                 const label = is1h ? '1ч' : '24ч';

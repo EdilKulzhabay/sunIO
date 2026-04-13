@@ -5,16 +5,39 @@ import { addAdminAction } from "../utils/addAdminAction.js";
 
 const BOT_SERVER_URL = process.env.BOT_SERVER_URL || "http://localhost:5011";
 
-const ALLOWED_FIELDS = ["channelLink", "chatLink", "channelTelegramId", "groupTelegramId"];
+const ALLOWED_FIELDS = [
+    "openChannelLink",
+    "openChatLink",
+    "closedChannelLink",
+    "closedChatLink",
+    "channelTelegramId",
+    "groupTelegramId",
+];
+
+function serializeClosedClubForApi(doc) {
+    const openChannelLink = (doc.openChannelLink || doc.channelLink || "").trim();
+    const openChatLink = (doc.openChatLink || doc.chatLink || "").trim();
+    return {
+        openChannelLink,
+        openChatLink,
+        closedChannelLink: (doc.closedChannelLink || "").trim(),
+        closedChatLink: (doc.closedChatLink || "").trim(),
+        channelTelegramId: (doc.channelTelegramId || "").trim(),
+        groupTelegramId: (doc.groupTelegramId || "").trim(),
+    };
+}
 
 export const getPublicLinks = async (req, res) => {
     try {
         const doc = await getClosedClubSettingsDoc();
+        const s = serializeClosedClubForApi(doc);
         res.json({
             success: true,
             data: {
-                channelLink: doc.channelLink || "",
-                chatLink: doc.chatLink || "",
+                openChannelLink: s.openChannelLink,
+                openChatLink: s.openChatLink,
+                closedChannelLink: s.closedChannelLink,
+                closedChatLink: s.closedChatLink,
             },
         });
     } catch (error) {
@@ -28,12 +51,7 @@ export const getSettings = async (req, res) => {
         const doc = await getClosedClubSettingsDoc();
         res.json({
             success: true,
-            data: {
-                channelLink: doc.channelLink || "",
-                chatLink: doc.chatLink || "",
-                channelTelegramId: doc.channelTelegramId || "",
-                groupTelegramId: doc.groupTelegramId || "",
-            },
+            data: serializeClosedClubForApi(doc),
         });
     } catch (error) {
         console.error("ClosedClubController.getSettings:", error);
@@ -53,20 +71,25 @@ export const updateSettings = async (req, res) => {
             }
         }
 
+        if (body.openChannelLink !== undefined && body.openChannelLink !== null) {
+            doc.channelLink = String(body.openChannelLink).trim();
+        }
+        if (body.openChatLink !== undefined && body.openChatLink !== null) {
+            doc.chatLink = String(body.openChatLink).trim();
+        }
+
         await doc.save();
 
         if (admin?._id) {
-            await addAdminAction(admin._id, "Обновил(а) настройки закрытого клуба (Telegram канал/чат)");
+            await addAdminAction(
+                admin._id,
+                "Обновил(а) настройки закрытого клуба (открытые/закрытые канал и чат Telegram)"
+            );
         }
 
         res.json({
             success: true,
-            data: {
-                channelLink: doc.channelLink || "",
-                chatLink: doc.chatLink || "",
-                channelTelegramId: doc.channelTelegramId || "",
-                groupTelegramId: doc.groupTelegramId || "",
-            },
+            data: serializeClosedClubForApi(doc),
             message: "Сохранено",
         });
     } catch (error) {

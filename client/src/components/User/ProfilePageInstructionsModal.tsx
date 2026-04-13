@@ -42,17 +42,31 @@ const INSTRUCTION_STEPS: ProfileInstructionStep[] = [
         curveBend: -50,
     },
     {
-        title: 'Телеграм канал',
+        title: 'Открытый канал',
         description:
-            'Информационный канал, где публикуется интересный контент, которого нет в других социальных сетях',
-        targetId: 'profile-instruction-telegram-channel',
+            'Публичный канал с контентом, которого нет в других социальных сетях — открывается по ссылке в Telegram',
+        targetId: 'profile-instruction-telegram-open-channel',
         curveBend: 46,
     },
     {
-        title: 'Телеграм чат',
-        description: 'Чат проекта, где можно задавать вопросы ведущим проекта и делиться обратной связью',
-        targetId: 'profile-instruction-telegram-chat',
+        title: 'Открытый чат',
+        description: 'Общий чат проекта: вопросы ведущим и обратная связь',
+        targetId: 'profile-instruction-telegram-open-chat',
         curveBend: -48,
+    },
+    {
+        title: 'Закрытый канал',
+        description:
+            'Доступ через бота при активной подписке: переход по ссылке открывает бота, который оформляет доступ в канал клуба',
+        targetId: 'profile-instruction-telegram-closed-channel',
+        curveBend: 44,
+    },
+    {
+        title: 'Закрытый чат',
+        description:
+            'Закрытое общение участников клуба — по ссылке на бота при действующей подписке',
+        targetId: 'profile-instruction-telegram-closed-chat',
+        curveBend: -46,
     },
     {
         title: 'Настройка просмотра видео',

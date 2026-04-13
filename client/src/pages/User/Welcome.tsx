@@ -61,7 +61,13 @@ export const Welcome = () => {
                             const fullName = response.data.user.fullName;
                             localStorage.setItem('fullName', fullName);
                             const redirectTo = searchParams.get('redirectTo');
-                            navigate(redirectTo || '/main', { replace: true });
+                            const page = searchParams.get('page');
+                            const qs = new URLSearchParams();
+                            qs.set('telegramId', telegramId);
+                            if (telegramUserName) qs.set('telegramUserName', telegramUserName);
+                            if (page) qs.set('page', page);
+                            const mainWithParams = `/main?${qs.toString()}`;
+                            navigate(redirectTo || mainWithParams, { replace: true });
                         } else {
                             // Оставляем только 'telegramId', 'telegramUserName' и 'user' в localStorage
                             const telegramIdValue = localStorage.getItem("telegramId");
@@ -111,7 +117,7 @@ export const Welcome = () => {
 
     if (loading) {
         return <div className="flex justify-center items-center h-screen">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-400/90" />
         </div>
     }
 

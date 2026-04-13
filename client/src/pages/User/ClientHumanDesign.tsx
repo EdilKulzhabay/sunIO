@@ -209,7 +209,7 @@ export const ClientHumanDesign = () => {
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen bg-[#031F23]">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-400/90" />
             </div>
         );
     }
@@ -244,7 +244,7 @@ export const ClientHumanDesign = () => {
                                 </div>
                             </div>
                             <div className="shrink-0">
-                                <img src={levelInfo.icon} alt={levelInfo.label} className="w-16 h-16 object-contain" />
+                                <img src={levelInfo.icon} alt={levelInfo.label} className="w-18 h-18 object-contain" />
                             </div>
                         </div>
 

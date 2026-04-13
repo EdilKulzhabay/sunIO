@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AdminLayout } from '../../components/Admin/AdminLayout';
 import { MyInput } from '../../components/Admin/MyInput';
 import { MyButton } from '../../components/Admin/MyButton';
@@ -14,7 +14,22 @@ const COMPLETED_BODY_ACTIVATIONS = [
     { key: 'karmicBodyActivation' as const, label: 'Активация кармического тела' },
     { key: 'buddhicBodyActivation' as const, label: 'Активация будхиального тела' },
     { key: 'atmicBodyActivation' as const, label: 'Активация атманического тела' },
-];
+] as const;
+
+const BONUS_PER_BODY_ACTIVATION = 10;
+
+type BodyActivationKey = (typeof COMPLETED_BODY_ACTIVATIONS)[number]['key'];
+
+function countNewBodyActivations(
+    current: FormData,
+    initial: Partial<Record<BodyActivationKey, boolean>>
+): number {
+    let n = 0;
+    for (const { key } of COMPLETED_BODY_ACTIVATIONS) {
+        if (!!current[key] && !initial[key]) n += 1;
+    }
+    return n;
+}
 
 interface Referral {
     _id: string;
@@ -81,6 +96,9 @@ export const UserForm = () => {
         ? new Date(formData.lastActiveDate).toLocaleString('ru-RU')
         : '';
 
+    /** Снимок активаций с сервера — чтобы начислять бонус только за вновь отмеченные галочки. */
+    const initialBodyActivationsRef = useRef<Partial<Record<BodyActivationKey, boolean>>>({});
+
     useEffect(() => {
         const load = async () => {
             if (id) {
@@ -124,6 +142,14 @@ export const UserForm = () => {
                 hdBirthCity: data.hdBirthCity || '',
                 selectedAssignmentRequest: data.selectedAssignmentRequest || '',
             });
+            initialBodyActivationsRef.current = {
+                ethericBodyActivation: !!data.ethericBodyActivation,
+                astralBodyActivation: !!data.astralBodyActivation,
+                mentalBodyActivation: !!data.mentalBodyActivation,
+                karmicBodyActivation: !!data.karmicBodyActivation,
+                buddhicBodyActivation: !!data.buddhicBodyActivation,
+                atmicBodyActivation: !!data.atmicBodyActivation,
+            };
             if (data.telegramId) {
                 fetchReferrals(data.telegramId);
             }
@@ -188,6 +214,10 @@ export const UserForm = () => {
         setLoading(true);
 
         try {
+            const newActivations = countNewBodyActivations(formData, initialBodyActivationsRef.current);
+            const activationBonus = newActivations * BONUS_PER_BODY_ACTIVATION;
+            const baseBonus = Number(formData.bonus) || 0;
+
             const payload: FormData = {
                 ...formData,
                 lastActiveDate: formData.lastActiveDate || undefined,
@@ -197,14 +227,23 @@ export const UserForm = () => {
                 karmicBodyActivation: !!formData.karmicBodyActivation,
                 buddhicBodyActivation: !!formData.buddhicBodyActivation,
                 atmicBodyActivation: !!formData.atmicBodyActivation,
+                bonus: baseBonus + activationBonus,
             };
 
             if (id) {
                 await api.put(`/api/user/${id}`, payload);
-                toast.success('Пользователь обновлен');
+                toast.success(
+                    activationBonus > 0
+                        ? `Пользователь обновлён. Дополнительно начислено ${activationBonus} Солнц (${newActivations} новых активаций).`
+                        : 'Пользователь обновлен'
+                );
             } else {
                 await api.post('/api/user/create-by-admin', payload);
-                toast.success('Пользователь создан');
+                toast.success(
+                    activationBonus > 0
+                        ? `Пользователь создан. Начислено ${activationBonus} Солнц за отмеченные активации.`
+                        : 'Пользователь создан'
+                );
             }
             navigate('/admin/users');
         } catch (error: any) {

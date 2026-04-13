@@ -13,19 +13,57 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 // Экспортируем бота для использования в других модулях
 export default bot;
 
-// Храним startParam для каждого пользователя, чтобы передать после согласия
-const pendingStartParams = new Map();
+/**
+ * После /start до нажатия «Да, принимаю»: реферал и/или целевая страница приложения.
+ * Deep link с страницей: t.me/bot?start=page_<base64url(utf8 пути)>, путь вида /client/profile
+ * (в payload /start допустимы только A–Z, a–z, 0–9, _ и -).
+ */
+const pendingStartData = new Map();
 
 // Deep link из подсказки с restart.jpg — не реферал, только повторный /start
 const RESTART_HINT_START_PARAM = 'reopen';
+
+function parseDeepLinkStart(startParam) {
+  if (startParam == null || startParam === '') return {};
+  const trimmed = String(startParam).trim();
+  if (trimmed === RESTART_HINT_START_PARAM) return {};
+  if (trimmed.startsWith('page_')) {
+    const b64 = trimmed.slice(5);
+    if (!b64) return {};
+    try {
+      const path = Buffer.from(b64, 'base64url').toString('utf8').trim();
+      if (path.startsWith('/') && !path.startsWith('//') && !path.includes('..')) {
+        return { pagePath: path };
+      }
+      console.warn('[start] page_: небезопасный или пустой путь после декодирования');
+    } catch (e) {
+      console.warn('[start] page_: ошибка base64url:', e.message);
+    }
+    return {};
+  }
+  return { referralTelegramId: trimmed };
+}
+
+function buildOpenSunWebAppUrl(telegramId, telegramUserName, pagePath) {
+  const base = (process.env.APP_URL || '').replace(/\/$/, '');
+  const u = new URL(`${base}/main/`);
+  u.searchParams.set('telegramId', String(telegramId));
+  if (telegramUserName) u.searchParams.set('telegramUserName', String(telegramUserName));
+  if (pagePath && String(pagePath).trim()) {
+    const p = String(pagePath).trim();
+    u.searchParams.set('page', p.startsWith('/') ? p : `/${p}`);
+  }
+  return u.toString();
+}
 
 bot.start(async (ctx) => {
   const chatId = ctx.chat.id;
   const telegramId = ctx.from.id;
 
   const startParam = ctx.startParam || (ctx.message?.text?.split(' ')[1] || null);
-  if (startParam && startParam !== RESTART_HINT_START_PARAM) {
-    pendingStartParams.set(String(telegramId), startParam);
+  const parsed = parseDeepLinkStart(startParam);
+  if (Object.keys(parsed).length > 0) {
+    pendingStartData.set(String(telegramId), parsed);
   }
 
   try {
@@ -81,8 +119,9 @@ bot.action('consent_accept', async (ctx) => {
     await ctx.answerCbQuery();
   } catch (e) { /* ignore */ }
 
-  const startParam = pendingStartParams.get(String(telegramId)) || null;
-  pendingStartParams.delete(String(telegramId));
+  const pending = pendingStartData.get(String(telegramId)) || {};
+  pendingStartData.delete(String(telegramId));
+  const { referralTelegramId, pagePath } = pending;
 
   let profilePhotoUrl = null;
   try {
@@ -105,7 +144,7 @@ bot.action('consent_accept', async (ctx) => {
     await axios.post(`${process.env.API_URL}/api/user/create`, {
       telegramId,
       telegramUserName,
-      referralTelegramId: startParam,
+      referralTelegramId: referralTelegramId || undefined,
       profilePhotoUrl
     }, {
       headers: { 'Content-Type': 'application/json' }
@@ -125,7 +164,7 @@ bot.action('consent_accept', async (ctx) => {
               {
                 text: '☀️ Открыть Солнце',
                 web_app: {
-                  url: `${process.env.APP_URL}/main/?telegramId=${telegramId}&telegramUserName=${telegramUserName}`
+                  url: buildOpenSunWebAppUrl(telegramId, telegramUserName, pagePath)
                 }
               }
             ]]
@@ -138,6 +177,14 @@ bot.action('consent_accept', async (ctx) => {
     setTimeout(() => {
       (async () => {
         try {
+          const userResp = await axios.get(
+            `${process.env.API_URL}/api/user/telegram/${telegramId}`
+          );
+          const user = userResp.data?.user;
+          if (user?.fullName && String(user.fullName).trim()) {
+            return;
+          }
+
           const me = await bot.telegram.getMe();
           const botUsername = me.username || process.env.BOT_USERNAME;
           if (!botUsername) {
@@ -186,7 +233,17 @@ bot.action('consent_accept', async (ctx) => {
             .replace(/<\/div>\s*<div>/gi, '\n\n')
             .replace(/<\/?div>/gi, '');
 
+          const mainAppRow = [
+            {
+              text: '☀️ Открыть Солнце',
+              web_app: {
+                url: `${process.env.APP_URL}/main/?telegramId=${telegramId}&telegramUserName=${encodeURIComponent(telegramUserName || '')}`,
+              },
+            },
+          ];
+
           const msgOpts = { parse_mode: 'HTML' };
+          const extraRows = [];
           if (bc.buttonText && bc.buttonUrl) {
             const appUrl = process.env.APP_URL || '';
             const isExternal =
@@ -198,9 +255,7 @@ bot.action('consent_accept', async (ctx) => {
 
             if (isExternal) {
               const btnUrl = bc.buttonUrl.startsWith('http') ? bc.buttonUrl : `https://${bc.buttonUrl}`;
-              msgOpts.reply_markup = {
-                inline_keyboard: [[{ text: bc.buttonText, url: btnUrl }]],
-              };
+              extraRows.push([{ text: bc.buttonText, url: btnUrl }]);
             } else {
               let webAppUrl = `${appUrl}/?telegramId=${telegramId}`;
               if (bc.buttonUrl) {
@@ -211,11 +266,12 @@ bot.action('consent_accept', async (ctx) => {
                   webAppUrl += `&redirectTo=${encodeURIComponent(path)}`;
                 }
               }
-              msgOpts.reply_markup = {
-                inline_keyboard: [[{ text: bc.buttonText, web_app: { url: webAppUrl } }]],
-              };
+              extraRows.push([{ text: bc.buttonText, web_app: { url: webAppUrl } }]);
             }
           }
+          msgOpts.reply_markup = {
+            inline_keyboard: [mainAppRow, ...extraRows],
+          };
 
           if (bc.imgUrl) {
             const fullImageUrl = bc.imgUrl.startsWith('http')

@@ -11,7 +11,6 @@ import {
     CalendarClock,
     Send,
     X,
-    BarChart3,
     ArrowUp,
     ArrowDown,
     ArrowUpDown,
@@ -59,8 +58,9 @@ interface ModalScheduleRow {
     scheduledBy?: { fullName?: string };
 }
 
-type SentSortKey = 'sentAt' | 'recipients' | 'closed' | 'clicked';
-type SentRowsSortKey = 'sentAt' | 'count';
+type EnrichedSentRow = ModalScheduleRow & { campaign: ModalCampaignRow | null };
+
+type SentRowsSortKey = 'sentAt' | 'count' | 'closed' | 'clicked';
 
 function formatMsk(iso?: string | null) {
     if (!iso) return '—';
@@ -94,10 +94,6 @@ export const ModalNotificationsAdmin = () => {
     const [loadingSentRows, setLoadingSentRows] = useState(false);
     const [campaigns, setCampaigns] = useState<ModalCampaignRow[]>([]);
     const [campaignsLoading, setCampaignsLoading] = useState(false);
-
-    const [sentSortKey, setSentSortKey] = useState<SentSortKey>('sentAt');
-    const [sentSortDir, setSentSortDir] = useState<'asc' | 'desc'>('desc');
-    const [campaignSearch, setCampaignSearch] = useState('');
 
     const [sentRowsSortKey, setSentRowsSortKey] = useState<SentRowsSortKey>('sentAt');
     const [sentRowsSortDir, setSentRowsSortDir] = useState<'asc' | 'desc'>('desc');
@@ -156,7 +152,7 @@ export const ModalNotificationsAdmin = () => {
         try {
             const response = await api.get<{ success: boolean; data: ModalCampaignRow[] }>(
                 '/api/modal-notification/campaigns',
-                { params: { limit: 40 } }
+                { params: { limit: 100 } }
             );
             if (response.data.success && response.data.data) {
                 setCampaigns(response.data.data);
@@ -210,15 +206,6 @@ export const ModalNotificationsAdmin = () => {
         }
     };
 
-    const toggleSentSort = (key: SentSortKey) => {
-        if (sentSortKey === key) {
-            setSentSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
-        } else {
-            setSentSortKey(key);
-            setSentSortDir('desc');
-        }
-    };
-
     const toggleSentRowsSort = (key: SentRowsSortKey) => {
         if (sentRowsSortKey === key) {
             setSentRowsSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
@@ -228,15 +215,26 @@ export const ModalNotificationsAdmin = () => {
         }
     };
 
+    const enrichedSentRows: EnrichedSentRow[] = useMemo(() => {
+        const byId = new Map(campaigns.map((c) => [String(c._id), c]));
+        return sentModalRows.map((row) => ({
+            ...row,
+            campaign: row.payload?.campaignId
+                ? byId.get(String(row.payload.campaignId)) ?? null
+                : null,
+        }));
+    }, [sentModalRows, campaigns]);
+
     const sortedSentModalRows = useMemo(() => {
-        let list = [...sentModalRows];
+        let list = [...enrichedSentRows];
 
         if (sentRowsSearch.trim()) {
             const q = sentRowsSearch.trim().toLowerCase();
             list = list.filter((item) => {
                 const title = (item.payload?.modalTitle || '').toLowerCase();
+                const cTitle = (item.campaign?.modalTitle || '').toLowerCase();
                 const desc = stripHtml(item.payload?.modalDescription || '').toLowerCase();
-                return title.includes(q) || desc.includes(q);
+                return title.includes(q) || cTitle.includes(q) || desc.includes(q);
             });
         }
 
@@ -247,62 +245,33 @@ export const ModalNotificationsAdmin = () => {
                 const db = b.sentAt ? new Date(b.sentAt).getTime() : 0;
                 return mult * (da - db);
             });
+        } else if (sentRowsSortKey === 'count') {
+            list.sort((a, b) => {
+                const av = a.result?.count ?? a.campaign?.recipientCount ?? 0;
+                const bv = b.result?.count ?? b.campaign?.recipientCount ?? 0;
+                return mult * (av - bv);
+            });
+        } else if (sentRowsSortKey === 'closed') {
+            list.sort((a, b) => {
+                const av = a.campaign?.stats?.closedModal ?? -1;
+                const bv = b.campaign?.stats?.closedModal ?? -1;
+                return mult * (av - bv);
+            });
         } else {
             list.sort((a, b) => {
-                const av = a.result?.count ?? 0;
-                const bv = b.result?.count ?? 0;
+                const av = a.campaign?.stats?.clickedButton ?? -1;
+                const bv = b.campaign?.stats?.clickedButton ?? -1;
                 return mult * (av - bv);
             });
         }
         return list;
-    }, [sentModalRows, sentRowsSortKey, sentRowsSortDir, sentRowsSearch]);
+    }, [enrichedSentRows, sentRowsSortKey, sentRowsSortDir, sentRowsSearch]);
 
     const SentRowsSortIcon = ({ column }: { column: SentRowsSortKey }) => {
         if (sentRowsSortKey !== column) {
             return <ArrowUpDown size={14} className="opacity-40 shrink-0" aria-hidden />;
         }
         return sentRowsSortDir === 'desc' ? (
-            <ArrowDown size={14} className="shrink-0" aria-hidden />
-        ) : (
-            <ArrowUp size={14} className="shrink-0" aria-hidden />
-        );
-    };
-
-    const sortedCampaigns = useMemo(() => {
-        let list = [...campaigns];
-
-        if (campaignSearch.trim()) {
-            const q = campaignSearch.trim().toLowerCase();
-            list = list.filter((c) => c.modalTitle?.toLowerCase().includes(q));
-        }
-
-        const mult = sentSortDir === 'asc' ? 1 : -1;
-        switch (sentSortKey) {
-            case 'sentAt':
-                list.sort((a, b) => {
-                    const da = a.sentAt ? new Date(a.sentAt).getTime() : 0;
-                    const db = b.sentAt ? new Date(b.sentAt).getTime() : 0;
-                    return mult * (da - db);
-                });
-                break;
-            case 'recipients':
-                list.sort((a, b) => mult * (a.recipientCount - b.recipientCount));
-                break;
-            case 'closed':
-                list.sort((a, b) => mult * (a.stats.closedModal - b.stats.closedModal));
-                break;
-            case 'clicked':
-                list.sort((a, b) => mult * (a.stats.clickedButton - b.stats.clickedButton));
-                break;
-        }
-        return list;
-    }, [campaigns, sentSortKey, sentSortDir, campaignSearch]);
-
-    const SortIcon = ({ column }: { column: SentSortKey }) => {
-        if (sentSortKey !== column) {
-            return <ArrowUpDown size={14} className="opacity-40 shrink-0" aria-hidden />;
-        }
-        return sentSortDir === 'desc' ? (
             <ArrowDown size={14} className="shrink-0" aria-hidden />
         ) : (
             <ArrowUp size={14} className="shrink-0" aria-hidden />
@@ -444,7 +413,7 @@ export const ModalNotificationsAdmin = () => {
                     )}
                 </div>
 
-                {/* Отправленные */}
+                {/* Отправленные + статистика кампаний (одна таблица) */}
                 <div className="bg-white rounded-lg shadow-sm p-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                         <div className="flex items-center gap-2">
@@ -473,10 +442,10 @@ export const ModalNotificationsAdmin = () => {
                             )}
                         </div>
                     </div>
-                    {loadingSentRows && (
+                    {loadingSentRows || campaignsLoading ? (
                         <p className="text-gray-500 text-center py-4">Загрузка…</p>
-                    )}
-                    {!loadingSentRows && sentModalRows.length > 0 && (
+                    ) : null}
+                    {!loadingSentRows && !campaignsLoading && sentModalRows.length > 0 && (
                         <div className="overflow-x-auto border border-gray-200 rounded-lg">
                             <table className="min-w-full text-sm text-left">
                                 <thead className="bg-gray-50 border-b border-gray-200">
@@ -487,6 +456,9 @@ export const ModalNotificationsAdmin = () => {
                                         <th className="px-4 py-3 font-medium text-gray-700 min-w-[200px]">
                                             Описание
                                         </th>
+                                        <th className="px-4 py-3 font-medium text-gray-700 whitespace-nowrap">
+                                            Статус кампании
+                                        </th>
                                         <th className="px-4 py-3 whitespace-nowrap">
                                             <button
                                                 type="button"
@@ -494,7 +466,7 @@ export const ModalNotificationsAdmin = () => {
                                                 onClick={() => toggleSentRowsSort('sentAt')}
                                                 title="Сортировать по дате отправки"
                                             >
-                                                Отправлено
+                                                Отправлено (МСК)
                                                 <SentRowsSortIcon column="sentAt" />
                                             </button>
                                         </th>
@@ -509,198 +481,123 @@ export const ModalNotificationsAdmin = () => {
                                                 <SentRowsSortIcon column="count" />
                                             </button>
                                         </th>
+                                        <th className="px-4 py-3 text-right tabular-nums">
+                                            <button
+                                                type="button"
+                                                className="inline-flex items-center justify-end gap-1 w-full font-medium text-gray-700 hover:text-gray-900"
+                                                onClick={() => toggleSentRowsSort('closed')}
+                                                title="Закрыли модалку"
+                                            >
+                                                Закрыли (×)
+                                                <SentRowsSortIcon column="closed" />
+                                            </button>
+                                        </th>
+                                        <th className="px-4 py-3 text-right tabular-nums">
+                                            <button
+                                                type="button"
+                                                className="inline-flex items-center justify-end gap-1 w-full font-medium text-gray-700 hover:text-gray-900"
+                                                onClick={() => toggleSentRowsSort('clicked')}
+                                                title="Нажали кнопку в модалке"
+                                            >
+                                                Нажали кнопку
+                                                <SentRowsSortIcon column="clicked" />
+                                            </button>
+                                        </th>
                                         <th className="px-4 py-3 font-medium text-gray-700 whitespace-nowrap">
                                             Инициатор
                                         </th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {sortedSentModalRows.map((item) => (
-                                        <tr
-                                            key={item._id}
-                                            className="border-b border-gray-100 hover:bg-green-50/60 transition-colors"
-                                        >
-                                            <td className="px-4 py-3 font-medium text-gray-900 max-w-[220px]">
-                                                <span className="line-clamp-2" title={item.payload?.modalTitle || ''}>
-                                                    {item.payload?.modalTitle || '—'}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-3 text-gray-700 max-w-md">
-                                                <span className="line-clamp-2" title={stripHtml(item.payload?.modalDescription || '')}>
-                                                    {getDescriptionPreview(item.payload?.modalDescription, 200)}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
-                                                {item.sentAt
-                                                    ? new Date(item.sentAt).toLocaleString('ru-RU')
-                                                    : '—'}
-                                            </td>
-                                            <td className="px-4 py-3 text-right tabular-nums text-gray-900">
-                                                {item.result?.count ?? '—'}
-                                            </td>
-                                            <td className="px-4 py-3 text-gray-600 max-w-[160px]">
-                                                <span className="line-clamp-2" title={item.scheduledBy?.fullName || ''}>
-                                                    {item.scheduledBy?.fullName || '—'}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {sortedSentModalRows.map((item) => {
+                                        const cid = item.payload?.campaignId;
+                                        const goCampaign = () => {
+                                            if (cid) navigate(`/admin/modal-notifications/campaign/${cid}`);
+                                        };
+                                        return (
+                                            <tr
+                                                key={item._id}
+                                                role={cid ? 'button' : undefined}
+                                                tabIndex={cid ? 0 : undefined}
+                                                onClick={cid ? goCampaign : undefined}
+                                                onKeyDown={
+                                                    cid
+                                                        ? (e) => {
+                                                              if (e.key === 'Enter' || e.key === ' ') {
+                                                                  e.preventDefault();
+                                                                  goCampaign();
+                                                              }
+                                                          }
+                                                        : undefined
+                                                }
+                                                className={`border-b border-gray-100 hover:bg-green-50/60 transition-colors ${cid ? 'cursor-pointer' : ''}`}
+                                            >
+                                                <td className="px-4 py-3 font-medium text-gray-900 max-w-[220px]">
+                                                    <span className="line-clamp-2" title={item.payload?.modalTitle || ''}>
+                                                        {item.payload?.modalTitle || '—'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3 text-gray-700 max-w-md">
+                                                    <span
+                                                        className="line-clamp-2"
+                                                        title={stripHtml(item.payload?.modalDescription || '')}
+                                                    >
+                                                        {getDescriptionPreview(item.payload?.modalDescription, 200)}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    {!item.campaign && <span className="text-gray-400">—</span>}
+                                                    {item.campaign?.status === 'scheduled' && (
+                                                        <span className="text-amber-700">ожидает</span>
+                                                    )}
+                                                    {item.campaign?.status === 'sent' && (
+                                                        <span className="text-green-700">отправлено</span>
+                                                    )}
+                                                    {item.campaign?.status === 'failed' && (
+                                                        <span className="text-red-700" title={item.campaign.error}>
+                                                            ошибка
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
+                                                    {formatMsk(item.sentAt)}
+                                                </td>
+                                                <td className="px-4 py-3 text-right tabular-nums text-gray-900">
+                                                    {item.result?.count ??
+                                                        item.campaign?.recipientCount ??
+                                                        '—'}
+                                                </td>
+                                                <td className="px-4 py-3 text-right tabular-nums text-gray-800">
+                                                    {item.campaign?.stats != null
+                                                        ? item.campaign.stats.closedModal
+                                                        : '—'}
+                                                </td>
+                                                <td className="px-4 py-3 text-right tabular-nums text-gray-800">
+                                                    {item.campaign?.stats != null
+                                                        ? item.campaign.stats.clickedButton
+                                                        : '—'}
+                                                </td>
+                                                <td className="px-4 py-3 text-gray-600 max-w-[160px]">
+                                                    <span className="line-clamp-2" title={item.scheduledBy?.fullName || ''}>
+                                                        {item.scheduledBy?.fullName || '—'}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
                     )}
-                    {!loadingSentRows && sentModalRows.length === 0 && (
+                    {!loadingSentRows && !campaignsLoading && sentModalRows.length === 0 && (
                         <p className="text-gray-500 text-center py-4">
                             Пока нет записей об отправках
                         </p>
                     )}
-                </div>
-
-                {/* Статистика */}
-                <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
-                    <div className="flex items-center justify-between border-b pb-2">
-                        <div className="flex items-center gap-2 text-gray-900 font-semibold">
-                            <BarChart3 size={20} />
-                            Статистика по кампаниям
-                        </div>
-                        <div className="relative w-64">
-                            <input
-                                type="text"
-                                value={campaignSearch}
-                                onChange={(e) => setCampaignSearch(e.target.value)}
-                                placeholder="Поиск по заголовку…"
-                                className="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                            <Search className="absolute left-2.5 top-2.5 text-gray-400" size={16} />
-                            {campaignSearch && (
-                                <button
-                                    type="button"
-                                    onClick={() => setCampaignSearch('')}
-                                    className="absolute right-2.5 top-2.5 text-gray-400 hover:text-gray-600"
-                                >
-                                    <X size={16} />
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                    {campaignsLoading ? (
-                        <p className="text-sm text-gray-500">Загрузка…</p>
-                    ) : campaigns.length === 0 ? (
-                        <p className="text-sm text-gray-500">Пока нет кампаний.</p>
-                    ) : (
-                        <div className="overflow-x-auto border border-gray-200 rounded-lg">
-                            <table className="min-w-full text-sm text-left">
-                                <thead className="bg-gray-50 border-b border-gray-200">
-                                    <tr>
-                                        <th className="px-4 py-3 font-medium text-gray-700 whitespace-nowrap">
-                                            Заголовок
-                                        </th>
-                                        <th className="px-4 py-3 font-medium text-gray-700 whitespace-nowrap">
-                                            Статус
-                                        </th>
-                                        <th className="px-4 py-3 whitespace-nowrap">
-                                            <button
-                                                type="button"
-                                                className="inline-flex items-center gap-1 font-medium text-gray-700 hover:text-gray-900"
-                                                onClick={() => toggleSentSort('sentAt')}
-                                            >
-                                                Отправлено (МСК)
-                                                <SortIcon column="sentAt" />
-                                            </button>
-                                        </th>
-                                        <th className="px-4 py-3 text-right whitespace-nowrap">
-                                            <button
-                                                type="button"
-                                                className="inline-flex items-center justify-end gap-1 w-full font-medium text-gray-700 hover:text-gray-900"
-                                                onClick={() => toggleSentSort('recipients')}
-                                            >
-                                                Получателей
-                                                <SortIcon column="recipients" />
-                                            </button>
-                                        </th>
-                                        <th className="px-4 py-3 text-right whitespace-nowrap">
-                                            <button
-                                                type="button"
-                                                className="inline-flex items-center justify-end gap-1 w-full font-medium text-gray-700 hover:text-gray-900"
-                                                onClick={() => toggleSentSort('closed')}
-                                            >
-                                                Закрыли (×)
-                                                <SortIcon column="closed" />
-                                            </button>
-                                        </th>
-                                        <th className="px-4 py-3 text-right whitespace-nowrap">
-                                            <button
-                                                type="button"
-                                                className="inline-flex items-center justify-end gap-1 w-full font-medium text-gray-700 hover:text-gray-900"
-                                                onClick={() => toggleSentSort('clicked')}
-                                            >
-                                                Нажали кнопку
-                                                <SortIcon column="clicked" />
-                                            </button>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {sortedCampaigns.map((c) => (
-                                        <tr
-                                            key={c._id}
-                                            role="button"
-                                            tabIndex={0}
-                                            onClick={() => navigate(`/admin/modal-notifications/campaign/${c._id}`)}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter' || e.key === ' ') {
-                                                    e.preventDefault();
-                                                    navigate(`/admin/modal-notifications/campaign/${c._id}`);
-                                                }
-                                            }}
-                                            className="border-b border-gray-100 hover:bg-green-50/60 cursor-pointer transition-colors"
-                                        >
-                                            <td
-                                                className="px-4 py-3 max-w-[200px] truncate font-medium text-gray-900"
-                                                title={c.modalTitle}
-                                            >
-                                                {c.modalTitle}
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                {c.status === 'scheduled' && (
-                                                    <span className="text-amber-700">ожидает</span>
-                                                )}
-                                                {c.status === 'sent' && (
-                                                    <span className="text-green-700">
-                                                        отправлено
-                                                    </span>
-                                                )}
-                                                {c.status === 'failed' && (
-                                                    <span
-                                                        className="text-red-700"
-                                                        title={c.error}
-                                                    >
-                                                        ошибка
-                                                    </span>
-                                                )}
-                                            </td>
-                                            <td className="px-4 py-3 whitespace-nowrap">
-                                                {formatMsk(c.sentAt)}
-                                            </td>
-                                            <td className="px-4 py-3 text-right tabular-nums">
-                                                {c.recipientCount}
-                                            </td>
-                                            <td className="px-4 py-3 text-right tabular-nums font-medium text-gray-800">
-                                                {c.stats.closedModal}
-                                            </td>
-                                            <td className="px-4 py-3 text-right tabular-nums font-medium text-gray-800">
-                                                {c.stats.clickedButton}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
                     <button
                         type="button"
                         onClick={fetchAll}
-                        className="text-sm text-blue-600 hover:underline"
+                        className="mt-3 text-sm text-blue-600 hover:underline"
                     >
                         Обновить статистику и списки
                     </button>

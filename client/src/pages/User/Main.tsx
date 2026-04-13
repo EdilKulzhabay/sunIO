@@ -26,6 +26,20 @@ import copyLinkIcon from "../../assets/copyLink.png";
 import { QRCodeSVG } from "qrcode.react";
 import humanDesign from "../../assets/humanDesign.png";
 
+/** Параметр `page` из Web App URL: только внутренний путь приложения. */
+function sanitizeAppInternalPath(raw: string | null): string | null {
+    if (raw == null || typeof raw !== "string") return null;
+    let t = raw.trim();
+    try {
+        t = decodeURIComponent(t);
+    } catch {
+        return null;
+    }
+    t = t.trim();
+    if (!t.startsWith("/") || t.startsWith("//")) return null;
+    if (t.includes("..")) return null;
+    return t;
+}
 
 // const SmallCard = ({ title, link, img }: { title: string, link: string, img: string }) => {
 //     return (
@@ -110,6 +124,11 @@ export const Main = () => {
 
                 const telegramIdFromParams = searchParams.get('telegramId');
                 const telegramUserNameFromParams = searchParams.get('telegramUserName');
+                const pageFromParams = searchParams.get('page');
+                const pageQs =
+                    pageFromParams != null && pageFromParams !== ''
+                        ? `&page=${encodeURIComponent(pageFromParams)}`
+                        : '';
 
                 console.log("telegramIdFromParams", telegramIdFromParams);
                 console.log("telegramUserNameFromParams", telegramUserNameFromParams);
@@ -122,7 +141,13 @@ export const Main = () => {
                 }
                 if (!userStr) {
                     console.log('Пользователь не найден в localStorage');
-                    navigate('/?telegramId=' + telegramIdFromParams + '&telegramUserName=' + telegramUserNameFromParams);
+                    navigate(
+                        '/?telegramId=' +
+                            encodeURIComponent(telegramIdFromParams || '') +
+                            '&telegramUserName=' +
+                            encodeURIComponent(telegramUserNameFromParams || '') +
+                            pageQs
+                    );
                     return;
                 }
 
@@ -142,7 +167,13 @@ export const Main = () => {
                         if (response.data.success && response.data.user) {
                             updatedUser = response.data.user;
                             if (!updatedUser.fullName || updatedUser.fullName.trim() === '') {
-                                navigate('/?telegramId=' + telegramIdFromParams + '&telegramUserName=' + telegramUserNameFromParams);
+                                navigate(
+                                    '/?telegramId=' +
+                                        encodeURIComponent(telegramIdFromParams || '') +
+                                        '&telegramUserName=' +
+                                        encodeURIComponent(telegramUserNameFromParams || '') +
+                                        pageQs
+                                );
                                 return;
                             }
                         }
@@ -158,11 +189,23 @@ export const Main = () => {
                         if (response.data.success && response.data.user) {
                             updatedUser = response.data.user;
                             if (!updatedUser.fullName || updatedUser.fullName.trim() === '') {
-                                navigate('/?telegramId=' + telegramIdFromParams + '&telegramUserName=' + telegramUserNameFromParams);
+                                navigate(
+                                    '/?telegramId=' +
+                                        encodeURIComponent(telegramIdFromParams || '') +
+                                        '&telegramUserName=' +
+                                        encodeURIComponent(telegramUserNameFromParams || '') +
+                                        pageQs
+                                );
                                 return;
                             }
                         } else {
-                            navigate('/?telegramId=' + telegramIdFromParams + '&telegramUserName=' + telegramUserNameFromParams);
+                            navigate(
+                                '/?telegramId=' +
+                                    encodeURIComponent(telegramIdFromParams || '') +
+                                    '&telegramUserName=' +
+                                    encodeURIComponent(telegramUserNameFromParams || '') +
+                                    pageQs
+                            );
                         }
                     } catch (error) {
                         console.error('Ошибка получения данных пользователя через Telegram API:', error);
@@ -176,11 +219,23 @@ export const Main = () => {
                         if (response.data.success && response.data.data) {
                             updatedUser = response.data.data;
                             if (!updatedUser.fullName || updatedUser.fullName.trim() === '') {
-                                navigate('/?telegramId=' + telegramIdFromParams + '&telegramUserName=' + telegramUserNameFromParams);
+                                navigate(
+                                    '/?telegramId=' +
+                                        encodeURIComponent(telegramIdFromParams || '') +
+                                        '&telegramUserName=' +
+                                        encodeURIComponent(telegramUserNameFromParams || '') +
+                                        pageQs
+                                );
                                 return;
                             }
                         } else {
-                            navigate('/?telegramId=' + telegramIdFromParams + '&telegramUserName=' + telegramUserNameFromParams);
+                            navigate(
+                                '/?telegramId=' +
+                                    encodeURIComponent(telegramIdFromParams || '') +
+                                    '&telegramUserName=' +
+                                    encodeURIComponent(telegramUserNameFromParams || '') +
+                                    pageQs
+                            );
                         }
                     } catch (error) {
                         console.error('Ошибка получения данных пользователя через /api/user/:id:', error);
@@ -200,7 +255,13 @@ export const Main = () => {
                     setUserData(updatedUser);
 
                     if (!updatedUser.fullName || updatedUser.fullName.trim() === '') {
-                        navigate('/?telegramId=' + telegramIdFromParams + '&telegramUserName=' + telegramUserNameFromParams);
+                        navigate(
+                            '/?telegramId=' +
+                                encodeURIComponent(telegramIdFromParams || '') +
+                                '&telegramUserName=' +
+                                encodeURIComponent(telegramUserNameFromParams || '') +
+                                pageQs
+                        );
                         return;
                     }
                     
@@ -214,6 +275,12 @@ export const Main = () => {
                     // Обновляем состояние в AuthContext
                     if (updateUser) {
                         updateUser(updatedUser);
+                    }
+
+                    const targetPage = sanitizeAppInternalPath(pageFromParams);
+                    if (targetPage) {
+                        navigate(targetPage, { replace: true });
+                        return;
                     }
                 } else {
                     // Если не удалось получить данные с сервера, используем данные из localStorage
@@ -429,7 +496,7 @@ export const Main = () => {
 
     if (loading) {
         return <div className="flex justify-center items-center h-screen">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-400/90" />
         </div>
     }
 

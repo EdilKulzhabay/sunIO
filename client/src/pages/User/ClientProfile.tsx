@@ -39,8 +39,10 @@ export const ClientProfile = () => {
     const [pointsAwardingPolicy, setPointsAwardingPolicy] = useState<any>(null);
     const [instructionStep, setInstructionStep] = useState(0);
     const [closedClubLinks, setClosedClubLinks] = useState({
-        channelLink: "https://t.me/io_center",
-        chatLink: "https://t.me/+UWaWd3xq3erdWnny",
+        openChannelLink: "https://t.me/io_center",
+        openChatLink: "https://t.me/+UWaWd3xq3erdWnny",
+        closedChannelLink: "",
+        closedChatLink: "",
     });
 
     const handleInstructionNext = () => {
@@ -80,9 +82,12 @@ export const ClientProfile = () => {
             try {
                 const res = await api.get("/api/closed-club/public-links");
                 if (res.data?.success && res.data.data) {
+                    const d = res.data.data;
                     setClosedClubLinks({
-                        channelLink: res.data.data.channelLink || "https://t.me/io_center",
-                        chatLink: res.data.data.chatLink || "https://t.me/+UWaWd3xq3erdWnny",
+                        openChannelLink: d.openChannelLink || "https://t.me/io_center",
+                        openChatLink: d.openChatLink || "https://t.me/+UWaWd3xq3erdWnny",
+                        closedChannelLink: d.closedChannelLink || "",
+                        closedChatLink: d.closedChatLink || "",
                     });
                 }
             } catch {
@@ -289,7 +294,7 @@ export const ClientProfile = () => {
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen bg-[#031F23]">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-400/90" />
             </div>
         );
     }
@@ -447,23 +452,61 @@ export const ClientProfile = () => {
                                 )}
                             </div>
 
-                            <div className="mt-4 flex items-center gap-x-2">
+                            <div className="mt-4 grid grid-cols-2 gap-2">
                                 <SafeExternalLink
-                                    id="profile-instruction-telegram-channel"
-                                    href={closedClubLinks.channelLink}
-                                    className="basis-1/2 bg-[#114E50] rounded-lg p-4 pr-2 flex items-center justify-between"
+                                    id="profile-instruction-telegram-open-channel"
+                                    href={closedClubLinks.openChannelLink}
+                                    className="bg-[#114E50] rounded-lg p-3 pr-2 flex items-center justify-between gap-1 min-h-[52px]"
                                 >
-                                    <div className="font-medium text-sm">Телеграм канал</div>
-                                    <img src={linkArrow} alt="linkArrow" className="w-5 h-5 object-cover shrink-0" />
+                                    <div className="font-medium text-xs leading-tight">Открытый канал</div>
+                                    <img src={linkArrow} alt="" className="w-5 h-5 object-cover shrink-0" />
                                 </SafeExternalLink>
                                 <SafeExternalLink
-                                    id="profile-instruction-telegram-chat"
-                                    href={closedClubLinks.chatLink}
-                                    className="basis-1/2 bg-[#114E50] rounded-lg p-4 pr-2 flex items-center justify-between"
+                                    id="profile-instruction-telegram-open-chat"
+                                    href={closedClubLinks.openChatLink}
+                                    className="bg-[#114E50] rounded-lg p-3 pr-2 flex items-center justify-between gap-1 min-h-[52px]"
                                 >
-                                    <div className="font-medium text-sm">Телеграм чат</div>
-                                    <img src={linkArrow} alt="linkArrow" className="w-5 h-5 object-cover shrink-0" />
+                                    <div className="font-medium text-xs leading-tight">Открытый чат</div>
+                                    <img src={linkArrow} alt="" className="w-5 h-5 object-cover shrink-0" />
                                 </SafeExternalLink>
+                                {closedClubLinks.closedChannelLink ? (
+                                    <SafeExternalLink
+                                        id="profile-instruction-telegram-closed-channel"
+                                        href={closedClubLinks.closedChannelLink}
+                                        className="bg-[#114E50] rounded-lg p-3 pr-2 flex items-center justify-between gap-1 min-h-[52px]"
+                                    >
+                                        <div className="font-medium text-xs leading-tight">Закрытый канал</div>
+                                        <img src={linkArrow} alt="" className="w-5 h-5 object-cover shrink-0" />
+                                    </SafeExternalLink>
+                                ) : (
+                                    <div
+                                        id="profile-instruction-telegram-closed-channel"
+                                        className="bg-[#114E50]/40 rounded-lg p-3 flex items-center min-h-[52px]"
+                                    >
+                                        <div className="font-medium text-xs text-white/50 leading-tight">
+                                            Закрытый канал
+                                        </div>
+                                    </div>
+                                )}
+                                {closedClubLinks.closedChatLink ? (
+                                    <SafeExternalLink
+                                        id="profile-instruction-telegram-closed-chat"
+                                        href={closedClubLinks.closedChatLink}
+                                        className="bg-[#114E50] rounded-lg p-3 pr-2 flex items-center justify-between gap-1 min-h-[52px]"
+                                    >
+                                        <div className="font-medium text-xs leading-tight">Закрытый чат</div>
+                                        <img src={linkArrow} alt="" className="w-5 h-5 object-cover shrink-0" />
+                                    </SafeExternalLink>
+                                ) : (
+                                    <div
+                                        id="profile-instruction-telegram-closed-chat"
+                                        className="bg-[#114E50]/40 rounded-lg p-3 flex items-center min-h-[52px]"
+                                    >
+                                        <div className="font-medium text-xs text-white/50 leading-tight">
+                                            Закрытый чат
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div id="profile-instruction-video-settings" className="mt-4 flex items-center justify-between">

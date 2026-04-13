@@ -1,19 +1,21 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { AdminLayout } from "../../components/Admin/AdminLayout";
 import api from "../../api";
 import { toast } from "react-toastify";
-import { ChevronRight } from "lucide-react";
 
-type Section = "channel" | "chat";
+const SECTIONS = ["open-channel", "open-chat", "closed-channel", "closed-chat"] as const;
+type Section = (typeof SECTIONS)[number];
 
 export const ClosedClubSectionForm = () => {
     const { section } = useParams<{ section: string }>();
     const navigate = useNavigate();
-    const kind: Section | null = section === "channel" || section === "chat" ? section : null;
+    const kind: Section | null = SECTIONS.includes(section as Section) ? (section as Section) : null;
 
-    const [channelLink, setChannelLink] = useState("");
-    const [chatLink, setChatLink] = useState("");
+    const [openChannelLink, setOpenChannelLink] = useState("");
+    const [openChatLink, setOpenChatLink] = useState("");
+    const [closedChannelLink, setClosedChannelLink] = useState("");
+    const [closedChatLink, setClosedChatLink] = useState("");
     const [channelTelegramId, setChannelTelegramId] = useState("");
     const [groupTelegramId, setGroupTelegramId] = useState("");
     const [loading, setLoading] = useState(true);
@@ -29,8 +31,10 @@ export const ClosedClubSectionForm = () => {
                 const res = await api.get("/api/closed-club/settings");
                 if (res.data?.success && res.data.data) {
                     const d = res.data.data;
-                    setChannelLink(d.channelLink || "");
-                    setChatLink(d.chatLink || "");
+                    setOpenChannelLink(d.openChannelLink || "");
+                    setOpenChatLink(d.openChatLink || "");
+                    setClosedChannelLink(d.closedChannelLink || "");
+                    setClosedChatLink(d.closedChatLink || "");
                     setChannelTelegramId(d.channelTelegramId || "");
                     setGroupTelegramId(d.groupTelegramId || "");
                 }
@@ -45,13 +49,20 @@ export const ClosedClubSectionForm = () => {
     const handleSave = async () => {
         setSaving(true);
         try {
-            const payload =
-                kind === "channel"
-                    ? { channelLink, channelTelegramId }
-                    : { chatLink, groupTelegramId };
+            let payload: Record<string, string> = {};
+            if (kind === "open-channel") {
+                payload = { openChannelLink };
+            } else if (kind === "open-chat") {
+                payload = { openChatLink };
+            } else if (kind === "closed-channel") {
+                payload = { closedChannelLink, channelTelegramId };
+            } else if (kind === "closed-chat") {
+                payload = { closedChatLink, groupTelegramId };
+            }
             const res = await api.put("/api/closed-club/settings", payload);
             if (res.data?.success) {
                 toast.success("Сохранено");
+                navigate("/admin/closed-club");
             } else {
                 toast.error(res.data?.message || "Ошибка");
             }
@@ -64,8 +75,13 @@ export const ClosedClubSectionForm = () => {
 
     if (!kind) return null;
 
-    const title = kind === "channel" ? "Телеграм канал" : "Телеграм чат";
-    const membersPath = kind === "channel" ? "/admin/closed-club/members/channel" : "/admin/closed-club/members/chat";
+    const titles: Record<Section, string> = {
+        "open-channel": "Открытый канал",
+        "open-chat": "Открытый чат",
+        "closed-channel": "Закрытый канал",
+        "closed-chat": "Закрытый чат",
+    };
+    const title = titles[kind];
 
     return (
         <AdminLayout>
@@ -80,10 +96,18 @@ export const ClosedClubSectionForm = () => {
                     </button>
                     <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
                     <p className="text-gray-600 text-sm mt-1">
-                        Публичная ссылка открывается в профиле пользователя. ID чата для API — тот же, что в .env{" "}
-                        <code className="bg-gray-100 px-1 rounded">CHANNEL_ID</code> /{" "}
-                        <code className="bg-gray-100 px-1 rounded">GROUP_ID</code> (например{" "}
-                        <code className="bg-gray-100 px-1 rounded">-1001234567890</code>).
+                        {kind === "open-channel" || kind === "open-chat" ? (
+                            <>Публичная ссылка для кнопки в профиле приложения (открывается в Telegram).</>
+                        ) : (
+                            <>
+                                Укажите ссылку на бота (например{" "}
+                                <code className="bg-gray-100 px-1 rounded text-xs">https://t.me/ВашБот?start=club</code>
+                                ), чтобы пользователь мог запросить доступ. ID канала или чата — тот же, что для
+                                добавления через бота при оплате подписки (как{" "}
+                                <code className="bg-gray-100 px-1 rounded text-xs">CHANNEL_ID</code> /{" "}
+                                <code className="bg-gray-100 px-1 rounded text-xs">GROUP_ID</code>).
+                            </>
+                        )}
                     </p>
                 </div>
 
@@ -91,20 +115,57 @@ export const ClosedClubSectionForm = () => {
                     <p className="text-gray-500">Загрузка…</p>
                 ) : (
                     <div className="bg-white rounded-lg shadow p-6 space-y-4">
-                        {kind === "channel" ? (
+                        {kind === "open-channel" && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Ссылка на открытый канал
+                                </label>
+                                <input
+                                    type="url"
+                                    value={openChannelLink}
+                                    onChange={(e) => setOpenChannelLink(e.target.value)}
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                                    placeholder="https://t.me/..."
+                                />
+                            </div>
+                        )}
+
+                        {kind === "open-chat" && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Ссылка на открытый чат
+                                </label>
+                                <input
+                                    type="url"
+                                    value={openChatLink}
+                                    onChange={(e) => setOpenChatLink(e.target.value)}
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                                    placeholder="https://t.me/+..."
+                                />
+                            </div>
+                        )}
+
+                        {kind === "closed-channel" && (
                             <>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Ссылка на канал</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Ссылка на бота (закрытый канал)
+                                    </label>
                                     <input
                                         type="url"
-                                        value={channelLink}
-                                        onChange={(e) => setChannelLink(e.target.value)}
+                                        value={closedChannelLink}
+                                        onChange={(e) => setClosedChannelLink(e.target.value)}
                                         className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                                        placeholder="https://t.me/..."
+                                        placeholder="https://t.me/io_sun_bot?start=..."
                                     />
+                                    <p className="text-sm text-gray-500 mt-1">
+                                        Пользователь откроет бота; дальше логика доступа к закрытому каналу — в боте.
+                                    </p>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">ID канала (для бота)</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        ID закрытого канала (для бота)
+                                    </label>
                                     <input
                                         type="text"
                                         value={channelTelegramId}
@@ -112,22 +173,31 @@ export const ClosedClubSectionForm = () => {
                                         className="w-full border border-gray-300 rounded-lg px-3 py-2 font-mono text-sm"
                                         placeholder="-100..."
                                     />
+                                    <p className="text-sm text-gray-500 mt-1">
+                                        Чтобы узнать ID, временно добавьте бота @LeadConverterToolkitBot в админы канала.
+                                    </p>
                                 </div>
                             </>
-                        ) : (
+                        )}
+
+                        {kind === "closed-chat" && (
                             <>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Ссылка на чат</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Ссылка на бота (закрытый чат)
+                                    </label>
                                     <input
                                         type="url"
-                                        value={chatLink}
-                                        onChange={(e) => setChatLink(e.target.value)}
+                                        value={closedChatLink}
+                                        onChange={(e) => setClosedChatLink(e.target.value)}
                                         className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                                        placeholder="https://t.me/+..."
+                                        placeholder="https://t.me/io_sun_bot?start=..."
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">ID чата (для бота)</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        ID закрытого чата (для бота)
+                                    </label>
                                     <input
                                         type="text"
                                         value={groupTelegramId}
@@ -135,6 +205,9 @@ export const ClosedClubSectionForm = () => {
                                         className="w-full border border-gray-300 rounded-lg px-3 py-2 font-mono text-sm"
                                         placeholder="-100..."
                                     />
+                                    <p className="text-sm text-gray-500 mt-1">
+                                        Чтобы узнать ID, временно добавьте бота @LeadConverterToolkitBot в админы группы.
+                                    </p>
                                 </div>
                             </>
                         )}
@@ -148,13 +221,6 @@ export const ClosedClubSectionForm = () => {
                             >
                                 {saving ? "Сохранение…" : "Сохранить"}
                             </button>
-                            <Link
-                                to={membersPath}
-                                className="inline-flex items-center gap-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-                            >
-                                Подробнее
-                                <ChevronRight size={18} />
-                            </Link>
                         </div>
                     </div>
                 )}

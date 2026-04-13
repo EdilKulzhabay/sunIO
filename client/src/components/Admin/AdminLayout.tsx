@@ -33,7 +33,7 @@ import {
     Layers,
     ListChecks,
     BarChart2,
-    Lock
+    MessagesSquare
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -44,7 +44,7 @@ const menuItems = [
     { path: '/admin', label: 'Главная', icon: Home },
     { path: '/admin/users', label: 'Пользователи', icon: Users },
     { path: '/admin/bot-traffic-sources', label: 'Источники трафика', icon: LinkIcon },
-    { path: '/admin/closed-club', label: 'Закрытый клуб', icon: Lock },
+    { path: '/admin/closed-club', label: 'Закрытый клуб', icon: MessagesSquare },
     {
         path: '/admin/client-page-analytics',
         label: 'Статистика просмотра',

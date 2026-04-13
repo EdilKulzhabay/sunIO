@@ -53,7 +53,65 @@ interface VideoProgress {
     duration: number;
 }
 
+/** Ссылки из админки/API иногда приходят с &amp; или без схемы. */
+const sanitizeVideoUrlInput = (raw: string): string =>
+    String(raw || "")
+        .trim()
+        .replace(/&amp;/gi, "&")
+        .replace(/&#0*38;/g, "&");
+
+/** Встраиваемый плеер VK: video_ext.php на доменах VK. */
+const isVkVideoExtUrl = (url: string): boolean => {
+    const u = url.toLowerCase();
+    if (!u.includes("video_ext.php")) return false;
+    return u.includes("vkvideo.ru") || u.includes("vk.com") || u.includes("vk.ru");
+};
+
+/** Исправляет ttps:// и относительные URL перед разбором через URL(). */
+const normalizeProtocolForUrlParse = (s: string): string => {
+    let t = s.trim();
+    if (/^ttps:\/\//i.test(t)) t = `https://${t.slice(7)}`;
+    if (t.startsWith("//")) t = `https:${t}`;
+    if (!/^https?:\/\//i.test(t)) t = `https://${t.replace(/^\/+/, "")}`;
+    return t;
+};
+
+/** Собирает канонический embed URL, если парсер URL не справился. */
+const buildVkVideoEmbedFromQueryString = (s: string): string => {
+    const idx = s.indexOf("?");
+    const qs = idx >= 0 ? s.slice(idx + 1).split("#")[0] : s;
+    const sp = new URLSearchParams(qs.replace(/&amp;/gi, "&"));
+    let oid = sp.get("oid");
+    let id = sp.get("id");
+    if (!oid || !id) {
+        const o = s.match(/[?&]oid=([^&#]+)/i);
+        const i = s.match(/[?&]id=([^&#]+)/i);
+        oid = o ? decodeURIComponent(o[1]) : null;
+        id = i ? decodeURIComponent(i[1]) : null;
+    }
+    if (!oid || !id) return "";
+    let hashVal = sp.get("hash");
+    if (!hashVal) {
+        const hm = s.match(/[?&]hash=([^&#]+)/i);
+        if (hm?.[1]) {
+            try {
+                hashVal = decodeURIComponent(hm[1].replace(/\+/g, " "));
+            } catch {
+                hashVal = hm[1];
+            }
+        }
+    }
+    const hd = sp.get("hd") || s.match(/[?&]hd=([^&#]+)/i)?.[1] || "2";
+    const out = new URL("https://vkvideo.ru/video_ext.php");
+    out.searchParams.set("oid", oid);
+    out.searchParams.set("id", id);
+    if (hashVal) out.searchParams.set("hash", hashVal);
+    out.searchParams.set("hd", hd);
+    return out.toString();
+};
+
 const getVideoInfo = (url: string): { type: "kinescope" | "youtube" | "rutube" | "vkvideo" | "unknown"; id: string; privateParam?: string } => {
+    url = sanitizeVideoUrlInput(url);
     if (!url) return { type: "unknown", id: "" };
 
     if (url.includes("kinescope.io")) {
@@ -109,8 +167,7 @@ const getVideoInfo = (url: string): { type: "kinescope" | "youtube" | "rutube" |
         }
     }
 
-    // VK Video embed URL: vkvideo.ru/video_ext.php?oid=...&id=...&hash=...
-    if (url.includes("vkvideo.ru/video_ext.php") || url.includes("vk.com/video_ext.php")) {
+    if (isVkVideoExtUrl(url)) {
         return { type: "vkvideo", id: url };
     }
 
@@ -137,60 +194,84 @@ const getRuTubeEmbedUrl = (url: string): string => {
 };
 
 const getVkVideoEmbedUrl = (oidId: string): string => {
-    // oidId format: "-211095106_456239712"
+    // oidId format: "-211095106_456239712" — встраивание через vkvideo.ru (как в официальном iframe VK Видео)
     const parts = oidId.split("_");
     if (parts.length !== 2) return "";
-    return `https://vk.com/video_ext.php?oid=${parts[0]}&id=${parts[1]}&hd=2`;
+    return `https://vkvideo.ru/video_ext.php?oid=${parts[0]}&id=${parts[1]}&hd=2`;
 };
 
 /** Полный src iframe из VK (с hash) или короткий owner_video_id — без hash VK часто отдаёт «Video not found». */
 const resolveVkVideoEmbedUrl = (idOrUrl: string): string => {
-    const s = idOrUrl.trim();
+    const s = sanitizeVideoUrlInput(idOrUrl);
     if (!s) return "";
-    if (s.includes("video_ext.php")) {
-        try {
-            const withProtocol =
-                s.startsWith("http://") || s.startsWith("https://")
-                    ? s
-                    : `https://${s.replace(/^\/\//, "")}`;
-            const u = new URL(withProtocol);
-            if (!u.pathname.includes("video_ext.php")) return "";
-            return u.toString();
-        } catch {
-            return "";
-        }
+    if (!s.toLowerCase().includes("video_ext.php")) {
+        return getVkVideoEmbedUrl(s);
     }
-    return getVkVideoEmbedUrl(s);
+    const withProtocol = normalizeProtocolForUrlParse(s);
+    try {
+        const u = new URL(withProtocol);
+        if (!u.pathname.toLowerCase().includes("video_ext.php")) {
+            const fb = buildVkVideoEmbedFromQueryString(withProtocol);
+            return fb || "";
+        }
+        const h = u.hostname.toLowerCase();
+        if (
+            h === "vk.com" ||
+            h === "www.vk.com" ||
+            h === "m.vk.com" ||
+            h === "vk.ru" ||
+            h === "www.vk.ru" ||
+            h === "m.vk.ru"
+        ) {
+            u.hostname = "vkvideo.ru";
+        }
+        if (!u.searchParams.has("hd")) {
+            u.searchParams.set("hd", "2");
+        }
+        return u.toString();
+    } catch {
+        return buildVkVideoEmbedFromQueryString(withProtocol) || "";
+    }
 };
 
 const vkVideoEmbedMissingHash = (embedUrl: string): boolean => {
     try {
-        const u = new URL(embedUrl);
-        if (!u.pathname.includes("video_ext.php")) return true;
+        const u = new URL(normalizeProtocolForUrlParse(sanitizeVideoUrlInput(embedUrl)));
+        if (!u.pathname.toLowerCase().includes("video_ext.php")) return true;
         const hash = u.searchParams.get("hash");
         return !hash?.trim();
     } catch {
-        return true;
+        const s = sanitizeVideoUrlInput(embedUrl);
+        const m = s.match(/[?&]hash=([^&#]+)/i);
+        return !m?.[1]?.trim();
     }
 };
 
 /** Ключ для VK API video.get: ownerId_videoId, например -211095106_456239712 */
 const getVkVideosKey = (idOrUrl: string): string => {
-    const s = idOrUrl.trim();
+    const s = sanitizeVideoUrlInput(idOrUrl);
     if (/^-?\d+_\d+$/.test(s)) return s;
-    if (s.includes("video_ext.php")) {
+    if (s.toLowerCase().includes("video_ext.php")) {
         try {
-            const withProtocol =
-                s.startsWith("http://") || s.startsWith("https://")
-                    ? s
-                    : `https://${s.replace(/^\/\//, "")}`;
-            const u = new URL(withProtocol);
+            const u = new URL(normalizeProtocolForUrlParse(s));
             const oid = u.searchParams.get("oid");
             const vid = u.searchParams.get("id");
             if (oid != null && oid !== "" && vid != null && vid !== "") return `${oid}_${vid}`;
         } catch {
-            return "";
+            /* fall through */
         }
+        const fb = buildVkVideoEmbedFromQueryString(normalizeProtocolForUrlParse(s));
+        if (fb) {
+            try {
+                const u2 = new URL(fb);
+                const oid = u2.searchParams.get("oid");
+                const vid = u2.searchParams.get("id");
+                if (oid && vid) return `${oid}_${vid}`;
+            } catch {
+                return "";
+            }
+        }
+        return "";
     }
     const m = s.match(/video(-?\d+_\d+)/);
     return m ? m[1] : "";
@@ -316,11 +397,15 @@ const VkVideoPlayerWithProgress = ({
     return (
         <div className="relative" style={{ width: "100%", height: "100%" }}>
             <iframe
+                key={embedUrl}
                 src={embedUrl}
                 title={title || "VK Video player"}
+                width="100%"
+                height="100%"
                 allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock"
                 allowFullScreen
                 className={className}
+                style={{ border: 0, width: "100%", height: "100%" }}
             />
             {!played && (
                 <div
@@ -750,7 +835,7 @@ export const UnifiedVideoContentPage = ({
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen bg-[#031F23]">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-400/90" />
             </div>
         );
     }
@@ -982,7 +1067,7 @@ export const UnifiedVideoContentPage = ({
                         
                         const originalVideoInfo = getVideoInfo(mainUrl);
                         const shouldUseRuTube = originalVideoInfo.type === "youtube" && user?.locatedInRussia && reserveUrl;
-                        const videoUrl = shouldUseRuTube ? reserveUrl : mainUrl;
+                        const videoUrl = shouldUseRuTube ? reserveUrl : mainUrl || reserveUrl;
                         const videoInfo = getVideoInfo(videoUrl);
 
                         if (videoInfo.type === "kinescope") {

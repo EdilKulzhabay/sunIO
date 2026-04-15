@@ -1,5 +1,6 @@
 import axios from "axios";
 import './utils/telegramWebApp';
+import { getOrCreateClientDeviceId } from "./utils/clientDeviceId";
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
@@ -13,6 +14,10 @@ api.interceptors.request.use((config) => {
     const token = window.localStorage.getItem("token");
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+    }
+    const deviceId = getOrCreateClientDeviceId();
+    if (deviceId) {
+        config.headers["X-Device-Id"] = deviceId;
     }
     
     // Добавляем специальные заголовки для Telegram WebView
@@ -72,6 +77,16 @@ api.interceptors.response.use(
         
         if (!error.response) {
             console.error('❌ Сетевая ошибка:', error.message);
+            return Promise.reject(error);
+        }
+
+        if (error.response.status === 403 && error.response.data?.deviceSessionInvalid) {
+            localStorage.removeItem("token");
+            localStorage.removeItem("refreshToken");
+            localStorage.removeItem("user");
+            if (window.location.pathname !== "/client/telegram-auth") {
+                window.location.assign("/client/telegram-auth");
+            }
             return Promise.reject(error);
         }
         

@@ -92,7 +92,8 @@ app.use(cors({
         'X-Requested-With',
         'X-Telegram-WebApp',
         'X-Telegram-Platform',
-        'X-Telegram-Init-Data'
+        'X-Telegram-Init-Data',
+        'X-Device-Id'
     ],
     exposedHeaders: ['Content-Disposition'],
     credentials: true
@@ -180,6 +181,7 @@ setupSwagger(app);
 app.post("/api/user/create", createUserRateLimit, UserController.createUser);
 app.post("/api/user/register", createUserRateLimit, UserController.register);
 app.post("/api/user/login", UserController.login);
+app.post("/api/user/telegram-web-auth", createUserRateLimit, UserController.telegramWebAuth);
 app.post("/api/user/send-mail", UserController.sendMail);
 app.post("/api/user/code-confirm", UserController.codeConfirm);
 app.post("/api/user/send-mail-recovery", UserController.sendMailRecovery);
@@ -195,7 +197,7 @@ app.post("/api/user/transfer-bonus", UserController.transferBonus);
 app.get("/api/user/me", authMiddleware, async (req, res) => {
     try {
         await migrateLegacyCompletedActivationsIfNeeded(req.userId);
-        const user = await User.findById(req.userId).select("-password -currentToken -refreshToken");
+        const user = await User.findById(req.userId).select("-password -currentToken -refreshToken -clientDeviceId");
         if (!user) {
             return res.status(404).json({ success: false, message: "Пользователь не найден" });
         }

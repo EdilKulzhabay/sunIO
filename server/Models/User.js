@@ -79,6 +79,11 @@ const UserSchema = new mongoose.Schema({
         type: String,
         default: null,
     },
+    /** Привязка веб-сессии к одному устройству (значение с клиента, заголовок X-Device-Id). */
+    clientDeviceId: {
+        type: String,
+        default: null,
+    },
     // Поля для отслеживания оплаты через Robokassa
     hasPaid: {
         type: Boolean,

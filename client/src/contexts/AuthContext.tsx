@@ -2,15 +2,18 @@ import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
+import { getOrCreateClientDeviceId } from "../utils/clientDeviceId";
 
-interface User {
+export interface User {
     _id: string;
-    fullName: string;
-    telegramUserName: string;
-    phone: string;
-    mail: string;
+    fullName?: string;
+    telegramUserName?: string;
+    telegramId?: string;
+    profilePhotoUrl?: string;
+    phone?: string;
+    mail?: string;
     role: string;
-    status: string;
+    status?: string;
     isBlocked?: boolean;
     hasPaid?: boolean;
 }
@@ -19,6 +22,8 @@ interface AuthContextType {
     user: User | null;
     loading: boolean;
     login: (email: string, password: string) => Promise<void>;
+    /** Сессия после Telegram Login Widget (OAuth). */
+    loginWithTelegramSession: (userData: User, accessToken: string, refreshToken?: string) => void;
     register: (fullName: string, email: string, phone: string, telegramId?: string) => Promise<void>;
     logout: () => void;
     checkSession: () => Promise<boolean>;
@@ -150,8 +155,44 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const loginWithTelegramSession = (userData: User, accessToken: string, refreshToken?: string) => {
+        localStorage.setItem("token", accessToken);
+        if (refreshToken) {
+            localStorage.setItem("refreshToken", refreshToken);
+        }
+        setUser(userData);
+        localStorage.setItem("user", JSON.stringify(userData));
+        if (userData.telegramId != null && String(userData.telegramId).trim() !== "") {
+            localStorage.setItem("telegramId", String(userData.telegramId).trim());
+        }
+
+        if (userData.isBlocked && userData.role !== "admin") {
+            navigate("/client/blocked-user");
+            return;
+        }
+
+        const redirectPath = localStorage.getItem("redirectAfterLogin");
+        if (redirectPath) {
+            localStorage.removeItem("redirectAfterLogin");
+            navigate(redirectPath);
+            return;
+        }
+
+        if (userData.role === "admin") {
+            navigate("/admin");
+            return;
+        }
+
+        const name = (userData.fullName ?? "").trim();
+        navigate(name ? "/main" : "/client-performance");
+    };
+
     const login = async (email: string, password: string) => {
-        const response = await api.post("/api/user/login", { email, password });
+        const response = await api.post("/api/user/login", {
+            email,
+            password,
+            deviceId: getOrCreateClientDeviceId(),
+        });
         
         if (response.data.success) {
             localStorage.setItem("token", response.data.accessToken);
@@ -182,11 +223,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const register = async (fullName: string, email: string, phone: string, telegramId?: string) => {
-        const response = await api.post("/api/user/register", { 
-            fullName, 
-            mail: email, 
-            phone, 
-            ...(telegramId && { telegramId })
+        const response = await api.post("/api/user/register", {
+            fullName,
+            mail: email,
+            phone,
+            deviceId: getOrCreateClientDeviceId(),
+            ...(telegramId && { telegramId }),
         });
         
         if (response.data.success) {
@@ -236,7 +278,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, register, logout, checkSession, updateUser }}>
+        <AuthContext.Provider
+            value={{
+                user,
+                loading,
+                login,
+                loginWithTelegramSession,
+                register,
+                logout,
+                checkSession,
+                updateUser,
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );

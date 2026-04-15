@@ -82,6 +82,7 @@ import { OperationLogs } from "./pages/Admin/OperationLogs";
 import { RobokassaSuccess } from "./pages/Robokassa/Success";
 import { RobokassaFail } from "./pages/Robokassa/Fail";
 import { ClientPerfomance } from "./pages/User/ClientPerfomance";
+import { ClientTelegramAuth } from "./pages/User/ClientTelegramAuth";
 import { ClientRegister } from "./pages/User/ClientRegister";
 import { ClientLogin } from "./pages/User/ClientLogin";
 import { About } from "./pages/User/About";
@@ -131,7 +132,6 @@ import { TelegramWebAppHandler } from "./components/TelegramWebAppHandler";
 import { BlockedUser } from "./pages/User/BlockedUser";
 import { BlockedBrowser } from "./pages/User/BlockedBrowser";
 import { EaseLaunch } from "./pages/User/EaseLaunch";
-import { TelegramGuard } from "./components/TelegramGuard";
 import { ClientInvitedUsers } from "./pages/User/ClientInvitedUsers.tsx";
 import { ClientNavigator } from "./pages/User/ClientNavigator";
 import { ClientBegginingJourney } from "./pages/User/ClientBegginingJourney";
@@ -162,223 +162,231 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
 export const routes = createBrowserRouter([
     {
         path: "/",
-        element: <RootLayout><TelegramGuard><Welcome /></TelegramGuard></RootLayout>,
+        element: <RootLayout><Welcome /></RootLayout>,
+    },
+    {
+        path: "/client/telegram-auth",
+        element: (
+            <RootLayout>
+                <ClientTelegramAuth />
+            </RootLayout>
+        ),
     },
     {
         path: "/main",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><Main /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><Main /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/welcome2",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientWelcome2 /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientWelcome2 /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client-performance",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientPerfomance /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientPerfomance /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/register",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientRegister /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientRegister /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/login",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientLogin /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientLogin /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/about",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><About /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><About /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/faq",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientFAQ /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientFAQ /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/horoscope",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientHoroscope /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientHoroscope /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/horoscopes",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientHoroscopesList /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientHoroscopesList /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/horoscope/:id",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientHoroscopeDetail /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientHoroscopeDetail /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/transit",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientTransit /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientTransit /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/transits",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientTransitsList /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientTransitsList /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/transit/:id",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientTransitDetail /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientTransitDetail /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/schumann",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientSchumann /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientSchumann /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/contactus",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientContactUs /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientContactUs /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/practices",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientPracticesList /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientPracticesList /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/practice/:id",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientPractice /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientPractice /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/broadcast-recordings",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientBroadcastRecordingsList /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientBroadcastRecordingsList /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/broadcast-recording/:id",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientBroadcastRecording /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientBroadcastRecording /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/parables-of-life",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientParablesOfLifeList /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientParablesOfLifeList /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/parables-of-life/:id",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientParablesOfLife /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientParablesOfLife /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/scientific-discoveries",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientScientificDiscoveriesList /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientScientificDiscoveriesList /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/scientific-discoveries/:id",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientScientificDiscoveries /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientScientificDiscoveries /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/health-lab",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientHealthLabList /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientHealthLabList /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/health-lab/:id",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientHealthLab /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientHealthLab /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/relationship-workshop",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientRelationshipWorkshopList /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientRelationshipWorkshopList /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/relationship-workshop/:id",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientRelationshipWorkshop /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientRelationshipWorkshop /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/spirit-forge",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientSpiritForgeList /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientSpiritForgeList /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/spirit-forge/:id",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientSpiritForge /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientSpiritForge /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/masters-tower",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientMastersTowerList /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientMastersTowerList /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/masters-tower/:id",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientMastersTower /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientMastersTower /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/femininity-gazebo",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientFemininityGazeboList /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientFemininityGazeboList /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/femininity-gazebo/:id",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientFemininityGazebo /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientFemininityGazebo /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/consciousness-library",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientConsciousnessLibraryList /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientConsciousnessLibraryList /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/consciousness-library/:id",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientConsciousnessLibrary /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientConsciousnessLibrary /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/product-catalog",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientProductCatalogList /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientProductCatalogList /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/product-catalog/:id",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientProductCatalog /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientProductCatalog /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/analysis-health",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientAnalysisHealthList /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientAnalysisHealthList /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/analysis-health/:id",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientAnalysisHealth /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientAnalysisHealth /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/analysis-relationships",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientAnalysisRelationshipsList /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientAnalysisRelationshipsList /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/analysis-relationships/:id",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientAnalysisRelationships /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientAnalysisRelationships /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/analysis-realization",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientAnalysisRealizationList /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientAnalysisRealizationList /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/analysis-realization/:id",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientAnalysisRealization /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientAnalysisRealization /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/psychodiagnostics",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientPsychodiagnosticsList /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientPsychodiagnosticsList /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/psychodiagnostics/:id",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientPsychodiagnostics /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientPsychodiagnostics /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/schedule",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientSchedule /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientSchedule /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/diary",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientDiary /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientDiary /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/navigator",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientNavigator /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientNavigator /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/profile",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientProfile /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientProfile /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/beggining-journey",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientBegginingJourney /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientBegginingJourney /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/tasks",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientTasks /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientTasks /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/new-task",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientNewTask /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientNewTask /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/region",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientRegion /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientRegion /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/app-temporarily-unavailable",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientAppTemporarilyUnavailable /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientAppTemporarilyUnavailable /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/login",
@@ -390,11 +398,11 @@ export const routes = createBrowserRouter([
     },
     {
         path: "/client/ease-launch",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><EaseLaunch /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><EaseLaunch /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/blocked-user",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><BlockedUser /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><BlockedUser /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/blocked-browser",
@@ -402,39 +410,45 @@ export const routes = createBrowserRouter([
     },
     {
         path: "/client/connect-error",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientConnectError /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientConnectError /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/invited-users",
-        element: <RootLayout><ClientInvitedUsers /></RootLayout>,
+        element: (
+            <RootLayout>
+                <ProtectedRoute>
+                    <ClientInvitedUsers />
+                </ProtectedRoute>
+            </RootLayout>
+        ),
     },
     {
         path: "/client/documents",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientDocuments /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientDocuments /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/operation-log",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientOperationLog /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientOperationLog /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/deposit-log",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientDepositLog /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientDepositLog /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/purchase-log",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientPurchaseLog /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientPurchaseLog /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/content-search",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientContentSearch /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientContentSearch /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/choose-your-path",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientChooseYourPath /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientChooseYourPath /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/human-design",
-        element: <RootLayout><TelegramGuard><ProtectedRoute><ClientHumanDesign /></ProtectedRoute></TelegramGuard></RootLayout>,
+        element: <RootLayout><ProtectedRoute><ClientHumanDesign /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/admin",

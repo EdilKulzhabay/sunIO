@@ -1,5 +1,8 @@
 import jwt from "jsonwebtoken";
 import User from "../Models/User.js";
+import { sanitizeClientDeviceId } from "../utils/clientDeviceId.js";
+
+const STAFF_ROLES_DEVICE_SKIP = ["admin", "manager", "content_manager", "client_manager"];
 
 export const authMiddleware = async (req, res, next) => {
     try {
@@ -34,6 +37,21 @@ export const authMiddleware = async (req, res, next) => {
                 success: false,
                 message: "Аккаунт заблокирован",
             });
+        }
+
+        if (
+            user.clientDeviceId &&
+            !STAFF_ROLES_DEVICE_SKIP.includes(user.role)
+        ) {
+            const sent = sanitizeClientDeviceId(req.headers["x-device-id"]);
+            if (!sent || sent !== user.clientDeviceId) {
+                return res.status(403).json({
+                    success: false,
+                    message: "Сессия привязана к другому устройству. Войдите снова.",
+                    deviceSessionInvalid: true,
+                    sessionExpired: true,
+                });
+            }
         }
 
         req.userId = decoded.userId;

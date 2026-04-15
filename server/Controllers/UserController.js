@@ -9,6 +9,8 @@ import axios from "axios";
 import crypto from 'crypto';
 import { addAdminAction } from "../utils/addAdminAction.js";
 import { resolveProfilePhotoUrl } from "../utils/profilePhotoDownload.js";
+import { verifyTelegramWidgetHash } from "../utils/telegramWidgetAuth.js";
+import { sanitizeClientDeviceId } from "../utils/clientDeviceId.js";
 import PurchaseLog from "../Models/PurchaseLog.js";
 import DepositLog from "../Models/DepositLog.js";
 
@@ -394,9 +396,12 @@ export const register = async (req, res) => {
             }
         );
 
-        // Сохраняем refresh токен
+        const regDeviceId = sanitizeClientDeviceId(req.body?.deviceId);
+
+        // Сохраняем refresh токен и привязку к устройству
         await User.findByIdAndUpdate(user._id, {
             refreshToken: refreshToken,
+            ...(regDeviceId && { clientDeviceId: regDeviceId }),
         });
 
         const userData = {
@@ -493,9 +498,12 @@ export const login = async (req, res) => {
             }
         );
 
-        // Сохраняем refresh токен
+        const loginDeviceId = sanitizeClientDeviceId(req.body?.deviceId);
+
+        // Сохраняем refresh токен и привязку к устройству
         await User.findByIdAndUpdate(candidate._id, {
             refreshToken: refreshToken,
+            ...(loginDeviceId && { clientDeviceId: loginDeviceId }),
         });
 
         console.log("login successful");
@@ -523,6 +531,7 @@ export const logout = async (req, res) => {
         await User.findByIdAndUpdate(userId, {
             refreshToken: null,
             currentToken: null,
+            clientDeviceId: null,
         });
 
         res.json({
@@ -2297,5 +2306,105 @@ export const transferBonus = async (req, res) => {
     } catch (error) {
         console.error('Ошибка в transferBonus:', error);
         res.status(500).json({ success: false, message: 'Ошибка при передаче солнц' });
+    }
+};
+
+/** Вход через Telegram Login Widget (OAuth для сайта). */
+export const telegramWebAuth = async (req, res) => {
+    try {
+        const rawBody = req.body || {};
+        const deviceId = sanitizeClientDeviceId(rawBody.deviceId);
+        if (!deviceId) {
+            return res.status(400).json({
+                success: false,
+                message: "Требуется идентификатор устройства (deviceId)",
+            });
+        }
+
+        const { deviceId: _omitDevice, ...telegramPayload } = rawBody;
+
+        const botToken = process.env.TELEGRAM_BOT_TOKEN || process.env.BOT_TOKEN;
+        if (!botToken) {
+            return res.status(500).json({
+                success: false,
+                message: "Сервер не настроен для Telegram (нет токена бота)",
+            });
+        }
+
+        if (!verifyTelegramWidgetHash(telegramPayload, botToken)) {
+            return res.status(401).json({
+                success: false,
+                message: "Неверная подпись данных Telegram",
+            });
+        }
+
+        const authDate = Number(telegramPayload.auth_date);
+        if (!Number.isFinite(authDate) || Math.abs(Date.now() / 1000 - authDate) > 86400) {
+            return res.status(401).json({
+                success: false,
+                message: "Данные авторизации устарели",
+            });
+        }
+
+        const telegramId = String(telegramPayload.id);
+        const telegramUserName = telegramPayload.username != null ? String(telegramPayload.username) : "";
+        const photoUrlFromTg = telegramPayload.photo_url ? String(telegramPayload.photo_url) : null;
+
+        let storedProfilePhotoUrl = null;
+        if (photoUrlFromTg) {
+            storedProfilePhotoUrl = await resolveProfilePhotoUrl(photoUrlFromTg, telegramId);
+        }
+
+        let user = await User.findOne({ telegramId });
+
+        if (user) {
+            const updates = { telegramUserName };
+            if (storedProfilePhotoUrl) {
+                updates.profilePhotoUrl = storedProfilePhotoUrl;
+            }
+            user = await User.findByIdAndUpdate(user._id, { $set: updates }, { new: true });
+        } else {
+            const doc = new User({
+                telegramId,
+                telegramUserName,
+                status: "anonym",
+                profilePhotoUrl: storedProfilePhotoUrl,
+            });
+            user = await doc.save();
+        }
+
+        if (user.isBlocked && user.role !== "admin") {
+            return res.status(403).json({
+                success: false,
+                message: "Аккаунт заблокирован",
+            });
+        }
+
+        const accessToken = jwt.sign(
+            { userId: user._id },
+            process.env.SecretKey,
+            { expiresIn: "30d" }
+        );
+
+        const refreshToken = jwt.sign(
+            { userId: user._id },
+            process.env.SecretKeyRefresh,
+            { expiresIn: "30d" }
+        );
+
+        await User.findByIdAndUpdate(user._id, { refreshToken, clientDeviceId: deviceId });
+
+        const fresh = await User.findById(user._id)
+            .select("-password -currentToken -refreshToken -clientDeviceId")
+            .lean();
+        const userData = { ...fresh };
+
+        return res.json({ success: true, accessToken, refreshToken, userData });
+    } catch (error) {
+        console.error("Ошибка в telegramWebAuth:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Ошибка авторизации через Telegram",
+        });
     }
 };

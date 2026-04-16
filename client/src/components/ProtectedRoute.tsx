@@ -1,7 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
-const CLIENT_TELEGRAM_AUTH = "/client/telegram-auth";
+// const CLIENT_TELEGRAM_AUTH = "/client/telegram-auth";
 
 function getStoredAuthToken(): string | null {
     if (typeof window === "undefined") return null;
@@ -32,9 +32,9 @@ export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) 
         const token = getStoredAuthToken();
         const userFromStorage = localStorage.getItem("user");
 
-        if (!user && !token && !userFromStorage) {
-            return <Navigate to={CLIENT_TELEGRAM_AUTH} replace />;
-        }
+        // if (!user && !token && !userFromStorage) {
+        //     return <Navigate to={CLIENT_TELEGRAM_AUTH} replace />;
+        // }
 
         if (!user && token) {
             try {
@@ -52,21 +52,21 @@ export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) 
             }
         }
 
-        if (!user) {
-            return <Navigate to={CLIENT_TELEGRAM_AUTH} replace />;
-        }
+        // if (!user) {
+        //     return <Navigate to={CLIENT_TELEGRAM_AUTH} replace />;
+        // }
 
-        if (!user.role || !allowedRoles.includes(user.role as Role)) {
+        if (!user || !user.role || !allowedRoles.includes(user.role as Role)) {
             return <Navigate to="/" replace />;
         }
 
         return <>{children}</>;
     }
 
-    const token = getStoredAuthToken();
-    if (!token || !user) {
-        return <Navigate to={CLIENT_TELEGRAM_AUTH} replace />;
-    }
+    // const token = getStoredAuthToken();
+    // if (!token || !user) {
+    //     return <Navigate to={CLIENT_TELEGRAM_AUTH} replace />;
+    // }
 
     return <>{children}</>;
 };

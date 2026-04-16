@@ -1,36 +1,31 @@
 import bgGar from "../../assets/bgGar.png";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../api";
 import { useAuth, type User } from "../../contexts/AuthContext";
 import sunWithHands from "../../assets/sunWithHands.png";
 import { getOrCreateClientDeviceId } from "../../utils/clientDeviceId";
+import type { TelegramOidcLoginResult } from "../../utils/telegramWebApp";
 
-const BOT_USERNAME = import.meta.env.VITE_TELEGRAM_BOT_USERNAME as string | undefined;
+const OIDC_CLIENT_ID_RAW = import.meta.env.VITE_TELEGRAM_OIDC_CLIENT_ID as string | undefined;
 
-export type TelegramWidgetAuthPayload = {
-    id: number;
-    first_name: string;
-    last_name?: string;
-    username?: string;
-    photo_url?: string;
-    auth_date: number;
-    hash: string;
-};
-
-declare global {
-    interface Window {
-        onTelegramAuth?: (user: TelegramWidgetAuthPayload) => void;
-    }
+function parseOidcClientId(raw: string | undefined): number | null {
+    if (!raw || typeof raw !== "string") return null;
+    const t = raw.trim();
+    if (!/^\d+$/.test(t)) return null;
+    const n = Number(t);
+    return Number.isSafeInteger(n) ? n : null;
 }
+
+const OIDC_CLIENT_ID = parseOidcClientId(OIDC_CLIENT_ID_RAW);
 
 export const ClientTelegramAuth = () => {
     const [loading, setLoading] = useState(false);
+    const [sdkReady, setSdkReady] = useState(false);
     const navigate = useNavigate();
     const { loginWithTelegramSession, user, loading: authLoading } = useAuth();
     const [screenHeight, setScreenHeight] = useState(0);
-    const widgetHostRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (authLoading) return;
@@ -41,8 +36,8 @@ export const ClientTelegramAuth = () => {
         }
     }, [authLoading, user, navigate]);
 
-    const handleTelegramPayload = useCallback(
-        async (tg: TelegramWidgetAuthPayload) => {
+    const handleIdToken = useCallback(
+        async (idToken: string) => {
             setLoading(true);
             try {
                 const { data } = await api.post<{
@@ -52,7 +47,7 @@ export const ClientTelegramAuth = () => {
                     userData?: User;
                     message?: string;
                 }>("/api/user/telegram-web-auth", {
-                    ...tg,
+                    id_token: idToken,
                     deviceId: getOrCreateClientDeviceId(),
                 });
 
@@ -72,38 +67,51 @@ export const ClientTelegramAuth = () => {
     );
 
     useEffect(() => {
-        window.onTelegramAuth = (u) => {
-            void handleTelegramPayload(u);
-        };
-        return () => {
-            delete window.onTelegramAuth;
-        };
-    }, [handleTelegramPayload]);
+        if (!OIDC_CLIENT_ID) return;
 
-    useEffect(() => {
-        const el = widgetHostRef.current;
-        if (!el || !BOT_USERNAME) {
+        let cancelled = false;
+        const existing = document.querySelector('script[data-app="telegram-login-sdk"]');
+        if (existing && window.Telegram?.Login) {
+            setSdkReady(true);
             return;
         }
 
-        el.innerHTML = "";
         const script = document.createElement("script");
-        script.src = "https://telegram.org/js/telegram-widget.js?22";
+        script.src = "https://telegram.org/js/telegram-login.js";
         script.async = true;
-        script.setAttribute("data-telegram-login", BOT_USERNAME);
-        script.setAttribute("data-size", "large");
-        script.setAttribute("data-radius", "16");
-        script.setAttribute("data-request-access", "write");
-        script.setAttribute("data-onauth", "onTelegramAuth(user)");
-        script.onerror = () => {
-            toast.error("Не удалось загрузить виджет Telegram");
+        script.dataset.app = "telegram-login-sdk";
+        script.onload = () => {
+            if (cancelled) return;
+            setSdkReady(true);
         };
-        el.appendChild(script);
+        script.onerror = () => {
+            if (!cancelled) toast.error("Не удалось загрузить Telegram Login SDK");
+        };
+        document.body.appendChild(script);
 
         return () => {
-            el.innerHTML = "";
+            cancelled = true;
         };
     }, []);
+
+    useEffect(() => {
+        if (!sdkReady || !OIDC_CLIENT_ID) return;
+        try {
+            window.Telegram?.Login?.init({ client_id: OIDC_CLIENT_ID, lang: "ru" }, (result: TelegramOidcLoginResult) => {
+                if ("error" in result && result.error) {
+                    if (result.error === "popup_closed") return;
+                    toast.error(`Telegram: ${result.error}`);
+                    return;
+                }
+                if ("id_token" in result && result.id_token) {
+                    void handleIdToken(result.id_token);
+                }
+            });
+        } catch (e) {
+            const msg = e instanceof Error ? e.message : "Ошибка инициализации Telegram Login";
+            toast.error(msg);
+        }
+    }, [sdkReady, handleIdToken]);
 
     useEffect(() => {
         const updateScreenHeight = () => setScreenHeight(window.innerHeight);
@@ -127,30 +135,46 @@ export const ClientTelegramAuth = () => {
             </div>
             <div className="flex-1 lg:flex-0 lg:w-[700px] lg:mx-auto">
                 <h1 className="text-[48px] font-semibold text-white leading-12">Авторизуйтесь через Telegram</h1>
-                {!BOT_USERNAME ? (
+                {!OIDC_CLIENT_ID ? (
                     <p className="text-amber-200 text-sm mt-3">
-                        Добавьте в окружение <code className="bg-black/30 px-1 rounded">VITE_TELEGRAM_BOT_USERNAME</code>{" "}
-                        — имя бота из BotFather (без @). Домен сайта должен быть указан у бота для Login Widget.
+                        Добавьте в окружение фронта{" "}
+                        <code className="bg-black/30 px-1 rounded">VITE_TELEGRAM_OIDC_CLIENT_ID</code> — числовой
+                        Client ID из @BotFather (Bot Settings → Web Login). На сервере задайте{" "}
+                        <code className="bg-black/30 px-1 rounded">TELEGRAM_OIDC_CLIENT_ID</code> с тем же значением.
+                        В Web Login у бота должны быть разрешены URL вашего сайта (
+                        <a
+                            className="underline text-white"
+                            href="https://core.telegram.org/bots/telegram-login"
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                            документация
+                        </a>
+                        ).
                     </p>
                 ) : (
                     <p className="text-white/80 text-sm mt-3">
-                        Нажмите кнопку ниже — откроется окно Telegram для входа в аккаунт.
+                        Вход без номера телефона (профиль Telegram). Нажмите кнопку — откроется окно авторизации.
                     </p>
                 )}
             </div>
 
             <div className="lg:w-[700px] lg:mx-auto space-y-4">
-                {BOT_USERNAME ? (
+                {OIDC_CLIENT_ID ? (
                     <div
                         className={`flex flex-col items-center w-full mt-4 min-h-[56px] rounded-full bg-white/5 p-3 ring-1 ring-white/20 ${
-                            loading || authLoading ? "pointer-events-none opacity-50" : ""
+                            loading || authLoading || !sdkReady ? "pointer-events-none opacity-50" : ""
                         }`}
                     >
-                        <div
-                            ref={widgetHostRef}
-                            className="flex justify-center w-full [&_iframe]:rounded-2xl"
-                            aria-label="Вход через Telegram"
-                        />
+                        <button
+                            type="button"
+                            className="tg-auth-button w-full max-w-sm justify-center"
+                            data-style="rounded shine"
+                            disabled={loading || authLoading || !sdkReady}
+                            aria-label="Войти через Telegram"
+                        >
+                            Войти через Telegram
+                        </button>
                     </div>
                 ) : null}
                 <button

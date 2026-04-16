@@ -60,9 +60,28 @@ declare global {
                 openLink: (url: string, options?: { try_instant_view?: boolean }) => void;
                 openTelegramLink: (url: string) => void;
             };
+            /** Log In With Telegram (OIDC), см. https://core.telegram.org/bots/telegram-login */
+            Login?: {
+                init: (
+                    opts: {
+                        client_id: number;
+                        lang?: string;
+                        request_access?: string | string[];
+                        nonce?: string;
+                    },
+                    callback?: (result: TelegramOidcLoginResult) => void
+                ) => void;
+                open: (callback?: (result: TelegramOidcLoginResult) => void) => void;
+                close: () => void;
+            };
         };
     }
 }
+
+/** Результат колбэка после `Telegram.Login.init` / `open` (telegram-login.js). */
+export type TelegramOidcLoginResult =
+    | { id_token: string; user: Record<string, unknown> }
+    | { error: string };
 
 /**
  * Инициализирует Telegram WebApp и расширяет его на весь экран

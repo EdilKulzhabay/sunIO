@@ -10,6 +10,7 @@ import crypto from 'crypto';
 import { addAdminAction } from "../utils/addAdminAction.js";
 import { resolveProfilePhotoUrl } from "../utils/profilePhotoDownload.js";
 import { verifyTelegramWidgetHash } from "../utils/telegramWidgetAuth.js";
+import { verifyTelegramOidcIdToken } from "../utils/telegramOidcAuth.js";
 import { sanitizeClientDeviceId } from "../utils/clientDeviceId.js";
 import PurchaseLog from "../Models/PurchaseLog.js";
 import DepositLog from "../Models/DepositLog.js";
@@ -2309,7 +2310,7 @@ export const transferBonus = async (req, res) => {
     }
 };
 
-/** Вход через Telegram Login Widget (OAuth для сайта). */
+/** Вход через Telegram (OIDC id_token или legacy Login Widget). */
 export const telegramWebAuth = async (req, res) => {
     try {
         const rawBody = req.body || {};
@@ -2321,34 +2322,75 @@ export const telegramWebAuth = async (req, res) => {
             });
         }
 
-        const { deviceId: _omitDevice, ...telegramPayload } = rawBody;
+        const idToken = typeof rawBody.id_token === "string" ? rawBody.id_token.trim() : "";
+        let telegramId;
+        let telegramUserName = "";
+        let photoUrlFromTg = null;
 
-        const botToken = process.env.TELEGRAM_BOT_TOKEN || process.env.BOT_TOKEN;
-        if (!botToken) {
-            return res.status(500).json({
-                success: false,
-                message: "Сервер не настроен для Telegram (нет токена бота)",
-            });
+        if (idToken) {
+            const oidcClientId =
+                process.env.TELEGRAM_OIDC_CLIENT_ID ||
+                process.env.TELEGRAM_WEB_LOGIN_CLIENT_ID;
+            if (!oidcClientId || !String(oidcClientId).trim()) {
+                return res.status(500).json({
+                    success: false,
+                    message: "Сервер не настроен для Telegram OIDC (нет TELEGRAM_OIDC_CLIENT_ID)",
+                });
+            }
+            let claims;
+            try {
+                claims = await verifyTelegramOidcIdToken(idToken, oidcClientId);
+            } catch (_e) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Недействительный токен Telegram",
+                });
+            }
+            telegramId =
+                claims.id != null && claims.id !== ""
+                    ? String(claims.id)
+                    : claims.sub != null
+                      ? String(claims.sub)
+                      : null;
+            if (!telegramId) {
+                return res.status(401).json({
+                    success: false,
+                    message: "В токене Telegram нет идентификатора пользователя",
+                });
+            }
+            telegramUserName =
+                claims.preferred_username != null ? String(claims.preferred_username) : "";
+            photoUrlFromTg = claims.picture != null ? String(claims.picture) : null;
+        } else {
+            const { deviceId: _omitDevice, ...telegramPayload } = rawBody;
+
+            const botToken = process.env.TELEGRAM_BOT_TOKEN || process.env.BOT_TOKEN;
+            if (!botToken) {
+                return res.status(500).json({
+                    success: false,
+                    message: "Сервер не настроен для Telegram (нет токена бота)",
+                });
+            }
+
+            if (!verifyTelegramWidgetHash(telegramPayload, botToken)) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Неверная подпись данных Telegram",
+                });
+            }
+
+            const authDate = Number(telegramPayload.auth_date);
+            if (!Number.isFinite(authDate) || Math.abs(Date.now() / 1000 - authDate) > 86400) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Данные авторизации устарели",
+                });
+            }
+
+            telegramId = String(telegramPayload.id);
+            telegramUserName = telegramPayload.username != null ? String(telegramPayload.username) : "";
+            photoUrlFromTg = telegramPayload.photo_url ? String(telegramPayload.photo_url) : null;
         }
-
-        if (!verifyTelegramWidgetHash(telegramPayload, botToken)) {
-            return res.status(401).json({
-                success: false,
-                message: "Неверная подпись данных Telegram",
-            });
-        }
-
-        const authDate = Number(telegramPayload.auth_date);
-        if (!Number.isFinite(authDate) || Math.abs(Date.now() / 1000 - authDate) > 86400) {
-            return res.status(401).json({
-                success: false,
-                message: "Данные авторизации устарели",
-            });
-        }
-
-        const telegramId = String(telegramPayload.id);
-        const telegramUserName = telegramPayload.username != null ? String(telegramPayload.username) : "";
-        const photoUrlFromTg = telegramPayload.photo_url ? String(telegramPayload.photo_url) : null;
 
         let storedProfilePhotoUrl = null;
         if (photoUrlFromTg) {

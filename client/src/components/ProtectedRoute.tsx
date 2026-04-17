@@ -1,5 +1,6 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { hasWebAppBootstrapParams } from "../utils/telegramWebAppSessionBootstrap";
 
 const CLIENT_TELEGRAM_AUTH = "/client/telegram-auth";
 
@@ -15,8 +16,14 @@ interface ProtectedRouteProps {
     requiredRole?: Role | Role[];
 }
 
+function isMainPath(pathname: string): boolean {
+    const p = (pathname || "/").replace(/\/+$/, "") || "/";
+    return p === "/main";
+}
+
 export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
     const { user, loading } = useAuth();
+    const location = useLocation();
 
     if (loading) {
         return (
@@ -60,6 +67,13 @@ export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) 
             return <Navigate to="/" replace />;
         }
 
+        return <>{children}</>;
+    }
+
+    /** Вход из кнопки Web App бота: на /main уже есть wb_ts/wb_sig — пусть Main запросит сессию, не редирект на telegram-auth */
+    const mainWebAppBootstrap =
+        isMainPath(location.pathname) && hasWebAppBootstrapParams(new URLSearchParams(location.search));
+    if (mainWebAppBootstrap) {
         return <>{children}</>;
     }
 

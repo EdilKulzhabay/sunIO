@@ -162,7 +162,7 @@ export const ClientTelegramAuth = () => {
                 <h1 className="text-[48px] font-semibold text-white leading-12">Авторизуйтесь через Telegram</h1>
             </div>
 
-            <div className="lg:w-[700px] lg:mx-auto space-y-4">
+            <div className="lg:w-[700px] lg:mt-20 lg:mx-auto space-y-4">
                 {OIDC_CLIENT_ID ? (
                     <button
                         type="button"

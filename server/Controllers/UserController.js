@@ -11,6 +11,7 @@ import { addAdminAction } from "../utils/addAdminAction.js";
 import { resolveProfilePhotoUrl } from "../utils/profilePhotoDownload.js";
 import { verifyTelegramWidgetHash } from "../utils/telegramWidgetAuth.js";
 import { verifyTelegramOidcIdToken } from "../utils/telegramOidcAuth.js";
+import { exchangeTelegramAuthorizationCode } from "../utils/telegramOidcTokenExchange.js";
 import { sanitizeClientDeviceId } from "../utils/clientDeviceId.js";
 import PurchaseLog from "../Models/PurchaseLog.js";
 import DepositLog from "../Models/DepositLog.js";
@@ -2322,15 +2323,57 @@ export const telegramWebAuth = async (req, res) => {
             });
         }
 
-        const idToken = typeof rawBody.id_token === "string" ? rawBody.id_token.trim() : "";
+        let idToken = typeof rawBody.id_token === "string" ? rawBody.id_token.trim() : "";
+        const authCode = typeof rawBody.code === "string" ? rawBody.code.trim() : "";
+        const codeVerifier = typeof rawBody.code_verifier === "string" ? rawBody.code_verifier.trim() : "";
+        const redirectUriBody = typeof rawBody.redirect_uri === "string" ? rawBody.redirect_uri.trim() : "";
+
+        const oidcClientId =
+            process.env.TELEGRAM_OIDC_CLIENT_ID || process.env.TELEGRAM_WEB_LOGIN_CLIENT_ID;
+        const oidcClientSecret = process.env.TELEGRAM_OIDC_CLIENT_SECRET || process.env.TELEGRAM_WEB_LOGIN_CLIENT_SECRET;
+        const oidcRedirectAllowed = (process.env.TELEGRAM_OIDC_REDIRECT_URI || "").trim();
+
+        if (!idToken && authCode && codeVerifier && redirectUriBody) {
+            if (!oidcClientId || !oidcClientSecret) {
+                return res.status(500).json({
+                    success: false,
+                    message:
+                        "Сервер не настроен для OAuth-кода Telegram (нужны TELEGRAM_OIDC_CLIENT_ID и TELEGRAM_OIDC_CLIENT_SECRET)",
+                });
+            }
+            if (!oidcRedirectAllowed) {
+                return res.status(500).json({
+                    success: false,
+                    message: "Задайте TELEGRAM_OIDC_REDIRECT_URI (полный URL как у клиента, например https://домен/client/telegram-auth)",
+                });
+            }
+            if (redirectUriBody !== oidcRedirectAllowed) {
+                return res.status(400).json({
+                    success: false,
+                    message: "redirect_uri не совпадает с TELEGRAM_OIDC_REDIRECT_URI на сервере",
+                });
+            }
+            try {
+                idToken = await exchangeTelegramAuthorizationCode({
+                    code: authCode,
+                    redirectUri: redirectUriBody,
+                    codeVerifier,
+                    clientId: String(oidcClientId).trim(),
+                    clientSecret: String(oidcClientSecret).trim(),
+                });
+            } catch (_e) {
+                return res.status(401).json({
+                    success: false,
+                    message: "Не удалось обменять код авторизации Telegram",
+                });
+            }
+        }
+
         let telegramId;
         let telegramUserName = "";
         let photoUrlFromTg = null;
 
         if (idToken) {
-            const oidcClientId =
-                process.env.TELEGRAM_OIDC_CLIENT_ID ||
-                process.env.TELEGRAM_WEB_LOGIN_CLIENT_ID;
             if (!oidcClientId || !String(oidcClientId).trim()) {
                 return res.status(500).json({
                     success: false,

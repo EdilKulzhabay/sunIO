@@ -6,6 +6,7 @@ import api from "../../api";
 import { useAuth, type User } from "../../contexts/AuthContext";
 import sunWithHands from "../../assets/sunWithHands.png";
 import { getOrCreateClientDeviceId } from "../../utils/clientDeviceId";
+import { openTelegramOidcPostMessageLogin } from "../../utils/telegramOidcPostMessageLogin";
 import type { TelegramOidcLoginResult } from "../../utils/telegramWebApp";
 
 const OIDC_CLIENT_ID_RAW = import.meta.env.VITE_TELEGRAM_OIDC_CLIENT_ID as string | undefined;
@@ -22,7 +23,6 @@ const OIDC_CLIENT_ID = parseOidcClientId(OIDC_CLIENT_ID_RAW);
 
 export const ClientTelegramAuth = () => {
     const [loading, setLoading] = useState(false);
-    const [sdkReady, setSdkReady] = useState(false);
     const navigate = useNavigate();
     const { loginWithTelegramSession, user, loading: authLoading } = useAuth();
     const [screenHeight, setScreenHeight] = useState(0);
@@ -66,52 +66,28 @@ export const ClientTelegramAuth = () => {
         [loginWithTelegramSession]
     );
 
-    useEffect(() => {
-        if (!OIDC_CLIENT_ID) return;
-
-        let cancelled = false;
-        const existing = document.querySelector('script[data-app="telegram-login-sdk"]');
-        if (existing && window.Telegram?.Login) {
-            setSdkReady(true);
-            return;
-        }
-
-        const script = document.createElement("script");
-        script.src = "https://telegram.org/js/telegram-login.js";
-        script.async = true;
-        script.dataset.app = "telegram-login-sdk";
-        script.onload = () => {
-            if (cancelled) return;
-            setSdkReady(true);
-        };
-        script.onerror = () => {
-            if (!cancelled) toast.error("Не удалось загрузить Telegram Login SDK");
-        };
-        document.body.appendChild(script);
-
-        return () => {
-            cancelled = true;
-        };
-    }, []);
-
-    useEffect(() => {
-        if (!sdkReady || !OIDC_CLIENT_ID) return;
-        try {
-            window.Telegram?.Login?.init({ client_id: OIDC_CLIENT_ID, lang: "ru" }, (result: TelegramOidcLoginResult) => {
-                if ("error" in result && result.error) {
-                    if (result.error === "popup_closed") return;
-                    toast.error(`Telegram: ${result.error}`);
+    const onTelegramOidcResult = useCallback(
+        (result: TelegramOidcLoginResult) => {
+            if ("error" in result && result.error) {
+                if (result.error === "popup_closed") return;
+                if (result.error === "popup_blocked") {
+                    toast.error("Браузер заблокировал всплывающее окно. Разрешите pop-up для этого сайта.");
                     return;
                 }
-                if ("id_token" in result && result.id_token) {
-                    void handleIdToken(result.id_token);
-                }
-            });
-        } catch (e) {
-            const msg = e instanceof Error ? e.message : "Ошибка инициализации Telegram Login";
-            toast.error(msg);
-        }
-    }, [sdkReady, handleIdToken]);
+                toast.error(`Telegram: ${result.error}`);
+                return;
+            }
+            if ("id_token" in result && result.id_token) {
+                void handleIdToken(result.id_token);
+            }
+        },
+        [handleIdToken]
+    );
+
+    const handleLoginClick = useCallback(() => {
+        if (!OIDC_CLIENT_ID) return;
+        openTelegramOidcPostMessageLogin({ clientId: OIDC_CLIENT_ID, lang: "ru" }, onTelegramOidcResult);
+    }, [onTelegramOidcResult]);
 
     useEffect(() => {
         const updateScreenHeight = () => setScreenHeight(window.innerHeight);
@@ -162,15 +138,15 @@ export const ClientTelegramAuth = () => {
             <div className="lg:w-[700px] lg:mx-auto space-y-4">
                 {OIDC_CLIENT_ID ? (
                     <div
-                        className={`flex flex-col items-center w-full mt-4 min-h-[56px] rounded-full bg-white/5 p-3 ring-1 ring-white/20 ${
-                            loading || authLoading || !sdkReady ? "pointer-events-none opacity-50" : ""
+                        className={`flex flex-col items-center w-full mt-4 min-h-[56px] rounded-2xl bg-white/5 p-3 ring-1 ring-white/20 ${
+                            loading || authLoading ? "pointer-events-none opacity-50" : ""
                         }`}
                     >
                         <button
                             type="button"
-                            className="tg-auth-button w-full max-w-sm justify-center"
-                            data-style="rounded shine"
-                            disabled={loading || authLoading || !sdkReady}
+                            onClick={handleLoginClick}
+                            disabled={loading || authLoading}
+                            className="w-full max-w-sm rounded-full bg-[#119AF5] hover:bg-[#1090E5] text-white font-semibold text-base py-3 px-7 shadow-lg transition-colors disabled:opacity-60"
                             aria-label="Войти через Telegram"
                         >
                             Войти через Telegram

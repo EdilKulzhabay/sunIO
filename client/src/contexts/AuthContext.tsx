@@ -22,8 +22,13 @@ interface AuthContextType {
     user: User | null;
     loading: boolean;
     login: (email: string, password: string) => Promise<void>;
-    /** Сессия после Telegram Login Widget (OAuth). */
-    loginWithTelegramSession: (userData: User, accessToken: string, refreshToken?: string) => void;
+    /** Сессия после Telegram OIDC / Web App бота. `navigateOverride` — явный путь после входа (сохранить ?page=). */
+    loginWithTelegramSession: (
+        userData: User,
+        accessToken: string,
+        refreshToken?: string,
+        navigateOverride?: { navigateTo: string }
+    ) => void;
     register: (fullName: string, email: string, phone: string, telegramId?: string) => Promise<void>;
     logout: () => void;
     checkSession: () => Promise<boolean>;
@@ -155,7 +160,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    const loginWithTelegramSession = (userData: User, accessToken: string, refreshToken?: string) => {
+    const loginWithTelegramSession = (
+        userData: User,
+        accessToken: string,
+        refreshToken?: string,
+        navigateOverride?: { navigateTo: string }
+    ) => {
         localStorage.setItem("token", accessToken);
         if (refreshToken) {
             localStorage.setItem("refreshToken", refreshToken);
@@ -180,6 +190,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (userData.role === "admin") {
             navigate("/admin");
+            return;
+        }
+
+        if (navigateOverride?.navigateTo) {
+            navigate(navigateOverride.navigateTo, { replace: true });
             return;
         }
 

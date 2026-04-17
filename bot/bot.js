@@ -1,6 +1,7 @@
 import { Telegraf, Input } from 'telegraf';
 import 'dotenv/config';
 import axios from 'axios';
+import crypto from 'crypto';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { executeUserOperation } from './queue.js';
@@ -81,6 +82,29 @@ function parseDeepLinkStart(startParam) {
   return { referralTelegramId: trimmed };
 }
 
+/**
+ * В ссылку Web App добавляются все данные для входа на клиенте:
+ * telegramId, telegramUserName, page + wb_ts/wb_sig (HMAC) для POST /api/user/telegram-webapp-bootstrap
+ * → token, refreshToken, sunio_client_device_id на клиенте.
+ * Секрет: BOT_WEBAPP_AUTH_SECRET или BOT_TOKEN (как на сервере).
+ */
+function appendWebAppBootstrapSearchParams(urlString, telegramId) {
+  const secret = process.env.BOT_WEBAPP_AUTH_SECRET || process.env.BOT_TOKEN;
+  if (!secret || telegramId == null || telegramId === '') return urlString;
+  try {
+    const u = new URL(urlString);
+    const ts = Math.floor(Date.now() / 1000);
+    const msg = `${String(telegramId).trim()}.${ts}`;
+    const sig = crypto.createHmac('sha256', secret).update(msg, 'utf8').digest('hex');
+    u.searchParams.set('wb_ts', String(ts));
+    u.searchParams.set('wb_sig', sig);
+    return u.toString();
+  } catch (e) {
+    console.warn('[web_app] wb_ts/wb_sig:', e.message);
+    return urlString;
+  }
+}
+
 function buildOpenSunWebAppUrl(telegramId, telegramUserName, pagePath) {
   const base = (process.env.APP_URL || '').replace(/\/$/, '');
   const u = new URL(`${base}/main/`);
@@ -90,7 +114,7 @@ function buildOpenSunWebAppUrl(telegramId, telegramUserName, pagePath) {
     const p = String(pagePath).trim();
     u.searchParams.set('page', p.startsWith('/') ? p : `/${p}`);
   }
-  return u.toString();
+  return appendWebAppBootstrapSearchParams(u.toString(), telegramId);
 }
 
 bot.start(async (ctx) => {
@@ -270,11 +294,16 @@ bot.action('consent_accept', async (ctx) => {
             .replace(/<\/div>\s*<div>/gi, '\n\n')
             .replace(/<\/?div>/gi, '');
 
+          const appBase = (process.env.APP_URL || '').replace(/\/$/, '');
+          const mainOpenUrl = appendWebAppBootstrapSearchParams(
+            `${appBase}/main/?telegramId=${telegramId}&telegramUserName=${encodeURIComponent(telegramUserName || '')}`,
+            telegramId
+          );
           const mainAppRow = [
             {
               text: '☀️ Открыть Солнце',
               web_app: {
-                url: `${process.env.APP_URL}/main/?telegramId=${telegramId}&telegramUserName=${encodeURIComponent(telegramUserName || '')}`,
+                url: mainOpenUrl,
               },
             },
           ];
@@ -294,7 +323,8 @@ bot.action('consent_accept', async (ctx) => {
               const btnUrl = bc.buttonUrl.startsWith('http') ? bc.buttonUrl : `https://${bc.buttonUrl}`;
               extraRows.push([{ text: bc.buttonText, url: btnUrl }]);
             } else {
-              let webAppUrl = `${appUrl}/?telegramId=${telegramId}`;
+              const appBase = (appUrl || '').replace(/\/$/, '');
+              let webAppUrl = `${appBase}/?telegramId=${telegramId}`;
               if (bc.buttonUrl) {
                 let path = bc.buttonUrl.startsWith(appUrl)
                   ? bc.buttonUrl.slice(appUrl.length)
@@ -303,6 +333,7 @@ bot.action('consent_accept', async (ctx) => {
                   webAppUrl += `&redirectTo=${encodeURIComponent(path)}`;
                 }
               }
+              webAppUrl = appendWebAppBootstrapSearchParams(webAppUrl, telegramId);
               extraRows.push([{ text: bc.buttonText, web_app: { url: webAppUrl } }]);
             }
           }

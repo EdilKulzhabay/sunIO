@@ -1,7 +1,10 @@
-const KEY_VERIFIER = "sunio_tg_oidc_pkce_verifier";
-const KEY_STATE = "sunio_tg_oidc_pkce_state";
+const PENDING_KEY = "sunio_tg_oidc_pending";
+/** Старые ключи sessionStorage — удаляем при записи, чтобы не путать состояние */
+const LEGACY_VERIFIER = "sunio_tg_oidc_pkce_verifier";
+const LEGACY_STATE = "sunio_tg_oidc_pkce_state";
 
 const OIDC_AUTH = "https://oauth.telegram.org/auth";
+const PENDING_MAX_AGE_MS = 15 * 60 * 1000;
 
 function base64UrlEncode(bytes: ArrayBuffer | Uint8Array): string {
     const u8 = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
@@ -27,6 +30,15 @@ async function pkceChallengeS256(verifier: string): Promise<string> {
     const data = new TextEncoder().encode(verifier);
     const digest = await crypto.subtle.digest("SHA-256", data);
     return base64UrlEncode(digest);
+}
+
+function clearLegacySessionKeys(): void {
+    try {
+        sessionStorage.removeItem(LEGACY_VERIFIER);
+        sessionStorage.removeItem(LEGACY_STATE);
+    } catch {
+        /* ignore */
+    }
 }
 
 /** Полный redirect_uri — должен совпадать с TELEGRAM_OIDC_REDIRECT_URI на сервере и с Allowed URL в @BotFather */
@@ -58,29 +70,48 @@ export function parseTelegramOidcReturnUrl(search: string): ParsedOidcReturn | n
     return null;
 }
 
-/** Прочитать verifier без удаления (удалить после успешного обмена через clearPkceSession). */
+type PendingPayload = { state: string; verifier: string; t: number };
+
+/** Читает verifier по state из URL. PKCE хранится в localStorage — общий для вкладки после редиректа с oauth.telegram.org. */
 export function readPkceVerifierForState(urlState: string): string | null {
-    const storedState = sessionStorage.getItem(KEY_STATE);
-    const verifier = sessionStorage.getItem(KEY_VERIFIER);
-    if (!verifier || !storedState || urlState !== storedState) return null;
-    return verifier;
+    try {
+        const raw = localStorage.getItem(PENDING_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw) as PendingPayload;
+        if (!parsed?.verifier || !parsed?.state || typeof parsed.t !== "number") {
+            return null;
+        }
+        if (parsed.state !== urlState) return null;
+        if (Date.now() - parsed.t > PENDING_MAX_AGE_MS) {
+            localStorage.removeItem(PENDING_KEY);
+            return null;
+        }
+        return parsed.verifier;
+    } catch {
+        return null;
+    }
 }
 
 export function clearPkceSession(): void {
-    sessionStorage.removeItem(KEY_STATE);
-    sessionStorage.removeItem(KEY_VERIFIER);
+    try {
+        localStorage.removeItem(PENDING_KEY);
+        clearLegacySessionKeys();
+    } catch {
+        /* ignore */
+    }
 }
 
 /**
  * Официальный OIDC: response_type=code + PKCE (см. discovery Telegram).
- * Полноэкранный редирект — стабильно в мобильных браузерах, без postMessage/popup.
+ * PKCE кладём в localStorage: при возврате с Telegram редирект иногда не сохраняет sessionStorage так же надёжно, как ожидается.
  * Scope только openid profile (без phone).
  */
 export async function startTelegramOidcRedirectWithPkce(clientId: number, lang = "ru"): Promise<void> {
     const verifier = randomVerifier();
     const state = randomState();
-    sessionStorage.setItem(KEY_VERIFIER, verifier);
-    sessionStorage.setItem(KEY_STATE, state);
+    clearLegacySessionKeys();
+    const pending: PendingPayload = { state, verifier, t: Date.now() };
+    localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
 
     const redirectUri = getOidcRedirectUri();
     const challenge = await pkceChallengeS256(verifier);

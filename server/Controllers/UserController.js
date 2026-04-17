@@ -13,6 +13,7 @@ import { verifyTelegramWidgetHash } from "../utils/telegramWidgetAuth.js";
 import { verifyTelegramOidcIdToken } from "../utils/telegramOidcAuth.js";
 import { exchangeTelegramAuthorizationCode } from "../utils/telegramOidcTokenExchange.js";
 import { sanitizeClientDeviceId } from "../utils/clientDeviceId.js";
+import { verifyWebAppBootstrap } from "../utils/botWebAppBootstrapSig.js";
 import PurchaseLog from "../Models/PurchaseLog.js";
 import DepositLog from "../Models/DepositLog.js";
 
@@ -2490,6 +2491,77 @@ export const telegramWebAuth = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Ошибка авторизации через Telegram",
+        });
+    }
+};
+
+/**
+ * Сессия после открытия Web App из бота: те же token / refreshToken / clientDeviceId, что после telegram-web-auth.
+ * В URL передаются wb_ts + wb_sig (HMAC), см. bot.js buildOpenSunWebAppUrl.
+ */
+export const telegramWebAppBootstrap = async (req, res) => {
+    try {
+        const raw = req.body || {};
+        const telegramId = raw.telegramId != null ? String(raw.telegramId).trim() : "";
+        const deviceId = sanitizeClientDeviceId(raw.deviceId);
+        const sig = typeof raw.sig === "string" ? raw.sig.trim() : "";
+        const ts = typeof raw.ts === "number" ? raw.ts : Number.parseInt(String(raw.ts ?? ""), 10);
+
+        if (!telegramId) {
+            return res.status(400).json({ success: false, message: "Нужен telegramId" });
+        }
+        if (!deviceId) {
+            return res.status(400).json({
+                success: false,
+                message: "Требуется идентификатор устройства (deviceId)",
+            });
+        }
+
+        const secret =
+            process.env.BOT_WEBAPP_AUTH_SECRET ||
+            process.env.TELEGRAM_BOT_TOKEN ||
+            process.env.BOT_TOKEN;
+        if (!secret) {
+            return res.status(500).json({
+                success: false,
+                message: "Сервер не настроен для входа из Web App бота",
+            });
+        }
+
+        if (!verifyWebAppBootstrap(telegramId, ts, sig, secret)) {
+            return res.status(401).json({
+                success: false,
+                message: "Неверная подпись или истёк срок ссылки",
+            });
+        }
+
+        const user = await User.findOne({ telegramId });
+        if (!user) {
+            return res.status(404).json({ success: false, message: "Пользователь не найден" });
+        }
+
+        if (user.isBlocked && user.role !== "admin") {
+            return res.status(403).json({
+                success: false,
+                message: "Аккаунт заблокирован",
+            });
+        }
+
+        const accessToken = jwt.sign({ userId: user._id }, process.env.SecretKey, { expiresIn: "30d" });
+        const refreshToken = jwt.sign({ userId: user._id }, process.env.SecretKeyRefresh, { expiresIn: "30d" });
+        await User.findByIdAndUpdate(user._id, { refreshToken, clientDeviceId: deviceId });
+
+        const fresh = await User.findById(user._id)
+            .select("-password -currentToken -refreshToken -clientDeviceId")
+            .lean();
+        const userData = { ...fresh };
+
+        return res.json({ success: true, accessToken, refreshToken, userData });
+    } catch (error) {
+        console.error("Ошибка в telegramWebAppBootstrap:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Ошибка сессии Web App",
         });
     }
 };

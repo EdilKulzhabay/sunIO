@@ -182,6 +182,7 @@ app.post("/api/user/create", createUserRateLimit, UserController.createUser);
 app.post("/api/user/register", createUserRateLimit, UserController.register);
 app.post("/api/user/login", UserController.login);
 app.post("/api/user/telegram-web-auth", createUserRateLimit, UserController.telegramWebAuth);
+app.post("/api/user/telegram-webapp-bootstrap", createUserRateLimit, UserController.telegramWebAppBootstrap);
 app.post("/api/user/send-mail", UserController.sendMail);
 app.post("/api/user/code-confirm", UserController.codeConfirm);
 app.post("/api/user/send-mail-recovery", UserController.sendMailRecovery);

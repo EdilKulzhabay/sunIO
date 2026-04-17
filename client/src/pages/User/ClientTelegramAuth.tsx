@@ -76,9 +76,12 @@ export const ClientTelegramAuth = () => {
         [loginWithTelegramSession, navigate]
     );
 
-    /** Обработка возврата с oauth.telegram.org (?code=&state= или ?error=) */
+    /**
+     * Обработка возврата с oauth.telegram.org (?code=&state= или ?error=).
+     * Не ждём authLoading: иначе первый кадр после редиректа может пропустить обмен, пока AuthContext крутится.
+     */
     useEffect(() => {
-        if (!OIDC_CLIENT_ID || authLoading) return;
+        if (!OIDC_CLIENT_ID) return;
 
         const parsed = parseTelegramOidcReturnUrl(location.search);
         if (!parsed) return;
@@ -89,13 +92,21 @@ export const ClientTelegramAuth = () => {
             return;
         }
 
-        const claimKey = `sunio_tg_code_claim_${parsed.code.slice(0, 48)}`;
-        if (sessionStorage.getItem(claimKey)) return;
-        sessionStorage.setItem(claimKey, "1");
+        const claimKey = `sunio_tg_code_claim_${parsed.code}`;
+        try {
+            if (localStorage.getItem(claimKey)) return;
+            localStorage.setItem(claimKey, "1");
+        } catch {
+            /* private mode — без дедупа */
+        }
 
         const verifier = readPkceVerifierForState(parsed.state);
         if (!verifier) {
-            sessionStorage.removeItem(claimKey);
+            try {
+                localStorage.removeItem(claimKey);
+            } catch {
+                /* ignore */
+            }
             toast.error("Сессия входа устарела. Нажмите «Войти через Telegram» ещё раз.");
             navigate("/client/telegram-auth", { replace: true });
             return;
@@ -109,10 +120,14 @@ export const ClientTelegramAuth = () => {
                     redirect_uri: getOidcRedirectUri(),
                 });
             } finally {
-                sessionStorage.removeItem(claimKey);
+                try {
+                    localStorage.removeItem(claimKey);
+                } catch {
+                    /* ignore */
+                }
             }
         })();
-    }, [location.search, authLoading, completeLoginWithTokens, navigate]);
+    }, [location.search, completeLoginWithTokens, navigate]);
 
     const handleLoginClick = useCallback(async () => {
         if (!OIDC_CLIENT_ID) return;
@@ -145,58 +160,19 @@ export const ClientTelegramAuth = () => {
             </div>
             <div className="flex-1 lg:flex-0 lg:w-[700px] lg:mx-auto">
                 <h1 className="text-[48px] font-semibold text-white leading-12">Авторизуйтесь через Telegram</h1>
-                {!OIDC_CLIENT_ID ? (
-                    <p className="text-amber-200 text-sm mt-3">
-                        Добавьте <code className="bg-black/30 px-1 rounded">VITE_TELEGRAM_OIDC_CLIENT_ID</code> и при
-                        необходимости{" "}
-                        <code className="bg-black/30 px-1 rounded">VITE_TELEGRAM_OIDC_REDIRECT_URI</code> (полный URL
-                        страницы, по умолчанию <code className="bg-black/30 px-1 rounded">…/client/telegram-auth</code>
-                        ). На сервере: <code className="bg-black/30 px-1 rounded">TELEGRAM_OIDC_CLIENT_ID</code>,{" "}
-                        <code className="bg-black/30 px-1 rounded">TELEGRAM_OIDC_CLIENT_SECRET</code> из @BotFather →
-                        Web Login, и тот же URL в{" "}
-                        <code className="bg-black/30 px-1 rounded">TELEGRAM_OIDC_REDIRECT_URI</code>.{" "}
-                        <a
-                            className="underline text-white"
-                            href="https://core.telegram.org/bots/telegram-login"
-                            target="_blank"
-                            rel="noreferrer"
-                        >
-                            Документация Telegram Login
-                        </a>
-                        .
-                    </p>
-                ) : (
-                    <>
-                        <p className="text-white/80 text-sm mt-3">
-                            Запрашиваются только данные профиля Telegram (<code className="bg-black/30 px-1">openid</code>{" "}
-                            + <code className="bg-black/30 px-1">profile</code>), без доступа к номеру телефона через
-                            OAuth. Откроется страница Telegram, затем вы вернётесь на сайт.
-                        </p>
-                        <p className="text-white/60 text-xs mt-2">
-                            Если браузер просит номер — это вход в аккаунт Telegram в вебе; удобнее открыть сайт из
-                            приложения Telegram или уже быть авторизованным на web.telegram.org.
-                        </p>
-                    </>
-                )}
             </div>
 
             <div className="lg:w-[700px] lg:mx-auto space-y-4">
                 {OIDC_CLIENT_ID ? (
-                    <div
-                        className={`flex flex-col items-center w-full mt-4 min-h-[56px] rounded-2xl bg-white/5 p-3 ring-1 ring-white/20 ${
-                            loading || authLoading ? "pointer-events-none opacity-50" : ""
-                        }`}
+                    <button
+                        type="button"
+                        onClick={() => void handleLoginClick()}
+                        disabled={loading || authLoading}
+                        className="w-full bg-[#C4841D] text-white py-2.5 text-center font-medium rounded-full hover:bg-[#C4841D]/80 hover:cursor-pointer disabled:opacity-60"
+                        aria-label="Войти через Telegram"
                     >
-                        <button
-                            type="button"
-                            onClick={() => void handleLoginClick()}
-                            disabled={loading || authLoading}
-                            className="w-full max-w-sm rounded-full bg-[#119AF5] hover:bg-[#1090E5] text-white font-semibold text-base py-3 px-7 shadow-lg transition-colors disabled:opacity-60"
-                            aria-label="Войти через Telegram"
-                        >
-                            Войти через Telegram
-                        </button>
-                    </div>
+                        Войти через Telegram
+                    </button>
                 ) : null}
                 <button
                     type="button"

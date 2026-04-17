@@ -1,4 +1,7 @@
-const STORAGE_KEY = "sunio_client_device_id";
+/** Ключ в localStorage — тот же проверяем на Main при входе из Web App бота */
+export const CLIENT_DEVICE_STORAGE_KEY = "sunio_client_device_id";
+
+const STORAGE_KEY = CLIENT_DEVICE_STORAGE_KEY;
 
 function generateId(): string {
     if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {

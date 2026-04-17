@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { UserLayout } from "../../components/User/UserLayout"
-import { Link, useNavigate, useSearchParams } from "react-router-dom"
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import api from "../../api"
 import { useAuth } from "../../contexts/AuthContext"
 import logo from "../../assets/logo.png"
@@ -21,6 +21,12 @@ import { MainPageInstructionsModal } from "../../components/User/MainPageInstruc
 import { X } from "lucide-react";
 import { MAIN_INSTRUCTION_STEPS_COUNT } from "../../components/User/MainPageInstructionsModal";
 import { openExternalLink } from "../../utils/telegramWebApp";
+import { CLIENT_DEVICE_STORAGE_KEY, getOrCreateClientDeviceId } from "../../utils/clientDeviceId";
+import {
+    hasWebAppBootstrapParams,
+    requestWebAppBootstrapSession,
+    searchParamsWithoutBootstrap,
+} from "../../utils/telegramWebAppSessionBootstrap";
 import { toast } from "react-toastify";
 import copyLinkIcon from "../../assets/copyLink.png";
 import { QRCodeSVG } from "qrcode.react";
@@ -102,7 +108,8 @@ export const Main = () => {
     const [userName, setUserName] = useState<string>("");
     const [userData, setUserData] = useState<any>(null);
     const [searchParams] = useSearchParams();
-    const { updateUser } = useAuth();
+    const location = useLocation();
+    const { updateUser, loginWithTelegramSession } = useAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [modalNotification, setModalNotification] = useState<ModalNotification | null>(null);
@@ -118,9 +125,7 @@ export const Main = () => {
         const fetchUserData = async () => {
             setLoading(true);
             try {
-                const userStr = localStorage.getItem('user');
-                const telegramId = localStorage.getItem('telegramId');
-                const token = localStorage.getItem('token');
+                getOrCreateClientDeviceId();
 
                 const telegramIdFromParams = searchParams.get('telegramId');
                 const telegramUserNameFromParams = searchParams.get('telegramUserName');
@@ -130,15 +135,51 @@ export const Main = () => {
                         ? `&page=${encodeURIComponent(pageFromParams)}`
                         : '';
 
-                console.log("telegramIdFromParams", telegramIdFromParams);
-                console.log("telegramUserNameFromParams", telegramUserNameFromParams);
-
                 if (telegramIdFromParams) {
                     localStorage.setItem('telegramId', telegramIdFromParams);
                 }
                 if (telegramUserNameFromParams) {
                     localStorage.setItem('telegramUserName', telegramUserNameFromParams);
                 }
+
+                const tokenLs = localStorage.getItem("token");
+                const refreshLs = localStorage.getItem("refreshToken");
+                const deviceLs = localStorage.getItem(CLIENT_DEVICE_STORAGE_KEY);
+
+                const needsSessionFromBotWebApp =
+                    hasWebAppBootstrapParams(searchParams) &&
+                    (!tokenLs || !refreshLs || !deviceLs);
+
+                if (needsSessionFromBotWebApp) {
+                    try {
+                        const session = await requestWebAppBootstrapSession(searchParams);
+                        const stripped = searchParamsWithoutBootstrap(searchParams);
+                        const qs = stripped.toString();
+                        const name = (session.userData.fullName ?? "").trim();
+                        const navigateTo: string | undefined =
+                            !name ? undefined : qs ? `/main?${qs}` : "/main";
+                        loginWithTelegramSession(
+                            session.userData,
+                            session.accessToken,
+                            session.refreshToken,
+                            navigateTo ? { navigateTo } : undefined
+                        );
+                    } catch (e: unknown) {
+                        toast.error(e instanceof Error ? e.message : "Не удалось войти из Telegram");
+                        const stripped = searchParamsWithoutBootstrap(searchParams);
+                        const qs = stripped.toString();
+                        navigate(qs ? `${location.pathname}?${qs}` : location.pathname, { replace: true });
+                    }
+                    return;
+                }
+
+                const userStr = localStorage.getItem('user');
+                const telegramId = localStorage.getItem('telegramId');
+                const token = localStorage.getItem('token');
+
+                console.log("telegramIdFromParams", telegramIdFromParams);
+                console.log("telegramUserNameFromParams", telegramUserNameFromParams);
+
                 if (!userStr) {
                     console.log('Пользователь не найден в localStorage');
                     navigate(

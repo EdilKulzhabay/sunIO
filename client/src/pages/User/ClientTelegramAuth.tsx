@@ -98,7 +98,6 @@ export const ClientTelegramAuth = () => {
         void (async () => {
             const verifier = await readPkceVerifierForStateWithRetries(parsed.state);
             if (!verifier) {
-                toast.error("Сессия входа устарела. Нажмите «Войти через Telegram» ещё раз.");
                 navigate("/client/telegram-auth", { replace: true });
                 return;
             }

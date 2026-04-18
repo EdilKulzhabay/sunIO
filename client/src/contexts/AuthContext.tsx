@@ -59,9 +59,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const refreshToken = localStorage.getItem("refreshToken");
         const userStr = localStorage.getItem("user");
 
-        /** Профиль без сессии — битое состояние (циклы запросов, «есть user, нет токенов»). */
-        if (!token && !refreshToken && userStr) {
-            localStorage.clear();
+        /**
+         * Нет сессии (ни access, ни refresh), но в LS остались user/fullName и т.д. —
+         * приложение считает пользователя «вошедшим», срабатывают циклы (Welcome и др.).
+         */
+        if (!token && !refreshToken) {
+            [
+                "user",
+                "fullName",
+                "firstName",
+                "lastName",
+                "token",
+                "authToken",
+                "refreshToken",
+            ].forEach((k) => localStorage.removeItem(k));
             setUser(null);
             setLoading(false);
             return;

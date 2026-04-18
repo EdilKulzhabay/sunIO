@@ -39,11 +39,11 @@ export const ClientTelegramAuth = () => {
         const oauth = parseTelegramOidcReturnUrl(location.search);
         if (oauth?.kind === "success") return;
         const token = localStorage.getItem("token");
-        if (user && token) {
-            const name = (user.fullName ?? "").trim();
-            navigate(name ? "/main" : "/client-performance", { replace: true });
-        }
-    }, [authLoading, user, navigate, location.search]);
+        if (!user?._id || !token) return;
+        const name = (user.fullName ?? "").trim();
+        navigate(name ? "/main" : "/client-performance", { replace: true });
+        /** user в deps давал повтор при каждом новом объекте user из checkAuth — только id и имя для редиректа. */
+    }, [authLoading, user?._id, user?.fullName, navigate, location.search]);
 
     const completeLoginWithTokens = useCallback(
         async (body: Record<string, unknown>) => {
@@ -64,9 +64,9 @@ export const ClientTelegramAuth = () => {
                     throw new Error(data.message || "Ошибка авторизации");
                 }
 
-                loginWithTelegramSession(data.userData, data.accessToken, data.refreshToken);
                 clearPkceSession();
-                navigate("/client/telegram-auth", { replace: true });
+                /** Не вызывать navigate на /client/telegram-auth после входа: loginWithTelegramSession уже ведёт на /main или /client-performance, второй navigate отменял первый и провоцировал лишние циклы. */
+                loginWithTelegramSession(data.userData, data.accessToken, data.refreshToken);
             } catch (e: unknown) {
                 const err = e as { response?: { data?: { message?: string } }; message?: string };
                 toast.error(err.response?.data?.message || err.message || "Ошибка авторизации");

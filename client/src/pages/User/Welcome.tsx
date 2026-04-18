@@ -1,4 +1,4 @@
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { UserLayout } from '../../components/User/UserLayout';
 import api from '../../api';
@@ -6,7 +6,7 @@ import { MyLink } from '../../components/User/MyLink';
 import { useAuth } from '../../contexts/AuthContext';
 
 export const Welcome = () => {
-    const [searchParams] = useSearchParams();
+    const location = useLocation();
     const [content, setContent] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -18,9 +18,9 @@ export const Welcome = () => {
 
     useEffect(() => {
         setLoading(true);
-        // Извлекаем параметры из URL
-        let telegramId = searchParams.get('telegramId') || '';
-        const telegramUserName = searchParams.get('telegramUserName') || '';
+        const params = new URLSearchParams(location.search);
+        let telegramId = params.get("telegramId") || "";
+        const telegramUserName = params.get("telegramUserName") || "";
 
         if (telegramId === "") {
             telegramId = localStorage.getItem('telegramId') || '';
@@ -35,7 +35,7 @@ export const Welcome = () => {
                 console.log('telegramId не найден');
                 return;
             }
-            
+
             try {
                 const response = await api.get(`/api/user/telegram/${telegramId}`);
 
@@ -64,8 +64,8 @@ export const Welcome = () => {
                         if (response.data.user.fullName && response.data.user.fullName.trim() !== '') {
                             const fullName = response.data.user.fullName;
                             localStorage.setItem('fullName', fullName);
-                            const redirectTo = searchParams.get('redirectTo');
-                            const page = searchParams.get('page');
+                            const redirectTo = params.get('redirectTo');
+                            const page = params.get('page');
                             const qs = new URLSearchParams();
                             qs.set('telegramId', telegramId);
                             if (telegramUserName) qs.set('telegramUserName', telegramUserName);
@@ -102,7 +102,8 @@ export const Welcome = () => {
 
         // createUser();
         setLoading(false);
-    }, [searchParams]);
+        /** location.search — стабильная строка; объект searchParams в зависимостях мог давать лишние запуски эффекта. */
+    }, [location.search]);
 
     useEffect(() => {
         setLoading(true);

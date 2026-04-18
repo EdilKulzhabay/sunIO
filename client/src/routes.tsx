@@ -148,12 +148,14 @@ import { ClientWelcome2 } from "./pages/User/ClientWelcome2";
 import { ClientContentSearch } from "./pages/User/ClientContentSearch";
 import { ClientChooseYourPath } from "./pages/User/ClientChooseYourPath";
 import { ClientHumanDesign } from "./pages/User/ClientHumanDesign";
+import { UserIosPwaTopInset } from "./components/UserIosPwaTopInset";
 
 // Компонент-обертка для всех маршрутов
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
     return (
         <AuthProvider>
             <TelegramWebAppHandler />
+            <UserIosPwaTopInset />
             {children}
         </AuthProvider>
     );

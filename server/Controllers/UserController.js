@@ -13,6 +13,13 @@ import { verifyTelegramWidgetHash } from "../utils/telegramWidgetAuth.js";
 import { verifyTelegramOidcIdToken } from "../utils/telegramOidcAuth.js";
 import { exchangeTelegramAuthorizationCode } from "../utils/telegramOidcTokenExchange.js";
 import { sanitizeClientDeviceId } from "../utils/clientDeviceId.js";
+import {
+    BROWSER_JWT_EXPIRES,
+    MINIAPP_JWT_EXPIRES,
+    getMiniAppDeviceId,
+    getWebDeviceId,
+    isTelegramMiniAppRequest,
+} from "../utils/clientSession.js";
 import { verifyWebAppBootstrap } from "../utils/botWebAppBootstrapSig.js";
 import PurchaseLog from "../Models/PurchaseLog.js";
 import DepositLog from "../Models/DepositLog.js";
@@ -387,7 +394,7 @@ export const register = async (req, res) => {
             { userId: user._id },
             process.env.SecretKey,
             {
-                expiresIn: "30d",
+                expiresIn: BROWSER_JWT_EXPIRES,
             }
         );
 
@@ -395,16 +402,18 @@ export const register = async (req, res) => {
             { userId: user._id },
             process.env.SecretKeyRefresh,
             {
-                expiresIn: "30d",
+                expiresIn: BROWSER_JWT_EXPIRES,
             }
         );
 
         const regDeviceId = sanitizeClientDeviceId(req.body?.deviceId);
 
-        // Сохраняем refresh токен и привязку к устройству
         await User.findByIdAndUpdate(user._id, {
-            refreshToken: refreshToken,
-            ...(regDeviceId && { clientDeviceId: regDeviceId }),
+            $set: {
+                refreshTokenWeb: refreshToken,
+                ...(regDeviceId && { clientDeviceIdWeb: regDeviceId }),
+            },
+            $unset: { refreshToken: "", clientDeviceId: "" },
         });
 
         const userData = {
@@ -484,12 +493,11 @@ export const login = async (req, res) => {
         // }
 
         const { password: _, ...userData } = candidate.toObject();
-        // Создаем новый токен (это инвалидирует предыдущую сессию)
         const accessToken = jwt.sign(
             { userId: candidate._id },
             process.env.SecretKey,
             {
-                expiresIn: "30d",
+                expiresIn: BROWSER_JWT_EXPIRES,
             }
         );
 
@@ -497,16 +505,18 @@ export const login = async (req, res) => {
             { userId: candidate._id },
             process.env.SecretKeyRefresh,
             {
-                expiresIn: "30d",
+                expiresIn: BROWSER_JWT_EXPIRES,
             }
         );
 
         const loginDeviceId = sanitizeClientDeviceId(req.body?.deviceId);
 
-        // Сохраняем refresh токен и привязку к устройству
         await User.findByIdAndUpdate(candidate._id, {
-            refreshToken: refreshToken,
-            ...(loginDeviceId && { clientDeviceId: loginDeviceId }),
+            $set: {
+                refreshTokenWeb: refreshToken,
+                ...(loginDeviceId && { clientDeviceIdWeb: loginDeviceId }),
+            },
+            $unset: { refreshToken: "", clientDeviceId: "" },
         });
 
         console.log("login successful");
@@ -531,11 +541,37 @@ export const logout = async (req, res) => {
             });
         }
 
-        await User.findByIdAndUpdate(userId, {
-            refreshToken: null,
-            currentToken: null,
-            clientDeviceId: null,
-        });
+        const user = await User.findById(userId).lean();
+        if (!user) {
+            return res.status(404).json({ success: false, message: "Пользователь не найден" });
+        }
+
+        const sent = sanitizeClientDeviceId(req.headers["x-device-id"]);
+        const webId = getWebDeviceId(user);
+        const miniId = getMiniAppDeviceId(user);
+
+        if (sent && miniId && sent === miniId) {
+            await User.findByIdAndUpdate(userId, {
+                $set: { refreshTokenMiniApp: null, clientDeviceIdMiniApp: null },
+            });
+        } else if (sent && webId && sent === webId) {
+            await User.findByIdAndUpdate(userId, {
+                $set: { refreshTokenWeb: null, clientDeviceIdWeb: null },
+                $unset: { refreshToken: "", clientDeviceId: "" },
+            });
+        } else {
+            await User.findByIdAndUpdate(userId, {
+                $set: {
+                    refreshToken: null,
+                    currentToken: null,
+                    clientDeviceId: null,
+                    refreshTokenWeb: null,
+                    refreshTokenMiniApp: null,
+                    clientDeviceIdWeb: null,
+                    clientDeviceIdMiniApp: null,
+                },
+            });
+        }
 
         res.json({
             success: true,
@@ -953,6 +989,11 @@ export const updateUser = async (req, res) => {
         delete updateData.password;
         delete updateData.currentToken;
         delete updateData.refreshToken;
+        delete updateData.refreshTokenWeb;
+        delete updateData.refreshTokenMiniApp;
+        delete updateData.clientDeviceId;
+        delete updateData.clientDeviceIdWeb;
+        delete updateData.clientDeviceIdMiniApp;
         // bonus теперь можно обновлять
 
         // Пустая строка в botStartSource невалидна для ObjectId — приводим к null
@@ -1435,6 +1476,11 @@ export const updateUserByTelegramId = async (req, res) => {
         // Не позволяем обновлять пароль через этот метод
         delete updateData.currentToken;
         delete updateData.refreshToken;
+        delete updateData.refreshTokenWeb;
+        delete updateData.refreshTokenMiniApp;
+        delete updateData.clientDeviceId;
+        delete updateData.clientDeviceIdWeb;
+        delete updateData.clientDeviceIdMiniApp;
 
         if (Object.prototype.hasOwnProperty.call(updateData, 'botStartSource') && (updateData.botStartSource === '' || updateData.botStartSource == null)) {
             updateData.botStartSource = null;
@@ -1998,6 +2044,11 @@ export const updateAdmin = async (req, res) => {
         delete updateData.password;
         delete updateData.currentToken;
         delete updateData.refreshToken;
+        delete updateData.refreshTokenWeb;
+        delete updateData.refreshTokenMiniApp;
+        delete updateData.clientDeviceId;
+        delete updateData.clientDeviceIdWeb;
+        delete updateData.clientDeviceIdMiniApp;
 
         // Валидация роли - если указана, должна быть одна из административных ролей
         const allowedRoles = ['admin', 'content_manager', 'client_manager'];
@@ -2466,22 +2517,36 @@ export const telegramWebAuth = async (req, res) => {
             });
         }
 
+        const miniApp = isTelegramMiniAppRequest(req);
+        const expiresIn = miniApp ? MINIAPP_JWT_EXPIRES : BROWSER_JWT_EXPIRES;
+
         const accessToken = jwt.sign(
             { userId: user._id },
             process.env.SecretKey,
-            { expiresIn: "30d" }
+            { expiresIn }
         );
 
         const refreshToken = jwt.sign(
             { userId: user._id },
             process.env.SecretKeyRefresh,
-            { expiresIn: "30d" }
+            { expiresIn }
         );
 
-        await User.findByIdAndUpdate(user._id, { refreshToken, clientDeviceId: deviceId });
+        if (miniApp) {
+            await User.findByIdAndUpdate(user._id, {
+                $set: { refreshTokenMiniApp: refreshToken, clientDeviceIdMiniApp: deviceId },
+            });
+        } else {
+            await User.findByIdAndUpdate(user._id, {
+                $set: { refreshTokenWeb: refreshToken, clientDeviceIdWeb: deviceId },
+                $unset: { refreshToken: "", clientDeviceId: "" },
+            });
+        }
 
         const fresh = await User.findById(user._id)
-            .select("-password -currentToken -refreshToken -clientDeviceId")
+            .select(
+                "-password -currentToken -refreshToken -refreshTokenWeb -refreshTokenMiniApp -clientDeviceId -clientDeviceIdWeb -clientDeviceIdMiniApp"
+            )
             .lean();
         const userData = { ...fresh };
 
@@ -2496,7 +2561,7 @@ export const telegramWebAuth = async (req, res) => {
 };
 
 /**
- * Сессия после открытия Web App из бота: те же token / refreshToken / clientDeviceId, что после telegram-web-auth.
+ * Сессия после открытия Web App из бота: только слот Mini App (долгий JWT), браузерная сессия не трогается.
  * В URL передаются wb_ts + wb_sig (HMAC), см. bot.js buildOpenSunWebAppUrl.
  */
 export const telegramWebAppBootstrap = async (req, res) => {
@@ -2547,12 +2612,24 @@ export const telegramWebAppBootstrap = async (req, res) => {
             });
         }
 
-        const accessToken = jwt.sign({ userId: user._id }, process.env.SecretKey, { expiresIn: "30d" });
-        const refreshToken = jwt.sign({ userId: user._id }, process.env.SecretKeyRefresh, { expiresIn: "30d" });
-        await User.findByIdAndUpdate(user._id, { refreshToken, clientDeviceId: deviceId });
+        const accessToken = jwt.sign(
+            { userId: user._id },
+            process.env.SecretKey,
+            { expiresIn: MINIAPP_JWT_EXPIRES }
+        );
+        const refreshToken = jwt.sign(
+            { userId: user._id },
+            process.env.SecretKeyRefresh,
+            { expiresIn: MINIAPP_JWT_EXPIRES }
+        );
+        await User.findByIdAndUpdate(user._id, {
+            $set: { refreshTokenMiniApp: refreshToken, clientDeviceIdMiniApp: deviceId },
+        });
 
         const fresh = await User.findById(user._id)
-            .select("-password -currentToken -refreshToken -clientDeviceId")
+            .select(
+                "-password -currentToken -refreshToken -refreshTokenWeb -refreshTokenMiniApp -clientDeviceId -clientDeviceIdWeb -clientDeviceIdMiniApp"
+            )
             .lean();
         const userData = { ...fresh };
 

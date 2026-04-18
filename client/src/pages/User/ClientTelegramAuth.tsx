@@ -10,7 +10,7 @@ import {
     clearPkceSession,
     getOidcRedirectUri,
     parseTelegramOidcReturnUrl,
-    readPkceVerifierForState,
+    readPkceVerifierForStateWithRetries,
     startTelegramOidcRedirectWithPkce,
 } from "../../utils/telegramOidcPkceRedirect";
 
@@ -35,12 +35,15 @@ export const ClientTelegramAuth = () => {
 
     useEffect(() => {
         if (authLoading) return;
+        /** Пока в URL OAuth-callback (?code=&state=), не уводим на /main — иначе гонка с обменом кода. */
+        const oauth = parseTelegramOidcReturnUrl(location.search);
+        if (oauth?.kind === "success") return;
         const token = localStorage.getItem("token");
         if (user && token) {
             const name = (user.fullName ?? "").trim();
             navigate(name ? "/main" : "/client-performance", { replace: true });
         }
-    }, [authLoading, user, navigate]);
+    }, [authLoading, user, navigate, location.search]);
 
     const completeLoginWithTokens = useCallback(
         async (body: Record<string, unknown>) => {
@@ -92,27 +95,22 @@ export const ClientTelegramAuth = () => {
             return;
         }
 
-        const claimKey = `sunio_tg_code_claim_${parsed.code}`;
-        try {
-            if (localStorage.getItem(claimKey)) return;
-            localStorage.setItem(claimKey, "1");
-        } catch {
-            /* private mode — без дедупа */
-        }
-
-        const verifier = readPkceVerifierForState(parsed.state);
-        if (!verifier) {
-            try {
-                localStorage.removeItem(claimKey);
-            } catch {
-                /* ignore */
-            }
-            toast.error("Сессия входа устарела. Нажмите «Войти через Telegram» ещё раз.");
-            navigate("/client/telegram-auth", { replace: true });
-            return;
-        }
-
         void (async () => {
+            const verifier = await readPkceVerifierForStateWithRetries(parsed.state);
+            if (!verifier) {
+                toast.error("Сессия входа устарела. Нажмите «Войти через Telegram» ещё раз.");
+                navigate("/client/telegram-auth", { replace: true });
+                return;
+            }
+
+            const claimKey = `sunio_tg_code_claim_${parsed.code}`;
+            try {
+                if (localStorage.getItem(claimKey)) return;
+                localStorage.setItem(claimKey, "1");
+            } catch {
+                /* private mode — без дедупа */
+            }
+
             try {
                 await completeLoginWithTokens({
                     code: parsed.code,

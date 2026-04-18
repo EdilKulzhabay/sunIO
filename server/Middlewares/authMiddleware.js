@@ -1,6 +1,9 @@
 import jwt from "jsonwebtoken";
 import User from "../Models/User.js";
-import { sanitizeClientDeviceId } from "../utils/clientDeviceId.js";
+import {
+    deviceIdMatchesUserSessions,
+    userHasDeviceSessionBinding,
+} from "../utils/clientSession.js";
 
 const STAFF_ROLES_DEVICE_SKIP = ["admin", "manager", "content_manager", "client_manager"];
 
@@ -40,11 +43,10 @@ export const authMiddleware = async (req, res, next) => {
         }
 
         if (
-            user.clientDeviceId &&
+            userHasDeviceSessionBinding(user) &&
             !STAFF_ROLES_DEVICE_SKIP.includes(user.role)
         ) {
-            const sent = sanitizeClientDeviceId(req.headers["x-device-id"]);
-            if (!sent || sent !== user.clientDeviceId) {
+            if (!deviceIdMatchesUserSessions(user, req.headers["x-device-id"])) {
                 return res.status(403).json({
                     success: false,
                     message: "Сессия привязана к другому устройству. Войдите снова.",

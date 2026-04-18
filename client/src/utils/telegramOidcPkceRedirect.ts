@@ -92,6 +92,20 @@ export function readPkceVerifierForState(urlState: string): string | null {
     }
 }
 
+/**
+ * После редиректа из WebView (Telegram и др.) localStorage иногда отдаёт pending не с первого тика —
+ * несколько попыток с короткой задержкой убирают ложное «Сессия входа устарела».
+ */
+export async function readPkceVerifierForStateWithRetries(urlState: string): Promise<string | null> {
+    const delaysMs = [0, 50, 100, 200];
+    for (const ms of delaysMs) {
+        if (ms > 0) await new Promise((r) => setTimeout(r, ms));
+        const v = readPkceVerifierForState(urlState);
+        if (v) return v;
+    }
+    return null;
+}
+
 export function clearPkceSession(): void {
     try {
         localStorage.removeItem(PENDING_KEY);

@@ -79,8 +79,26 @@ const UserSchema = new mongoose.Schema({
         type: String,
         default: null,
     },
-    /** Привязка веб-сессии к одному устройству (значение с клиента, заголовок X-Device-Id). */
+    /** Устаревшее: одна сессия; мигрирует в clientDeviceIdWeb + refreshTokenWeb */
     clientDeviceId: {
+        type: String,
+        default: null,
+    },
+    /** Браузер (OIDC, email/пароль): отдельная сессия от Mini App */
+    clientDeviceIdWeb: {
+        type: String,
+        default: null,
+    },
+    refreshTokenWeb: {
+        type: String,
+        default: null,
+    },
+    /** Telegram Mini App (Web App из бота) */
+    clientDeviceIdMiniApp: {
+        type: String,
+        default: null,
+    },
+    refreshTokenMiniApp: {
         type: String,
         default: null,
     },

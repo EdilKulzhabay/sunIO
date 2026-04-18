@@ -1,0 +1,18 @@
+{
+  "name": "sun.psylife.io",
+  "short_name": "Sun",
+  "description": "sun.psylife.io",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#161616",
+  "theme_color": "#161616",
+  "icons": [
+    {
+      "src": "/web-view-icon.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}

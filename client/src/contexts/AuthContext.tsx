@@ -56,8 +56,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const checkAuth = async () => {
         const token = localStorage.getItem("token");
-        
+        const refreshToken = localStorage.getItem("refreshToken");
         const userStr = localStorage.getItem("user");
+
+        /** Профиль без сессии — битое состояние (циклы запросов, «есть user, нет токенов»). */
+        if (!token && !refreshToken && userStr) {
+            localStorage.clear();
+            setUser(null);
+            setLoading(false);
+            return;
+        }
+
         let userFromStorage: User | null = null;
         if (userStr) {
             try {

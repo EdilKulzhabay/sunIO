@@ -4,6 +4,7 @@ import { UserLayout } from '../../components/User/UserLayout';
 import api from '../../api';
 import { MyLink } from '../../components/User/MyLink';
 import { useAuth } from '../../contexts/AuthContext';
+import { CLIENT_DEVICE_STORAGE_KEY } from '../../utils/clientDeviceId';
 
 export const Welcome = () => {
     const location = useLocation();
@@ -19,6 +20,13 @@ export const Welcome = () => {
     useEffect(() => {
         setLoading(true);
         const params = new URLSearchParams(location.search);
+        const token = localStorage.getItem("token");
+        if (!token) {
+            const deviceId = localStorage.getItem(CLIENT_DEVICE_STORAGE_KEY);
+            localStorage.clear();
+            if (deviceId) localStorage.setItem(CLIENT_DEVICE_STORAGE_KEY, deviceId);
+            return;
+        }
         let telegramId = params.get("telegramId") || "";
         const telegramUserName = params.get("telegramUserName") || "";
 
@@ -40,7 +48,6 @@ export const Welcome = () => {
                 const response = await api.get(`/api/user/telegram/${telegramId}`);
 
                 if (!response.data.success) {
-                    localStorage.clear();
                     if (telegramId) localStorage.setItem("telegramId", telegramId);
                     if (telegramUserName) localStorage.setItem("telegramUserName", telegramUserName);
                     return;
@@ -77,7 +84,6 @@ export const Welcome = () => {
                             const telegramIdValue = localStorage.getItem("telegramId");
                             const telegramUserNameValue = localStorage.getItem("telegramUserName");
                             const userValue = localStorage.getItem("user");
-                            localStorage.clear();
                             if (telegramIdValue) localStorage.setItem("telegramId", telegramIdValue);
                             if (telegramUserNameValue) localStorage.setItem("telegramUserName", telegramUserNameValue);
                             if (userValue) localStorage.setItem("user", userValue);

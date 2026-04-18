@@ -156,10 +156,12 @@ export const ClientTelegramAuth = () => {
                 <img src={sunWithHands} alt="" className="object-cover h-[175px] w-[175px] mb-5" />
             </div>
             <div className="flex-1 lg:flex-0 lg:w-[700px] lg:mx-auto">
-                <h1 className="text-[48px] font-semibold text-white leading-12">Авторизуйтесь через Telegram</h1>
+                <h1 className="text-[48px] font-semibold text-white leading-12">Требуется авторизация через Telegram</h1>
+                <p className="mt-4 text-white">Чтобы тебе было удобно пользоваться приложением, мы используем вход через Telegram. Это позволяет автоматически создать твой профиль без лишних регистраций и паролей.</p>
+                <p className="mt-5 text-white">Мы получаем только базовые данные (имя, username и ID) — они нужны, чтобы сохранить твои результаты, прогресс и доступ к практикам. Твои данные защищены и не передаются третьим лицам.</p>
             </div>
 
-            <div className="lg:w-[700px] lg:mt-20 lg:mx-auto space-y-4">
+            <div className="lg:w-[700px] lg:mt-20 lg:mx-auto">
                 {OIDC_CLIENT_ID ? (
                     <button
                         type="button"

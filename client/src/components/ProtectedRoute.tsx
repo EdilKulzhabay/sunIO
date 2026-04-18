@@ -2,7 +2,8 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { hasWebAppBootstrapParams } from "../utils/telegramWebAppSessionBootstrap";
 
-const CLIENT_TELEGRAM_AUTH = "/client/telegram-auth";
+/** Неавторизованных ведём на Welcome — дальше сценарий входа (в т.ч. Telegram) с этой ветки. */
+const UNAUTHENTICATED_REDIRECT = "/";
 
 function getStoredAuthToken(): string | null {
     if (typeof window === "undefined") return null;
@@ -40,7 +41,7 @@ export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) 
         const userFromStorage = localStorage.getItem("user");
 
         if (!user && !token && !userFromStorage) {
-            return <Navigate to={CLIENT_TELEGRAM_AUTH} replace />;
+            return <Navigate to={UNAUTHENTICATED_REDIRECT} replace />;
         }
 
         if (!user && token) {
@@ -60,7 +61,7 @@ export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) 
         }
 
         if (!user) {
-            return <Navigate to={CLIENT_TELEGRAM_AUTH} replace />;
+            return <Navigate to={UNAUTHENTICATED_REDIRECT} replace />;
         }
 
         if (!user || !user.role || !allowedRoles.includes(user.role as Role)) {
@@ -79,7 +80,7 @@ export const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) 
 
     const token = getStoredAuthToken();
     if (!token || !user) {
-        return <Navigate to={CLIENT_TELEGRAM_AUTH} replace />;
+        return <Navigate to={UNAUTHENTICATED_REDIRECT} replace />;
     }
 
     return <>{children}</>;

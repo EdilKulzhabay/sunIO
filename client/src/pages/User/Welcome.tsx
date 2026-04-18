@@ -10,7 +10,11 @@ export const Welcome = () => {
     const [content, setContent] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const { updateUser } = useAuth();
+    const { updateUser, user, loading: authLoading } = useAuth();
+
+    const hasClientSession =
+        !authLoading && Boolean(localStorage.getItem("token") && user);
+    const nextStepHref = hasClientSession ? "/client-performance" : "/client/telegram-auth";
 
     useEffect(() => {
         setLoading(true);
@@ -166,7 +170,7 @@ export const Welcome = () => {
                         >
                             <h1 className="text-2xl font-bold">{content?.title}</h1>
                             <p className="mt-4" dangerouslySetInnerHTML={{ __html: content?.content }} />
-                            <MyLink to="/client-performance" text="Далее" className='w-full mt-4' color='red'/>
+                            <MyLink to={nextStepHref} text="Далее" className='w-full mt-4' color='red'/>
                         </div>
                     </div>
                 </div>

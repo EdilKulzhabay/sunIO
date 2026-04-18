@@ -4,6 +4,8 @@ import { isIosPwaStandalone } from "../utils/pwaEnv";
 import { pathnameIsClientUserAppPage } from "../utils/clientUserRoutes";
 
 const TOP_PX = 30;
+/** Фон полосы под статус-баром (как на клиентских экранах), иначе виден белый body */
+const INSET_BG = "#031F23";
 
 /**
  * В PWA на iOS контент заходит под статус-бар / вырез.
@@ -16,13 +18,19 @@ export function UserIosPwaTopInset() {
         const root = document.getElementById("root");
         if (!root) return;
 
-        const apply =
-            isIosPwaStandalone() && pathnameIsClientUserAppPage(pathname) ? `${TOP_PX}px` : "";
+        const active = isIosPwaStandalone() && pathnameIsClientUserAppPage(pathname);
 
-        root.style.paddingTop = apply;
+        if (active) {
+            root.style.paddingTop = `${TOP_PX}px`;
+            root.style.backgroundColor = INSET_BG;
+        } else {
+            root.style.paddingTop = "";
+            root.style.backgroundColor = "";
+        }
 
         return () => {
             root.style.paddingTop = "";
+            root.style.backgroundColor = "";
         };
     }, [pathname]);
 

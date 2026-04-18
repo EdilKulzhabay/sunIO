@@ -84,8 +84,8 @@ api.interceptors.response.use(
             localStorage.removeItem("token");
             localStorage.removeItem("refreshToken");
             localStorage.removeItem("user");
-            if (window.location.pathname !== "/client/telegram-auth") {
-                window.location.assign("/client/telegram-auth");
+            if (window.location.pathname !== "/") {
+                window.location.assign("/");
             }
             return Promise.reject(error);
         }

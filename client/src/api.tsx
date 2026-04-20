@@ -1,6 +1,7 @@
 import axios from "axios";
 import './utils/telegramWebApp';
 import { getOrCreateClientDeviceId } from "./utils/clientDeviceId";
+import { isAdminAppPath } from "./utils/authAppArea";
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
@@ -81,17 +82,19 @@ api.interceptors.response.use(
         }
 
         if (error.response.status === 403 && error.response.data?.deviceSessionInvalid) {
-            localStorage.removeItem("token");
-            localStorage.removeItem("refreshToken");
-            localStorage.removeItem("user");
-            if (window.location.pathname !== "/") {
-                window.location.assign("/");
+            if (!isAdminAppPath(window.location.pathname)) {
+                localStorage.removeItem("token");
+                localStorage.removeItem("refreshToken");
+                localStorage.removeItem("user");
+                if (window.location.pathname !== "/") {
+                    window.location.assign("/");
+                }
             }
             return Promise.reject(error);
         }
         
         if (error.response && error.response.status === 403 && !isAuthCheck) {
-            if (error.response.data?.sessionExpired) {
+            if (error.response.data?.sessionExpired && !isAdminAppPath(window.location.pathname)) {
                 localStorage.removeItem("token");
                 localStorage.removeItem("refreshToken");
                 const telegramId = localStorage.getItem("telegramId");

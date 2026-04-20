@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
 import { getOrCreateClientDeviceId } from "../utils/clientDeviceId";
+import { isAdminAppPath } from "../utils/authAppArea";
 
 export interface User {
     _id: string;
@@ -61,9 +62,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         /**
          * Нет сессии (ни access, ни refresh), но в LS остались user/fullName и т.д. —
-         * приложение считает пользователя «вошедшим», срабатывают циклы (Welcome и др.).
+         * только для клиентского приложения (User), не для админки.
          */
-        if (!token && !refreshToken) {
+        if (
+            !token &&
+            !refreshToken &&
+            typeof window !== "undefined" &&
+            !isAdminAppPath(window.location.pathname)
+        ) {
             [
                 "user",
                 "fullName",
@@ -168,6 +174,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             return response.data.success;
         } catch (error: any) {
             if (error.response?.data?.sessionExpired) {
+                if (typeof window !== "undefined" && isAdminAppPath(window.location.pathname)) {
+                    return false;
+                }
                 localStorage.removeItem("token");
                 localStorage.removeItem("refreshToken");
                 const telegramId = localStorage.getItem("telegramId");

@@ -13,7 +13,7 @@ import { verifyTelegramWidgetHash } from "../utils/telegramWidgetAuth.js";
 import { verifyTelegramOidcIdToken } from "../utils/telegramOidcAuth.js";
 import { exchangeTelegramAuthorizationCode } from "../utils/telegramOidcTokenExchange.js";
 import { sanitizeClientDeviceId } from "../utils/clientDeviceId.js";
-import { upsertBrowserWebSession } from "../utils/browserWebSessions.js";
+import { removeBrowserWebSession, upsertBrowserWebSession } from "../utils/browserWebSessions.js";
 import {
     BROWSER_JWT_EXPIRES,
     MINIAPP_JWT_EXPIRES,
@@ -543,16 +543,7 @@ export const logout = async (req, res) => {
                 $set: { refreshTokenMiniApp: null, clientDeviceIdMiniApp: null },
             });
         } else if (sent && sentMatchesAnyBrowserSession(user, sent)) {
-            await User.findByIdAndUpdate(userId, {
-                $pull: { browserWebSessions: { deviceId: sent } },
-            });
-            const legacy = user.clientDeviceIdWeb ?? user.clientDeviceId;
-            if (legacy === sent) {
-                await User.findByIdAndUpdate(userId, {
-                    $set: { refreshTokenWeb: null, clientDeviceIdWeb: null },
-                    $unset: { refreshToken: "", clientDeviceId: "" },
-                });
-            }
+            await removeBrowserWebSession(userId, sent);
         } else {
             await User.findByIdAndUpdate(userId, {
                 $set: {
@@ -2530,13 +2521,13 @@ export const telegramWebAuth = async (req, res) => {
             { expiresIn }
         );
 
-        if (miniApp) {
-            await User.findByIdAndUpdate(user._id, {
-                $set: { refreshTokenMiniApp: refreshToken, clientDeviceIdMiniApp: deviceId },
-            });
-        } else {
-            await upsertBrowserWebSession(user._id, deviceId, refreshToken);
-        }
+        /**
+         * Сессия Mini App хранится только в clientDeviceIdMiniApp / refreshTokenMiniApp
+         * и задаётся через telegramWebAppBootstrap (вход из бота). Здесь же — всегда браузер
+         * (в т.ч. OIDC в WebView): иначе заголовок X-Telegram-WebApp со всех запросов api
+         * помечал бы вход как Mini App и затирал слот Telegram.
+         */
+        await upsertBrowserWebSession(user._id, deviceId, refreshToken);
 
         const fresh = await User.findById(user._id)
             .select(

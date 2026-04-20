@@ -93,7 +93,7 @@ const UserSchema = new mongoose.Schema({
         type: String,
         default: null,
     },
-    /** Браузер: до двух параллельных сессий (deviceId + refresh для слота) */
+    /** Браузер: два слота [0],[1] — при новом входе бывший [1] → [0], новая пара → [1] (см. browserWebSessions.js) */
     browserWebSessions: {
         type: [
             {

@@ -13,13 +13,15 @@ export function isTelegramMiniAppRequest(req) {
     return v === "true" || v === true;
 }
 
-/** Первый браузерный deviceId (legacy или из массива) — для обратной совместимости. */
+/** Актуальный браузерный deviceId: слот [1] (последний вход), иначе [0], иначе legacy. */
 export function getWebDeviceId(user) {
     if (!user) return null;
-    if (Array.isArray(user.browserWebSessions) && user.browserWebSessions.length > 0) {
-        const first = user.browserWebSessions.find((s) => s?.deviceId);
-        if (first?.deviceId) return first.deviceId;
+    const bw = user.browserWebSessions;
+    if (Array.isArray(bw) && bw.length >= 2) {
+        if (bw[1]?.deviceId) return bw[1].deviceId;
+        if (bw[0]?.deviceId) return bw[0].deviceId;
     }
+    if (Array.isArray(bw) && bw.length === 1 && bw[0]?.deviceId) return bw[0].deviceId;
     return user.clientDeviceIdWeb ?? user.clientDeviceId ?? null;
 }
 

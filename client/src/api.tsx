@@ -5,7 +5,7 @@ import { isAdminAppPath } from "./utils/authAppArea";
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
-    timeout: 1000 * 30,
+    timeout: 1000 * 60,
     headers: {
         "X-Requested-With": "XMLHttpRequest",
     },

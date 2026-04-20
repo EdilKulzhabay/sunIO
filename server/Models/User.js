@@ -93,6 +93,16 @@ const UserSchema = new mongoose.Schema({
         type: String,
         default: null,
     },
+    /** Браузер: до двух параллельных сессий (deviceId + refresh для слота) */
+    browserWebSessions: {
+        type: [
+            {
+                deviceId: { type: String, default: null },
+                refreshToken: { type: String, default: null },
+            },
+        ],
+        default: [],
+    },
     /** Telegram Mini App (Web App из бота) */
     clientDeviceIdMiniApp: {
         type: String,

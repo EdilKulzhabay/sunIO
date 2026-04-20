@@ -13,10 +13,26 @@ export function isTelegramMiniAppRequest(req) {
     return v === "true" || v === true;
 }
 
-/** Устаревшее поле clientDeviceId считаем браузерной сессией до миграции. */
+/** Первый браузерный deviceId (legacy или из массива) — для обратной совместимости. */
 export function getWebDeviceId(user) {
     if (!user) return null;
+    if (Array.isArray(user.browserWebSessions) && user.browserWebSessions.length > 0) {
+        const first = user.browserWebSessions.find((s) => s?.deviceId);
+        if (first?.deviceId) return first.deviceId;
+    }
     return user.clientDeviceIdWeb ?? user.clientDeviceId ?? null;
+}
+
+export function collectBrowserDeviceIds(user) {
+    const ids = new Set();
+    if (Array.isArray(user?.browserWebSessions)) {
+        for (const s of user.browserWebSessions) {
+            if (s?.deviceId) ids.add(s.deviceId);
+        }
+    }
+    const legacy = user?.clientDeviceIdWeb ?? user?.clientDeviceId;
+    if (legacy) ids.add(legacy);
+    return [...ids];
 }
 
 export function getMiniAppDeviceId(user) {
@@ -25,13 +41,18 @@ export function getMiniAppDeviceId(user) {
 }
 
 export function userHasDeviceSessionBinding(user) {
-    return !!(getWebDeviceId(user) || getMiniAppDeviceId(user));
+    return collectBrowserDeviceIds(user).length > 0 || !!getMiniAppDeviceId(user);
 }
 
 export function deviceIdMatchesUserSessions(user, sentRaw) {
     const sent = sanitizeClientDeviceId(sentRaw);
     if (!sent) return false;
-    const web = getWebDeviceId(user);
-    const mini = getMiniAppDeviceId(user);
-    return sent === web || sent === mini;
+    if (getMiniAppDeviceId(user) === sent) return true;
+    return collectBrowserDeviceIds(user).includes(sent);
+}
+
+export function sentMatchesAnyBrowserSession(user, sentRaw) {
+    const sent = sanitizeClientDeviceId(sentRaw);
+    if (!sent) return false;
+    return collectBrowserDeviceIds(user).includes(sent);
 }

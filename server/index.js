@@ -199,7 +199,7 @@ app.get("/api/user/me", authMiddleware, async (req, res) => {
     try {
         await migrateLegacyCompletedActivationsIfNeeded(req.userId);
         const user = await User.findById(req.userId).select(
-            "-password -currentToken -refreshToken -refreshTokenWeb -refreshTokenMiniApp -clientDeviceId -clientDeviceIdWeb -clientDeviceIdMiniApp"
+            "-password -currentToken -refreshToken -refreshTokenWeb -refreshTokenMiniApp -clientDeviceId -clientDeviceIdWeb -clientDeviceIdMiniApp -browserWebSessions"
         );
         if (!user) {
             return res.status(404).json({ success: false, message: "Пользователь не найден" });

@@ -13,12 +13,13 @@ import { verifyTelegramWidgetHash } from "../utils/telegramWidgetAuth.js";
 import { verifyTelegramOidcIdToken } from "../utils/telegramOidcAuth.js";
 import { exchangeTelegramAuthorizationCode } from "../utils/telegramOidcTokenExchange.js";
 import { sanitizeClientDeviceId } from "../utils/clientDeviceId.js";
+import { upsertBrowserWebSession } from "../utils/browserWebSessions.js";
 import {
     BROWSER_JWT_EXPIRES,
     MINIAPP_JWT_EXPIRES,
     getMiniAppDeviceId,
-    getWebDeviceId,
     isTelegramMiniAppRequest,
+    sentMatchesAnyBrowserSession,
 } from "../utils/clientSession.js";
 import { verifyWebAppBootstrap } from "../utils/botWebAppBootstrapSig.js";
 import PurchaseLog from "../Models/PurchaseLog.js";
@@ -408,13 +409,7 @@ export const register = async (req, res) => {
 
         const regDeviceId = sanitizeClientDeviceId(req.body?.deviceId);
 
-        await User.findByIdAndUpdate(user._id, {
-            $set: {
-                refreshTokenWeb: refreshToken,
-                ...(regDeviceId && { clientDeviceIdWeb: regDeviceId }),
-            },
-            $unset: { refreshToken: "", clientDeviceId: "" },
-        });
+        await upsertBrowserWebSession(user._id, regDeviceId, refreshToken);
 
         const userData = {
             _id: user._id,
@@ -511,13 +506,7 @@ export const login = async (req, res) => {
 
         const loginDeviceId = sanitizeClientDeviceId(req.body?.deviceId);
 
-        await User.findByIdAndUpdate(candidate._id, {
-            $set: {
-                refreshTokenWeb: refreshToken,
-                ...(loginDeviceId && { clientDeviceIdWeb: loginDeviceId }),
-            },
-            $unset: { refreshToken: "", clientDeviceId: "" },
-        });
+        await upsertBrowserWebSession(candidate._id, loginDeviceId, refreshToken);
 
         console.log("login successful");
 
@@ -547,18 +536,23 @@ export const logout = async (req, res) => {
         }
 
         const sent = sanitizeClientDeviceId(req.headers["x-device-id"]);
-        const webId = getWebDeviceId(user);
         const miniId = getMiniAppDeviceId(user);
 
         if (sent && miniId && sent === miniId) {
             await User.findByIdAndUpdate(userId, {
                 $set: { refreshTokenMiniApp: null, clientDeviceIdMiniApp: null },
             });
-        } else if (sent && webId && sent === webId) {
+        } else if (sent && sentMatchesAnyBrowserSession(user, sent)) {
             await User.findByIdAndUpdate(userId, {
-                $set: { refreshTokenWeb: null, clientDeviceIdWeb: null },
-                $unset: { refreshToken: "", clientDeviceId: "" },
+                $pull: { browserWebSessions: { deviceId: sent } },
             });
+            const legacy = user.clientDeviceIdWeb ?? user.clientDeviceId;
+            if (legacy === sent) {
+                await User.findByIdAndUpdate(userId, {
+                    $set: { refreshTokenWeb: null, clientDeviceIdWeb: null },
+                    $unset: { refreshToken: "", clientDeviceId: "" },
+                });
+            }
         } else {
             await User.findByIdAndUpdate(userId, {
                 $set: {
@@ -569,6 +563,7 @@ export const logout = async (req, res) => {
                     refreshTokenMiniApp: null,
                     clientDeviceIdWeb: null,
                     clientDeviceIdMiniApp: null,
+                    browserWebSessions: [],
                 },
             });
         }
@@ -994,6 +989,7 @@ export const updateUser = async (req, res) => {
         delete updateData.clientDeviceId;
         delete updateData.clientDeviceIdWeb;
         delete updateData.clientDeviceIdMiniApp;
+        delete updateData.browserWebSessions;
         // bonus теперь можно обновлять
 
         // Пустая строка в botStartSource невалидна для ObjectId — приводим к null
@@ -1481,6 +1477,7 @@ export const updateUserByTelegramId = async (req, res) => {
         delete updateData.clientDeviceId;
         delete updateData.clientDeviceIdWeb;
         delete updateData.clientDeviceIdMiniApp;
+        delete updateData.browserWebSessions;
 
         if (Object.prototype.hasOwnProperty.call(updateData, 'botStartSource') && (updateData.botStartSource === '' || updateData.botStartSource == null)) {
             updateData.botStartSource = null;
@@ -2049,6 +2046,7 @@ export const updateAdmin = async (req, res) => {
         delete updateData.clientDeviceId;
         delete updateData.clientDeviceIdWeb;
         delete updateData.clientDeviceIdMiniApp;
+        delete updateData.browserWebSessions;
 
         // Валидация роли - если указана, должна быть одна из административных ролей
         const allowedRoles = ['admin', 'content_manager', 'client_manager'];
@@ -2537,15 +2535,12 @@ export const telegramWebAuth = async (req, res) => {
                 $set: { refreshTokenMiniApp: refreshToken, clientDeviceIdMiniApp: deviceId },
             });
         } else {
-            await User.findByIdAndUpdate(user._id, {
-                $set: { refreshTokenWeb: refreshToken, clientDeviceIdWeb: deviceId },
-                $unset: { refreshToken: "", clientDeviceId: "" },
-            });
+            await upsertBrowserWebSession(user._id, deviceId, refreshToken);
         }
 
         const fresh = await User.findById(user._id)
             .select(
-                "-password -currentToken -refreshToken -refreshTokenWeb -refreshTokenMiniApp -clientDeviceId -clientDeviceIdWeb -clientDeviceIdMiniApp"
+                "-password -currentToken -refreshToken -refreshTokenWeb -refreshTokenMiniApp -clientDeviceId -clientDeviceIdWeb -clientDeviceIdMiniApp -browserWebSessions"
             )
             .lean();
         const userData = { ...fresh };
@@ -2628,7 +2623,7 @@ export const telegramWebAppBootstrap = async (req, res) => {
 
         const fresh = await User.findById(user._id)
             .select(
-                "-password -currentToken -refreshToken -refreshTokenWeb -refreshTokenMiniApp -clientDeviceId -clientDeviceIdWeb -clientDeviceIdMiniApp"
+                "-password -currentToken -refreshToken -refreshTokenWeb -refreshTokenMiniApp -clientDeviceId -clientDeviceIdWeb -clientDeviceIdMiniApp -browserWebSessions"
             )
             .lean();
         const userData = { ...fresh };

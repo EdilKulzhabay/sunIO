@@ -41,7 +41,7 @@ const ACTION_VERBS: Array<{ pattern: RegExp; label: string }> = [
     { pattern: /^Разблокировал\(а\)/,    label: 'Разблокировка' },
     { pattern: /^Активировал\(а\)/,      label: 'Активация' },
     { pattern: /^Деактивировал\(а\)/,    label: 'Деактивация' },
-    { pattern: /^Отправил\(а\)/,         label: 'Отправка' },
+    { pattern: /^Отправил\(а\)/,         label: 'Отправил' },
     { pattern: /^Запланировал\(а\)/,     label: 'Планирование' },
     { pattern: /^Запустил\(а\)/,         label: 'Отправка' },
     { pattern: /^Отменил\(а\)/,          label: 'Отмена' },
@@ -361,7 +361,7 @@ export const AdminActionLogs = () => {
                                             </td>
                                             <td className="px-4 py-3 text-sm text-gray-700">{log.parsed.objectType}</td>
                                             <td className="px-4 py-3 text-sm text-gray-700">{log.parsed.category}</td>
-                                            <td className="px-4 py-3 text-sm text-gray-700 max-w-xs truncate" title={log.parsed.objectName}>
+                                            <td className="px-4 py-3 text-sm text-gray-700 max-w-xl min-w-[10rem] break-words" title={log.parsed.objectName}>
                                                 {log.parsed.objectName}
                                             </td>
                                         </tr>
@@ -440,6 +440,7 @@ const ACTION_BADGE_COLORS: Record<string, string> = {
     'Разблокировка':  'bg-green-100 text-green-700',
     'Активация':      'bg-purple-100 text-purple-700',
     'Деактивация':    'bg-orange-100 text-orange-700',
+    'Отправил':       'bg-indigo-100 text-indigo-700',
     'Отправка':       'bg-indigo-100 text-indigo-700',
     'Планирование':   'bg-yellow-100 text-yellow-700',
     'Отмена':         'bg-gray-100 text-gray-700',

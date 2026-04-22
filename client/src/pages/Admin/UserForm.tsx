@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { AdminLayout } from '../../components/Admin/AdminLayout';
 import { MyInput } from '../../components/Admin/MyInput';
 import { MyButton } from '../../components/Admin/MyButton';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Search } from 'lucide-react';
 import api from '../../api';
 import { toast } from 'react-toastify';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -36,6 +36,14 @@ interface Referral {
     fullName: string;
     telegramUserName?: string;
     createdAt: string;
+}
+
+interface ReferralCandidate {
+    _id: string;
+    fullName?: string;
+    telegramUserName?: string;
+    phone?: string;
+    mail?: string;
 }
 
 interface FormData {
@@ -76,6 +84,16 @@ export const UserForm = () => {
     const [botTrafficSources, setBotTrafficSources] = useState<Array<{ _id: string; title: string; botParameter: string }>>([]);
     const [referrals, setReferrals] = useState<Referral[]>([]);
     const [referralsLoading, setReferralsLoading] = useState(false);
+    const [addReferralModalOpen, setAddReferralModalOpen] = useState(false);
+    const [referralSearch, setReferralSearch] = useState('');
+    const [referralPickerLoading, setReferralPickerLoading] = useState(false);
+    const [referralCandidates, setReferralCandidates] = useState<ReferralCandidate[]>([]);
+    const [referralPickerPage, setReferralPickerPage] = useState(1);
+    const [referralPickerPagination, setReferralPickerPagination] = useState<{
+        totalPages: number;
+        hasNextPage: boolean;
+    } | null>(null);
+    const [assigningReferralId, setAssigningReferralId] = useState<string | null>(null);
     const [formData, setFormData] = useState<FormData>({
         fullName: '',
         mail: '',
@@ -150,9 +168,7 @@ export const UserForm = () => {
                 buddhicBodyActivation: !!data.buddhicBodyActivation,
                 atmicBodyActivation: !!data.atmicBodyActivation,
             };
-            if (data.telegramId) {
-                fetchReferrals(data.telegramId);
-            }
+            fetchReferrals();
             if (data.subscriptionEndDate) {
                 const date = new Date(data.subscriptionEndDate);
                 const day = String(date.getDate()).padStart(2, '0');
@@ -168,11 +184,11 @@ export const UserForm = () => {
         }
     };
 
-    const fetchReferrals = async (telegramId: string) => {
-        if (!telegramId) return;
+    const fetchReferrals = async () => {
+        if (!id) return;
         setReferralsLoading(true);
         try {
-            const response = await api.post('/api/user/invited-users', { telegramId });
+            const response = await api.post('/api/user/invited-users', { userId: id });
             if (response.data.success) {
                 setReferrals(response.data.invitedUsers || []);
             }
@@ -181,6 +197,74 @@ export const UserForm = () => {
         } finally {
             setReferralsLoading(false);
         }
+    };
+
+    const limitReferralPicker = 100;
+
+    const fetchReferralCandidates = async (page: number) => {
+        if (!id) return;
+        setReferralPickerLoading(true);
+        try {
+            const params: Record<string, string | number> = {
+                page,
+                limit: limitReferralPicker,
+                noInvitedUser: 'true',
+                excludeUserId: id,
+            };
+            if (referralSearch.trim()) {
+                params.searchQuery = referralSearch.trim();
+            }
+            const response = await api.get('/api/user/all', { params });
+            setReferralCandidates((prev) => (page === 1 ? response.data.data : [...prev, ...response.data.data]));
+            const p = response.data.pagination;
+            if (p) {
+                setReferralPickerPagination({
+                    totalPages: p.totalPages,
+                    hasNextPage: p.hasNextPage,
+                });
+            } else {
+                setReferralPickerPagination(null);
+            }
+        } catch {
+            toast.error('Ошибка загрузки списка пользователей');
+        } finally {
+            setReferralPickerLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (!addReferralModalOpen || !id) return;
+        setReferralPickerPage(1);
+        void fetchReferralCandidates(1);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [addReferralModalOpen, id, referralSearch]);
+
+    const openAddReferralModal = () => {
+        setReferralSearch('');
+        setReferralPickerPage(1);
+        setAddReferralModalOpen(true);
+    };
+
+    const handleAssignInvitedUser = async (candidate: ReferralCandidate) => {
+        if (!id) return;
+        setAssigningReferralId(candidate._id);
+        try {
+            await api.put(`/api/user/${candidate._id}`, { invitedUser: id });
+            toast.success('Реферал добавлен');
+            setAddReferralModalOpen(false);
+            await fetchReferrals();
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Ошибка назначения реферера');
+        } finally {
+            setAssigningReferralId(null);
+        }
+    };
+
+    const loadMoreReferralCandidates = () => {
+        if (!referralPickerPagination?.hasNextPage || referralPickerLoading) return;
+        const next = referralPickerPage + 1;
+        setReferralPickerPage(next);
+        void fetchReferralCandidates(next);
     };
 
     const fetchBotTrafficSources = async () => {
@@ -616,7 +700,7 @@ export const UserForm = () => {
 
                     {id && (
                         <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
-                            <h2 className="text-xl font-semibold text-gray-900">Пройденные активации</h2>
+                            <h2 className="text-xl font-semibold text-gray-900">Пройденные активации клуба «Мастерская энергий»</h2>
                             {COMPLETED_BODY_ACTIVATIONS.map(({ key, label }) => (
                                 <label key={key} className="flex items-center gap-3 cursor-pointer">
                                     <input
@@ -637,6 +721,9 @@ export const UserForm = () => {
                                     </span>
                                 </label>
                             ))}
+                            <p className="text-sm text-gray-500 mt-1">
+                                За каждый уровень активации автоматически начисляется 10 баллов
+                            </p>
                         </div>
                     )}
 
@@ -682,9 +769,18 @@ export const UserForm = () => {
                     {/* Рефералы */}
                     {id && (
                         <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
-                            <h2 className="text-xl font-semibold text-gray-900">
-                                Рефералы {referrals.length > 0 && <span className="text-base font-normal text-gray-500">({referrals.length})</span>}
-                            </h2>
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <h2 className="text-xl font-semibold text-gray-900">
+                                    Рефералы {referrals.length > 0 && <span className="text-base font-normal text-gray-500">({referrals.length})</span>}
+                                </h2>
+                                <button
+                                    type="button"
+                                    onClick={openAddReferralModal}
+                                    className="shrink-0 px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                                >
+                                    Добавить
+                                </button>
+                            </div>
                             {referralsLoading && (
                                 <p className="text-gray-500 text-center py-4">Загрузка…</p>
                             )}
@@ -719,6 +815,104 @@ export const UserForm = () => {
                                     </table>
                                 </div>
                             )}
+                        </div>
+                    )}
+
+                    {addReferralModalOpen && id && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                            <div
+                                className="absolute inset-0 bg-black/50"
+                                onClick={() => setAddReferralModalOpen(false)}
+                                aria-hidden
+                            />
+                            <div
+                                role="dialog"
+                                aria-modal
+                                className="relative bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[min(80vh,720px)] flex flex-col"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <div className="flex items-center justify-between gap-3 p-4 border-b border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-900">Выберите пользователя</h3>
+                                    <button
+                                        type="button"
+                                        onClick={() => setAddReferralModalOpen(false)}
+                                        className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                                        aria-label="Закрыть"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                                <div className="p-4 border-b border-gray-200">
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                                        <input
+                                            type="text"
+                                            placeholder="Поиск по имени, TG имени, телефону, email..."
+                                            value={referralSearch}
+                                            onChange={(e) => setReferralSearch(e.target.value)}
+                                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-2">
+                                        Показаны пользователи без реферера, кроме редактируемого профиля
+                                    </p>
+                                </div>
+                                <div className="overflow-y-auto flex-1 min-h-0 p-4">
+                                    {referralPickerLoading && referralCandidates.length === 0 && (
+                                        <p className="text-gray-500 text-center py-8">Загрузка…</p>
+                                    )}
+                                    {!referralPickerLoading && referralCandidates.length === 0 && (
+                                        <p className="text-gray-500 text-center py-8">Никого не найдено</p>
+                                    )}
+                                    {referralCandidates.length > 0 && (
+                                        <div className="border border-gray-200 rounded-lg overflow-hidden">
+                                            <table className="min-w-full text-sm text-left">
+                                                <thead className="bg-gray-50 border-b border-gray-200">
+                                                    <tr>
+                                                        <th className="px-3 py-2 font-medium text-gray-700">Полное имя</th>
+                                                        <th className="px-3 py-2 font-medium text-gray-700">TG</th>
+                                                        <th className="px-3 py-2 font-medium text-gray-700">Email</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {referralCandidates.map((c) => (
+                                                        <tr
+                                                            key={c._id}
+                                                            className={`border-b border-gray-100 last:border-0 hover:bg-gray-50 cursor-pointer ${
+                                                                assigningReferralId === c._id ? 'opacity-60 pointer-events-none' : ''
+                                                            }`}
+                                                            onClick={() => {
+                                                                if (assigningReferralId) return;
+                                                                void handleAssignInvitedUser(c);
+                                                            }}
+                                                        >
+                                                            <td className="px-3 py-2 text-gray-900">
+                                                                {assigningReferralId === c._id ? 'Сохранение…' : c.fullName || '—'}
+                                                            </td>
+                                                            <td className="px-3 py-2 text-gray-600">
+                                                                {c.telegramUserName ? `@${c.telegramUserName}` : '—'}
+                                                            </td>
+                                                            <td className="px-3 py-2 text-gray-600">{c.mail || '—'}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+                                    {referralPickerPagination?.hasNextPage && referralCandidates.length > 0 && (
+                                        <div className="pt-3 flex justify-center">
+                                            <button
+                                                type="button"
+                                                onClick={loadMoreReferralCandidates}
+                                                disabled={referralPickerLoading}
+                                                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                                            >
+                                                {referralPickerLoading ? 'Загрузка…' : 'Показать ещё'}
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     )}
 

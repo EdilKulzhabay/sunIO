@@ -12,6 +12,7 @@ import { DocumentsAdmin } from "./pages/Admin/Documents";
 import { DocumentsForm } from "./pages/Admin/DocumentsForm";
 import { PracticeAdmin } from "./pages/Admin/Practice";
 import { PracticeForm } from "./pages/Admin/PracticeForm";
+import { NeuromeditationsAdmin } from "./pages/Admin/NeuromeditationsAdmin";
 import { BroadcastRecordingAdmin } from "./pages/Admin/BroadcastRecording";
 import { BroadcastRecordingForm } from "./pages/Admin/BroadcastRecordingForm";
 import { ParablesOfLifeAdmin } from "./pages/Admin/ParablesOfLife";
@@ -491,6 +492,10 @@ export const routes = createBrowserRouter([
     {
         path: "/admin/practice/edit/:id",
         element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><PracticeForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/neuromeditations",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><NeuromeditationsAdmin /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/admin/broadcast-recordings",

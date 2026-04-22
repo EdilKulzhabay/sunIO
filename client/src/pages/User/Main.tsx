@@ -5,7 +5,6 @@ import api from "../../api"
 import { useAuth } from "../../contexts/AuthContext"
 import logo from "../../assets/logo.png"
 import users from "../../assets/users.png"
-import faq from "../../assets/faq.png"
 import user from "../../assets/user.png"
 import productsCatalog from "../../assets/productsCatalog.png"
 // import mainVideo from "../../assets/mainVideo.png"
@@ -31,6 +30,7 @@ import { toast } from "react-toastify";
 import copyLinkIcon from "../../assets/copyLink.png";
 import { QRCodeSVG } from "qrcode.react";
 import humanDesign from "../../assets/humanDesign.png";
+import mainPageSearch from "../../assets/mainPageSearch.png";
 
 /** Параметр `page` из Web App URL: только внутренний путь приложения. */
 function sanitizeAppInternalPath(raw: string | null): string | null {
@@ -647,7 +647,7 @@ export const Main = () => {
                             <img src={humanDesign} alt="humanDesign" className="w-6 h-6" />
                         </Link>
                         <Link to="/client/faq" id="main-instruction-faq">
-                            <img src={faq} alt="faq" className="w-6 h-6" />
+                            <img src={mainPageSearch} alt="mainPageSearch" className="w-5 h-5" />
                         </Link>
                         <Link to="/client/profile" id="main-instruction-profile">
                             {userData?.hasPaid && userData?.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date() ? (

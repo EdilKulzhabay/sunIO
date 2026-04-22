@@ -585,6 +585,8 @@ export const getAllUsers = async (req, res) => {
         const lastActiveFilter = req.query.lastActiveFilter || 'all';
         const searchQuery = req.query.searchQuery || '';
         const botStartSourceId = req.query.botStartSourceId || '';
+        const noInvitedUser = req.query.noInvitedUser === 'true';
+        const excludeUserId = req.query.excludeUserId || '';
 
         // Параметры сортировки
         const sortField = req.query.sortField || '';
@@ -636,6 +638,34 @@ export const getAllUsers = async (req, res) => {
         // Фильтр по источнику трафика бота (приводим к ObjectId для $match в aggregate и для find)
         if (botStartSourceId && botStartSourceId !== 'all' && mongoose.Types.ObjectId.isValid(botStartSourceId)) {
             filter.botStartSource = new mongoose.Types.ObjectId(botStartSourceId);
+        }
+
+        // Кандидаты в рефералы: invitedUser null / отсутствует / пустая строка; при «всех» — без anonym
+        if (noInvitedUser) {
+            if (statusFilter === 'anonym') {
+                filter._id = { $in: [] };
+            } else {
+                if (!filter.$and) {
+                    filter.$and = [];
+                }
+                filter.$and.push({
+                    $or: [
+                        { invitedUser: null },
+                        { invitedUser: { $exists: false } },
+                        { invitedUser: '' },
+                    ],
+                });
+                if (statusFilter === 'all') {
+                    filter.status = { $ne: 'anonym' };
+                }
+            }
+        }
+        if (excludeUserId && mongoose.Types.ObjectId.isValid(excludeUserId)) {
+            if (noInvitedUser && statusFilter === 'anonym') {
+                // уже пусто
+            } else {
+                filter._id = { $ne: new mongoose.Types.ObjectId(excludeUserId) };
+            }
         }
 
         // Получаем общее количество пользователей с учетом фильтров
@@ -970,6 +1000,7 @@ export const updateUser = async (req, res) => {
         
         const { id } = req.params;
         const updateData = req.body;
+        const hadInvitedUserInBody = Object.prototype.hasOwnProperty.call(req.body, "invitedUser");
 
         // Удаляем поля, которые нельзя обновлять через этот метод
         delete updateData.password;
@@ -986,6 +1017,15 @@ export const updateUser = async (req, res) => {
         // Пустая строка в botStartSource невалидна для ObjectId — приводим к null
         if (Object.prototype.hasOwnProperty.call(updateData, 'botStartSource') && (updateData.botStartSource === '' || updateData.botStartSource == null)) {
             updateData.botStartSource = null;
+        }
+        if (Object.prototype.hasOwnProperty.call(updateData, 'invitedUser')) {
+            if (updateData.invitedUser === '' || updateData.invitedUser == null) {
+                updateData.invitedUser = null;
+            } else if (mongoose.Types.ObjectId.isValid(String(updateData.invitedUser))) {
+                updateData.invitedUser = new mongoose.Types.ObjectId(updateData.invitedUser);
+            } else {
+                delete updateData.invitedUser;
+            }
         }
 
         delete updateData.completedActivations;
@@ -1042,8 +1082,50 @@ export const updateUser = async (req, res) => {
             });
         }
 
+        let invitedUserActionLogged = false;
+        if (admin && hadInvitedUserInBody) {
+            const oldId = candidate.invitedUser ? String(candidate.invitedUser) : "";
+            const newId = user.invitedUser ? String(user.invitedUser) : "";
+            if (oldId !== newId) {
+                const refLabel = [user.fullName?.trim(), user.telegramUserName ? `@${user.telegramUserName}` : ""]
+                    .filter(Boolean)
+                    .join(" ") || String(user._id);
+                if (newId) {
+                    const inviter = await User.findById(user.invitedUser).select("fullName telegramUserName mail").lean();
+                    const invLabel = inviter
+                        ? [inviter.fullName?.trim(), inviter.telegramUserName ? `@${inviter.telegramUserName}` : ""]
+                              .filter(Boolean)
+                              .join(" ") || inviter.mail || newId
+                        : newId;
+                    await addAdminAction(
+                        admin._id,
+                        `Реферал: к пригласившему «${invLabel}» (${newId}) добавлен пользователь «${refLabel}» (${String(user._id)})`
+                    );
+                } else {
+                    let wasRef = oldId;
+                    if (candidate.invitedUser) {
+                        const ex = await User.findById(candidate.invitedUser).select("fullName telegramUserName").lean();
+                        if (ex) {
+                            wasRef = [ex.fullName?.trim(), ex.telegramUserName ? `@${ex.telegramUserName}` : ""]
+                                .filter(Boolean)
+                                .join(" ") || oldId;
+                        }
+                    }
+                    await addAdminAction(
+                        admin._id,
+                        `Реферал: у пользователя «${refLabel}» (${String(user._id)}) снят пригласивший (был: «${wasRef}»)`
+                    );
+                }
+                invitedUserActionLogged = true;
+            }
+        }
+
         if (admin && admin !== null) {
-            await addAdminAction(admin._id, `Обновил(а) пользователя: "${user.fullName}"`);
+            const onlyInvitedUser =
+                Object.keys(updateData).length === 1 && Object.prototype.hasOwnProperty.call(updateData, "invitedUser");
+            if (!invitedUserActionLogged || !onlyInvitedUser) {
+                await addAdminAction(admin._id, `Обновил(а) пользователя: "${user.fullName}"`);
+            }
         }
 
         if (balanceAddedAmount > 0) {
@@ -2245,8 +2327,15 @@ export const payment = async (req, res) => {
 
 export const getInvitedUsers = async (req, res) => {
     try {
-        const { telegramId } = req.body;
-        const user = await User.findOne({ telegramId });
+        const { telegramId, userId: inviterUserId } = req.body;
+        let user;
+        if (inviterUserId && mongoose.Types.ObjectId.isValid(String(inviterUserId))) {
+            user = await User.findById(inviterUserId);
+        } else if (telegramId) {
+            user = await User.findOne({ telegramId });
+        } else {
+            return res.status(400).json({ success: false, message: 'Укажите userId или telegramId' });
+        }
         if (!user) {
             return res.status(404).json({ success: false, message: 'Пользователь не найден' });
         }

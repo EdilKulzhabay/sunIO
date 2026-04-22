@@ -6,6 +6,21 @@ import ModalNotificationInteraction from "../Models/ModalNotificationInteraction
 import ModalNotificationTemplate from "../Models/ModalNotificationTemplate.js";
 import { addAdminAction } from "../utils/addAdminAction.js";
 
+/**
+ * В ModalNotificationSchedule поле payload — Schema.Types.Mixed, поэтому campaignId
+ * в БД лежит как ObjectId, а в запросе приходит строка: find по строке не совпадает.
+ */
+function filterByPayloadCampaignId(campaignIdParam) {
+    const s = String(campaignIdParam);
+    if (!mongoose.Types.ObjectId.isValid(s)) {
+        return { "payload.campaignId": s };
+    }
+    const oid = new mongoose.Types.ObjectId(s);
+    return {
+        $or: [{ "payload.campaignId": oid }, { "payload.campaignId": s }],
+    };
+}
+
 // Получить пользователей с фильтрацией по статусу и поиску (для выбора получателей)
 export const getFilteredUsers = async (req, res) => {
     try {
@@ -226,7 +241,11 @@ export const createModalNotification = async (req, res) => {
             scheduledBy: user?._id,
         });
 
-        await addAdminAction(user._id, `Создал(а) модальное уведомление: "${modalTitle}" (${count} польз.)`);
+        const titleSafe = String(modalTitle || "").replace(/"/g, "'");
+        await addAdminAction(
+            user._id,
+            `Отправил(а) модальное уведомление: "${titleSafe}" (${count} польз.)`
+        );
 
         res.json({
             success: true,
@@ -281,10 +300,10 @@ export const processScheduledModalNotifications = async () => {
             }
 
             if (job.scheduledBy) {
-                const preview = (p.modalTitle || "").substring(0, 50);
+                const titleSafe = String(p.modalTitle || "").replace(/"/g, "'");
                 await addAdminAction(
                     job.scheduledBy,
-                    `Модальное уведомление отправлено по расписанию: "${preview}${preview.length >= 50 ? "..." : ""}" (${count} польз.)`
+                    `Отправил(а) модальное уведомление по расписанию: "${titleSafe}" (${count} польз.)`
                 );
             }
         } catch (error) {
@@ -329,7 +348,7 @@ export const getModalCampaignById = async (req, res) => {
             if (row._id === "button") stats.clickedButton = row.count;
         }
 
-        const schedule = await ModalNotificationSchedule.findOne({ "payload.campaignId": id })
+        const schedule = await ModalNotificationSchedule.findOne(filterByPayloadCampaignId(id))
             .sort({ createdAt: -1 })
             .lean();
 
@@ -663,11 +682,11 @@ export const cancelScheduledModalNotification = async (req, res) => {
         if (campaignId && mongoose.Types.ObjectId.isValid(String(campaignId))) {
             await ModalNotificationCampaign.findByIdAndDelete(campaignId);
         }
-        const preview = (schedule.payload?.modalTitle || "").substring(0, 50);
+        const titleSafe = String(schedule.payload?.modalTitle || "").replace(/"/g, "'");
         if (user) {
             await addAdminAction(
                 user._id,
-                `Отменил(а) запланированное модальное уведомление: "${preview}${preview.length >= 50 ? "..." : ""}"`
+                `Отменил(а) запланированное модальное уведомление: "${titleSafe}"`
             );
         }
         res.json({ success: true, message: "Планирование отменено" });
@@ -686,14 +705,14 @@ export const deleteModalCampaign = async (req, res) => {
         }
 
         await ModalNotificationCampaign.findByIdAndDelete(id);
-        await ModalNotificationSchedule.deleteMany({ "payload.campaignId": id });
+        await ModalNotificationSchedule.deleteMany(filterByPayloadCampaignId(id));
 
         const user = req.user;
         if (user) {
-            const preview = (campaign.modalTitle || "").substring(0, 50);
+            const titleSafe = String(campaign.modalTitle || "").replace(/"/g, "'");
             await addAdminAction(
                 user._id,
-                `Удалил(а) кампанию модального уведомления: "${preview}${preview.length >= 50 ? "..." : ""}"`
+                `Удалил(а) кампанию модального уведомления: "${titleSafe}"`
             );
         }
 

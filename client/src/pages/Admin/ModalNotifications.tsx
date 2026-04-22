@@ -319,7 +319,7 @@ export const ModalNotificationsAdmin = () => {
                                     key={t._id}
                                     className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
                                 >
-                                    <div className="font-semibold text-gray-900 mb-1">{t.title}</div>
+                                    <div className="font-semibold text-gray-900 mb-1">{t.modalTitle}</div>
                                     <div className="text-sm text-gray-700 font-medium line-clamp-1">
                                         {t.modalTitle}
                                     </div>

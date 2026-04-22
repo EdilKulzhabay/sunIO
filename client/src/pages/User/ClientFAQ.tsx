@@ -122,7 +122,7 @@ export const ClientFAQ = () => {
                     <div className="">
                         <button 
                             onClick={() => navigate('/client/content-search')}
-                            className="flex items-center pl-4 justify-start sm:px-4 gap-x-2 w-full bg-white/10 rounded-full py-2.5 text-white mb-4"
+                            className="flex items-center pl-4 justify-start sm:px-4 gap-x-2 w-full bg-white/10 rounded-full py-2.5 text-white mb-6"
                         >
                             <div className="shrink-0">
                                 <img src={search} alt="search" className="w-5 h-5 object-cover" />

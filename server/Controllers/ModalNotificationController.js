@@ -415,7 +415,11 @@ export const listModalCampaigns = async (req, res) => {
     }
 };
 
-/** Пользователи, у которых в профиле есть это уведомление кампании (фактически получившие) */
+/**
+ * Получатели кампании: если в записи рассылки (ModalNotificationSchedule) в payload.userIds
+ * указан список — строим ответ только по ним (как в ответе GET кампании). Иначе — по факту
+ * выдачи (modalNotifications + реакции в ModalNotificationInteraction).
+ */
 export const getCampaignRecipients = async (req, res) => {
     try {
         const { id } = req.params;
@@ -434,9 +438,43 @@ export const getCampaignRecipients = async (req, res) => {
         const page = Math.max(1, parseInt(req.query.page, 10) || 1);
         const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 50));
 
-        const filter = {
-            $and: [{ modalNotifications: { $elemMatch: { campaignId: campaignOid } } }],
-        };
+        const schedule = await ModalNotificationSchedule.findOne(filterByPayloadCampaignId(id))
+            .sort({ createdAt: -1 })
+            .select("payload")
+            .lean();
+
+        const rawUserIds = schedule?.payload?.userIds;
+        const payloadOids = [];
+        if (Array.isArray(rawUserIds)) {
+            for (const uid of rawUserIds) {
+                if (uid != null && mongoose.Types.ObjectId.isValid(String(uid))) {
+                    payloadOids.push(new mongoose.Types.ObjectId(String(uid)));
+                }
+            }
+        }
+
+        const usePayloadList = payloadOids.length > 0;
+
+        let filter;
+        if (usePayloadList) {
+            filter = { $and: [{ _id: { $in: payloadOids } }] };
+        } else {
+            const reactedUserIds = await ModalNotificationInteraction.distinct("userId", {
+                campaignId: campaignOid,
+            });
+            filter = {
+                $and: [
+                    {
+                        $or: [
+                            { modalNotifications: { $elemMatch: { campaignId: campaignOid } } },
+                            ...(reactedUserIds.length
+                                ? [{ _id: { $in: reactedUserIds } }]
+                                : []),
+                        ],
+                    },
+                ],
+            };
+        }
         if (statusFilter !== "all") {
             filter.$and.push({ status: statusFilter });
         }
@@ -464,6 +502,7 @@ export const getCampaignRecipients = async (req, res) => {
         res.json({
             success: true,
             campaign: { _id: campaign._id, modalTitle: campaign.modalTitle },
+            recipientsSource: usePayloadList ? "payloadUserIds" : "inferred",
             data,
             pagination: {
                 total,

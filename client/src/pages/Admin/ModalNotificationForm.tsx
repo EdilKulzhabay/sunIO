@@ -513,8 +513,8 @@ export const ModalNotificationFormAdmin = () => {
                                     </p>
                                 )}
                                 <p className="text-xs text-gray-500 mt-1">
-                                    Пользователи, у которых это уведомление есть в ленте (факт доставки в
-                                    приложение).
+                                    Все, кому рассылка выдала это уведомление, в том числе уже закрывших окно
+                                    или нажавших кнопку.
                                 </p>
                             </div>
                             <div className="flex flex-wrap gap-2 shrink-0">

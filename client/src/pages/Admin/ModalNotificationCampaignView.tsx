@@ -340,23 +340,6 @@ export const ModalNotificationCampaignView = () => {
                                         «{recipientsMeta.modalTitle}»
                                     </p>
                                 )}
-                                {recipientsMeta && (
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        {recipientsMeta.source === 'payloadUserIds' ? (
-                                            <>
-                                                Те же id, что в{' '}
-                                                <code className="text-[11px] bg-gray-100 px-1 rounded">data.payload.userIds</code>{' '}
-                                                в ответе кампании. Поиск и фильтр по статусу — только среди
-                                                этих пользователей.
-                                            </>
-                                        ) : (
-                                            <>
-                                                Массовая рассылка без явного списка id: кто получил
-                                                уведомление в приложении или отметился реакцией.
-                                            </>
-                                        )}
-                                    </p>
-                                )}
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

@@ -504,6 +504,9 @@ export const ModalNotificationsAdmin = () => {
                                             </button>
                                         </th>
                                         <th className="px-4 py-3 font-medium text-gray-700 whitespace-nowrap">
+                                            Получатели
+                                        </th>
+                                        <th className="px-4 py-3 font-medium text-gray-700 whitespace-nowrap">
                                             Инициатор
                                         </th>
                                     </tr>
@@ -576,6 +579,26 @@ export const ModalNotificationsAdmin = () => {
                                                     {item.campaign?.stats != null
                                                         ? item.campaign.stats.clickedButton
                                                         : '—'}
+                                                </td>
+                                                <td
+                                                    className="px-4 py-3 whitespace-nowrap"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    {cid ? (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                navigate(
+                                                                    `/admin/modal-notifications/create?campaign=${String(cid)}`
+                                                                )
+                                                            }
+                                                            className="text-sm text-indigo-600 hover:text-indigo-800 hover:underline"
+                                                        >
+                                                            Список
+                                                        </button>
+                                                    ) : (
+                                                        <span className="text-gray-400">—</span>
+                                                    )}
                                                 </td>
                                                 <td className="px-4 py-3 text-gray-600 max-w-[160px]">
                                                     <span className="line-clamp-2" title={item.scheduledBy?.fullName || ''}>

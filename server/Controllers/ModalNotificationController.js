@@ -415,6 +415,71 @@ export const listModalCampaigns = async (req, res) => {
     }
 };
 
+/** Пользователи, у которых в профиле есть это уведомление кампании (фактически получившие) */
+export const getCampaignRecipients = async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ success: false, message: "Некорректный id кампании" });
+        }
+        const campaignOid = new mongoose.Types.ObjectId(id);
+
+        const campaign = await ModalNotificationCampaign.findById(id).select("_id modalTitle").lean();
+        if (!campaign) {
+            return res.status(404).json({ success: false, message: "Кампания не найдена" });
+        }
+
+        const search = (req.query.search || "").trim();
+        const statusFilter = req.query.status || "all";
+        const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+        const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 50));
+
+        const filter = {
+            $and: [{ modalNotifications: { $elemMatch: { campaignId: campaignOid } } }],
+        };
+        if (statusFilter !== "all") {
+            filter.$and.push({ status: statusFilter });
+        }
+        if (search) {
+            const esc = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            const rx = new RegExp(esc, "i");
+            filter.$and.push({
+                $or: [
+                    { fullName: rx },
+                    { telegramUserName: rx },
+                    { phone: rx },
+                    { mail: rx },
+                ],
+            });
+        }
+
+        const total = await User.countDocuments(filter);
+        const data = await User.find(filter)
+            .select("fullName telegramUserName phone mail status isBlocked")
+            .sort({ fullName: 1 })
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .lean();
+
+        res.json({
+            success: true,
+            campaign: { _id: campaign._id, modalTitle: campaign.modalTitle },
+            data,
+            pagination: {
+                total,
+                currentPage: page,
+                limit,
+                totalPages: Math.max(1, Math.ceil(total / limit)),
+                hasNextPage: page * limit < total,
+                hasPrevPage: page > 1,
+            },
+        });
+    } catch (error) {
+        console.log("Ошибка в getCampaignRecipients:", error);
+        res.status(500).json({ success: false, message: "Ошибка загрузки получателей" });
+    }
+};
+
 // Удалить модальное уведомление у пользователя (после нажатия на кнопку или закрытия)
 export const removeModalNotification = async (req, res) => {
     try {

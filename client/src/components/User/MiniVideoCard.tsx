@@ -102,7 +102,7 @@ export const MiniVideoCard = ({ title, image, link, progress, accessType, onLock
                         }
                         <div className='self-stretch flex-1'>
                         {accessType === 'stars' && (
-                            <div className='flex h-full w-full items-center justify-center gap-x-2 border border-[#00C5AE] rounded-full'>
+                            <div className='flex max-h-max w-full items-center justify-center gap-x-2 border border-[#00C5AE] rounded-xl'>
                                 <p className='text-sm font-medium text-[#00C5AE]'>{starsRequired}</p>
                                 <img
                                     src={star}
@@ -112,7 +112,7 @@ export const MiniVideoCard = ({ title, image, link, progress, accessType, onLock
                             </div>
                         )}
                         {accessType === 'paid' && (
-                            <div className='flex h-full w-full items-center justify-center gap-x-2 border border-[#00C5AE] rounded-xl'>
+                            <div className='flex max-h-max w-full items-center justify-center gap-x-2 border border-[#00C5AE] rounded-xl'>
                                 <div className='py-2'>
                                     <img
                                         src={needMoney}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { AdminLayout } from '../../components/Admin/AdminLayout';
 import api from '../../api';
 import { toast } from 'react-toastify';
@@ -12,6 +12,9 @@ import {
     Clock,
     Save,
     ArrowLeft,
+    ChevronLeft,
+    ChevronRight,
+    ListFilter,
 } from 'lucide-react';
 import { RichTextEditor } from '../../components/Admin/RichTextEditor';
 import { RedirectToPageSelector } from '../../components/Admin/RedirectToPageSelector';
@@ -50,9 +53,13 @@ function mskLocalToIso(mskDatetimeLocal: string): string | undefined {
     return new Date(utcMs).toISOString();
 }
 
+const RECIPIENT_PAGE_SIZE = 50;
+
 export const ModalNotificationFormAdmin = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const viewCampaignId = searchParams.get('campaign') || '';
     const isEditing = Boolean(id);
 
     const [modalTitle, setModalTitle] = useState('');
@@ -71,7 +78,97 @@ export const ModalNotificationFormAdmin = () => {
     const [selectedUsersData, setSelectedUsersData] = useState<Map<string, User>>(new Map());
     const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);
 
+    const [recipients, setRecipients] = useState<User[]>([]);
+    const [recipientsLoading, setRecipientsLoading] = useState(false);
+    const [recipientsMeta, setRecipientsMeta] = useState<{
+        modalTitle?: string;
+        total: number;
+        currentPage: number;
+        totalPages: number;
+    } | null>(null);
+    /** Применённый поиск по получателям (обновляется кнопкой «Найти») */
+    const [recipientSearch, setRecipientSearch] = useState('');
+    const [recipientSearchDraft, setRecipientSearchDraft] = useState('');
+    const [recipientStatus, setRecipientStatus] = useState('all');
+    const [recipientPage, setRecipientPage] = useState(1);
+
     const scheduledAtIso = useMemo(() => mskLocalToIso(scheduledSendAt), [scheduledSendAt]);
+
+    useEffect(() => {
+        if (!viewCampaignId) {
+            setRecipients([]);
+            setRecipientsMeta(null);
+            return;
+        }
+        setRecipientPage(1);
+        setRecipientSearch('');
+        setRecipientSearchDraft('');
+    }, [viewCampaignId]);
+
+    useEffect(() => {
+        if (!viewCampaignId) return;
+        let cancelled = false;
+        (async () => {
+            setRecipientsLoading(true);
+            try {
+                const params: Record<string, string | number> = {
+                    page: recipientPage,
+                    limit: RECIPIENT_PAGE_SIZE,
+                    status: recipientStatus,
+                };
+                if (recipientSearch.trim()) {
+                    params.search = recipientSearch.trim();
+                }
+                const response = await api.get<{
+                    success: boolean;
+                    campaign?: { modalTitle?: string };
+                    data: User[];
+                    pagination?: {
+                        total: number;
+                        currentPage: number;
+                        totalPages: number;
+                    };
+                }>(`/api/modal-notification/campaigns/${viewCampaignId}/recipients`, { params });
+                if (cancelled) return;
+                if (response.data.success) {
+                    setRecipients(response.data.data || []);
+                    const p = response.data.pagination;
+                    setRecipientsMeta({
+                        modalTitle: response.data.campaign?.modalTitle,
+                        total: p?.total ?? 0,
+                        currentPage: p?.currentPage ?? 1,
+                        totalPages: p?.totalPages ?? 1,
+                    });
+                } else {
+                    setRecipients([]);
+                    setRecipientsMeta(null);
+                }
+            } catch {
+                if (!cancelled) {
+                    toast.error('Не удалось загрузить список получателей');
+                    setRecipients([]);
+                    setRecipientsMeta(null);
+                }
+            } finally {
+                if (!cancelled) setRecipientsLoading(false);
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, [viewCampaignId, recipientPage, recipientStatus, recipientSearch]);
+
+    const applyRecipientSearch = () => {
+        setRecipientSearch(recipientSearchDraft);
+        setRecipientPage(1);
+    };
+
+    const closeRecipientsView = () => {
+        setSearchParams((p) => {
+            p.delete('campaign');
+            return p;
+        });
+    };
 
     useEffect(() => {
         fetchUserCount();
@@ -278,7 +375,12 @@ export const ModalNotificationFormAdmin = () => {
                             ? response.data.message || 'Уведомление запланировано'
                             : `Модальное уведомление создано для ${response.data.count} пользователей`
                     );
-                    navigate('/admin/modal-notifications');
+                    const cid = response.data.campaignId;
+                    if (cid && !response.data.scheduledAt) {
+                        navigate(`/admin/modal-notifications/create?campaign=${String(cid)}`);
+                    } else {
+                        navigate('/admin/modal-notifications');
+                    }
                 } else {
                     toast.error(response.data.message || 'Ошибка создания уведомления');
                 }
@@ -319,7 +421,12 @@ export const ModalNotificationFormAdmin = () => {
                         ? response.data.message || 'Уведомление запланировано'
                         : `Модальное уведомление создано для ${response.data.count} пользователей`
                 );
-                navigate('/admin/modal-notifications');
+                const cid = response.data.campaignId;
+                if (cid && !response.data.scheduledAt) {
+                    navigate(`/admin/modal-notifications/create?campaign=${String(cid)}`);
+                } else {
+                    navigate('/admin/modal-notifications');
+                }
             } else {
                 toast.error(response.data.message || 'Ошибка создания уведомления');
             }
@@ -388,6 +495,188 @@ export const ModalNotificationFormAdmin = () => {
                         Назад к списку
                     </button>
                 </div>
+
+                {viewCampaignId && (
+                    <div className="bg-white rounded-lg shadow-sm border border-indigo-100 p-6 space-y-4">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div>
+                                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                    <ListFilter size={20} className="text-indigo-600" />
+                                    Получатели рассылки
+                                </h2>
+                                {recipientsMeta?.modalTitle && (
+                                    <p className="text-sm text-gray-600 mt-1 break-words">
+                                        Кампания:{' '}
+                                        <span className="font-medium text-gray-800">
+                                            {recipientsMeta.modalTitle}
+                                        </span>
+                                    </p>
+                                )}
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Пользователи, у которых это уведомление есть в ленте (факт доставки в
+                                    приложение).
+                                </p>
+                            </div>
+                            <div className="flex flex-wrap gap-2 shrink-0">
+                                <button
+                                    type="button"
+                                    onClick={closeRecipientsView}
+                                    className="text-sm text-indigo-600 hover:text-indigo-800"
+                                >
+                                    Скрыть список
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Фильтр по статусу
+                                </label>
+                                <select
+                                    value={recipientStatus}
+                                    onChange={(e) => {
+                                        setRecipientStatus(e.target.value);
+                                        setRecipientPage(1);
+                                    }}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                >
+                                    <option value="all">Все статусы</option>
+                                    <option value="client">Клиент</option>
+                                    <option value="guest">Гость</option>
+                                    <option value="registered">Зарегистрирован</option>
+                                    <option value="active">Активен</option>
+                                    <option value="anonym">Аноним</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Поиск
+                                </label>
+                                <div className="flex gap-2">
+                                    <div className="relative flex-1">
+                                        <input
+                                            type="text"
+                                            value={recipientSearchDraft}
+                                            onChange={(e) => setRecipientSearchDraft(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    applyRecipientSearch();
+                                                }
+                                            }}
+                                            placeholder="Имя, TG, телефон, email…"
+                                            className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                        />
+                                        <Search
+                                            className="absolute left-2.5 top-2.5 text-gray-400"
+                                            size={16}
+                                        />
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={applyRecipientSearch}
+                                        className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700"
+                                    >
+                                        Найти
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {recipientsLoading && (
+                            <p className="text-sm text-gray-500 py-4">Загрузка…</p>
+                        )}
+                        {!recipientsLoading && recipientsMeta && (
+                            <p className="text-sm text-gray-600">
+                                Найдено: <span className="font-semibold">{recipientsMeta.total}</span>
+                            </p>
+                        )}
+
+                        {!recipientsLoading && recipients.length > 0 && (
+                            <div className="border border-gray-200 rounded-lg overflow-x-auto max-h-[420px] overflow-y-auto">
+                                <table className="min-w-full text-sm text-left">
+                                    <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
+                                        <tr>
+                                            <th className="px-3 py-2 font-medium text-gray-700">Имя</th>
+                                            <th className="px-3 py-2 font-medium text-gray-700">Контакты</th>
+                                            <th className="px-3 py-2 font-medium text-gray-700 whitespace-nowrap">
+                                                Статус
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {recipients.map((u) => (
+                                            <tr key={u._id} className="border-b border-gray-100 last:border-0">
+                                                <td className="px-3 py-2 font-medium text-gray-900 align-top break-words max-w-[200px]">
+                                                    {u.fullName || '—'}
+                                                </td>
+                                                <td className="px-3 py-2 text-gray-600 align-top break-all max-w-md">
+                                                    <div className="flex flex-col gap-0.5 text-xs sm:text-sm">
+                                                        {u.telegramUserName && (
+                                                            <span>@{u.telegramUserName}</span>
+                                                        )}
+                                                        {u.phone && <span>{u.phone}</span>}
+                                                        {u.mail && <span>{u.mail}</span>}
+                                                    </div>
+                                                </td>
+                                                <td className="px-3 py-2 whitespace-nowrap align-top">
+                                                    <span
+                                                        className={`text-xs px-2 py-0.5 rounded ${getStatusColor(
+                                                            u.status,
+                                                            u.isBlocked
+                                                        )}`}
+                                                    >
+                                                        {getStatusLabel(u.status, u.isBlocked)}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+
+                        {!recipientsLoading &&
+                            recipientsMeta &&
+                            recipientsMeta.total === 0 &&
+                            recipientSearch && (
+                                <p className="text-sm text-amber-700">Нет пользователей по заданным условиям.</p>
+                            )}
+
+                        {recipientsMeta && recipientsMeta.totalPages > 1 && (
+                            <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                                <span className="text-sm text-gray-600">
+                                    Стр. {recipientsMeta.currentPage} из {recipientsMeta.totalPages}
+                                </span>
+                                <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setRecipientPage((p) => Math.max(1, p - 1))}
+                                        disabled={recipientsMeta.currentPage <= 1}
+                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-sm border rounded-lg border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50"
+                                    >
+                                        <ChevronLeft size={16} />
+                                        Назад
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setRecipientPage((p) =>
+                                                Math.min(recipientsMeta.totalPages, p + 1)
+                                            )
+                                        }
+                                        disabled={recipientsMeta.currentPage >= recipientsMeta.totalPages}
+                                        className="inline-flex items-center gap-1 px-3 py-1.5 text-sm border rounded-lg border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50"
+                                    >
+                                        Вперёд
+                                        <ChevronRight size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
                     <div>

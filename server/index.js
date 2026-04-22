@@ -523,6 +523,11 @@ app.delete("/api/broadcast/:id", authMiddleware, BroadcastController.deleteBroad
 // ==================== Modal Notification маршруты ====================
 app.post("/api/modal-notification/users", ModalNotificationController.getFilteredUsers);
 app.get("/api/modal-notification/campaigns", authMiddleware, ModalNotificationController.listModalCampaigns);
+app.get(
+    "/api/modal-notification/campaigns/:id/recipients",
+    authMiddleware,
+    ModalNotificationController.getCampaignRecipients
+);
 app.get("/api/modal-notification/campaigns/:id", authMiddleware, ModalNotificationController.getModalCampaignById);
 app.get("/api/modal-notification/templates", authMiddleware, ModalNotificationController.getModalTemplates);
 app.get("/api/modal-notification/templates/:id", authMiddleware, ModalNotificationController.getModalTemplateById);

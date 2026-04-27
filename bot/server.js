@@ -1089,21 +1089,52 @@ app.post('/api/bot/member-counts', async (req, res) => {
 });
 
 // Запускаем бота при старте сервера
+const BOT_MENU_COMMANDS = [
+    { command: 'start', description: 'Запуск бота и приложения «Солнце»' },
+    { command: 'web', description: 'Сайт sun.psylife.io в браузере' },
+    { command: 'help', description: 'Подсказка при ошибке и повторный /start' }
+];
+
+/**
+ * Список команд у подсказки «/» в чате с ботом. Без scope чат-бот часто
+ * не показывал меню в личке — задаём all_private_chats + ru.
+ */
+async function registerBotCommandMenu() {
+    try {
+        await bot.telegram.deleteMyCommands().catch(() => {});
+        await bot.telegram.deleteMyCommands({ scope: { type: 'all_private_chats' } }).catch(() => {});
+        await bot.telegram
+            .deleteMyCommands({ scope: { type: 'all_private_chats' }, language_code: 'ru' })
+            .catch(() => {});
+
+        await bot.telegram.setMyCommands(BOT_MENU_COMMANDS, { scope: { type: 'default' } });
+        await bot.telegram.setMyCommands(BOT_MENU_COMMANDS, { scope: { type: 'all_private_chats' } });
+        await bot.telegram.setMyCommands(BOT_MENU_COMMANDS, {
+            scope: { type: 'all_private_chats' },
+            language_code: 'ru'
+        });
+
+        const list = await bot.telegram.getMyCommands({ scope: { type: 'all_private_chats' } });
+        console.log(
+            '✅ Меню команд (личка):',
+            list.map((c) => `/${c.command}`).join(', '),
+            '| всего',
+            list.length
+        );
+    } catch (e) {
+        const d = e?.response?.description || e?.message || String(e);
+        console.error('❌ setMyCommands:', d);
+    }
+}
+
 bot.launch({
     allowedUpdates: ['message', 'callback_query'], // Указываем типы обновлений
     dropPendingUpdates: false // Не удаляем ожидающие обновления при перезапуске
 }).then(async () => {
     console.log('✅ Telegram bot started successfully');
-    try {
-        await bot.telegram.setMyCommands([
-            { command: 'start', description: 'Запуск бота и приложения «Солнце»' },
-            { command: 'web', description: 'Сайт sun.psylife.io в браузере' },
-            { command: 'help', description: 'Подсказка при ошибке и повторный /start' }
-        ]);
-        console.log('✅ Меню команд бота: /start, /web, /help');
-    } catch (e) {
-        console.error('❌ Не удалось зарегистрировать команды бота (setMyCommands):', e);
-    }
+    // Небольшая задержка — стабильнее отдаёт команды в API после polling
+    await new Promise((r) => setTimeout(r, 500));
+    await registerBotCommandMenu();
 }).catch((error) => {
     console.error('❌ Error starting bot:', error);
     

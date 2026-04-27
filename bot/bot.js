@@ -401,8 +401,7 @@ bot.command('web', async (ctx) => {
   try {
     await executeUserOperation(async () => {
       return await ctx.reply(
-        `Сайт: <a href="${SUN_PUBLIC_WEB_URL}">${SUN_PUBLIC_WEB_URL}</a>\n` +
-          'Нажми на ссылку — откроется в браузере.',
+        `<a href="${SUN_PUBLIC_WEB_URL}">${SUN_PUBLIC_WEB_URL}</a>`,
         { parse_mode: 'HTML' }
       );
     });

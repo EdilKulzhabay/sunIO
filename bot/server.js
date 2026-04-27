@@ -1092,8 +1092,16 @@ app.post('/api/bot/member-counts', async (req, res) => {
 bot.launch({
     allowedUpdates: ['message', 'callback_query'], // Указываем типы обновлений
     dropPendingUpdates: false // Не удаляем ожидающие обновления при перезапуске
-}).then(() => {
+}).then(async () => {
     console.log('✅ Telegram bot started successfully');
+    try {
+        await bot.telegram.setMyCommands([
+            { command: 'start', description: 'Запуск приложения «Солнце»' }
+        ]);
+        console.log('✅ Меню команд бота: /start');
+    } catch (e) {
+        console.error('❌ Не удалось зарегистрировать команды бота (setMyCommands):', e);
+    }
 }).catch((error) => {
     console.error('❌ Error starting bot:', error);
     

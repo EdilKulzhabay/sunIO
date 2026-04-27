@@ -7,8 +7,8 @@ import { ClientSubscriptionDynamicModal } from "../../components/User/ClientSubs
 import { ClientPaidDynamicModal } from "../../components/User/ClientPaidDynamicModal";
 import { ClientPurchaseConfirmModal } from "../../components/User/ClientPurchaseConfirmModal";
 import { ClientInsufficientBonusModal } from "../../components/User/ClientInsufficientBonusModal";
-import inBothDirections from "../../assets/inBothDirections.png";
 import { useAutoScrollPreview } from "../../hooks/useAutoScrollPreview";
+import { PwaBackButton } from "../../components/User/PwaBackButton";
 
 export const ClientPracticesList = () => {
     const [practices, setPractices] = useState([]);
@@ -252,24 +252,6 @@ export const ClientPracticesList = () => {
     const topPracticesCount = practices.filter((p: any) => p.location === 'top' && p.visibility).length;
     useAutoScrollPreview(cardsContainerRef, topPracticesCount, !loading);
 
-    const scrollRight = () => {
-        const container = cardsContainerRef.current;
-        if (!container) return;
-
-        const firstCard = container.querySelector('[data-card]') as HTMLElement | null;
-        const styles = window.getComputedStyle(container);
-        const gap = Number.parseFloat(styles.columnGap || styles.gap || '0') || 0;
-        const scrollAmount = (firstCard?.offsetWidth || 300) + gap;
-
-        const maxScrollLeft = container.scrollWidth - container.clientWidth;
-        const isAtEnd = container.scrollLeft >= maxScrollLeft - 1;
-
-        container.scrollTo({
-            left: isAtEnd ? 0 : Math.min(maxScrollLeft, container.scrollLeft + scrollAmount),
-            behavior: 'smooth',
-        });
-    };
-
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen bg-[#031F23]">
@@ -285,20 +267,7 @@ export const ClientPracticesList = () => {
                     <div className="flex items-center">
                         <h1 className="text-2xl font-semibold">Практики</h1>
                     </div>
-                    {practices.filter((practice: any) => practice.location === 'top' && practice.visibility).length > 0 && (
-                        <div className="md:hidden">
-                            <button 
-                                onClick={scrollRight}
-                                className="flex items-center justify-center w-8 h-8 border border-[#00C5AE] rounded-full cursor-pointer hover:bg-[#00C5AE] transition-colors"
-                            >
-                                <img 
-                                    src={inBothDirections}
-                                    alt="inBothDirections"
-                                    className="w-5 h-5"
-                                />
-                            </button>
-                        </div>
-                    )}
+                    <PwaBackButton />
                 </div>
 
                 <div className="px-4 mt-2 pb-10 bg-[#031F23]">

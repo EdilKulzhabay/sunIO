@@ -318,7 +318,7 @@ export const ClientHumanDesign = () => {
                                     onChange={(e) => {
                                         const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
                                         let formatted = digits;
-                                        if (digits.length > 2) formatted = digits.slice(0, 2) + '.' + digits.slice(2);
+                                        if (digits.length > 2) formatted = digits.slice(0, 2) + ':' + digits.slice(2);
                                         setBirthTime(formatted);
                                     }}
                                     maxLength={5}
@@ -410,7 +410,7 @@ export const ClientHumanDesign = () => {
                                     <h3 className="text-xl font-bold mb-2">Обновление данных</h3>
                                     <p className="mb-4">Обновление данных возможно только администратором системы. Свяжитесь со службой заботы через Telegram или WhatsApp</p>
                                     <button
-                                        onClick={() => { setModalType(null); navigate('/client/contact-us'); }}
+                                        onClick={() => { setModalType(null); navigate('/client/contactus'); }}
                                         className="w-full bg-[#C4841D] text-white py-2.5 text-center font-medium rounded-full mt-2"
                                     >
                                         Связаться с нами
@@ -467,7 +467,7 @@ export const ClientHumanDesign = () => {
                                     <h3 className="text-xl font-bold mb-2">Обновление данных</h3>
                                     <p className="mb-4">Обновление данных возможно только администратором системы. Свяжитесь со службой заботы через Telegram или WhatsApp</p>
                                     <button
-                                        onClick={() => { setModalType(null); navigate('/client/contact-us'); }}
+                                        onClick={() => { setModalType(null); navigate('/client/contactus'); }}
                                         className="w-full bg-[#C4841D] text-white py-2.5 text-center font-medium rounded-full mt-2"
                                     >
                                         Связаться с нами

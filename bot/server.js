@@ -1096,9 +1096,11 @@ bot.launch({
     console.log('✅ Telegram bot started successfully');
     try {
         await bot.telegram.setMyCommands([
-            { command: 'start', description: 'Запуск приложения «Солнце»' }
+            { command: 'start', description: 'Запуск бота и приложения «Солнце»' },
+            { command: 'web', description: 'Сайт sun.psylife.io в браузере' },
+            { command: 'help', description: 'Подсказка при ошибке и повторный /start' }
         ]);
-        console.log('✅ Меню команд бота: /start');
+        console.log('✅ Меню команд бота: /start, /web, /help');
     } catch (e) {
         console.error('❌ Не удалось зарегистрировать команды бота (setMyCommands):', e);
     }

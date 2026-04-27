@@ -69,7 +69,7 @@ const menuItems = [
     { path: '', label: '', icon: null, divider: true },
     { path: '/admin/health-lab', label: 'Лаборатория здоровья', icon: Heart },
     { path: '/admin/analysis-health', label: 'Разборы - Здоровье', icon: Stethoscope },
-    { path: '/admin/psychodiagnostics', label: 'Психодиагностики', icon: Brain },
+    { path: '/admin/psychodiagnostics', label: 'Психодиагностика', icon: Brain },
     { path: '/admin/relationship-workshop', label: 'Мастерская отношений', icon: Users2 },
     { path: '/admin/analysis-relationships', label: 'Разборы - Отношения', icon: HeartHandshake },
     { path: '/admin/spirit-forge', label: 'Кузница духа', icon: Flame },
@@ -83,7 +83,6 @@ const menuItems = [
     { path: '/admin/masters-tower', label: 'Башня мастеров', icon: Castle },
     { path: '/admin/activation-links', label: 'Ссылки активации', icon: Link2 },
     { path: '/admin/levels', label: 'Уровни мастерства', icon: Layers },
-    { path: '', label: '', icon: null, divider: true },
 ];
 
 export const AdminLayout = ({ children }: AdminLayoutProps) => {

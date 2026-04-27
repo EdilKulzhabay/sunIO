@@ -30,6 +30,12 @@ const pendingStartData = new Map();
 // Deep link из подсказки с restart.jpg — не реферал, только повторный /start
 const RESTART_HINT_START_PARAM = 'reopen';
 
+/** Публичный сайт (команда /web) — ссылка открывается в браузере. */
+const SUN_PUBLIC_WEB_URL = (process.env.SUN_PUBLIC_WEB_URL || 'https://sun.psylife.io').replace(
+  /\/$/,
+  ''
+);
+
 function isSafeAppPath(path) {
   return (
     typeof path === 'string' &&
@@ -115,6 +121,31 @@ function buildOpenSunWebAppUrl(telegramId, telegramUserName, pagePath) {
     u.searchParams.set('page', p.startsWith('/') ? p : `/${p}`);
   }
   return appendWebAppBootstrapSearchParams(u.toString(), telegramId);
+}
+
+/**
+ * Текст + картинка restart.jpg — подсказка «нажать /start и снова принять документы».
+ * Используется: отложенное сообщение после активации, команда /help.
+ */
+async function sendRestartHelpPhoto(chatId) {
+  const me = await bot.telegram.getMe();
+  const botUsername = me.username || process.env.BOT_USERNAME;
+  if (!botUsername) {
+    console.error('Не задан username бота: укажите BOT_USERNAME в .env или проверьте токен.');
+    return;
+  }
+  const startHref = `https://t.me/${botUsername}?start=${RESTART_HINT_START_PARAM}`;
+  const caption =
+    'Если получено такое сообщение с ошибкой, то тебе необходимо нажать ' +
+    `<a href="${startHref}">/start</a>` +
+    ', а затем снова принять комплект документов и повторить регистрацию по кнопке ☀️ Открыть Солнце';
+
+  await executeUserOperation(async () => {
+    return await bot.telegram.sendPhoto(chatId, Input.fromLocalFile(RESTART_IMAGE_PATH), {
+      caption,
+      parse_mode: 'HTML',
+    });
+  });
 }
 
 bot.start(async (ctx) => {
@@ -246,24 +277,7 @@ bot.action('consent_accept', async (ctx) => {
             return;
           }
 
-          const me = await bot.telegram.getMe();
-          const botUsername = me.username || process.env.BOT_USERNAME;
-          if (!botUsername) {
-            console.error('Не задан username бота: укажите BOT_USERNAME в .env или проверьте токен.');
-            return;
-          }
-          const startHref = `https://t.me/${botUsername}?start=${RESTART_HINT_START_PARAM}`;
-          const caption =
-            'Если получено такое сообщение с ошибкой, то тебе необходимо нажать ' +
-            `<a href="${startHref}">/start</a>` +
-            ', а затем снова принять комплект документов и повторить регистрацию по кнопке ☀️ Открыть Солнце';
-
-          await executeUserOperation(async () => {
-            return await bot.telegram.sendPhoto(chatId, Input.fromLocalFile(RESTART_IMAGE_PATH), {
-              caption,
-              parse_mode: 'HTML'
-            });
-          });
+          await sendRestartHelpPhoto(chatId);
         } catch (err) {
           if (err.response?.error_code === 403) {
             console.log(`⚠️ Пользователь ${telegramId} заблокировал бота (отложенное сообщение с restart.jpg).`);
@@ -380,6 +394,34 @@ bot.action('consent_accept', async (ctx) => {
       return;
     }
     console.error(`Ошибка отправки сообщения пользователю ${telegramId}:`, error.message);
+  }
+});
+
+bot.command('web', async (ctx) => {
+  try {
+    await executeUserOperation(async () => {
+      return await ctx.reply(
+        `Сайт: <a href="${SUN_PUBLIC_WEB_URL}">${SUN_PUBLIC_WEB_URL}</a>\n` +
+          'Нажми на ссылку — откроется в браузере.',
+        { parse_mode: 'HTML' }
+      );
+    });
+  } catch (err) {
+    console.error('Ошибка /web:', err.message);
+  }
+});
+
+bot.command('help', async (ctx) => {
+  const chatId = ctx.chat.id;
+  const fromId = ctx.from.id;
+  try {
+    await sendRestartHelpPhoto(chatId);
+  } catch (err) {
+    if (err.response?.error_code === 403) {
+      console.log(`⚠️ Пользователь ${fromId} заблокировал бота (/help).`);
+      return;
+    }
+    console.error(`Ошибка /help для пользователя ${fromId}:`, err.message);
   }
 });
 

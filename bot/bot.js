@@ -149,24 +149,12 @@ async function sendRestartHelpPhoto(chatId) {
 }
 
 bot.start(async (ctx) => {
-  const chatId = ctx.chat.id;
   const telegramId = ctx.from.id;
 
   const startParam = ctx.startParam || (ctx.message?.text?.split(' ')[1] || null);
   const parsed = parseDeepLinkStart(startParam);
   if (Object.keys(parsed).length > 0) {
     pendingStartData.set(String(telegramId), parsed);
-  }
-
-  try {
-    await executeUserOperation(async () => {
-      return await bot.telegram.setChatMenuButton({
-        chatId,
-        menuButton: { type: "default" }
-      });
-    });
-  } catch (error) {
-    console.log("Ошибка при удалении menu button:", error);
   }
 
   const consentText =

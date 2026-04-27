@@ -1114,6 +1114,11 @@ async function registerBotCommandMenu() {
             language_code: 'ru'
         });
 
+        /* Кнопка «Меню» у поля ввода: список команд (не путать с setMyCommands). Без chatId — для всех чатов. */
+        await bot.telegram.setChatMenuButton({
+            menuButton: { type: 'commands' }
+        });
+
         const list = await bot.telegram.getMyCommands({ scope: { type: 'all_private_chats' } });
         console.log(
             '✅ Меню команд (личка):',
@@ -1121,6 +1126,7 @@ async function registerBotCommandMenu() {
             '| всего',
             list.length
         );
+        console.log('✅ Кнопка «Меню» у ввода: commands (setChatMenuButton)');
     } catch (e) {
         const d = e?.response?.description || e?.message || String(e);
         console.error('❌ setMyCommands:', d);

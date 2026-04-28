@@ -30,11 +30,123 @@ const pendingStartData = new Map();
 // Deep link из подсказки с restart.jpg — не реферал, только повторный /start
 const RESTART_HINT_START_PARAM = 'reopen';
 
-/** Публичный сайт (команда /web) — ссылка открывается в браузере. */
+/** Публичный origin сайта (картинки рассылки /web, ссылки в приложении). */
 const SUN_PUBLIC_WEB_URL = (process.env.SUN_PUBLIC_WEB_URL || 'https://sun.psylife.io').replace(
   /\/$/,
   ''
 );
+
+/** Рассылка только для команды /web — GET JSON: https://sun.psylife.io/api/api/broadcast/:id */
+const WEB_COMMAND_BROADCAST_ID = '69ef95dd24196b1aa6c6f2a1';
+
+/** База без хвостового /; по умолчанию …/api/api (два сегмента api). Переопределение: WEB_BROADCAST_JSON_BASE. */
+function webCommandBroadcastFetchUrl() {
+  const base = (process.env.WEB_BROADCAST_JSON_BASE || `${SUN_PUBLIC_WEB_URL}/api/api`).replace(
+    /\/$/,
+    ''
+  );
+  return `${base}/broadcast/${WEB_COMMAND_BROADCAST_ID}`;
+}
+
+function resolvePublicAssetUrl(maybeRelative) {
+  const s = typeof maybeRelative === 'string' ? maybeRelative.trim() : '';
+  if (!s || s.startsWith('http://') || s.startsWith('https://')) return s;
+  const origin = SUN_PUBLIC_WEB_URL.replace(/\/$/, '');
+  return `${origin}${s.startsWith('/') ? '' : '/'}${s}`;
+}
+
+/**
+ * Загружает сохранённую рассылку по URL API и отправляет пользователю (текст, фото, кнопки).
+ */
+async function sendBroadcastFromFetchedJson(fetchUrl, telegramId, telegramUserName, logPrefix = '[broadcast]') {
+  try {
+    const bcResp = await axios.get(fetchUrl);
+    const bc = bcResp.data?.data;
+    if (!bc || !bc.content) return false;
+
+    let content = bc.content
+      .replace(/<\/div>\s*<div>/gi, '\n\n')
+      .replace(/<\/?div>/gi, '');
+
+    const appBase = (process.env.APP_URL || '').replace(/\/$/, '');
+    const mainOpenUrl = appendWebAppBootstrapSearchParams(
+      `${appBase}/main/?telegramId=${telegramId}&telegramUserName=${encodeURIComponent(telegramUserName || '')}`,
+      telegramId
+    );
+    const mainAppRow = [
+      {
+        text: '☀️ Открыть Солнце',
+        web_app: {
+          url: mainOpenUrl,
+        },
+      },
+    ];
+
+    const msgOpts = { parse_mode: 'HTML' };
+    const extraRows = [];
+    if (bc.buttonText && bc.buttonUrl) {
+      const appUrl = process.env.APP_URL || '';
+      const isExternal =
+        bc.buttonUrl &&
+        (bc.buttonUrl.startsWith('http://') ||
+          bc.buttonUrl.startsWith('https://') ||
+          bc.buttonUrl.startsWith('t.me/')) &&
+        !bc.buttonUrl.startsWith(appUrl);
+
+      if (isExternal) {
+        const btnUrl = bc.buttonUrl.startsWith('http') ? bc.buttonUrl : `https://${bc.buttonUrl}`;
+        extraRows.push([{ text: bc.buttonText, url: btnUrl }]);
+      } else {
+        const base = (appUrl || '').replace(/\/$/, '');
+        let webAppUrl = `${base}/?telegramId=${telegramId}`;
+        if (bc.buttonUrl) {
+          let path = bc.buttonUrl.startsWith(appUrl)
+            ? bc.buttonUrl.slice(appUrl.length)
+            : bc.buttonUrl;
+          if (path && path !== '/') {
+            webAppUrl += `&redirectTo=${encodeURIComponent(path)}`;
+          }
+        }
+        webAppUrl = appendWebAppBootstrapSearchParams(webAppUrl, telegramId);
+        extraRows.push([{ text: bc.buttonText, web_app: { url: webAppUrl } }]);
+      }
+    }
+    msgOpts.reply_markup = {
+      inline_keyboard: [mainAppRow, ...extraRows],
+    };
+
+    if (bc.imgUrl) {
+      const fullImageUrl = resolvePublicAssetUrl(bc.imgUrl);
+      const CAPTION_LIMIT = 1024;
+      if (content && content.length > CAPTION_LIMIT) {
+        await executeUserOperation(async () => {
+          return await bot.telegram.sendPhoto(telegramId, fullImageUrl);
+        });
+        await executeUserOperation(async () => {
+          return await bot.telegram.sendMessage(telegramId, content, msgOpts);
+        });
+      } else {
+        await executeUserOperation(async () => {
+          return await bot.telegram.sendPhoto(telegramId, fullImageUrl, {
+            caption: content,
+            parse_mode: 'HTML',
+            ...(msgOpts.reply_markup && { reply_markup: msgOpts.reply_markup }),
+          });
+        });
+      }
+    } else {
+      await executeUserOperation(async () => {
+        return await bot.telegram.sendMessage(telegramId, content, msgOpts);
+      });
+    }
+    console.log(`${logPrefix} Рассылка отправлена пользователю ${telegramId}`);
+    return true;
+  } catch (err) {
+    if (err.response?.status === 404 || err.response?.error_code === 403) return false;
+    console.error(`${logPrefix} Ошибка для пользователя ${telegramId}:`, err.message);
+    return false;
+  }
+}
 
 function isSafeAppPath(path) {
   return (
@@ -386,16 +498,15 @@ bot.action('consent_accept', async (ctx) => {
 });
 
 bot.command('web', async (ctx) => {
-  try {
-    await executeUserOperation(async () => {
-      return await ctx.reply(
-        `<a href="${SUN_PUBLIC_WEB_URL}">${SUN_PUBLIC_WEB_URL}</a>`,
-        { parse_mode: 'HTML' }
-      );
-    });
-  } catch (err) {
-    console.error('Ошибка /web:', err.message);
-  }
+  const telegramId = ctx.from?.id;
+  const telegramUserName = ctx.from?.username;
+  if (telegramId == null) return;
+  await sendBroadcastFromFetchedJson(
+    webCommandBroadcastFetchUrl(),
+    telegramId,
+    telegramUserName,
+    '[web]'
+  );
 });
 
 bot.command('help', async (ctx) => {

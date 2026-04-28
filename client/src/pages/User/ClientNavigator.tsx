@@ -102,6 +102,7 @@ export const ClientNavigator = () => {
             setUserData(response.data.data);
             setShowDescription(response.data.data.showNavigatorDescriptions);
             setShowNavigateInstruction(response.data.data.showNavigateInstruction !== false);
+            setLocationsInstructionOpen(response.data.data.showNavigateInstruction);
         }
     }
 

@@ -358,48 +358,75 @@ export const sendBroadcast = async (req, res) => {
         });
         await record.save();
 
+        const broadcastId = record._id;
         const actionLabel = payload.title || (payload.message || '').replace(/<[^>]*>/g, '').substring(0, 50);
         const actionLabelTrimmed = actionLabel.length >= 50 ? actionLabel.substring(0, 50) + '...' : actionLabel;
 
-        if (user) {
-            await addAdminAction(user._id, `Запустил(а) рассылку: "${actionLabelTrimmed}"`);
-        }
-
-        // Сразу отвечаем клиенту — рассылка уходит в фон
+        // Сразу отвечаем клиенту — запись в БД уже есть; статистику донесём после рассылки
         res.status(200).json({
             success: true,
             message: "Рассылка запущена. Результат можно посмотреть в отчётах.",
-            broadcastId: record._id,
+            broadcastId,
         });
 
-        // Выполняем рассылку асинхронно (после ответа клиенту)
-        executeBroadcast(payload)
-            .then(async (result) => {
+        // Лог и рассылка — только после отправки ответа (прокси/таймауты не режут сохранение результата)
+        setImmediate(() => {
+            void (async () => {
+                if (user) {
+                    try {
+                        await addAdminAction(user._id, `Запустил(а) рассылку: "${actionLabelTrimmed}"`);
+                    } catch (e) {
+                        console.error('Ошибка лога действия (старт рассылки):', e);
+                    }
+                }
+
                 try {
-                    record.result = result;
-                    record.sentAt = new Date();
-                    record.status = result.success ? 'sent' : 'failed';
-                    record.error = result.success ? undefined : (result.message || 'Ошибка отправки');
-                    await record.save();
+                    const result = await executeBroadcast(payload);
+                    const updateOnResult = result.success
+                        ? {
+                              $set: {
+                                  result,
+                                  sentAt: new Date(),
+                                  status: 'sent',
+                              },
+                              $unset: { error: '' },
+                          }
+                        : {
+                              $set: {
+                                  result,
+                                  sentAt: new Date(),
+                                  status: 'failed',
+                                  error: result.message || 'Ошибка отправки',
+                              },
+                          };
+                    await BroadcastSchedule.findByIdAndUpdate(broadcastId, updateOnResult);
 
                     if (user && result.sent) {
-                        await addAdminAction(user._id, `Рассылка завершена: "${actionLabelTrimmed}" (отправлено ${result.sent} пользователям)`);
+                        try {
+                            await addAdminAction(
+                                user._id,
+                                `Рассылка завершена: "${actionLabelTrimmed}" (отправлено ${result.sent} пользователям)`
+                            );
+                        } catch (e) {
+                            console.error('Ошибка лога действия (завершение рассылки):', e);
+                        }
                     }
-                } catch (saveErr) {
-                    console.error('Ошибка сохранения результата рассылки:', saveErr);
+                } catch (err) {
+                    console.error('Ошибка выполнения рассылки в фоне:', err);
+                    try {
+                        await BroadcastSchedule.findByIdAndUpdate(broadcastId, {
+                            $set: {
+                                status: 'failed',
+                                error: err.message || 'Неизвестная ошибка',
+                                sentAt: new Date(),
+                            },
+                        });
+                    } catch (saveErr) {
+                        console.error('Ошибка сохранения статуса failed рассылки:', saveErr);
+                    }
                 }
-            })
-            .catch(async (err) => {
-                try {
-                    record.status = 'failed';
-                    record.error = err.message || 'Неизвестная ошибка';
-                    record.sentAt = new Date();
-                    await record.save();
-                } catch (saveErr) {
-                    console.error('Ошибка сохранения ошибки рассылки:', saveErr);
-                }
-                console.error('Ошибка выполнения рассылки в фоне:', err);
-            });
+            })();
+        });
     } catch (error) {
         console.log("Ошибка в sendBroadcast:", error);
         res.status(500).json({
@@ -783,7 +810,7 @@ export const getScheduledBroadcasts = async (req, res) => {
 // Получить отправленные рассылки
 export const getSentBroadcasts = async (req, res) => {
     try {
-        const schedules = await BroadcastSchedule.find({ status: { $in: ['sent', 'sending'] } })
+        const schedules = await BroadcastSchedule.find({ status: { $in: ['sent', 'sending', 'failed'] } })
             .sort({ createdAt: -1 })
             .limit(100)
             .populate('scheduledBy', 'fullName');

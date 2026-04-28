@@ -301,7 +301,12 @@ export const BroadcastFormAdmin = () => {
                 });
                 
                 if (response.data.success) {
-                    toast.success(response.data.message || 'Рассылка выполнена');
+                    toast.success(
+                        response.data.message ||
+                            (response.data.broadcastId
+                                ? 'Рассылка запущена. Статистика появится после завершения.'
+                                : 'Рассылка выполнена')
+                    );
                     navigate('/admin/broadcast');
                 } else {
                     toast.error(response.data.message || 'Ошибка отправки рассылки');
@@ -348,7 +353,12 @@ export const BroadcastFormAdmin = () => {
             });
             
             if (response.data.success) {
-                toast.success(response.data.message || 'Рассылка выполнена');
+                toast.success(
+                    response.data.message ||
+                        (response.data.broadcastId
+                            ? 'Рассылка запущена. Статистика появится после завершения.'
+                            : 'Рассылка выполнена')
+                );
                 navigate('/admin/broadcast');
             } else {
                 toast.error(response.data.message || 'Ошибка отправки рассылки');

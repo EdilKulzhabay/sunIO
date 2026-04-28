@@ -5,7 +5,6 @@ import crypto from 'crypto';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { executeUserOperation } from './queue.js';
-import { downloadImageBufferFromUrl, guessImageFilename } from './imageDownload.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const RESTART_IMAGE_PATH = path.join(__dirname, 'assets', 'restart.jpg');
@@ -82,32 +81,6 @@ function broadcastHtmlToTelegramHtml(raw) {
   return s;
 }
 
-/** Фото из рассылки: сначала скачиваем на бот-сервер, затем отправляем файлом — иначе Telegram часто возвращает failed to get HTTP URL content для внешнего URL. */
-async function sendBroadcastImageToTelegram(telegramId, fullImageUrl, content, msgOpts, logPrefix) {
-  const CAPTION_LIMIT = 1024;
-  let buf;
-  try {
-    buf = await downloadImageBufferFromUrl(fullImageUrl);
-  } catch (e) {
-    console.warn(`${logPrefix} Не удалось скачать картинку (${fullImageUrl}):`, e.message);
-    await executeUserOperation(async () => bot.telegram.sendMessage(telegramId, content, msgOpts));
-    return;
-  }
-  const file = Input.fromBuffer(buf, guessImageFilename(fullImageUrl));
-  if (content && content.length > CAPTION_LIMIT) {
-    await executeUserOperation(async () => bot.telegram.sendPhoto(telegramId, file));
-    await executeUserOperation(async () => bot.telegram.sendMessage(telegramId, content, msgOpts));
-  } else {
-    await executeUserOperation(async () =>
-      bot.telegram.sendPhoto(telegramId, file, {
-        caption: content,
-        parse_mode: 'HTML',
-        ...(msgOpts.reply_markup && { reply_markup: msgOpts.reply_markup }),
-      })
-    );
-  }
-}
-
 /**
  * Загружает сохранённую рассылку по URL API и отправляет пользователю (текст, фото, кнопки).
  */
@@ -168,7 +141,23 @@ async function sendBroadcastFromFetchedJson(fetchUrl, telegramId, telegramUserNa
 
     if (bc.imgUrl) {
       const fullImageUrl = resolvePublicAssetUrl(bc.imgUrl);
-      await sendBroadcastImageToTelegram(telegramId, fullImageUrl, content, msgOpts, logPrefix);
+      const CAPTION_LIMIT = 1024;
+      if (content && content.length > CAPTION_LIMIT) {
+        await executeUserOperation(async () => {
+          return await bot.telegram.sendPhoto(telegramId, fullImageUrl);
+        });
+        await executeUserOperation(async () => {
+          return await bot.telegram.sendMessage(telegramId, content, msgOpts);
+        });
+      } else {
+        await executeUserOperation(async () => {
+          return await bot.telegram.sendPhoto(telegramId, fullImageUrl, {
+            caption: content,
+            parse_mode: 'HTML',
+            ...(msgOpts.reply_markup && { reply_markup: msgOpts.reply_markup }),
+          });
+        });
+      }
     } else {
       await executeUserOperation(async () => {
         return await bot.telegram.sendMessage(telegramId, content, msgOpts);
@@ -492,13 +481,23 @@ bot.action('consent_accept', async (ctx) => {
             const fullImageUrl = bc.imgUrl.startsWith('http')
               ? bc.imgUrl
               : `${process.env.API_URL}${bc.imgUrl}`;
-            await sendBroadcastImageToTelegram(
-              telegramId,
-              fullImageUrl,
-              content,
-              msgOpts,
-              '[fullName-check]'
-            );
+            const CAPTION_LIMIT = 1024;
+            if (content && content.length > CAPTION_LIMIT) {
+              await executeUserOperation(async () => {
+                return await bot.telegram.sendPhoto(telegramId, fullImageUrl);
+              });
+              await executeUserOperation(async () => {
+                return await bot.telegram.sendMessage(telegramId, content, msgOpts);
+              });
+            } else {
+              await executeUserOperation(async () => {
+                return await bot.telegram.sendPhoto(telegramId, fullImageUrl, {
+                  caption: content,
+                  parse_mode: 'HTML',
+                  ...(msgOpts.reply_markup && { reply_markup: msgOpts.reply_markup }),
+                });
+              });
+            }
           } else {
             await executeUserOperation(async () => {
               return await bot.telegram.sendMessage(telegramId, content, msgOpts);

@@ -37,6 +37,7 @@ interface PaginationInfo {
 const SECTION_TO_ADMIN_PATH: Record<string, string> = {
     'Практики': '/admin/practice/edit',
     'Притчи о жизни': '/admin/parables-of-life/edit',
+    'Нейромедитации': '/admin/neuromeditations/edit',
     'Научные открытия': '/admin/scientific-discoveries/edit',
     'Лаборатория здоровья': '/admin/health-lab/edit',
     'Мастерская отношений': '/admin/relationship-workshop/edit',

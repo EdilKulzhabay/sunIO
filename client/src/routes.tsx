@@ -13,6 +13,7 @@ import { DocumentsForm } from "./pages/Admin/DocumentsForm";
 import { PracticeAdmin } from "./pages/Admin/Practice";
 import { PracticeForm } from "./pages/Admin/PracticeForm";
 import { NeuromeditationsAdmin } from "./pages/Admin/NeuromeditationsAdmin";
+import { NeuromeditationsForm } from "./pages/Admin/NeuromeditationsForm";
 import { BroadcastRecordingAdmin } from "./pages/Admin/BroadcastRecording";
 import { BroadcastRecordingForm } from "./pages/Admin/BroadcastRecordingForm";
 import { ParablesOfLifeAdmin } from "./pages/Admin/ParablesOfLife";
@@ -102,6 +103,8 @@ import { ClientBroadcastRecordingsList } from "./pages/User/ClientBroadcastRecor
 import { ClientBroadcastRecording } from "./pages/User/ClientBroadcastRecording";
 import { ClientParablesOfLifeList } from "./pages/User/ClientParablesOfLifeList";
 import { ClientParablesOfLife } from "./pages/User/ClientParablesOfLife";
+import { ClientNeuromeditationsList } from "./pages/User/ClientNeuromeditationsList";
+import { ClientNeuromeditation } from "./pages/User/ClientNeuromeditation";
 import { ClientScientificDiscoveriesList } from "./pages/User/ClientScientificDiscoveriesList";
 import { ClientScientificDiscoveries } from "./pages/User/ClientScientificDiscoveries";
 import { ClientHealthLabList } from "./pages/User/ClientHealthLabList";
@@ -258,6 +261,14 @@ export const routes = createBrowserRouter([
     {
         path: "/client/parables-of-life/:id",
         element: <RootLayout><ProtectedRoute><ClientParablesOfLife /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/client/neuromeditations",
+        element: <RootLayout><ProtectedRoute><ClientNeuromeditationsList /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/client/neuromeditations/:id",
+        element: <RootLayout><ProtectedRoute><ClientNeuromeditation /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/scientific-discoveries",
@@ -496,6 +507,14 @@ export const routes = createBrowserRouter([
     {
         path: "/admin/neuromeditations",
         element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><NeuromeditationsAdmin /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/neuromeditations/create",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><NeuromeditationsForm /></ProtectedRoute></RootLayout>,
+    },
+    {
+        path: "/admin/neuromeditations/edit/:id",
+        element: <RootLayout><ProtectedRoute requiredRole={["admin", "content_manager", "manager"]}><NeuromeditationsForm /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/admin/broadcast-recordings",

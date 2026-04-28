@@ -1,13 +1,13 @@
 import { UserLayout } from "../../components/User/UserLayout"
 import { BackNav } from "../../components/User/BackNav"
+import { NavigatorLocationsInstructionModal } from "../../components/User/NavigatorLocationsInstructionModal"
 import api from "../../api"
 import { useState } from "react"
 import { useEffect } from "react"
 import navigatorMobile from "../../assets/navigatorMobile.jpg"
 import navigatorDesktop from "../../assets/navigatorDesktop.png"
 import { Switch } from "../../components/User/Switch"
-import { useNavigate } from "react-router-dom"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import navigatorConsciousnessLibraryMobile from "../../assets/navigatorConsciousnessLibraryMobile.png"
 import navigatorRelationshipWorkshopMobile from "../../assets/navigatorRelationshipWorkshopMobile.png"
 import navigatorSpiritForgeMobile from "../../assets/navigatorSpiritForgeMobile.png"
@@ -43,20 +43,54 @@ export const ClientNavigator = () => {
     const navigate = useNavigate();
     const [content, setContent] = useState<any>(null);
     const [userData, setUserData] = useState<any>(null);
-    const [descriptions, setDescriptions] = useState<NavigatorDescription[]>([])
     const [showDescription, setShowDescription] = useState(true);
-    const [selectedContent, setSelectedContent] = useState<NavigatorDescription | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedContent, setSelectedContent] = useState<any>(null);
+    const [showNavigateInstruction, setShowNavigateInstruction] = useState(true);
+    const [locationsInstructionOpen, setLocationsInstructionOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [descriptions, setDescriptions] = useState<NavigatorDescription[]>([]);
+
+    useEffect(() => {
+        fetchDescriptions();
+    }, []);
+
+    const fetchDescriptions = async () => {
+        const response = await api.get(`/api/navigator-descriptions`);
+        if (response.data.success) {
+            setDescriptions(response.data.data);
+        }
+    }
+
+    // const openLocationsInstruction = () => setLocationsInstructionOpen(true);
+    const persistUserFields = (updated: Record<string, unknown>) => {
+        setUserData((prev: any) => ({ ...prev, ...updated }));
+        try {
+            const u = JSON.parse(localStorage.getItem('user') || '{}');
+            localStorage.setItem('user', JSON.stringify({ ...u, ...updated }));
+        } catch {
+            /* noop */
+        }
+    };
+
+    const closeLocationsInstruction = async () => {
+        setLocationsInstructionOpen(false);
+        if (!userData?._id || !showNavigateInstruction) return;
+        try {
+            const response = await api.put(`/api/user/${userData._id}`, { showNavigateInstruction: false });
+            if (response.data.success) {
+                setShowNavigateInstruction(false);
+                persistUserFields(response.data.data);
+            }
+        } catch {
+            /* оставляем локальное состояние после закрытия модалки */
+        }
+    };
 
     const fetchContent = async () => {
         const response = await api.get(`/api/dynamic-content/name/navigator`);
         if (response.data.success) {
             setContent(response.data.data);
-        }
-        const descriptionsResponse = await api.get(`api/navigator-descriptions`)
-        if (descriptionsResponse.data.success) {
-            setDescriptions(descriptionsResponse.data.data)
         }
         setLoading(false);
     };
@@ -67,6 +101,7 @@ export const ClientNavigator = () => {
         if (response.data.success) {
             setUserData(response.data.data);
             setShowDescription(response.data.data.showNavigatorDescriptions);
+            setShowNavigateInstruction(response.data.data.showNavigateInstruction !== false);
         }
     }
 
@@ -76,15 +111,20 @@ export const ClientNavigator = () => {
         fetchUserData();
     }, []);
 
-    const closeModal = () => {
-        setIsModalOpen(false);
-        setSelectedContent(null);
-    };
-
     const updateShowDescription = async () => {
         const response = await api.put(`/api/user/${userData._id}`, { showNavigatorDescriptions: !showDescription });
         if (response.data.success) {
             setShowDescription(!showDescription);
+        }
+    }
+
+    const updateShowNavigateInstruction = async () => {
+        if (!userData?._id) return;
+        const next = !showNavigateInstruction;
+        const response = await api.put(`/api/user/${userData._id}`, { showNavigateInstruction: next });
+        if (response.data.success) {
+            setShowNavigateInstruction(next);
+            persistUserFields(response.data.data);
         }
     }
 
@@ -101,7 +141,7 @@ export const ClientNavigator = () => {
             <div className="max-h-screen">
                 <div className="lg:flex lg:flex-row lg:justify-between lg:items-center lg:pr-5">
                     <BackNav title="Навигатор" />
-                    <div className="lg:block hidden">
+                    <div className="hidden lg:flex lg:flex-row lg:items-center gap-x-8">
                         <div className="flex items-center gap-x-4">
                             <div className="">Показывать описание</div>
                             <Switch
@@ -109,6 +149,13 @@ export const ClientNavigator = () => {
                                 onChange={() => { 
                                     updateShowDescription();
                                 }} 
+                            />
+                        </div>
+                        <div className="flex items-center gap-x-4">
+                            <div className="">Показывать инструкцию</div>
+                            <Switch
+                                checked={showNavigateInstruction}
+                                onChange={() => updateShowNavigateInstruction()} 
                             />
                         </div>
                     </div>
@@ -143,8 +190,11 @@ export const ClientNavigator = () => {
                                 background: 'linear-gradient(to bottom, #031F2300 60%, #031F23 100%)',
                             }}
                         />
-                        <button onClick={() => {
-                            if (showDescription) {
+                        <button
+                            type="button"
+                            id="navigator-instruction-spot-consciousness-library"
+                            onClick={() => {
+                            if (showDescription ) {
                                 setIsModalOpen(true)
                                 setSelectedContent(descriptions.find((item: NavigatorDescription) => item.name === "consciousness-library") || null)
                             } else {
@@ -154,8 +204,11 @@ export const ClientNavigator = () => {
                             <img src={navigatorConsciousnessLibraryMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
                             <img src={navigatorConsciousnessLibraryDesktop} alt="" className="object-cover w-full h-full hidden lg:block" />
                         </button>
-                        <button onClick={() => {
-                            if (showDescription) {
+                        <button
+                            type="button"
+                            id="navigator-instruction-spot-spirit-forge"
+                            onClick={() => {
+                            if (showDescription ) {
                                 setIsModalOpen(true)
                                 setSelectedContent(descriptions.find((item: NavigatorDescription) => item.name === "spirit-forge") || null)
                             } else {
@@ -165,7 +218,10 @@ export const ClientNavigator = () => {
                             <img src={navigatorSpiritForgeMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
                             <img src={navigatorSpiritForgeDesktop} alt="" className="object-cover w-full h-full hidden lg:block" />
                         </button>
-                        <button onClick={() => {
+                        <button
+                            type="button"
+                            id="navigator-instruction-spot-relationship-workshop"
+                            onClick={() => {
                             if (showDescription) {
                                 setIsModalOpen(true)
                                 setSelectedContent(descriptions.find((item: NavigatorDescription) => item.name === "relationship-workshop") || null)
@@ -176,7 +232,10 @@ export const ClientNavigator = () => {
                             <img src={navigatorRelationshipWorkshopMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
                             <img src={navigatorRelationshipWorkshopDesktop} alt="" className="object-cover w-full h-full hidden lg:block" />
                         </button>
-                        <button onClick={() => {
+                        <button
+                            type="button"
+                            id="navigator-instruction-spot-masters-tower"
+                            onClick={() => {
                             if (showDescription) {
                                 setIsModalOpen(true)
                                 setSelectedContent(descriptions.find((item: NavigatorDescription) => item.name === "masters-tower") || null)
@@ -187,8 +246,11 @@ export const ClientNavigator = () => {
                             <img src={navigatorMastersTowerMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
                             <img src={navigatorMastersTowerDesktop} alt="" className="object-cover w-full h-full hidden lg:block" />
                         </button>
-                        <button onClick={() => {
-                            if (showDescription) {
+                        <button
+                            type="button"
+                            id="navigator-instruction-spot-health-lab"
+                            onClick={() => {
+                            if (showDescription ) {
                                 setIsModalOpen(true)
                                 setSelectedContent(descriptions.find((item: NavigatorDescription) => item.name === "health-lab") || null)
                             } else {
@@ -198,8 +260,11 @@ export const ClientNavigator = () => {
                             <img src={navigatorHealthLabMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
                             <img src={navigatorHealthLabDesktop} alt="" className="object-cover w-full h-full hidden lg:block" />
                         </button>
-                        <button onClick={() => {
-                            if (showDescription) {
+                        <button
+                            type="button"
+                            id="navigator-instruction-spot-femininity-gazebo"
+                            onClick={() => {
+                            if (showDescription ) {
                                 setIsModalOpen(true)
                                 setSelectedContent(descriptions.find((item: NavigatorDescription) => item.name === "femininity-gazebo") || null)
                             } else {
@@ -209,7 +274,9 @@ export const ClientNavigator = () => {
                             <img src={navigatorFemininityGazeboMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
                             <img src={navigatorFemininityGazeboDesktop} alt="" className="object-cover w-full h-full hidden lg:block" />
                         </button>
-                        <button onClick={() => {
+                        <button
+                            type="button"
+                            onClick={() => {
                             navigate("/client/beggining-journey")
                         }} className="absolute top-[78%] left-[27%] w-[99px] h-[61px] z-20 lg:w-[183px] lg:h-[72px] md:top-[78%] md:left-[38%] lg:top-[82%] lg:left-[30%] xl:top-[87%] xl:left-[35%] cursor-pointer">
                             <img src={navigatorBegginingJourneyMobile} alt="" className="object-cover w-full h-full block lg:hidden" />
@@ -226,11 +293,22 @@ export const ClientNavigator = () => {
                                 }} 
                             />
                         </div>
+                        <div className="flex items-center justify-between mt-4">
+                            <div className="">Показывать инструкцию</div>
+                            <Switch
+                                checked={showNavigateInstruction}
+                                onChange={() => updateShowNavigateInstruction()} 
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
             <div className="flex-1 bg-[#031F23]">
             </div>
+            <NavigatorLocationsInstructionModal
+                open={locationsInstructionOpen}
+                onClose={closeLocationsInstruction}
+            />
             {isModalOpen && selectedContent && (
                 <div className="fixed inset-0 z-50 overflow-y-auto">
                     {/* Мобильная версия: модальное окно снизу */}
@@ -238,7 +316,7 @@ export const ClientNavigator = () => {
                         {/* Overlay */}
                         <div 
                             className="fixed inset-0 bg-black/60 transition-opacity z-20"
-                            onClick={closeModal}
+                            onClick={() => setIsModalOpen(false)}
                         />
 
                         {/* Modal - снизу на мобильных */}
@@ -247,7 +325,7 @@ export const ClientNavigator = () => {
                             onClick={(e) => e.stopPropagation()}
                         >
                             <button
-                                onClick={closeModal}
+                                onClick={() => setIsModalOpen(false)}
                                 className="absolute top-[26px] right-5 cursor-pointer"
                             >
                                 <X size={24} />
@@ -279,7 +357,7 @@ export const ClientNavigator = () => {
                         {/* Overlay */}
                         <div 
                             className="fixed inset-0 bg-black/60 transition-opacity z-20"
-                            onClick={closeModal}
+                            onClick={() => setIsModalOpen(false)}
                         />
 
                         {/* Modal - снизу на мобильных */}
@@ -288,7 +366,7 @@ export const ClientNavigator = () => {
                             onClick={(e) => e.stopPropagation()}
                         >
                             <button
-                                onClick={closeModal}
+                                onClick={() => setIsModalOpen(false)}
                                 className="absolute top-[26px] right-5 cursor-pointer"
                             >
                                 <X size={24} />

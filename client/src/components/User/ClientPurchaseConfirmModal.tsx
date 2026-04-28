@@ -12,6 +12,7 @@ interface ClientPurchaseConfirmModalProps {
         | 'practice'
         | 'meditation'
         | 'parables-of-life'
+        | 'neuromeditations'
         | 'scientific-discoveries'
         | 'health-lab'
         | 'relationship-workshop'

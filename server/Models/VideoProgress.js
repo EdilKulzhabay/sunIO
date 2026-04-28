@@ -13,6 +13,7 @@ const VideoProgressSchema = new mongoose.Schema(
       enum: [
         'practice',
         'parables-of-life',
+        'neuromeditations',
         'scientific-discoveries',
         'health-lab',
         'relationship-workshop',

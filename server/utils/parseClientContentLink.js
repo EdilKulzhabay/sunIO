@@ -25,6 +25,7 @@ export function parseClientContentLink(link) {
         practice: "practice",
         "broadcast-recording": "broadcast-recording",
         "parables-of-life": "parables-of-life",
+        neuromeditations: "neuromeditations",
         "scientific-discoveries": "scientific-discoveries",
         "health-lab": "health-lab",
         "relationship-workshop": "relationship-workshop",

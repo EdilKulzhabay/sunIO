@@ -9,8 +9,9 @@ export interface ProfileInstructionStep {
     targetId: string;
     arrowOrigin?: ArrowOrigin;
     curveBend?: number;
-    targetOffsetY?: number;
+    /** Смещение точки прицеливания по центру цели относительно элемента (px). */
     originOffsetX?: number;
+    originOffsetY?: number;
 }
 
 const INSTRUCTION_STEPS: ProfileInstructionStep[] = [
@@ -55,25 +56,11 @@ const INSTRUCTION_STEPS: ProfileInstructionStep[] = [
         curveBend: -48,
     },
     {
-        title: 'Закрытый канал',
-        description:
-            'Доступ через бота при активной подписке: переход по ссылке открывает бота, который оформляет доступ в канал клуба',
-        targetId: 'profile-instruction-telegram-closed-channel',
-        curveBend: 44,
-    },
-    {
-        title: 'Закрытый чат',
-        description:
-            'Закрытое общение участников клуба — по ссылке на бота при действующей подписке',
-        targetId: 'profile-instruction-telegram-closed-chat',
-        curveBend: -46,
-    },
-    {
         title: 'Настройка просмотра видео',
         description: 'В РФ запрещён к использованию YouTube, при включенном параметре будут активны RuTube ссылки',
         targetId: 'profile-instruction-video-settings',
         curveBend: 42,
-        targetOffsetY: -20,
+        originOffsetY: -20,
         originOffsetX: 55,
     },
     {
@@ -81,7 +68,7 @@ const INSTRUCTION_STEPS: ProfileInstructionStep[] = [
         description: 'Разрешаете или нет Приложению отправлять различные уведомления через Телеграм-бота',
         targetId: 'profile-instruction-notifications',
         curveBend: -54,
-        targetOffsetY: -20,
+        originOffsetY: -20,
     },
 ];
 
@@ -159,7 +146,7 @@ export const ProfilePageInstructionsModal = ({ currentStep, onNext, onClose }: P
             const modalRect = modalEl.getBoundingClientRect();
 
             const targetCenterX = targetRect.left + targetRect.width / 2 + (step.originOffsetX ?? 0);
-            const targetCenterY = targetRect.top + targetRect.height / 2 + (step.targetOffsetY ?? 0);
+            const targetCenterY = targetRect.top + targetRect.height / 2 + (step.originOffsetY ?? 0);
 
             let originX: number;
             let originY: number;
@@ -218,7 +205,14 @@ export const ProfilePageInstructionsModal = ({ currentStep, onNext, onClose }: P
             window.removeEventListener('scroll', updateArrowPosition, true);
             window.removeEventListener('resize', updateArrowPosition);
         };
-    }, [currentStep, step?.targetId, step?.arrowOrigin, step?.curveBend]);
+    }, [
+        currentStep,
+        step?.targetId,
+        step?.arrowOrigin,
+        step?.curveBend,
+        step?.originOffsetX,
+        step?.originOffsetY,
+    ]);
 
     if (!step) return null;
 

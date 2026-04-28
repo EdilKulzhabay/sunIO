@@ -103,7 +103,7 @@ const UserSchema = new mongoose.Schema({
         ],
         default: [],
     },
-    /** Telegram Mini App (Web App из бота) */
+    /** Telegram Mini App (Web App из бота), legacy один слой — см. также miniAppWebSessions */
     clientDeviceIdMiniApp: {
         type: String,
         default: null,
@@ -111,6 +111,16 @@ const UserSchema = new mongoose.Schema({
     refreshTokenMiniApp: {
         type: String,
         default: null,
+    },
+    /** Telegram Mini App: два слота [0],[1] — при новом входе бывший [1] → [0], новая пара → [1] */
+    miniAppWebSessions: {
+        type: [
+            {
+                deviceId: { type: String, default: null },
+                refreshToken: { type: String, default: null },
+            },
+        ],
+        default: [],
     },
     // Поля для отслеживания оплаты через Robokassa
     hasPaid: {
@@ -261,6 +271,11 @@ const UserSchema = new mongoose.Schema({
         default: false,
     },
     showNavigatorDescriptions: {
+        type: Boolean,
+        default: true,
+    },
+    /** Показывать многострелочную инструкцию на карте навигатора; после закрытия модалки ставится false */
+    showNavigateInstruction: {
         type: Boolean,
         default: true,
     },

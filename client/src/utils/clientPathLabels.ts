@@ -9,6 +9,7 @@ const EXACT: Record<string, string> = {
     '/client/practices': 'Практики',
     '/client/broadcast-recordings': 'Записи эфиров',
     '/client/parables-of-life': 'Притчи',
+    '/client/neuromeditations': 'Нейромедитации',
     '/client/scientific-discoveries': 'Научные открытия',
     '/client/health-lab': 'Лаборатория здоровья',
     '/client/relationship-workshop': 'Мастерская отношений',
@@ -40,6 +41,7 @@ const PREFIX_RULES: Array<{ re: RegExp; section: string; fallbackTitle: string }
     { re: /^\/client\/practice\/[^/]+$/, section: 'Практики', fallbackTitle: 'Практика' },
     { re: /^\/client\/broadcast-recording\/[^/]+$/, section: 'Записи эфиров', fallbackTitle: 'Запись эфира' },
     { re: /^\/client\/parables-of-life\/[^/]+$/, section: 'Притчи', fallbackTitle: 'Притча' },
+    { re: /^\/client\/neuromeditations\/[^/]+$/, section: 'Нейромедитации', fallbackTitle: 'Нейромедитация' },
     { re: /^\/client\/scientific-discoveries\/[^/]+$/, section: 'Научные открытия', fallbackTitle: 'Научное открытие' },
     { re: /^\/client\/health-lab\/[^/]+$/, section: 'Лаборатория здоровья', fallbackTitle: 'Лаборатория здоровья' },
     { re: /^\/client\/relationship-workshop\/[^/]+$/, section: 'Мастерская отношений', fallbackTitle: 'Мастерская отношений' },
@@ -95,6 +97,7 @@ const MAIN_MENU_PATHS = new Set([
 const SECTION_EXACT: Record<string, string> = {
     '/client/broadcast-recordings': 'Записи эфиров',
     '/client/parables-of-life': 'Притчи',
+    '/client/neuromeditations': 'Нейромедитации',
     '/client/scientific-discoveries': 'Научные открытия',
     '/client/health-lab': 'Лаборатория здоровья',
     '/client/relationship-workshop': 'Мастерская отношений',

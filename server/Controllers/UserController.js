@@ -14,10 +14,11 @@ import { verifyTelegramOidcIdToken } from "../utils/telegramOidcAuth.js";
 import { exchangeTelegramAuthorizationCode } from "../utils/telegramOidcTokenExchange.js";
 import { sanitizeClientDeviceId } from "../utils/clientDeviceId.js";
 import { removeBrowserWebSession, upsertBrowserWebSession } from "../utils/browserWebSessions.js";
+import { upsertMiniAppWebSession, removeMiniAppWebSession } from "../utils/miniAppWebSessions.js";
 import {
     BROWSER_JWT_EXPIRES,
     MINIAPP_JWT_EXPIRES,
-    getMiniAppDeviceId,
+    collectMiniAppDeviceIds,
     isTelegramMiniAppRequest,
     sentMatchesAnyBrowserSession,
 } from "../utils/clientSession.js";
@@ -536,12 +537,9 @@ export const logout = async (req, res) => {
         }
 
         const sent = sanitizeClientDeviceId(req.headers["x-device-id"]);
-        const miniId = getMiniAppDeviceId(user);
 
-        if (sent && miniId && sent === miniId) {
-            await User.findByIdAndUpdate(userId, {
-                $set: { refreshTokenMiniApp: null, clientDeviceIdMiniApp: null },
-            });
+        if (sent && collectMiniAppDeviceIds(user).includes(sent)) {
+            await removeMiniAppWebSession(userId, sent);
         } else if (sent && sentMatchesAnyBrowserSession(user, sent)) {
             await removeBrowserWebSession(userId, sent);
         } else {
@@ -555,6 +553,7 @@ export const logout = async (req, res) => {
                     clientDeviceIdWeb: null,
                     clientDeviceIdMiniApp: null,
                     browserWebSessions: [],
+                    miniAppWebSessions: [],
                 },
             });
         }
@@ -652,7 +651,6 @@ export const getAllUsers = async (req, res) => {
                     $or: [
                         { invitedUser: null },
                         { invitedUser: { $exists: false } },
-                        { invitedUser: '' },
                     ],
                 });
                 if (statusFilter === 'all') {
@@ -1012,6 +1010,7 @@ export const updateUser = async (req, res) => {
         delete updateData.clientDeviceIdWeb;
         delete updateData.clientDeviceIdMiniApp;
         delete updateData.browserWebSessions;
+        delete updateData.miniAppWebSessions;
         // bonus теперь можно обновлять
 
         // Пустая строка в botStartSource невалидна для ObjectId — приводим к null
@@ -1551,6 +1550,7 @@ export const updateUserByTelegramId = async (req, res) => {
         delete updateData.clientDeviceIdWeb;
         delete updateData.clientDeviceIdMiniApp;
         delete updateData.browserWebSessions;
+        delete updateData.miniAppWebSessions;
 
         if (Object.prototype.hasOwnProperty.call(updateData, 'botStartSource') && (updateData.botStartSource === '' || updateData.botStartSource == null)) {
             updateData.botStartSource = null;
@@ -1708,6 +1708,7 @@ export const purchaseContent = async (req, res) => {
         // Импортируем модели контента
         const Practice = (await import("../Models/Practice.js")).default;
         const ParablesOfLife = (await import("../Models/ParablesOfLife.js")).default;
+        const Neuromeditation = (await import("../Models/Neuromeditation.js")).default;
         const ScientificDiscoveries = (await import("../Models/ScientificDiscoveries.js")).default;
         const HealthLab = (await import("../Models/HealthLab.js")).default;
         const RelationshipWorkshop = (await import("../Models/RelationshipWorkshop.js")).default;
@@ -1726,6 +1727,7 @@ export const purchaseContent = async (req, res) => {
             'practice': Practice,
             'broadcast-recording': BroadcastRecording,
             'parables-of-life': ParablesOfLife,
+            'neuromeditations': Neuromeditation,
             'scientific-discoveries': ScientificDiscoveries,
             'health-lab': HealthLab,
             'relationship-workshop': RelationshipWorkshop,
@@ -1778,6 +1780,7 @@ export const purchaseContent = async (req, res) => {
         const contentTypeLabels = {
             'practice': 'Практики',
             'parables-of-life': 'Притчи о жизни',
+            'neuromeditations': 'Нейромедитации',
             'scientific-discoveries': 'Научные открытия',
             'health-lab': 'Лаборатория здоровья',
             'relationship-workshop': 'Мастерская отношений',
@@ -2120,6 +2123,7 @@ export const updateAdmin = async (req, res) => {
         delete updateData.clientDeviceIdWeb;
         delete updateData.clientDeviceIdMiniApp;
         delete updateData.browserWebSessions;
+        delete updateData.miniAppWebSessions;
 
         // Валидация роли - если указана, должна быть одна из административных ролей
         const allowedRoles = ['admin', 'content_manager', 'client_manager'];
@@ -2611,8 +2615,8 @@ export const telegramWebAuth = async (req, res) => {
         );
 
         /**
-         * Сессия Mini App хранится только в clientDeviceIdMiniApp / refreshTokenMiniApp
-         * и задаётся через telegramWebAppBootstrap (вход из бота). Здесь же — всегда браузер
+         * Сессия Mini App — в miniAppWebSessions (до 2 устройств) или legacy clientDeviceIdMiniApp,
+         * задаётся через telegramWebAppBootstrap. Здесь же — всегда браузер
          * (в т.ч. OIDC в WebView): иначе заголовок X-Telegram-WebApp со всех запросов api
          * помечал бы вход как Mini App и затирал слот Telegram.
          */
@@ -2620,7 +2624,7 @@ export const telegramWebAuth = async (req, res) => {
 
         const fresh = await User.findById(user._id)
             .select(
-                "-password -currentToken -refreshToken -refreshTokenWeb -refreshTokenMiniApp -clientDeviceId -clientDeviceIdWeb -clientDeviceIdMiniApp -browserWebSessions"
+                "-password -currentToken -refreshToken -refreshTokenWeb -refreshTokenMiniApp -clientDeviceId -clientDeviceIdWeb -clientDeviceIdMiniApp -browserWebSessions -miniAppWebSessions"
             )
             .lean();
         const userData = { ...fresh };
@@ -2697,13 +2701,11 @@ export const telegramWebAppBootstrap = async (req, res) => {
             process.env.SecretKeyRefresh,
             { expiresIn: MINIAPP_JWT_EXPIRES }
         );
-        await User.findByIdAndUpdate(user._id, {
-            $set: { refreshTokenMiniApp: refreshToken, clientDeviceIdMiniApp: deviceId },
-        });
+        await upsertMiniAppWebSession(user._id, deviceId, refreshToken);
 
         const fresh = await User.findById(user._id)
             .select(
-                "-password -currentToken -refreshToken -refreshTokenWeb -refreshTokenMiniApp -clientDeviceId -clientDeviceIdWeb -clientDeviceIdMiniApp -browserWebSessions"
+                "-password -currentToken -refreshToken -refreshTokenWeb -refreshTokenMiniApp -clientDeviceId -clientDeviceIdWeb -clientDeviceIdMiniApp -browserWebSessions -miniAppWebSessions"
             )
             .lean();
         const userData = { ...fresh };

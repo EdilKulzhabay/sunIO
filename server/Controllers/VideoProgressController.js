@@ -4,6 +4,7 @@ import User from '../Models/User.js';
 import Practice from '../Models/Practice.js';
 import BroadcastRecording from '../Models/BroadcastRecording.js';
 import ParablesOfLife from '../Models/ParablesOfLife.js';
+import Neuromeditation from '../Models/Neuromeditation.js';
 import ScientificDiscoveries from '../Models/ScientificDiscoveries.js';
 import HealthLab from '../Models/HealthLab.js';
 import RelationshipWorkshop from '../Models/RelationshipWorkshop.js';
@@ -243,6 +244,7 @@ export const awardPointsForVideo = async (req, res) => {
             case 'practice': content = await Practice.findById(contentIdObj); break;
             case 'broadcast-recording': content = await BroadcastRecording.findById(contentIdObj); break;
             case 'parables-of-life': content = await ParablesOfLife.findById(contentIdObj); break;
+            case 'neuromeditations': content = await Neuromeditation.findById(contentIdObj); break;
             case 'scientific-discoveries': content = await ScientificDiscoveries.findById(contentIdObj); break;
             case 'health-lab':
             case 'healthLab': content = await HealthLab.findById(contentIdObj); break;
@@ -362,6 +364,9 @@ export const awardBonusOnPlay = async (req, res) => {
                 break;
             case 'parables-of-life':
                 content = await ParablesOfLife.findById(contentId);
+                break;
+            case 'neuromeditations':
+                content = await Neuromeditation.findById(contentId);
                 break;
             case 'scientific-discoveries':
                 content = await ScientificDiscoveries.findById(contentId);

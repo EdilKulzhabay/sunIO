@@ -2,6 +2,7 @@ import DepositLog from '../Models/DepositLog.js';
 import PurchaseLog from '../Models/PurchaseLog.js';
 import Practice from '../Models/Practice.js';
 import ParablesOfLife from '../Models/ParablesOfLife.js';
+import Neuromeditation from '../Models/Neuromeditation.js';
 import ScientificDiscoveries from '../Models/ScientificDiscoveries.js';
 import HealthLab from '../Models/HealthLab.js';
 import RelationshipWorkshop from '../Models/RelationshipWorkshop.js';
@@ -171,6 +172,7 @@ export const getClientPurchases = async (req, res) => {
         const CONTENT_SOURCES = [
             { Model: Practice, clientPath: '/client/practice' },
             { Model: ParablesOfLife, clientPath: '/client/parables-of-life' },
+            { Model: Neuromeditation, clientPath: '/client/neuromeditations' },
             { Model: ScientificDiscoveries, clientPath: '/client/scientific-discoveries' },
             { Model: HealthLab, clientPath: '/client/health-lab' },
             { Model: RelationshipWorkshop, clientPath: '/client/relationship-workshop' },

@@ -6,6 +6,7 @@
 import Practice from '../Models/Practice.js';
 import BroadcastRecording from '../Models/BroadcastRecording.js';
 import ParablesOfLife from '../Models/ParablesOfLife.js';
+import Neuromeditation from '../Models/Neuromeditation.js';
 import ScientificDiscoveries from '../Models/ScientificDiscoveries.js';
 import HealthLab from '../Models/HealthLab.js';
 import RelationshipWorkshop from '../Models/RelationshipWorkshop.js';
@@ -23,6 +24,7 @@ const CONTENT_SOURCES = [
     { Model: Practice, categoryLabel: 'Практики', clientPath: '/client/practice' },
     { Model: BroadcastRecording, categoryLabel: 'Записи эфиров', clientPath: '/client/broadcast-recording' },
     { Model: ParablesOfLife, categoryLabel: 'Притчи о жизни', clientPath: '/client/parables-of-life' },
+    { Model: Neuromeditation, categoryLabel: 'Нейромедитации', clientPath: '/client/neuromeditations' },
     { Model: ScientificDiscoveries, categoryLabel: 'Научные открытия', clientPath: '/client/scientific-discoveries' },
     { Model: HealthLab, categoryLabel: 'Лаборатория здоровья', clientPath: '/client/health-lab' },
     { Model: RelationshipWorkshop, categoryLabel: 'Мастерская отношений', clientPath: '/client/relationship-workshop' },

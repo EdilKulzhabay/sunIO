@@ -10,7 +10,9 @@ export interface InstructionStep {
     /** Откуда выходит линия: центр модалки (по умолчанию) или слева от крестика */
     arrowOrigin?: ArrowOrigin;
     curveBend?: number;
+    /** Смещение точки прицеливания по центру цели относительно элемента (px). */
     originOffsetX?: number;
+    originOffsetY?: number;
 }
 
 /** Дуга по умолчанию, если в шаге не указан `curveBend` (можно импортировать и подставлять в свои шаги). */
@@ -26,14 +28,14 @@ const INSTRUCTION_STEPS: InstructionStep[] = [
         originOffsetX: 6,
     },
     {
-        title: 'Часто задаваемые вопросы',
-        description: 'Ответы на частые вопросы, инструкция по работе с Приложением и контакты для связи',
+        title: 'Поиск контента и частые вопросы',
+        description: 'Ответы на частые вопросы, инструкция по работе с Приложением и удобный быстрый поиск контента',
         targetId: 'main-instruction-faq',
         curveBend: -44,
     },
     {
         title: 'Дизайн Человека',
-        description: 'Узнай, какой у тебя Дизайн Человека и как он влияет на твою жизнь',
+        description: 'Постепенное познание себя и своих возможностей в зависимости от твоего уровня лояльности',
         targetId: 'main-instruction-human-design',
         curveBend: 52,
         originOffsetX: 6,
@@ -52,15 +54,15 @@ const INSTRUCTION_STEPS: InstructionStep[] = [
         curveBend: -48,
     },
     {
-        title: 'Навигатор',
-        description: 'Переключение между пространствами пробуждения сознания через разные темы',
+        title: 'Навигатор контента',
+        description: 'Доступ к контенту по темам здоровья, отношений и развития суперспособностей в различных локациях',
         targetId: 'main-instruction-navigator',
         curveBend: 50,
     },
     {
         title: 'Задания',
         description:
-            'Последовательность заданий в зависимости от вашего запроса, помогает всё делать последовательно',
+            'Оптимальная последовательность заданий по вашему запросу, помогает всё делать постепенно и правильно',
         targetId: 'main-instruction-tasks',
         curveBend: -42,
     },
@@ -74,16 +76,16 @@ const INSTRUCTION_STEPS: InstructionStep[] = [
     {
         title: 'Практики',
         description:
-            'Самые популярные практики для гармонизации эмоционального состояния и развития навыков',
+            'Самые эффективные практики для гармонизации эмоционального состояния и развития навыков',
         targetId: 'main-instruction-practices',
         curveBend: -46,
     },
     {
         title: 'Календарь событий',
         description:
-            'Календарь событий – приоритетных и ознакомительных. Ниже карточки событий с подробной информацией',
+            'Календарь важных и ознакомительных событий. Ниже карточки событий с подробной информацией',
         targetId: 'main-instruction-schedule',
-        curveBend: 48,
+        curveBend: 200,
     },
 ];
 
@@ -156,7 +158,7 @@ export const MainPageInstructionsModal = ({ currentStep, onNext, onClose }: Main
             const modalRect = modalEl.getBoundingClientRect();
 
             const targetCenterX = targetRect.left + targetRect.width / 2 + (step.originOffsetX ?? 0);
-            const targetCenterY = targetRect.top + targetRect.height / 2;
+            const targetCenterY = targetRect.top + targetRect.height / 2 + (step.originOffsetY ?? 0);
 
             let originX: number;
             let originY: number;
@@ -215,7 +217,14 @@ export const MainPageInstructionsModal = ({ currentStep, onNext, onClose }: Main
             window.removeEventListener('scroll', updateArrowPosition, true);
             window.removeEventListener('resize', updateArrowPosition);
         };
-    }, [currentStep, step.targetId, step.arrowOrigin, step.curveBend]);
+    }, [
+        currentStep,
+        step?.targetId,
+        step?.arrowOrigin,
+        step?.curveBend,
+        step?.originOffsetX,
+        step?.originOffsetY,
+    ]);
 
     if (!step) return null;
 

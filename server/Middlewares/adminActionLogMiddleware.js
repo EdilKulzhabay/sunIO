@@ -51,6 +51,7 @@ export const adminActionLogMiddleware = (req, res, next) => {
             { prefix: '/api/meditation', label: 'медитацию' },
             { prefix: '/api/practice', label: 'практику' },
             { prefix: '/api/parables-of-life', label: 'притчу' },
+            { prefix: '/api/neuromeditations', label: 'нейромедитацию' },
             { prefix: '/api/scientific-discoveries', label: 'научное открытие' },
             { prefix: '/api/video-lesson', label: 'видео урок' },
             { prefix: '/api/schedule', label: 'событие' },

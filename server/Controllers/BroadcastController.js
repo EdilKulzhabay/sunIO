@@ -11,6 +11,13 @@ const TELEGRAM_API_URL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
 // URL бот сервера для рассылки
 const BOT_SERVER_URL = process.env.BOT_SERVER_URL || 'http://localhost:5011';
 
+/** Сколько адресатов за один HTTP-запрос к бот-серверу (меньше — быстрее ответ nginx; иначе 504 Gateway Time-out при большой рассылке). */
+function getBroadcastBotChunkSize() {
+    const raw = parseInt(process.env.BROADCAST_BOT_CHUNK_SIZE || '60', 10);
+    if (!Number.isFinite(raw) || raw < 1) return 60;
+    return Math.min(raw, 500);
+}
+
 // Отправка сообщения через Telegram Bot API
 const sendTelegramMessage = async (chatId, message) => {
     try {
@@ -236,35 +243,55 @@ export const executeBroadcast = async (payload) => {
                 }
         ));
 
-        try {
-            const response = await axios.post(`${BOT_SERVER_URL}/api/bot/broadcast`, {
-                text: finalMessage,
-                telegramIds: telegramIds,
-                imageUrl: finalImageUrl,
-                parseMode: parseMode || 'HTML',
-                buttonText: finalButtonText,
-                buttonUrl: finalButtonUrl || buttonUrl || undefined,
-                usersData: usersData,
-            }, {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            timeout: 300000,
-            });
+        const chunkSize = getBroadcastBotChunkSize();
+        const merged = { success: [], failed: [] };
 
-            if (!response.data || !response.data.results) {
-                console.error('Неожиданная структура ответа от бот сервера:', response.data);
-            return {
-                    success: false,
-                statusCode: 500,
-                    message: "Неожиданный формат ответа от бот сервера",
-                    error: response.data,
-            };
+        try {
+            const n = telegramIds.length;
+            const numChunks = Math.ceil(n / chunkSize);
+            if (numChunks > 1) {
+                console.log(
+                    `Рассылка чанками: ${numChunks} запрос(ов), до ${chunkSize} получателей за запрос (BROADCAST_BOT_CHUNK_SIZE=${chunkSize})`
+                );
             }
 
-            const { results } = response.data;
-            const totalSent = results.success?.length || 0;
-            const totalFailed = results.failed?.length || 0;
+            for (let offset = 0; offset < n; offset += chunkSize) {
+                const end = Math.min(offset + chunkSize, n);
+                const chunkIds = telegramIds.slice(offset, end);
+                const chunkUsersData = usersData.slice(offset, end);
+
+                const response = await axios.post(`${BOT_SERVER_URL}/api/bot/broadcast`, {
+                    text: finalMessage,
+                    telegramIds: chunkIds,
+                    imageUrl: finalImageUrl,
+                    parseMode: parseMode || 'HTML',
+                    buttonText: finalButtonText,
+                    buttonUrl: finalButtonUrl || buttonUrl || undefined,
+                    usersData: chunkUsersData,
+                }, {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    timeout: 300000,
+                });
+
+                if (!response.data || !response.data.results) {
+                    console.error('Неожиданная структура ответа от бот сервера:', response.data);
+                    return {
+                        success: false,
+                        statusCode: 500,
+                        message: "Неожиданный формат ответа от бот сервера",
+                        error: response.data,
+                    };
+                }
+
+                const { results } = response.data;
+                merged.success.push(...(results.success || []));
+                merged.failed.push(...(results.failed || []));
+            }
+
+            const totalSent = merged.success.length;
+            const totalFailed = merged.failed.length;
 
             console.log(`Рассылка завершена. Отправлено: ${totalSent}, Ошибок: ${totalFailed}`);
 
@@ -275,49 +302,77 @@ export const executeBroadcast = async (payload) => {
                 message = `Рассылка отправлена ${totalSent} пользователям`;
             }
 
-        return {
+            return {
                 success: true,
                 message,
                 sent: totalSent,
                 failed: totalFailed,
                 total: telegramIds.length,
-                failedUsers: results.failed || [],
-                sentTelegramIds: (results.success || []).map((tid) => String(tid)),
-        };
+                failedUsers: merged.failed || [],
+                sentTelegramIds: merged.success.map((tid) => String(tid)),
+            };
         } catch (error) {
             console.error('Ошибка при отправке запроса на бот сервер:', {
                 message: error.message,
                 code: error.code,
                 response: error.response?.data,
                 status: error.response?.status,
-                url: `${BOT_SERVER_URL}/api/bot/broadcast`
+                url: `${BOT_SERVER_URL}/api/bot/broadcast`,
+                partialDelivered: merged.success.length,
             });
-            
+
+            if (merged.success.length > 0 || merged.failed.length > 0) {
+                console.warn(
+                    `Часть рассылки уже выполнена до ошибки (успешно в ответах бота: ${merged.success.length}, с ошибкой: ${merged.failed.length})`
+                );
+            }
+
             if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
-            return {
+                return {
                     success: false,
-                statusCode: 500,
-                    message: `Бот сервер недоступен по адресу ${BOT_SERVER_URL}. Проверьте, что бот сервер запущен и доступен.`,
+                    statusCode: 500,
+                    message:
+                        merged.success.length > 0
+                            ? `Бот сервер недоступен после частичной отправки (~${merged.success.length} сообщ.). Проверьте ${BOT_SERVER_URL}`
+                            : `Бот сервер недоступен по адресу ${BOT_SERVER_URL}. Проверьте, что бот сервер запущен и доступен.`,
                     error: error.message,
-            };
+                    sent: merged.success.length,
+                    failed: merged.failed.length,
+                    total: telegramIds.length,
+                    failedUsers: merged.failed,
+                    sentTelegramIds: merged.success.map((tid) => String(tid)),
+                };
             }
-            
+
             if (error.response) {
-            return {
+                return {
                     success: false,
-                statusCode: error.response.status || 500,
-                    message: "Ошибка при отправке рассылки на бот сервер",
+                    statusCode: error.response.status || 500,
+                    message:
+                        merged.success.length > 0
+                            ? `Ошибка при отправке рассылки на бот-сервер после частичной доставки (~${merged.success.length}). ${error.response.status === 504 ? 'Попробуйте уменьшить BROADCAST_BOT_CHUNK_SIZE или увеличьте proxy_read_timeout в nginx для /bot.' : ''}`
+                            : "Ошибка при отправке рассылки на бот сервер",
                     error: error.response.data || error.message,
-            };
+                    sent: merged.success.length,
+                    failed: merged.failed.length,
+                    total: telegramIds.length,
+                    failedUsers: merged.failed,
+                    sentTelegramIds: merged.success.map((tid) => String(tid)),
+                };
             }
-            
-        return {
+
+            return {
                 success: false,
-            statusCode: 500,
+                statusCode: 500,
                 message: "Ошибка при отправке рассылки на бот сервер",
                 error: error.message,
-        };
-    }
+                sent: merged.success.length,
+                failed: merged.failed.length,
+                total: telegramIds.length,
+                failedUsers: merged.failed,
+                sentTelegramIds: merged.success.map((tid) => String(tid)),
+            };
+        }
 };
 
 // Отправить рассылку

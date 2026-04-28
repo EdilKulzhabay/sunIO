@@ -12,6 +12,7 @@ interface SecureKinescopePlayerProps {
         | 'meditation' 
         | 'practice'
         | 'parables-of-life'
+        | 'neuromeditations'
         | 'scientific-discoveries' 
         | 'videoLesson'
         | 'health-lab'

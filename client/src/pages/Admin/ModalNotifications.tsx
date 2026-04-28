@@ -450,14 +450,14 @@ export const ModalNotificationsAdmin = () => {
                             <table className="min-w-full text-sm text-left">
                                 <thead className="bg-gray-50 border-b border-gray-200">
                                     <tr>
-                                        <th className="px-4 py-3 font-medium text-gray-700 whitespace-nowrap">
+                                        <th className="px-4 py-3 font-medium text-gray-700 min-w-[300px]">
                                             Заголовок
                                         </th>
-                                        <th className="px-4 py-3 font-medium text-gray-700 min-w-[200px]">
+                                        <th className="px-4 py-3 font-medium text-gray-700 min-w-[150px]">
                                             Описание
                                         </th>
                                         <th className="px-4 py-3 font-medium text-gray-700 whitespace-nowrap">
-                                            Статус кампании
+                                            Статус отправки
                                         </th>
                                         <th className="px-4 py-3 whitespace-nowrap">
                                             <button

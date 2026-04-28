@@ -325,8 +325,7 @@ export const ModalNotificationFormAdmin = () => {
                     toast.error(response.data.message || 'Ошибка обновления');
                 }
             } else {
-                const title = window.prompt('Краткое название шаблона (для списка, уникальное)');
-                if (!title?.trim()) { setLoading(false); return; }
+                const title = modalTitle.trim();
                 const response = await api.post('/api/modal-notification/templates', {
                     title: title.trim(),
                     modalTitle: modalTitle.trim(),
@@ -436,6 +435,7 @@ export const ModalNotificationFormAdmin = () => {
             );
         } finally {
             setLoading(false);
+            navigate('/admin/modal-notifications');
         }
     };
 
@@ -471,8 +471,8 @@ export const ModalNotificationFormAdmin = () => {
                 : `Запланировать для всех (${userCount})`;
         }
         return selectedUsers.size > 0
-            ? `Создать уведомление для выбранных (${selectedUsers.size})`
-            : `Создать уведомление для всех (${userCount})`;
+            ? `Отправить уведомление для выбранных (${selectedUsers.size})`
+            : `Отправить уведомление для всех (${userCount})`;
     };
 
     return (
@@ -961,7 +961,7 @@ export const ModalNotificationFormAdmin = () => {
                             className="flex items-center gap-3 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                             <Save size={20} />
-                            {isEditing ? 'Сохранить изменения' : 'Сохранить как шаблон'}
+                            Сохранить изменения
                         </button>
                         <button
                             onClick={handleCreateNotification}

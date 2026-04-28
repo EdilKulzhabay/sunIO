@@ -9,6 +9,7 @@ export const CONTENT_CATEGORY_OPTIONS: { title: string; apiPath: string; clientP
     { title: 'Научные открытия', apiPath: '/api/scientific-discoveries', clientPath: '/client/scientific-discoveries' },
     { title: 'Лаборатория здоровья', apiPath: '/api/health-lab', clientPath: '/client/health-lab' },
     { title: 'Мастерская отношений', apiPath: '/api/relationship-workshop', clientPath: '/client/relationship-workshop' },
+    { title: 'Нейромедитации', apiPath: '/api/neuromeditations', clientPath: '/client/neuromeditations' },
     { title: 'Кузница Духа', apiPath: '/api/spirit-forge', clientPath: '/client/spirit-forge' },
     { title: 'Башня мастеров', apiPath: '/api/masters-tower', clientPath: '/client/masters-tower' },
     { title: 'Беседка женственности', apiPath: '/api/femininity-gazebo', clientPath: '/client/femininity-gazebo' },

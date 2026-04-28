@@ -19,6 +19,7 @@ export const REDIRECT_TO_PAGE_OPTIONS: { title: string; value: string }[] = [
     { title: 'Лаборатория здоровья', value: '/client/health-lab' },
     { title: 'Мастерская отношений', value: '/client/relationship-workshop' },
     { title: 'Навигатор', value: '/client/navigator' },
+    { title: 'Нейромедитации', value: '/client/neuromeditations' },
     { title: 'Научные открытия', value: '/client/scientific-discoveries' },
     { title: 'Не перенаправлять', value: '' },
     { title: 'Осознания', value: '/client/diary' },

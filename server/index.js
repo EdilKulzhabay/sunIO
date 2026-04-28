@@ -40,6 +40,7 @@ import {
     NavigatorDescriptionsController,
     PointsAwardingPolicyController,
     ParablesOfLifeController,
+    NeuromeditationController,
     ScientificDiscoveriesController,
     ActivationLinkController,
     OperationLogController,
@@ -199,7 +200,7 @@ app.get("/api/user/me", authMiddleware, async (req, res) => {
     try {
         await migrateLegacyCompletedActivationsIfNeeded(req.userId);
         const user = await User.findById(req.userId).select(
-            "-password -currentToken -refreshToken -refreshTokenWeb -refreshTokenMiniApp -clientDeviceId -clientDeviceIdWeb -clientDeviceIdMiniApp -browserWebSessions"
+            "-password -currentToken -refreshToken -refreshTokenWeb -refreshTokenMiniApp -clientDeviceId -clientDeviceIdWeb -clientDeviceIdMiniApp -browserWebSessions -miniAppWebSessions"
         );
         if (!user) {
             return res.status(404).json({ success: false, message: "Пользователь не найден" });
@@ -367,6 +368,13 @@ app.get("/api/parables-of-life", ParablesOfLifeController.getAll);
 app.get("/api/parables-of-life/:id", ParablesOfLifeController.getById);
 app.put("/api/parables-of-life/:id", authMiddleware, ParablesOfLifeController.update);
 app.delete("/api/parables-of-life/:id", authMiddleware, ParablesOfLifeController.remove);
+
+// ==================== Neuromeditation (Нейромедитации) ====================
+app.post("/api/neuromeditations", createContentRateLimit, authMiddleware, NeuromeditationController.create);
+app.get("/api/neuromeditations", NeuromeditationController.getAll);
+app.get("/api/neuromeditations/:id", NeuromeditationController.getById);
+app.put("/api/neuromeditations/:id", authMiddleware, NeuromeditationController.update);
+app.delete("/api/neuromeditations/:id", authMiddleware, NeuromeditationController.remove);
 
 // ==================== ScientificDiscoveries (Научные открытия) маршруты ====================
 app.post("/api/scientific-discoveries", createContentRateLimit, authMiddleware, ScientificDiscoveriesController.create);

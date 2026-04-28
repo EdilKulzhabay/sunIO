@@ -17,6 +17,7 @@ type ContentType =
     | "practice" 
     | "meditation"
     | "parables-of-life"
+    | "neuromeditations"
     | "scientific-discoveries"
     | "health-lab"
     | "relationship-workshop"

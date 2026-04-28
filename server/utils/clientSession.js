@@ -37,19 +37,40 @@ export function collectBrowserDeviceIds(user) {
     return [...ids];
 }
 
+/** Все deviceId активных слотов Telegram Mini App + legacy один слой. */
+export function collectMiniAppDeviceIds(user) {
+    const ids = [];
+    const ma = user?.miniAppWebSessions;
+    if (Array.isArray(ma)) {
+        for (const s of ma) {
+            if (s?.deviceId) ids.push(s.deviceId);
+        }
+    }
+    const legacy = user?.clientDeviceIdMiniApp;
+    if (legacy && !ids.includes(legacy)) ids.push(legacy);
+    return ids;
+}
+
+/** Последний слот Mini App [1], иначе [0], иначе legacy — для операций «одним id». */
 export function getMiniAppDeviceId(user) {
     if (!user) return null;
+    const bw = user.miniAppWebSessions;
+    if (Array.isArray(bw) && bw.length >= 2) {
+        if (bw[1]?.deviceId) return bw[1].deviceId;
+        if (bw[0]?.deviceId) return bw[0].deviceId;
+    }
+    if (Array.isArray(bw) && bw.length === 1 && bw[0]?.deviceId) return bw[0].deviceId;
     return user.clientDeviceIdMiniApp ?? null;
 }
 
 export function userHasDeviceSessionBinding(user) {
-    return collectBrowserDeviceIds(user).length > 0 || !!getMiniAppDeviceId(user);
+    return collectBrowserDeviceIds(user).length > 0 || collectMiniAppDeviceIds(user).length > 0;
 }
 
 export function deviceIdMatchesUserSessions(user, sentRaw) {
     const sent = sanitizeClientDeviceId(sentRaw);
     if (!sent) return false;
-    if (getMiniAppDeviceId(user) === sent) return true;
+    if (collectMiniAppDeviceIds(user).includes(sent)) return true;
     return collectBrowserDeviceIds(user).includes(sent);
 }
 

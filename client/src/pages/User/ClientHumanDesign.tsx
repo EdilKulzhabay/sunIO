@@ -244,7 +244,7 @@ export const ClientHumanDesign = () => {
                                 </div>
                             </div>
                             <div className="shrink-0">
-                                <img src={levelInfo.icon} alt={levelInfo.label} className="w-18 h-18 object-contain" />
+                                <img src={levelInfo.icon} alt={levelInfo.label} className="w-22 h-22 object-contain" />
                             </div>
                         </div>
 

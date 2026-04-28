@@ -29,6 +29,7 @@ interface RecipientUser {
 interface CampaignDetail {
     _id: string;
     modalTitle: string;
+    showUpTo?: string | null;
     scheduledAt?: string | null;
     sentAt?: string | null;
     recipientCount: number;
@@ -277,6 +278,14 @@ export const ModalNotificationCampaignView = () => {
                                 <dd className="font-medium text-gray-900 mt-0.5">
                                     {data.scheduledAt
                                         ? new Date(data.scheduledAt).toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })
+                                        : '—'}
+                                </dd>
+                            </div>
+                            <div>
+                                <dt className="text-gray-500">Отображать до</dt>
+                                <dd className="font-medium text-gray-900 mt-0.5">
+                                    {data.showUpTo
+                                        ? new Date(data.showUpTo).toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })
                                         : '—'}
                                 </dd>
                             </div>

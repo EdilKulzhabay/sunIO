@@ -4,6 +4,7 @@ import 'dotenv/config';
 import axios from 'axios';
 import { Input } from 'telegraf';
 import bot from './bot.js';
+import { downloadImageBufferFromUrl, guessImageFilename } from './imageDownload.js';
 import { executeUserOperation } from './queue.js';
 
 const app = express();
@@ -30,30 +31,6 @@ const isWrongWebPageContentError = (error) => {
         desc
     );
 };
-
-const guessImageFilename = (imageUrl) => {
-    const m = String(imageUrl).match(/\/([^/?#]+\.(jpe?g|png|gif|webp))(?:\?|#|$)/i);
-    return m ? m[1] : 'photo.jpg';
-};
-
-/** Скачивание картинки на сервере бота и отправка буфером — обходит сбои Telegram при запросе URL с CDN/редиректами. */
-async function downloadImageBufferFromUrl(imageUrl) {
-    const res = await axios.get(imageUrl, {
-        responseType: 'arraybuffer',
-        timeout: 90000,
-        maxContentLength: 25 * 1024 * 1024,
-        maxBodyLength: 25 * 1024 * 1024,
-    });
-    const buf = Buffer.from(res.data);
-    const ct = String(res.headers['content-type'] || '')
-        .split(';')[0]
-        .trim()
-        .toLowerCase();
-    if (!ct.startsWith('image/')) {
-        throw new Error(`Ожидался image/*, получено: ${ct || 'пусто'}`);
-    }
-    return buf;
-}
 
 /** Если Telegram не принимает web_app { url }, повтор с обычной ссылкой (откроется во внешнем браузере). */
 function replyMarkupUrlInsteadOfWebApp(reply_markup) {

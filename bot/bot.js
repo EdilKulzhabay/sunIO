@@ -59,6 +59,7 @@ function resolvePublicAssetUrl(maybeRelative) {
 function broadcastHtmlToTelegramHtml(raw) {
   if (typeof raw !== 'string' || !raw) return '';
   let s = raw
+    .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/div>\s*<div>/gi, '\n\n')
     .replace(/<\/?div>/gi, '')
     .trim();

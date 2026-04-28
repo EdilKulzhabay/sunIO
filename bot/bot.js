@@ -55,6 +55,31 @@ function resolvePublicAssetUrl(maybeRelative) {
   return `${origin}${s.startsWith('/') ? '' : '/'}${s}`;
 }
 
+/** HTML из редактора → подмножество Telegram HTML (иначе «Tag span must have class tg-spoiler» и т.п.). */
+function broadcastHtmlToTelegramHtml(raw) {
+  if (typeof raw !== 'string' || !raw) return '';
+  let s = raw
+    .replace(/<\/div>\s*<div>/gi, '\n\n')
+    .replace(/<\/?div>/gi, '')
+    .trim();
+
+  s = s.replace(
+    /<span[^>]*(?:font-weight\s*:\s*bold|font-weight\s*:\s*"bold"|font-weight\s*:\s*700)[^>]*>([\s\S]*?)<\/span>/gi,
+    '<b>$1</b>'
+  );
+
+  for (let i = 0; i < 24; i++) {
+    const next = s.replace(/<span([^>]*)>([\s\S]*?)<\/span>/gi, (_full, attrs, inner) => {
+      if (/class\s*=\s*["'][^"']*tg-spoiler[^"']*["']/i.test(attrs)) return _full;
+      return inner;
+    });
+    if (next === s) break;
+    s = next;
+  }
+
+  return s;
+}
+
 /**
  * Загружает сохранённую рассылку по URL API и отправляет пользователю (текст, фото, кнопки).
  */
@@ -64,9 +89,7 @@ async function sendBroadcastFromFetchedJson(fetchUrl, telegramId, telegramUserNa
     const bc = bcResp.data?.data;
     if (!bc || !bc.content) return false;
 
-    let content = bc.content
-      .replace(/<\/div>\s*<div>/gi, '\n\n')
-      .replace(/<\/?div>/gi, '');
+    let content = broadcastHtmlToTelegramHtml(bc.content);
 
     const appBase = (process.env.APP_URL || '').replace(/\/$/, '');
     const mainOpenUrl = appendWebAppBootstrapSearchParams(
@@ -404,9 +427,7 @@ bot.action('consent_accept', async (ctx) => {
           const bc = bcResp.data?.data;
           if (!bc || !bc.content) return;
 
-          let content = bc.content
-            .replace(/<\/div>\s*<div>/gi, '\n\n')
-            .replace(/<\/?div>/gi, '');
+          let content = broadcastHtmlToTelegramHtml(bc.content);
 
           const appBase = (process.env.APP_URL || '').replace(/\/$/, '');
           const mainOpenUrl = appendWebAppBootstrapSearchParams(

@@ -8,6 +8,8 @@ import { Switch } from "../../components/User/Switch";
 import { SafeExternalLink } from "../../components/User/SafeExternalLink";
 import search from "../../assets/search.png";
 import { useNavigate } from "react-router-dom";
+import { IOS_PWA_TOP_INSET_PX } from "../../components/UserIosPwaTopInset";
+import { isIosPwaStandalone } from "../../utils/pwaEnv";
 
 export const ClientFAQ = () => {
     const [faqs, setFaqs] = useState<{ title: string, content: string }[]>([]);
@@ -117,7 +119,9 @@ export const ClientFAQ = () => {
                 <BackNav title="Часто задаваемые вопросы" />
                 <div 
                     className="flex flex-col justify-between mt-2 px-4 pb-4 flex-1 bg-[#031F23]"
-                    style={{ minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom)}px` }}
+                    style={{
+                        minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom + (isIosPwaStandalone() ? IOS_PWA_TOP_INSET_PX : 0))}px`,
+                    }}
                 >
                     <div className="">
                         <button 
@@ -142,7 +146,10 @@ export const ClientFAQ = () => {
                         <div className="flex items-center justify-between">
                             <div className="">Обзор Приложения с подсказками</div>
                             <Switch
-                                checked={userData?.showMainPageInstructions && userData?.showMainPageInstructions !== false && userData?.showProfilePageInstructions && userData?.showProfilePageInstructions !== false}
+                                checked={userData?.showMainPageInstructions && 
+                                    userData?.showMainPageInstructions !== false && 
+                                    userData?.showProfilePageInstructions && 
+                                    userData?.showProfilePageInstructions !== false}
                                 onChange={() => { 
                                     const showMainPageInstructions = !userData?.showMainPageInstructions;
                                     const showProfilePageInstructions = !userData?.showProfilePageInstructions;
@@ -152,6 +159,7 @@ export const ClientFAQ = () => {
                                     }
                                     updateUserData('showMainPageInstructions', changeValue);
                                     updateUserData('showProfilePageInstructions', changeValue);
+                                    updateUserData('showNavigateInstruction', changeValue);
                                 }} 
                             />
                         </div>

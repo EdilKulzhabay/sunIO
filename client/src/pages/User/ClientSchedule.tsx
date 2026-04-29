@@ -322,12 +322,14 @@ export const ClientSchedule = ({ embedded = false }: ClientScheduleProps) => {
     return (
         <div className="mt-3 pb-10 lg:flex lg:gap-x-4">
             <div className="lg:basis-1/3">
-                <DateRangeCalendar 
-                    onDateClick={handleDateClick}
-                    eventDateBorders={eventDateBorders}
-                    eventDateDots={eventDateDots}
-                    selectedDate={selectedDateFromCalendar}
-                />
+                <div id={embedded ? 'main-instruction-schedule' : undefined}>
+                    <DateRangeCalendar
+                        onDateClick={handleDateClick}
+                        eventDateBorders={eventDateBorders}
+                        eventDateDots={eventDateDots}
+                        selectedDate={selectedDateFromCalendar}
+                    />
+                </div>
             </div>
             <div className="lg:basis-2/3">
                 <div className="mt-3 lg:mt-0 flex items-center justify-between">

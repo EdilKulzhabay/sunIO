@@ -81,7 +81,7 @@ export const ClientRegion = () => {
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
             }}
-            className='px-4 pb-6 flex flex-col justify-between lg:justify-start'
+            className='px-4 pb-6 pt-10 flex flex-col justify-between lg:justify-start'
         >
             <div className='flex justify-center items-end mt-5'>
                 <img src={sunWithHands} alt="Sun with Hands" className='object-cover h-[175px] w-[175px] mb-5' />
@@ -121,16 +121,17 @@ export const ClientRegion = () => {
             )}
 
             <div className='lg:w-[700px] lg:mx-auto'>
-                <button 
-                    onClick={() => navigate(-1)}
-                    className='w-full mt-4 lg:mt-10 bg-white/10 block text-white py-2.5 text-center font-medium rounded-full'
-                >Назад</button>
-                <RedButton 
+            <RedButton 
                     text={loading ? 'Сохранение...' : 'Продолжить'} 
                     onClick={handleContinue} 
-                    className='w-full mt-4'
+                    className='w-full mt-4 lg:mt-10'
                     disabled={loading || error}
                 />
+                <button 
+                    onClick={() => navigate(-1)}
+                    className='w-full mt-4 bg-white/10 block text-white py-2.5 text-center font-medium rounded-full'
+                >Назад</button>
+                
             </div>
         </div>
     );

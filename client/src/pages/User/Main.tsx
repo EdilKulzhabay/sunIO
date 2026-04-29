@@ -691,7 +691,7 @@ export const Main = () => {
                     </div>
                 </div>
 
-                <div id="main-instruction-schedule">
+                <div>
                     <ClientSchedule embedded />
                 </div>
 

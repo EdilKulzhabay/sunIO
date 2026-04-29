@@ -314,6 +314,7 @@ export const ClientPsychodiagnosticsList = () => {
                     contentId={selectedULPsychodiagnostics._id}
                     contentType="psychodiagnostics"
                     contentTitle={selectedULPsychodiagnostics.title}
+                    contentDescription={selectedULPsychodiagnostics.shortDescription || ''}
                     starsRequired={selectedULPsychodiagnostics.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     onPurchaseSuccess={handlePurchaseSuccess}

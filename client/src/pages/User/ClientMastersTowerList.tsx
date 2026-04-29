@@ -316,6 +316,7 @@ export const ClientMastersTowerList = () => {
                     contentId={selectedMastersTower._id}
                     contentType="masters-tower"
                     contentTitle={selectedMastersTower.title}
+                    contentDescription={selectedMastersTower.shortDescription || ''}
                     starsRequired={selectedMastersTower.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     onPurchaseSuccess={handlePurchaseSuccess}

@@ -94,6 +94,7 @@ export const UserForm = () => {
         hasNextPage: boolean;
     } | null>(null);
     const [assigningReferralId, setAssigningReferralId] = useState<string | null>(null);
+    const [removingReferralId, setRemovingReferralId] = useState<string | null>(null);
     const [formData, setFormData] = useState<FormData>({
         fullName: '',
         mail: '',
@@ -257,6 +258,27 @@ export const UserForm = () => {
             toast.error(error.response?.data?.message || 'Ошибка назначения реферера');
         } finally {
             setAssigningReferralId(null);
+        }
+    };
+
+    const handleRemoveReferral = async (referral: Referral) => {
+        const label = referral.fullName?.trim() || referral.telegramUserName || 'этого пользователя';
+        if (
+            !window.confirm(
+                `Убрать связь реферала «${label}» с текущим пригласившим? Связь можно будет восстановить, назначив реферала снова.`
+            )
+        ) {
+            return;
+        }
+        setRemovingReferralId(referral._id);
+        try {
+            await api.put(`/api/user/${referral._id}`, { invitedUser: null });
+            toast.success('Реферал удалён из списка');
+            await fetchReferrals();
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Не удалось удалить реферала');
+        } finally {
+            setRemovingReferralId(null);
         }
     };
 
@@ -795,6 +817,9 @@ export const UserForm = () => {
                                                 <th className="px-4 py-3 font-medium text-gray-700">Полное имя</th>
                                                 <th className="px-4 py-3 font-medium text-gray-700">TG Имя</th>
                                                 <th className="px-4 py-3 font-medium text-gray-700 whitespace-nowrap">Дата регистрации</th>
+                                                <th className="px-4 py-3 font-medium text-gray-700 text-right w-[1%] whitespace-nowrap">
+                                                    Действия
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -808,6 +833,16 @@ export const UserForm = () => {
                                                         {ref.createdAt
                                                             ? new Date(ref.createdAt).toLocaleDateString('ru-RU')
                                                             : '—'}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-right">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleRemoveReferral(ref)}
+                                                            disabled={removingReferralId === ref._id}
+                                                            className="text-sm font-medium text-red-600 hover:text-red-800 disabled:opacity-50 disabled:pointer-events-none"
+                                                        >
+                                                            {removingReferralId === ref._id ? 'Удаление…' : 'Удалить'}
+                                                        </button>
                                                     </td>
                                                 </tr>
                                             ))}

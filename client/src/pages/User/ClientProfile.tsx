@@ -16,6 +16,9 @@ import { X } from 'lucide-react';
 import { toast } from "react-toastify";
 import ruble from "../../assets/ruble.png";
 import { SafeExternalLink } from "../../components/User/SafeExternalLink";
+import { openExternalLink } from "../../utils/telegramWebApp";
+import { IOS_PWA_TOP_INSET_PX } from "../../components/UserIosPwaTopInset";
+import { isIosPwaStandalone } from "../../utils/pwaEnv";
 
 export const ClientProfile = () => {
     const [userData, setUserData] = useState<any>(null);
@@ -312,7 +315,9 @@ export const ClientProfile = () => {
                 <BackNav title="Профиль" />
                 <div 
                     className="pb-10 bg-[#031F23] flex flex-col justify-between"
-                    style={{ minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom)}px` }}
+                    style={{
+                        minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom + (isIosPwaStandalone() ? IOS_PWA_TOP_INSET_PX : 0))}px`,
+                    }}
                 >
                     <div className="flex-1">
                         <div className="flex items-center gap-x-4 pl-4">
@@ -393,10 +398,42 @@ export const ClientProfile = () => {
                             >
                                 <div className="text-xl font-medium">Подписка на Мастерскую Энергий</div>
                                 {userData?.hasPaid && userData?.subscriptionEndDate && new Date(userData.subscriptionEndDate) > new Date() ? (
-                                    <div>
-                                        Ваша подписка действует до{' '}
-                                        {userData?.subscriptionEndDate ? new Date(userData.subscriptionEndDate).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }) : ''}
-                                    </div>
+                                    <>
+                                        <div>
+                                            Ваша подписка действует до{' '}
+                                            {userData?.subscriptionEndDate ? new Date(userData.subscriptionEndDate).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }) : ''}
+                                        </div>
+                                        <div className="flex items-center justify-between mt-3">
+                                            <div
+                                                className="flex items-center justify-center gap-x-2 w-[48%] border border-white/40 rounded-lg py-2.5 px-3"
+                                                onClick={
+                                                    closedClubLinks.closedChannelLink
+                                                        ? (e) => {
+                                                              e.stopPropagation();
+                                                              openExternalLink(closedClubLinks.closedChannelLink);
+                                                          }
+                                                        : undefined
+                                                }
+                                            >
+                                                <div className="">Закрытый канал</div>
+                                                <img src={linkArrow} alt="" className="w-5 h-5 object-cover shrink-0" />
+                                            </div>
+                                            <div
+                                                className="flex items-center justify-center gap-x-2 w-[48%] border border-white/40 rounded-lg py-2.5 px-3"
+                                                onClick={
+                                                    closedClubLinks.closedChatLink
+                                                        ? (e) => {
+                                                              e.stopPropagation();
+                                                              openExternalLink(closedClubLinks.closedChatLink);
+                                                          }
+                                                        : undefined
+                                                }
+                                            >
+                                                <div className="">Закрытый чат</div>
+                                                <img src={linkArrow} alt="" className="w-5 h-5 object-cover shrink-0" />
+                                            </div>
+                                        </div>
+                                    </>
                                 ) : (
                                     <div>У вас нет доступа в Башню Мастеров</div>
                                 )}
@@ -469,44 +506,6 @@ export const ClientProfile = () => {
                                     <div className="font-medium text-xs leading-tight">Открытый чат</div>
                                     <img src={linkArrow} alt="" className="w-5 h-5 object-cover shrink-0" />
                                 </SafeExternalLink>
-                                {closedClubLinks.closedChannelLink ? (
-                                    <SafeExternalLink
-                                        id="profile-instruction-telegram-closed-channel"
-                                        href={closedClubLinks.closedChannelLink}
-                                        className="bg-[#114E50] rounded-lg p-3 pr-2 flex items-center justify-between gap-1 min-h-[52px]"
-                                    >
-                                        <div className="font-medium text-xs leading-tight">Закрытый канал</div>
-                                        <img src={linkArrow} alt="" className="w-5 h-5 object-cover shrink-0" />
-                                    </SafeExternalLink>
-                                ) : (
-                                    <div
-                                        id="profile-instruction-telegram-closed-channel"
-                                        className="bg-[#114E50]/40 rounded-lg p-3 flex items-center min-h-[52px]"
-                                    >
-                                        <div className="font-medium text-xs text-white/50 leading-tight">
-                                            Закрытый канал
-                                        </div>
-                                    </div>
-                                )}
-                                {closedClubLinks.closedChatLink ? (
-                                    <SafeExternalLink
-                                        id="profile-instruction-telegram-closed-chat"
-                                        href={closedClubLinks.closedChatLink}
-                                        className="bg-[#114E50] rounded-lg p-3 pr-2 flex items-center justify-between gap-1 min-h-[52px]"
-                                    >
-                                        <div className="font-medium text-xs leading-tight">Закрытый чат</div>
-                                        <img src={linkArrow} alt="" className="w-5 h-5 object-cover shrink-0" />
-                                    </SafeExternalLink>
-                                ) : (
-                                    <div
-                                        id="profile-instruction-telegram-closed-chat"
-                                        className="bg-[#114E50]/40 rounded-lg p-3 flex items-center min-h-[52px]"
-                                    >
-                                        <div className="font-medium text-xs text-white/50 leading-tight">
-                                            Закрытый чат
-                                        </div>
-                                    </div>
-                                )}
                             </div>
 
                             <div id="profile-instruction-video-settings" className="mt-4 flex items-center justify-between">

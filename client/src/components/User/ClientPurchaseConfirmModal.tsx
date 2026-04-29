@@ -27,6 +27,7 @@ interface ClientPurchaseConfirmModalProps {
         | 'psychodiagnostics'
         | 'broadcast-recording';
     contentTitle: string;
+    contentDescription: string;
     starsRequired: number;
     userBonus: number;
     onPurchaseSuccess?: () => void | Promise<void>;
@@ -40,6 +41,7 @@ export const ClientPurchaseConfirmModal = ({
     contentId,
     contentType,
     contentTitle,
+    contentDescription,
     starsRequired,
     userBonus,
     onPurchaseSuccess,
@@ -98,7 +100,8 @@ export const ClientPurchaseConfirmModal = ({
                     <div className="">
                         <h3 className="text-xl font-bold mb-4">Подтверждение покупки</h3>
                         <p className="mb-2">Вы хотите приобрести контент:</p>
-                        <p className="font-semibold mb-4">{contentTitle}</p>
+                        <p className="font-semibold mb-2">{contentTitle}</p>
+                        <p className="mb-2">{contentDescription}</p>
                         <div className="mb-4">
                             <p className="mb-1">Стоимость Солнц: <span className="font-bold">{starsRequired}</span></p>
                             <p className="mb-1">У вас есть Солнца: <span className="font-bold">{userBonus}</span></p>
@@ -150,6 +153,7 @@ export const ClientPurchaseConfirmModal = ({
                         <h3 className="text-xl font-bold mb-4">Подтверждение покупки</h3>
                         <p className="mb-2">Вы хотите приобрести контент:</p>
                         <p className="font-semibold mb-4 text-lg">{contentTitle}</p>
+                        <p className="mb-4">{contentDescription}</p>
                         <div className="mb-6">
                             <p className="mb-2">Стоимость Солнц: <span className="font-bold text-xl">{starsRequired}</span></p>
                             <p className="mb-2">У вас есть Солнца: <span className="font-bold text-xl">{userBonus}</span></p>

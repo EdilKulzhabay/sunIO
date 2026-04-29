@@ -11,6 +11,8 @@ import referralLevel3 from "../../assets/referralLevel3.png";
 import referralLevel4 from "../../assets/referralLevel4.png";
 import referralLevel5 from "../../assets/referralLevel5.png";
 import referralLevel6 from "../../assets/referralLevel6.png";
+import { IOS_PWA_TOP_INSET_PX } from "../../components/UserIosPwaTopInset";
+import { isIosPwaStandalone } from "../../utils/pwaEnv";
 
 const REFERRAL_LEVELS = [
     { min: 0, max: 5, label: 'Гость', icon: referralLevel1 },
@@ -220,7 +222,9 @@ export const ClientHumanDesign = () => {
                 <BackNav title="Дизайн Человека" />
                 <div 
                     className="flex flex-col justify-between mt-2 px-4 pb-4 flex-1 bg-[#031F23]"
-                    style={{ minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom)}px` }}
+                    style={{
+                        minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom + (isIosPwaStandalone() ? IOS_PWA_TOP_INSET_PX : 0))}px`,
+                    }}
                 >
                     <div>
                         <div dangerouslySetInnerHTML={{ __html: dynamicContentHumanDesignFirstPart }}></div>

@@ -354,6 +354,7 @@ export const ClientPracticesList = () => {
                     contentId={selectedPractice._id}
                     contentType="practice"
                     contentTitle={selectedPractice.title}
+                    contentDescription={selectedPractice.shortDescription || ''}
                     starsRequired={selectedPractice.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     onPurchaseSuccess={handlePurchaseSuccess}

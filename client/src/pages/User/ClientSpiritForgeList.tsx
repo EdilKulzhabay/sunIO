@@ -313,6 +313,7 @@ export const ClientSpiritForgeList = () => {
                     contentId={selectedSpiritForge._id}
                     contentType="spirit-forge"
                     contentTitle={selectedSpiritForge.title}
+                    contentDescription={selectedSpiritForge.shortDescription || ''}
                     starsRequired={selectedSpiritForge.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     onPurchaseSuccess={handlePurchaseSuccess}

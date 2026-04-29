@@ -314,6 +314,7 @@ export const ClientFemininityGazeboList = () => {
                     contentId={selectedFemininityGazebo._id}
                     contentType="femininity-gazebo"
                     contentTitle={selectedFemininityGazebo.title}
+                    contentDescription={selectedFemininityGazebo.shortDescription || ''}
                     starsRequired={selectedFemininityGazebo.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     onPurchaseSuccess={handlePurchaseSuccess}

@@ -4,6 +4,8 @@ import easeLaunch from '../../assets/easeLaunch.png';
 import { useState, useEffect } from 'react';
 import api from '../../api';
 import { SafeExternalLink } from '../../components/User/SafeExternalLink';
+import { isIosPwaStandalone } from '../../utils/pwaEnv';
+import { IOS_PWA_TOP_INSET_PX } from '../../components/UserIosPwaTopInset';
 
 export const EaseLaunch = () => {
     const [dinamycLink, setDinamycLink] = useState<string>('');
@@ -26,6 +28,7 @@ export const EaseLaunch = () => {
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
+                paddingTop: `${(isIosPwaStandalone() ? IOS_PWA_TOP_INSET_PX : 0)}px`
             }}
             className='px-4 pb-6 flex flex-1 flex-col'
         >
@@ -39,11 +42,11 @@ export const EaseLaunch = () => {
             </div>
             
             <div className='bg-[#031F23]'>
+                <MyLink to="/client/choose-your-path" text="Далее" className='w-full mt-4' color='red'/>
                 <SafeExternalLink 
                     href={dinamycLink || 'https://drive.google.com/file/d/1mvJtPzDEQQCcDBlbiFNgLb2U2ArlcPZp/view?usp=sharing'}
                     className='w-full mt-4 bg-white/10 block text-white py-2.5 text-center font-medium rounded-full'
                 >Открыть инструкцию</SafeExternalLink>
-                <MyLink to="/client/choose-your-path" text="Далее" className='w-full mt-4' color='red'/>
             </div>
         </div>
     );

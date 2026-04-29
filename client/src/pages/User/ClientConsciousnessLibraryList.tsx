@@ -317,6 +317,7 @@ export const ClientConsciousnessLibraryList = () => {
                     contentId={selectedConsciousnessLibrary._id}
                     contentType="consciousness-library"
                     contentTitle={selectedConsciousnessLibrary.title}
+                    contentDescription={selectedConsciousnessLibrary.shortDescription || ''}
                     starsRequired={selectedConsciousnessLibrary.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     onPurchaseSuccess={handlePurchaseSuccess}

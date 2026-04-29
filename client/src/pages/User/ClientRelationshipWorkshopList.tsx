@@ -314,6 +314,7 @@ export const ClientRelationshipWorkshopList = () => {
                     contentId={selectedRelationshipWorkshop._id}
                     contentType="relationship-workshop"
                     contentTitle={selectedRelationshipWorkshop.title}
+                    contentDescription={selectedRelationshipWorkshop.shortDescription || ''}
                     starsRequired={selectedRelationshipWorkshop.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     onPurchaseSuccess={handlePurchaseSuccess}

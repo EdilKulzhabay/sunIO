@@ -272,19 +272,19 @@ export const ClientAnalysisHealthList = () => {
 
                     <div className="mt-4 space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
                         {analysisHealths.filter((analysisHealth: any) => analysisHealth.location === 'bottom' && analysisHealth.visibility).sort((a: any, b: any) => a.order - b.order).map((analysisHealth: any) => (
-                                        <VideoCard 
-                                            key={analysisHealth._id} 
-                                            title={analysisHealth.title} 
-                                            description={analysisHealth.shortDescription} 
-                                            image={analysisHealth.imageUrl} 
-                                            link={analysisHealth.redirectToPage?.trim() || `/client/analysis-health/${analysisHealth._id}`} 
-                                            accessType={hasAccessToContent(analysisHealth._id) ? 'free' : analysisHealth.accessType} 
-                                            progress={progresses[analysisHealth._id] || 0} 
-                                            onLockedClick={hasAccessToContent(analysisHealth._id) ? undefined : (analysisHealth.accessType !== 'free' ? () => handleLockedULAnalysisLHealthClick(analysisHealth) : undefined)} 
-                                            starsRequired={analysisHealth?.starsRequired || 0}
-                                            duration={analysisHealth?.duration || 0}
-                                        />
-                                    ))}
+                            <VideoCard 
+                                key={analysisHealth._id} 
+                                title={analysisHealth.title} 
+                                description={analysisHealth.shortDescription} 
+                                image={analysisHealth.imageUrl} 
+                                link={analysisHealth.redirectToPage?.trim() || `/client/analysis-health/${analysisHealth._id}`} 
+                                accessType={hasAccessToContent(analysisHealth._id) ? 'free' : analysisHealth.accessType} 
+                                progress={progresses[analysisHealth._id] || 0} 
+                                onLockedClick={hasAccessToContent(analysisHealth._id) ? undefined : (analysisHealth.accessType !== 'free' ? () => handleLockedULAnalysisLHealthClick(analysisHealth) : undefined)} 
+                                starsRequired={analysisHealth?.starsRequired || 0}
+                                duration={analysisHealth?.duration || 0}
+                            />
+                        ))}
                     </div>
                 </div>
             </UserLayout>
@@ -314,6 +314,7 @@ export const ClientAnalysisHealthList = () => {
                     contentId={selectedULAnalysisLHealth._id}
                     contentType="analysis-health"
                     contentTitle={selectedULAnalysisLHealth.title}
+                    contentDescription={selectedULAnalysisLHealth.shortDescription || ''}
                     starsRequired={selectedULAnalysisLHealth.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     onPurchaseSuccess={handlePurchaseSuccess}

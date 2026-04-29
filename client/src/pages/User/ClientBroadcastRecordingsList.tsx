@@ -354,6 +354,7 @@ export const ClientBroadcastRecordingsList = () => {
                     contentId={selectedPractice._id}
                     contentType="broadcast-recording"
                     contentTitle={selectedPractice.title}
+                    contentDescription={selectedPractice.shortDescription || ''}
                     starsRequired={selectedPractice.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     onPurchaseSuccess={handlePurchaseSuccess}

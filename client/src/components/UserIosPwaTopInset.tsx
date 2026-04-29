@@ -6,7 +6,9 @@ import {
     pathnameIsClientUserAppPage,
 } from "../utils/clientUserRoutes";
 
-const TOP_PX = 50;
+/** Совпадает с padding-top у `#root` в iOS PWA (см. useEffect ниже). Для расчёта minHeight на страницах с BackNav. */
+export const IOS_PWA_TOP_INSET_PX = 50;
+const TOP_PX = IOS_PWA_TOP_INSET_PX;
 /** Фон полосы под статус-баром (как на клиентских экранах), иначе виден белый body */
 const INSET_BG = "#031F23";
 

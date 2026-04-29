@@ -85,7 +85,9 @@ const INSTRUCTION_STEPS: InstructionStep[] = [
         description:
             'Календарь важных и ознакомительных событий. Ниже карточки событий с подробной информацией',
         targetId: 'main-instruction-schedule',
-        curveBend: 200,
+        curveBend: 52,
+        /** Цель — верхняя часть виджета календаря (не центр всего блока расписания) */
+        originOffsetY: -72,
     },
 ];
 

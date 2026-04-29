@@ -10,7 +10,7 @@ export function PwaBackButton() {
         <button
             type="button"
             onClick={() => navigate(-1)}
-            className="flex items-center justify-center w-9 h-9 shrink-0 border border-[#00C5AE] rounded-full cursor-pointer hover:bg-[#00C5AE] transition-colors"
+            className="flex items-center justify-center w-9 h-9 shrink-0 border border-[#00C5AE] rounded-full cursor-pointer"
         >
             <img src={arrowLeft} alt="Назад" className="w-6 h-6 object-cover" />
         </button>

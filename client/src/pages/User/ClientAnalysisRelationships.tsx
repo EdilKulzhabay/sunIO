@@ -6,7 +6,7 @@ export const ClientAnalysisRelationships = () => {
     return (
         <UnifiedVideoContentPage
             contentType="analysis-relationships"
-            fetchPath={`/api/analysis-relationships/`}
+            fetchPath={`/api/analysis-relationships`}
             id={id || ''}
         />
     );

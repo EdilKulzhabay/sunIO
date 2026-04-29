@@ -314,6 +314,7 @@ export const ClientAnalysisRealizationList = () => {
                     contentId={selectedULAnalysisLRealization._id}
                     contentType="analysis-realization"
                     contentTitle={selectedULAnalysisLRealization.title}
+                    contentDescription={selectedULAnalysisLRealization.shortDescription || ''}
                     starsRequired={selectedULAnalysisLRealization.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     onPurchaseSuccess={handlePurchaseSuccess}

@@ -6,8 +6,6 @@ const USER_IOS_PWA_TOP_INSET_EXCLUDE = new Set<string>([
     "/client/telegram-auth",
     "/client-performance",
     "/client/register",
-    "/client/beggining-journey",
-    "/client/ease-launch",
     "/client/region",
 ]);
 

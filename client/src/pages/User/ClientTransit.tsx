@@ -5,6 +5,8 @@ import api from "../../api";
 import { MobileAccordionList } from "../../components/User/MobileAccordionList";
 import { RedButton } from "../../components/User/RedButton";
 import { useNavigate } from "react-router-dom";
+import { IOS_PWA_TOP_INSET_PX } from "../../components/UserIosPwaTopInset";
+import { isIosPwaStandalone } from "../../utils/pwaEnv";
 
 interface TransitLine {
     title: string;
@@ -126,7 +128,9 @@ export const ClientTransit = () => {
         <UserLayout>
             <div 
                 className="flex flex-col justify-between bg-[#031F23]"
-                style={{ minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom)}px` }}
+                style={{
+                    minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom + (isIosPwaStandalone() ? IOS_PWA_TOP_INSET_PX : 0))}px`,
+                }}
             >
                 <div className="lg:pb-10">
                     <BackNav title="Описание транзитов" />

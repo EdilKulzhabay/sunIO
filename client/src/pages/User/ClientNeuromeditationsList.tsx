@@ -281,6 +281,7 @@ export const ClientNeuromeditationsList = () => {
                         contentId={selectedItem._id}
                         contentType={CONTENT_TYPE}
                         contentTitle={selectedItem.title}
+                        contentDescription={selectedItem.shortDescription || ''}
                         starsRequired={selectedItem.starsRequired || 0}
                         userBonus={userData?.bonus || 0}
                         onPurchaseSuccess={async () => {

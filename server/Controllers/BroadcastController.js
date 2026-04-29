@@ -1113,8 +1113,8 @@ export const sendScheduleReminders = async () => {
 
         const events = await Schedule.find({
             $or: [
-                { startDate: { $gte: window24hStart, $lte: window24hEnd }, reminder24hSentAt: null },
-                { startDate: { $gte: window1hStart, $lte: window1hEnd }, reminder1hSentAt: null },
+                { startDate: { $gte: window24hStart - 5 * 60 * 1000, $lte: window24hEnd - 5 * 60 * 1000 }, reminder24hSentAt: null },
+                { startDate: { $gte: window1hStart - 5 * 60 * 1000, $lte: window1hEnd - 5 * 60 * 1000 }, reminder1hSentAt: null },
             ],
         }).lean();
 

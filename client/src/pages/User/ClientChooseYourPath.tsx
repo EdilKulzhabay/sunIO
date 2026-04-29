@@ -191,7 +191,7 @@ export const ClientChooseYourPath = () => {
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 backgroundRepeat: "no-repeat",
-                minHeight: selectedId ? "" : "100vh",
+                minHeight: "100vh",
             }}
             className="pb-10 flex flex-col justify-between relative"
         >
@@ -200,7 +200,7 @@ export const ClientChooseYourPath = () => {
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-400/90" />
                 </div>
             )}
-            <div style={{ height: `${screenHeight / 3}px` }} className="flex justify-center items-end px-4">
+            <div style={{ height: `${screenHeight / 3.5}px` }} className="flex justify-center items-end px-4">
                 <img src={sunWithHands} alt="" className="object-cover h-[175px] w-[175px] mb-5" />
             </div>
             <div className="flex-1 min-h-0 px-4">

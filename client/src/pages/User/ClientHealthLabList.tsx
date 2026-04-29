@@ -338,6 +338,7 @@ export const ClientHealthLabList = () => {
                     contentId={selectedHealthLab._id}
                     contentType="health-lab"
                     contentTitle={selectedHealthLab.title}
+                    contentDescription={selectedHealthLab.shortDescription || ''}
                     starsRequired={selectedHealthLab.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     onPurchaseSuccess={handlePurchaseSuccess}

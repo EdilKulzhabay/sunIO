@@ -68,12 +68,13 @@ export const ClientPageAnalytics = () => {
             await Promise.all(
                 CONTENT_CATEGORY_OPTIONS.map(async (opt) => {
                     try {
-                        const res = await api.get(opt.apiPath);
+                        /** Без admin API отдаёт только видимый контент (visibility !== false) — в аналитике нужны все материалы. */
+                        const res = await api.get(opt.apiPath, { params: { admin: true } });
                         const items: { _id: string; title?: string }[] = Array.isArray(res.data?.data)
                             ? res.data.data
                             : [];
                         items.forEach((item) => {
-                            if (item.title) map.set(item._id, item.title);
+                            if (item.title) map.set(String(item._id).toLowerCase() as string, item.title);
                         });
                     } catch {
                         /* ignore */
@@ -81,6 +82,7 @@ export const ClientPageAnalytics = () => {
                 })
             );
             setTitleMap(map);
+            console.log("titleMap", map);
         };
         load();
     }, []);

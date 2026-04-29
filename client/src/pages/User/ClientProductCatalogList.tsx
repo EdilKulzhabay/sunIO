@@ -314,6 +314,7 @@ export const ClientProductCatalogList = () => {
                     contentId={selectedULProductLCatalog._id}
                     contentType="product-catalog"
                     contentTitle={selectedULProductLCatalog.title}
+                    contentDescription={selectedULProductLCatalog.shortDescription || ''}
                     starsRequired={selectedULProductLCatalog.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     onPurchaseSuccess={handlePurchaseSuccess}

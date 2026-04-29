@@ -861,6 +861,7 @@ export const UnifiedVideoContentPage = ({
                             contentId={id}
                             contentType={contentType}
                             contentTitle={content.title}
+                            contentDescription={content.shortDescription || ''}
                             starsRequired={content.starsRequired || 0}
                             userBonus={user?.bonus || 0}
                             onPurchaseSuccess={handlePurchaseSuccess}

@@ -10,6 +10,8 @@ import { X } from 'lucide-react';
 import { toast } from "react-toastify";
 import { BonusPolicyModal } from "../../components/User/ClientInsufficientBonusModal";
 import { SafeExternalLink } from "../../components/User/SafeExternalLink";
+import { IOS_PWA_TOP_INSET_PX } from "../../components/UserIosPwaTopInset";
+import { isIosPwaStandalone } from "../../utils/pwaEnv";
 
 export const ClientInvitedUsers = () => {
     const [userData, setUserData] = useState<any>(null);
@@ -273,7 +275,9 @@ export const ClientInvitedUsers = () => {
                 <BackNav title="Приглашённые друзья" />
                 <div 
                     className="px-4 pb-10 bg-[#031F23] flex flex-col justify-between"
-                    style={{ minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom)}px` }}
+                    style={{
+                        minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom + (isIosPwaStandalone() ? IOS_PWA_TOP_INSET_PX : 0))}px`,
+                    }}
                 >
                     <div className="flex-1">
                         <div className="flex items-center gap-x-4">

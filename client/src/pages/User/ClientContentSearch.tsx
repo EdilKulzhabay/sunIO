@@ -5,6 +5,8 @@ import api from "../../api";
 import { BackNav } from "../../components/User/BackNav";
 import whiteArrowRight from "../../assets/whiteArrowRight.png";
 import searchIcon from "../../assets/search.png";
+import { IOS_PWA_TOP_INSET_PX } from "../../components/UserIosPwaTopInset";
+import { isIosPwaStandalone } from "../../utils/pwaEnv";
 
 export const ClientContentSearch = () => {
     const [screenHeight, setScreenHeight] = useState(0);
@@ -84,7 +86,9 @@ export const ClientContentSearch = () => {
                 <BackNav title="Поиск контента" />
                 <div
                     className="flex flex-col mt-2 px-4 pb-4 flex-1 bg-[#031F23]"
-                    style={{ minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom)}px` }}
+                    style={{
+                        minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom + (isIosPwaStandalone() ? IOS_PWA_TOP_INSET_PX : 0))}px`,
+                    }}
                 >
                     <div className="flex-1">
                         <div className="flex items-center gap-x-2 border border-white/40 rounded-full py-2.5 px-4">

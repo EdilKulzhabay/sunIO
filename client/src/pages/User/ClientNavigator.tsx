@@ -119,16 +119,6 @@ export const ClientNavigator = () => {
         }
     }
 
-    const updateShowNavigateInstruction = async () => {
-        if (!userData?._id) return;
-        const next = !showNavigateInstruction;
-        const response = await api.put(`/api/user/${userData._id}`, { showNavigateInstruction: next });
-        if (response.data.success) {
-            setShowNavigateInstruction(next);
-            persistUserFields(response.data.data);
-        }
-    }
-
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen bg-[#031F23]">
@@ -150,13 +140,6 @@ export const ClientNavigator = () => {
                                 onChange={() => { 
                                     updateShowDescription();
                                 }} 
-                            />
-                        </div>
-                        <div className="flex items-center gap-x-4">
-                            <div className="">Показывать инструкцию</div>
-                            <Switch
-                                checked={showNavigateInstruction}
-                                onChange={() => updateShowNavigateInstruction()} 
                             />
                         </div>
                     </div>
@@ -292,13 +275,6 @@ export const ClientNavigator = () => {
                                 onChange={() => { 
                                     updateShowDescription();
                                 }} 
-                            />
-                        </div>
-                        <div className="flex items-center justify-between mt-4">
-                            <div className="">Показывать инструкцию</div>
-                            <Switch
-                                checked={showNavigateInstruction}
-                                onChange={() => updateShowNavigateInstruction()} 
                             />
                         </div>
                     </div>

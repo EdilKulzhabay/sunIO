@@ -10,6 +10,8 @@ import whiteArrowRight from "../../assets/whiteArrowRight.png";
 import { openExternalLink } from "../../utils/telegramWebApp";
 import { Switch } from "../../components/User/Switch";
 import supportKarmaIcon from "../../assets/supportKarma.png";
+import { IOS_PWA_TOP_INSET_PX } from "../../components/UserIosPwaTopInset";
+import { isIosPwaStandalone } from "../../utils/pwaEnv";
 
 export const ClientOperationLog = () => {
     const navigate = useNavigate();
@@ -129,7 +131,9 @@ export const ClientOperationLog = () => {
                 <BackNav title="Журнал операций" />
                 <div 
                     className="min-h-screen px-4 pb-4 bg-[#031F23] flex flex-col justify-between"
-                    style={{ minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom)}px` }}
+                    style={{
+                        minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom + (isIosPwaStandalone() ? IOS_PWA_TOP_INSET_PX : 0))}px`,
+                    }}
                 >
                     <div className="flex-1">
                         <div className="bg-[#114E50] rounded-xl p-4 text-white flex items-start gap-x-3 w-full">

@@ -413,7 +413,7 @@ export const ClientProfile = () => {
                                         </div>
                                         <div className="flex items-center justify-between mt-3">
                                             <div
-                                                className="flex items-center justify-center gap-x-2 w-[48%] border border-white/40 rounded-lg py-2.5 px-3"
+                                                className="flex items-center justify-between gap-x-2 w-[48%] border border-white/40 rounded-lg py-2.5 px-3"
                                                 onClick={
                                                     closedClubLinks.closedChannelLink
                                                         ? (e) => {
@@ -427,7 +427,7 @@ export const ClientProfile = () => {
                                                 <img src={linkArrow} alt="" className="w-5 h-5 object-cover shrink-0" />
                                             </div>
                                             <div
-                                                className="flex items-center justify-center gap-x-2 w-[48%] border border-white/40 rounded-lg py-2.5 px-3"
+                                                className="flex items-center justify-between gap-x-2 w-[48%] border border-white/40 rounded-lg py-2.5 px-3"
                                                 onClick={
                                                     closedClubLinks.closedChatLink
                                                         ? (e) => {

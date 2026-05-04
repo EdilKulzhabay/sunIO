@@ -228,7 +228,7 @@ export const showTelegramBackButton = () => {
  * Открывает ссылку: если в URL есть "t.me", открывает в Telegram (openTelegramLink),
  * иначе — во внешнем браузере (openLink) или window.open вне WebApp.
  */
-export const openExternalLink = (url: string): void => {
+export const openExternalLink = (url: string, options?: { preferCurrentWindow?: boolean }): void => {
     if (!url?.trim()) return;
     const lower = url.trim().toLowerCase();
     if (lower.startsWith('mailto:') || lower.startsWith('tel:')) {
@@ -236,8 +236,12 @@ export const openExternalLink = (url: string): void => {
         return;
     }
     const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+    if (options?.preferCurrentWindow) {
+        window.location.assign(normalized);
+        return;
+    }
     const tg = window.Telegram?.WebApp;
-    if (tg) {
+    if (isTelegramWebView() && tg) {
         if (normalized.includes('t.me')) {
             tg.openTelegramLink?.(normalized);
         } else {

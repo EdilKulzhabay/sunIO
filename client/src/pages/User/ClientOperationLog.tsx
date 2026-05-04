@@ -78,7 +78,7 @@ export const ClientOperationLog = () => {
             if (response.data.success && response.data.url) {
                 setIsDepositModalOpen(false);
                 setDepositAmount('');
-                openExternalLink(response.data.url);
+                openExternalLink(response.data.url, { preferCurrentWindow: true });
             } else {
                 toast.error(response.data.message || 'Ошибка создания платежа');
             }
@@ -208,6 +208,7 @@ export const ClientOperationLog = () => {
                             <Switch checked={isDocumentsAccepted} onChange={() => {setIsDocumentsAccepted(!isDocumentsAccepted);}} />
                         </div>
                         <button
+                            type="button"
                             onClick={() => setIsDepositModalOpen(true)}
                             disabled={!isDocumentsAccepted}
                             className="mt-3 w-full block bg-[#C4841D] text-white py-2.5 text-center font-medium rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
@@ -249,6 +250,7 @@ export const ClientOperationLog = () => {
                                     />
                                 </div>
                                 <button
+                                    type="button"
                                     onClick={handleDeposit}
                                     disabled={depositLoading || !depositAmount || parseFloat(depositAmount) <= 0}
                                     className="w-full py-3 bg-[#C4841D] text-white font-medium rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -287,6 +289,7 @@ export const ClientOperationLog = () => {
                                     />
                                 </div>
                                 <button
+                                    type="button"
                                     onClick={handleDeposit}
                                     disabled={depositLoading || !depositAmount || parseFloat(depositAmount) <= 0}
                                     className="w-full py-3 bg-[#C4841D] text-white font-medium rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-colors"

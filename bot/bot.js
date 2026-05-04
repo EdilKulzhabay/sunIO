@@ -56,6 +56,102 @@ function resolvePublicAssetUrl(maybeRelative) {
   return `${origin}${s.startsWith('/') ? '' : '/'}${s}`;
 }
 
+const isWrongWebPageContentError = (error) => {
+  const desc = String(error?.response?.description ?? error?.message ?? '');
+  return /wrong type of the web page content|wrong file identifier\/http url|failed to get HTTP URL/i.test(desc);
+};
+
+const guessImageFilename = (imageUrl) => {
+  const m = String(imageUrl).match(/\/([^/?#]+\.(jpe?g|png|gif|webp))(?:\?|#|$)/i);
+  return m ? m[1] : 'photo.jpg';
+};
+
+async function downloadImageBufferFromUrl(imageUrl) {
+  const res = await axios.get(imageUrl, {
+    responseType: 'arraybuffer',
+    timeout: 90000,
+    maxContentLength: 25 * 1024 * 1024,
+    maxBodyLength: 25 * 1024 * 1024,
+  });
+  const contentType = String(res.headers['content-type'] || '')
+    .split(';')[0]
+    .trim()
+    .toLowerCase();
+  if (!contentType.startsWith('image/')) {
+    throw new Error(`Ожидался image/*, получено: ${contentType || 'пусто'}`);
+  }
+  return Buffer.from(res.data);
+}
+
+function replyMarkupUrlInsteadOfWebApp(reply_markup) {
+  if (!reply_markup?.inline_keyboard) return null;
+  const clone = JSON.parse(JSON.stringify(reply_markup));
+  let changed = false;
+  for (const row of clone.inline_keyboard) {
+    for (const btn of row) {
+      if (btn.web_app?.url) {
+        btn.url = btn.web_app.url;
+        delete btn.web_app;
+        changed = true;
+      }
+    }
+  }
+  return changed ? clone : null;
+}
+
+async function sendMessageWithWebAppFallback(chatId, text, opts) {
+  try {
+    await executeUserOperation(async () => bot.telegram.sendMessage(chatId, text, opts));
+  } catch (error) {
+    if (!isWrongWebPageContentError(error)) throw error;
+    const fallbackReplyMarkup = replyMarkupUrlInsteadOfWebApp(opts.reply_markup);
+    if (!fallbackReplyMarkup) throw error;
+    console.warn(`[broadcast] chat ${chatId}: Web App URL не прошёл проверку Telegram, повтор с кнопкой url`);
+    await executeUserOperation(async () =>
+      bot.telegram.sendMessage(chatId, text, { ...opts, reply_markup: fallbackReplyMarkup })
+    );
+  }
+}
+
+async function sendPhotoResilient(chatId, fullImageUrl, photoOpts) {
+  try {
+    await executeUserOperation(async () => bot.telegram.sendPhoto(chatId, fullImageUrl, photoOpts));
+    return true;
+  } catch (error) {
+    if (!isWrongWebPageContentError(error)) throw error;
+  }
+
+  let buf;
+  try {
+    buf = await downloadImageBufferFromUrl(fullImageUrl);
+  } catch (downloadErr) {
+    console.error(`[broadcast] Не удалось скачать изображение (${fullImageUrl}):`, downloadErr.message);
+    return false;
+  }
+
+  const filename = guessImageFilename(fullImageUrl);
+  try {
+    await executeUserOperation(async () =>
+      bot.telegram.sendPhoto(chatId, Input.fromBuffer(buf, filename), photoOpts)
+    );
+    return true;
+  } catch (error) {
+    if (!isWrongWebPageContentError(error)) throw error;
+  }
+
+  const fallbackReplyMarkup = replyMarkupUrlInsteadOfWebApp(photoOpts.reply_markup);
+  if (!fallbackReplyMarkup) return false;
+
+  console.warn(`[broadcast] chat ${chatId}: повтор sendPhoto с буфером и кнопкой url вместо Web App`);
+  await executeUserOperation(async () =>
+    bot.telegram.sendPhoto(chatId, Input.fromBuffer(Buffer.from(buf), filename), {
+      ...photoOpts,
+      reply_markup: fallbackReplyMarkup,
+    })
+  );
+  return true;
+}
+
 /** HTML из редактора → подмножество Telegram HTML (иначе «Tag span must have class tg-spoiler» и т.п.). */
 function broadcastHtmlToTelegramHtml(raw) {
   if (typeof raw !== 'string' || !raw) return '';
@@ -144,25 +240,24 @@ async function sendBroadcastFromFetchedJson(fetchUrl, telegramId, telegramUserNa
       const fullImageUrl = resolvePublicAssetUrl(bc.imgUrl);
       const CAPTION_LIMIT = 1024;
       if (content && content.length > CAPTION_LIMIT) {
-        await executeUserOperation(async () => {
-          return await bot.telegram.sendPhoto(telegramId, fullImageUrl);
-        });
-        await executeUserOperation(async () => {
-          return await bot.telegram.sendMessage(telegramId, content, msgOpts);
-        });
+        const photoSent = await sendPhotoResilient(telegramId, fullImageUrl, {});
+        if (!photoSent) {
+          console.warn(`${logPrefix} Фото недоступно, отправляю только текст пользователю ${telegramId}`);
+        }
+        await sendMessageWithWebAppFallback(telegramId, content, msgOpts);
       } else {
-        await executeUserOperation(async () => {
-          return await bot.telegram.sendPhoto(telegramId, fullImageUrl, {
-            caption: content,
-            parse_mode: 'HTML',
-            ...(msgOpts.reply_markup && { reply_markup: msgOpts.reply_markup }),
-          });
+        const photoSent = await sendPhotoResilient(telegramId, fullImageUrl, {
+          caption: content,
+          parse_mode: 'HTML',
+          ...(msgOpts.reply_markup && { reply_markup: msgOpts.reply_markup }),
         });
+        if (!photoSent) {
+          console.warn(`${logPrefix} Фото недоступно, отправляю только текст пользователю ${telegramId}`);
+          await sendMessageWithWebAppFallback(telegramId, content, msgOpts);
+        }
       }
     } else {
-      await executeUserOperation(async () => {
-        return await bot.telegram.sendMessage(telegramId, content, msgOpts);
-      });
+      await sendMessageWithWebAppFallback(telegramId, content, msgOpts);
     }
     console.log(`${logPrefix} Рассылка отправлена пользователю ${telegramId}`);
     return true;

@@ -30,11 +30,18 @@ const pendingStartData = new Map();
 // Deep link из подсказки с restart.jpg — не реферал, только повторный /start
 const RESTART_HINT_START_PARAM = 'reopen';
 
-/** Публичный origin сайта (картинки рассылки /web, ссылки в приложении). */
+/** Публичный origin сайта (ссылки в приложении). */
 const SUN_PUBLIC_WEB_URL = (process.env.SUN_PUBLIC_WEB_URL || 'https://sun.psylife.io').replace(
   /\/$/,
   ''
 );
+
+/** Публичный origin API-сервера, который раздаёт /uploads. */
+const SUN_PUBLIC_API_URL = (
+  process.env.API_URL ||
+  process.env.BOT_API_URL ||
+  `${SUN_PUBLIC_WEB_URL}/api`
+).replace(/\/$/, '');
 
 /** Рассылки для команд бота — GET JSON: https://sun.psylife.io/api/api/broadcast/:id */
 const HELP_COMMAND_BROADCAST_ID = '69b987b00f335a9904e35e21';
@@ -52,8 +59,7 @@ function commandBroadcastFetchUrl(broadcastId) {
 function resolvePublicAssetUrl(maybeRelative) {
   const s = typeof maybeRelative === 'string' ? maybeRelative.trim() : '';
   if (!s || s.startsWith('http://') || s.startsWith('https://')) return s;
-  const origin = SUN_PUBLIC_WEB_URL.replace(/\/$/, '');
-  return `${origin}${s.startsWith('/') ? '' : '/'}${s}`;
+  return `${SUN_PUBLIC_API_URL}${s.startsWith('/') ? '' : '/'}${s}`;
 }
 
 const isWrongWebPageContentError = (error) => {

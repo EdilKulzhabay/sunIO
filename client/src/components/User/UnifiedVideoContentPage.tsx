@@ -873,6 +873,7 @@ export const UnifiedVideoContentPage = ({
                             starsRequired={content.starsRequired || 0}
                             userBonus={user?.bonus || 0}
                             contentTitle={content.title}
+                            contentDescription={content.shortDescription || ''}
                         />
                     </>
                 )}

@@ -43,9 +43,13 @@ export const ClientProfile = () => {
     const [instructionStep, setInstructionStep] = useState(0);
     const [closedClubLinks, setClosedClubLinks] = useState({
         openChannelLink: "https://t.me/io_center",
+        openChannelTitle: "Открытый канал",
         openChatLink: "https://t.me/+UWaWd3xq3erdWnny",
+        openChatTitle: "Открытый чат",
         closedChannelLink: "",
+        closedChannelTitle: "Закрытый канал",
         closedChatLink: "",
+        closedChatTitle: "Закрытый чат",
     });
 
     const handleInstructionNext = () => {
@@ -88,9 +92,13 @@ export const ClientProfile = () => {
                     const d = res.data.data;
                     setClosedClubLinks({
                         openChannelLink: d.openChannelLink || "https://t.me/io_center",
+                        openChannelTitle: d.openChannelTitle || "Открытый канал",
                         openChatLink: d.openChatLink || "https://t.me/+UWaWd3xq3erdWnny",
+                        openChatTitle: d.openChatTitle || "Открытый чат",
                         closedChannelLink: d.closedChannelLink || "",
+                        closedChannelTitle: d.closedChannelTitle || "Закрытый канал",
                         closedChatLink: d.closedChatLink || "",
+                        closedChatTitle: d.closedChatTitle || "Закрытый чат",
                     });
                 }
             } catch {
@@ -415,7 +423,7 @@ export const ClientProfile = () => {
                                                         : undefined
                                                 }
                                             >
-                                                <div className="">Закрытый канал</div>
+                                                <div className="">{closedClubLinks.closedChannelTitle || "Закрытый канал"}</div>
                                                 <img src={linkArrow} alt="" className="w-5 h-5 object-cover shrink-0" />
                                             </div>
                                             <div
@@ -429,7 +437,7 @@ export const ClientProfile = () => {
                                                         : undefined
                                                 }
                                             >
-                                                <div className="">Закрытый чат</div>
+                                                <div className="">{closedClubLinks.closedChatTitle || "Закрытый чат"}</div>
                                                 <img src={linkArrow} alt="" className="w-5 h-5 object-cover shrink-0" />
                                             </div>
                                         </div>
@@ -495,7 +503,7 @@ export const ClientProfile = () => {
                                     href={closedClubLinks.openChannelLink}
                                     className="bg-[#114E50] rounded-lg p-3 pr-2 flex items-center justify-between gap-1 min-h-[52px]"
                                 >
-                                    <div className="font-medium text-xs leading-tight">Открытый канал</div>
+                                    <div className="">{closedClubLinks.openChannelTitle || "Открытый канал"}</div>
                                     <img src={linkArrow} alt="" className="w-5 h-5 object-cover shrink-0" />
                                 </SafeExternalLink>
                                 <SafeExternalLink
@@ -503,7 +511,7 @@ export const ClientProfile = () => {
                                     href={closedClubLinks.openChatLink}
                                     className="bg-[#114E50] rounded-lg p-3 pr-2 flex items-center justify-between gap-1 min-h-[52px]"
                                 >
-                                    <div className="font-medium text-xs leading-tight">Открытый чат</div>
+                                    <div className="">{closedClubLinks.openChatTitle || "Открытый чат"}</div>
                                     <img src={linkArrow} alt="" className="w-5 h-5 object-cover shrink-0" />
                                 </SafeExternalLink>
                             </div>

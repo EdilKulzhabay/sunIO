@@ -91,7 +91,7 @@ export const ClientOperationLog = () => {
 
     useEffect(() => {
         const updateScreenHeight = () => {
-            const height = window.innerHeight;
+            const height = Math.round(window.visualViewport?.height || window.innerHeight);
             setScreenHeight(height);
             
             // Получаем значения CSS переменных и преобразуем в числа
@@ -111,8 +111,12 @@ export const ClientOperationLog = () => {
         }
         updateScreenHeight();
         window.addEventListener('resize', updateScreenHeight);
+        window.visualViewport?.addEventListener('resize', updateScreenHeight);
+        window.visualViewport?.addEventListener('scroll', updateScreenHeight);
         return () => {
             window.removeEventListener('resize', updateScreenHeight);
+            window.visualViewport?.removeEventListener('resize', updateScreenHeight);
+            window.visualViewport?.removeEventListener('scroll', updateScreenHeight);
         };
     }, []);
 
@@ -132,7 +136,7 @@ export const ClientOperationLog = () => {
                 <div 
                     className="min-h-screen px-4 pb-4 bg-[#031F23] flex flex-col justify-between"
                     style={{
-                        minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom + (isIosPwaStandalone() ? IOS_PWA_TOP_INSET_PX : 0))}px`,
+                        minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom + (isIosPwaStandalone() ? IOS_PWA_TOP_INSET_PX + 20 : 0))}px`,
                     }}
                 >
                     <div className="flex-1">

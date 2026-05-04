@@ -11,6 +11,7 @@ import calendarRight from "../../assets/calendarRight.png";
 import greenCheck from "../../assets/greenCheck.png";
 import goldCross from "../../assets/goldCross.png";
 import XLS from "../../assets/XLS.png";
+import { PwaBackButton } from "../../components/User/PwaBackButton";
 
 const daysOfWeek = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
 const getWeekdayLabel = (date: Date) => daysOfWeek[(date.getDay() + 6) % 7];
@@ -413,17 +414,18 @@ export const ClientDiary = () => {
             <UserLayout>
                 <div className="flex items-center justify-between p-4">
                     <h1 className="text-2xl font-semibold">Осознания</h1>
-                    <button
-                        type="button"
-                        onClick={handleExportDiariesXls}
-                        disabled={exportSending || loading}
-                        className="w-6 h-6 flex items-center justify-center border border-[#00C5AE] rounded-full hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Отправить дневник в Excel в чат с ботом"
-                    >
-                        <div className="ml-px">
-                            <img src={XLS} alt="" className="w-4 h-4" aria-hidden />
-                        </div>
-                    </button>
+                    <div className="flex items-center gap-x-4">
+                        <button
+                            type="button"
+                            onClick={handleExportDiariesXls}
+                            disabled={exportSending || loading}
+                            className="w-6 h-6 flex items-center justify-center hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Отправить дневник в Excel в чат с ботом"
+                        >
+                            <img src={XLS} alt="" className="w-6 h-6" aria-hidden />
+                        </button>
+                        <PwaBackButton />
+                    </div>
                 </div>
                 <div 
                     className="px-4 -mt-2 pb-10 bg-[#031F23]" 

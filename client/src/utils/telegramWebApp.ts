@@ -244,7 +244,10 @@ export const openExternalLink = (url: string): void => {
             tg.openLink?.(normalized, { try_instant_view: false });
         }
     } else {
-        window.open(normalized, '_blank', 'noopener,noreferrer');
+        const opened = window.open(normalized, '_blank', 'noopener,noreferrer');
+        if (!opened) {
+            window.location.assign(normalized);
+        }
     }
 };
 
@@ -336,6 +339,56 @@ export const useTelegramFullscreen = () => {
         return () => {
             tg.offEvent?.("viewportChanged", apply);
             tg.offEvent?.("safeAreaChanged", apply);
+        };
+    }, []);
+};
+
+/**
+ * Эмулирует resize как в Telegram Mini App для обычных iOS WebView:
+ * при открытии клавиатуры WKWebView часто меняет только visualViewport,
+ * а layout viewport и fixed-элементы остаются на месте.
+ */
+export const useWebViewVisualViewport = () => {
+    useEffect(() => {
+        const root = document.documentElement;
+        const viewport = window.visualViewport;
+        let maxObservedHeight = Math.max(window.innerHeight || 0, viewport?.height || 0);
+
+        const apply = () => {
+            const height = Math.round(viewport?.height || window.innerHeight || maxObservedHeight);
+            const offsetTop = Math.round(viewport?.offsetTop || 0);
+
+            if (height > maxObservedHeight) {
+                maxObservedHeight = height;
+            }
+
+            const keyboardOffset = Math.max(0, maxObservedHeight - height - offsetTop);
+
+            root.style.setProperty('--app-viewport-height', `${height}px`);
+            root.style.setProperty('--app-viewport-offset-top', `${offsetTop}px`);
+            root.style.setProperty('--app-keyboard-offset', `${keyboardOffset}px`);
+            root.classList.toggle('app-keyboard-open', keyboardOffset > 80);
+        };
+
+        const handleWindowResize = () => {
+            if (!root.classList.contains('app-keyboard-open')) {
+                maxObservedHeight = Math.max(window.innerHeight || 0, viewport?.height || 0, maxObservedHeight);
+            }
+            apply();
+        };
+
+        apply();
+        window.addEventListener('resize', handleWindowResize);
+        window.addEventListener('orientationchange', handleWindowResize);
+        viewport?.addEventListener('resize', apply);
+        viewport?.addEventListener('scroll', apply);
+
+        return () => {
+            window.removeEventListener('resize', handleWindowResize);
+            window.removeEventListener('orientationchange', handleWindowResize);
+            viewport?.removeEventListener('resize', apply);
+            viewport?.removeEventListener('scroll', apply);
+            root.classList.remove('app-keyboard-open');
         };
     }, []);
 };

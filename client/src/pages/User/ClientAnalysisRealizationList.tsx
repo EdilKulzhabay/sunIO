@@ -328,6 +328,7 @@ export const ClientAnalysisRealizationList = () => {
                     starsRequired={selectedULAnalysisLRealization.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     contentTitle={selectedULAnalysisLRealization.title}
+                    contentDescription={selectedULAnalysisLRealization.shortDescription || ''}
                 />
             )}
         </div>

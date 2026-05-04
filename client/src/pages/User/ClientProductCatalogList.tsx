@@ -328,6 +328,7 @@ export const ClientProductCatalogList = () => {
                     starsRequired={selectedULProductLCatalog.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     contentTitle={selectedULProductLCatalog.title}
+                    contentDescription={selectedULProductLCatalog.shortDescription || ''}
                 />
             )}
         </div>

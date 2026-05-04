@@ -59,7 +59,7 @@ export const ClientRegion = () => {
                 // Сохраняем обновленные данные пользователя в localStorage и обновляем контекст
                 localStorage.setItem('user', JSON.stringify(response.data.data));
                 updateUser(response.data.data);
-                navigate('/client/beggining-journey');
+                navigate('/client/beggining-journey-start');
             } else {
                 toast.error('Ошибка обновления данных');
                 navigate('/client/connect-error');

@@ -18,6 +18,50 @@ function getBroadcastBotChunkSize() {
     return Math.min(raw, 500);
 }
 
+function getBroadcastReportRecipientLimit() {
+    const raw = parseInt(process.env.BROADCAST_REPORT_RECIPIENT_LIMIT || '20000', 10);
+    if (!Number.isFinite(raw) || raw < 1) return 20000;
+    return raw;
+}
+
+function compactBroadcastResult(result = {}) {
+    const recipientLimit = getBroadcastReportRecipientLimit();
+    const sentTelegramIds = Array.isArray(result.sentTelegramIds)
+        ? result.sentTelegramIds.map((id) => String(id)).filter(Boolean)
+        : [];
+    const failedUsers = Array.isArray(result.failedUsers)
+        ? result.failedUsers
+              .map((item) => ({
+                  telegramId: item?.telegramId != null ? String(item.telegramId) : '',
+                  error: String(item?.error || '').slice(0, 500),
+                  ...(item?.errorCode != null ? { errorCode: item.errorCode } : {}),
+              }))
+              .filter((item) => item.telegramId)
+        : [];
+    const sentTruncated = sentTelegramIds.length > recipientLimit;
+    const failedTruncated = failedUsers.length > recipientLimit;
+
+    return {
+        success: Boolean(result.success),
+        message: result.message || '',
+        sent: Number(result.sent || 0),
+        failed: Number(result.failed || 0),
+        total: Number(result.total || 0),
+        ...(result.error ? { error: result.error } : {}),
+        sentTelegramIds: sentTelegramIds.slice(0, recipientLimit),
+        failedUsers: failedUsers.slice(0, recipientLimit),
+        ...(sentTruncated || failedTruncated
+            ? {
+                  reportTruncated: {
+                      sentTelegramIds: sentTruncated,
+                      failedUsers: failedTruncated,
+                      limit: recipientLimit,
+                  },
+              }
+            : {}),
+    };
+}
+
 // Отправка сообщения через Telegram Bot API
 const sendTelegramMessage = async (chatId, message) => {
     try {
@@ -437,10 +481,11 @@ export const sendBroadcast = async (req, res) => {
 
                 try {
                     const result = await executeBroadcast(payload);
+                    const persistedResult = compactBroadcastResult(result);
                     const updateOnResult = result.success
                         ? {
                               $set: {
-                                  result,
+                                  result: persistedResult,
                                   sentAt: new Date(),
                                   status: 'sent',
                               },
@@ -448,7 +493,7 @@ export const sendBroadcast = async (req, res) => {
                           }
                         : {
                               $set: {
-                                  result,
+                                  result: persistedResult,
                                   sentAt: new Date(),
                                   status: 'failed',
                                   error: result.message || 'Ошибка отправки',
@@ -551,7 +596,7 @@ export const processScheduledBroadcasts = async () => {
     for (const job of scheduled) {
         try {
             const result = await executeBroadcast(job.payload || {});
-            job.result = result;
+            job.result = compactBroadcastResult(result);
             job.sentAt = new Date();
             if (result.success) {
                 job.status = 'sent';
@@ -866,9 +911,11 @@ export const getScheduledBroadcasts = async (req, res) => {
 export const getSentBroadcasts = async (req, res) => {
     try {
         const schedules = await BroadcastSchedule.find({ status: { $in: ['sent', 'sending', 'failed'] } })
+            .select('scheduledAt status payload.title payload.message payload.imageUrl payload.buttonText result.sent result.failed result.total sentAt scheduledBy error createdAt updatedAt')
             .sort({ createdAt: -1 })
             .limit(100)
-            .populate('scheduledBy', 'fullName');
+            .populate('scheduledBy', 'fullName')
+            .lean();
 
         res.json({
             success: true,

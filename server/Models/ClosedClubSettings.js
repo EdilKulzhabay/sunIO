@@ -8,11 +8,21 @@ const ClosedClubSettingsSchema = new mongoose.Schema(
             trim: true,
             default: "",
         },
+        openChannelTitle: {
+            type: String,
+            trim: true,
+            default: "Открытый канал",
+        },
         /** Публичная ссылка на открытый чат */
         openChatLink: {
             type: String,
             trim: true,
             default: "",
+        },
+        openChatTitle: {
+            type: String,
+            trim: true,
+            default: "Открытый чат",
         },
         /** Ссылка на бота для доступа к закрытому каналу (подписка) */
         closedChannelLink: {
@@ -20,11 +30,21 @@ const ClosedClubSettingsSchema = new mongoose.Schema(
             trim: true,
             default: "",
         },
+        closedChannelTitle: {
+            type: String,
+            trim: true,
+            default: "Закрытый канал",
+        },
         /** Ссылка на бота для доступа к закрытому чату */
         closedChatLink: {
             type: String,
             trim: true,
             default: "",
+        },
+        closedChatTitle: {
+            type: String,
+            trim: true,
+            default: "Закрытый чат",
         },
         /** @deprecated дублирует open* при миграции; читать через getClosedClubSettingsDoc */
         channelLink: {

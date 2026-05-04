@@ -36,16 +36,17 @@ const SUN_PUBLIC_WEB_URL = (process.env.SUN_PUBLIC_WEB_URL || 'https://sun.psyli
   ''
 );
 
-/** Рассылка только для команды /web — GET JSON: https://sun.psylife.io/api/api/broadcast/:id */
-const WEB_COMMAND_BROADCAST_ID = '69ef95dd24196b1aa6c6f2a1';
+/** Рассылки для команд бота — GET JSON: https://sun.psylife.io/api/api/broadcast/:id */
+const HELP_COMMAND_BROADCAST_ID = '69b987b00f335a9904e35e21';
+const WEB_COMMAND_BROADCAST_ID = '69e5c03ef644e0e64e30c67d';
 
 /** База без хвостового /; по умолчанию …/api/api (два сегмента api). Переопределение: WEB_BROADCAST_JSON_BASE. */
-function webCommandBroadcastFetchUrl() {
+function commandBroadcastFetchUrl(broadcastId) {
   const base = (process.env.WEB_BROADCAST_JSON_BASE || `${SUN_PUBLIC_WEB_URL}/api/api`).replace(
     /\/$/,
     ''
   );
-  return `${base}/broadcast/${WEB_COMMAND_BROADCAST_ID}`;
+  return `${base}/broadcast/${broadcastId}`;
 }
 
 function resolvePublicAssetUrl(maybeRelative) {
@@ -524,7 +525,7 @@ bot.command('web', async (ctx) => {
   const telegramUserName = ctx.from?.username;
   if (telegramId == null) return;
   await sendBroadcastFromFetchedJson(
-    webCommandBroadcastFetchUrl(),
+    commandBroadcastFetchUrl(WEB_COMMAND_BROADCAST_ID),
     telegramId,
     telegramUserName,
     '[web]'
@@ -532,16 +533,22 @@ bot.command('web', async (ctx) => {
 });
 
 bot.command('help', async (ctx) => {
-  const chatId = ctx.chat.id;
-  const fromId = ctx.from.id;
+  const telegramId = ctx.from?.id;
+  const telegramUserName = ctx.from?.username;
+  if (telegramId == null) return;
   try {
-    await sendRestartHelpPhoto(chatId);
+    await sendBroadcastFromFetchedJson(
+      commandBroadcastFetchUrl(HELP_COMMAND_BROADCAST_ID),
+      telegramId,
+      telegramUserName,
+      '[help]'
+    );
   } catch (err) {
     if (err.response?.error_code === 403) {
-      console.log(`⚠️ Пользователь ${fromId} заблокировал бота (/help).`);
+      console.log(`⚠️ Пользователь ${telegramId} заблокировал бота (/help).`);
       return;
     }
-    console.error(`Ошибка /help для пользователя ${fromId}:`, err.message);
+    console.error(`Ошибка /help для пользователя ${telegramId}:`, err.message);
   }
 });
 

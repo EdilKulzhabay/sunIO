@@ -328,6 +328,7 @@ export const ClientAnalysisHealthList = () => {
                     starsRequired={selectedULAnalysisLHealth.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     contentTitle={selectedULAnalysisLHealth.title}
+                    contentDescription={selectedULAnalysisLHealth.shortDescription || ''}
                 />
             )}
         </div>

@@ -8,6 +8,7 @@ interface ClientInsufficientBonusModalProps {
     starsRequired: number;
     userBonus: number;
     contentTitle: string;
+    contentDescription: string;
 }
 
 export const BonusPolicyModal = ({ isOpen, onClose, pointsAwardingPolicy }: { isOpen: boolean; onClose: () => void; pointsAwardingPolicy?: any }) => {
@@ -125,6 +126,7 @@ export const ClientInsufficientBonusModal = ({
     starsRequired,
     userBonus,
     contentTitle,
+    contentDescription,
 }: ClientInsufficientBonusModalProps) => {
     const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
     const [pointsAwardingPolicy, setPointsAwardingPolicy] = useState<any>(null);
@@ -190,7 +192,8 @@ export const ClientInsufficientBonusModal = ({
                         <h3 className="text-xl font-bold mb-4">Недостаточно Солнц</h3>
                         <div className="mb-4">
                             <p className="mb-2">Вы хотите приобрести контент:</p>
-                            <p className="mb-4">{contentTitle}</p>
+                            <p className="mb-3 font-medium">{contentTitle}</p>
+                            <p className="mb-3 text-white/80 text-sm">{contentDescription}</p>
                             <p className="font-semibold text-lg mb-2">Стоимость в Солнцах: {starsRequired}</p>
                             <p className="font-semibold text-lg mb-4">У вас есть Солнца: {userBonus}</p>
                         </div>
@@ -240,7 +243,8 @@ export const ClientInsufficientBonusModal = ({
                         <h3 className="text-xl font-bold mb-4">Недостаточно Солнц</h3>
                         <div className="mb-6">
                             <p className="mb-2">Вы хотите приобрести контент:</p>
-                            <p className="mb-4">{contentTitle}</p>
+                            <p className="mb-3 font-medium">{contentTitle}</p>
+                            <p className="mb-3 text-white/80 text-sm">{contentDescription}</p>
                             <p className="font-semibold text-lg mb-2">Стоимость Солнц: {starsRequired}</p>
                             <p className="font-semibold text-lg mb-4">У вас есть Солнца: {userBonus}</p>
                         </div>

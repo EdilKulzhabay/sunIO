@@ -328,6 +328,7 @@ export const ClientRelationshipWorkshopList = () => {
                     starsRequired={selectedRelationshipWorkshop.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     contentTitle={selectedRelationshipWorkshop.title}
+                    contentDescription={selectedRelationshipWorkshop.shortDescription || 'asdasd'}
                 />
             )}
         </div>

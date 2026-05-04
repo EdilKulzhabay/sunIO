@@ -14,17 +14,25 @@ type Overview = {
 
 type ClubLinks = {
     openChannelLink: string;
+    openChannelTitle: string;
     openChatLink: string;
+    openChatTitle: string;
     closedChannelLink: string;
+    closedChannelTitle: string;
     closedChatLink: string;
+    closedChatTitle: string;
 };
 
 export const ClosedClubHub = () => {
     const [links, setLinks] = useState<ClubLinks>({
         openChannelLink: "",
+        openChannelTitle: "Открытый канал",
         openChatLink: "",
+        openChatTitle: "Открытый чат",
         closedChannelLink: "",
+        closedChannelTitle: "Закрытый канал",
         closedChatLink: "",
+        closedChatTitle: "Закрытый чат",
     });
     const [overview, setOverview] = useState<Overview | null>(null);
     const [loading, setLoading] = useState(true);
@@ -42,9 +50,13 @@ export const ClosedClubHub = () => {
                     const d = sRes.data.data;
                     setLinks({
                         openChannelLink: d.openChannelLink || "",
+                        openChannelTitle: d.openChannelTitle || "Открытый канал",
                         openChatLink: d.openChatLink || "",
+                        openChatTitle: d.openChatTitle || "Открытый чат",
                         closedChannelLink: d.closedChannelLink || "",
+                        closedChannelTitle: d.closedChannelTitle || "Закрытый канал",
                         closedChatLink: d.closedChatLink || "",
+                        closedChatTitle: d.closedChatTitle || "Закрытый чат",
                     });
                 }
                 if (mRes.data?.success && mRes.data.data) {
@@ -122,26 +134,26 @@ export const ClosedClubHub = () => {
                 ) : (
                     <div className="grid gap-4 md:grid-cols-2 max-w-5xl">
                         {card({
-                            title: "Открытый канал",
+                            title: links.openChannelTitle || "Открытый канал",
                             subtitle: "Публичная ссылка в профиле пользователя",
                             url: links.openChannelLink,
                             configurePath: "/admin/closed-club/open-channel",
                         })}
                         {card({
-                            title: "Открытый чат",
+                            title: links.openChatTitle || "Открытый чат",
                             subtitle: "Публичная ссылка в профиле пользователя",
                             url: links.openChatLink,
                             configurePath: "/admin/closed-club/open-chat",
                         })}
                         {card({
-                            title: "Закрытый канал",
+                            title: links.closedChannelTitle || "Закрытый канал",
                             subtitle: "Ссылка на бота + ID канала для добавления по подписке",
                             url: links.closedChannelLink,
                             configurePath: "/admin/closed-club/closed-channel",
                             membersPath: "/admin/closed-club/members/channel",
                         })}
                         {card({
-                            title: "Закрытый чат",
+                            title: links.closedChatTitle || "Закрытый чат",
                             subtitle: "Ссылка на бота + ID чата для добавления по подписке",
                             url: links.closedChatLink,
                             configurePath: "/admin/closed-club/closed-chat",

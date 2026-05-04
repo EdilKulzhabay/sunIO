@@ -3,10 +3,11 @@ import { routes } from "./routes";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useEffect } from "react";
-import { useTelegramFullscreen } from "./utils/telegramWebApp";
+import { useTelegramFullscreen, useWebViewVisualViewport } from "./utils/telegramWebApp";
 
 function App() {
     useTelegramFullscreen();
+    useWebViewVisualViewport();
     
     useEffect(() => {
         const tg = window.Telegram?.WebApp;

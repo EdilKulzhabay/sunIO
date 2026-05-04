@@ -331,6 +331,7 @@ export const ClientConsciousnessLibraryList = () => {
                     starsRequired={selectedConsciousnessLibrary.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     contentTitle={selectedConsciousnessLibrary.title}
+                    contentDescription={selectedConsciousnessLibrary.shortDescription || ''}
                 />
             )}
         </div>

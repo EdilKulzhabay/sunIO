@@ -13,9 +13,13 @@ export const ClosedClubSectionForm = () => {
     const kind: Section | null = SECTIONS.includes(section as Section) ? (section as Section) : null;
 
     const [openChannelLink, setOpenChannelLink] = useState("");
+    const [openChannelTitle, setOpenChannelTitle] = useState("");
     const [openChatLink, setOpenChatLink] = useState("");
+    const [openChatTitle, setOpenChatTitle] = useState("");
     const [closedChannelLink, setClosedChannelLink] = useState("");
+    const [closedChannelTitle, setClosedChannelTitle] = useState("");
     const [closedChatLink, setClosedChatLink] = useState("");
+    const [closedChatTitle, setClosedChatTitle] = useState("");
     const [channelTelegramId, setChannelTelegramId] = useState("");
     const [groupTelegramId, setGroupTelegramId] = useState("");
     const [loading, setLoading] = useState(true);
@@ -32,9 +36,13 @@ export const ClosedClubSectionForm = () => {
                 if (res.data?.success && res.data.data) {
                     const d = res.data.data;
                     setOpenChannelLink(d.openChannelLink || "");
+                    setOpenChannelTitle(d.openChannelTitle || "Открытый канал");
                     setOpenChatLink(d.openChatLink || "");
+                    setOpenChatTitle(d.openChatTitle || "Открытый чат");
                     setClosedChannelLink(d.closedChannelLink || "");
+                    setClosedChannelTitle(d.closedChannelTitle || "Закрытый канал");
                     setClosedChatLink(d.closedChatLink || "");
+                    setClosedChatTitle(d.closedChatTitle || "Закрытый чат");
                     setChannelTelegramId(d.channelTelegramId || "");
                     setGroupTelegramId(d.groupTelegramId || "");
                 }
@@ -51,13 +59,13 @@ export const ClosedClubSectionForm = () => {
         try {
             let payload: Record<string, string> = {};
             if (kind === "open-channel") {
-                payload = { openChannelLink };
+                payload = { openChannelLink, openChannelTitle };
             } else if (kind === "open-chat") {
-                payload = { openChatLink };
+                payload = { openChatLink, openChatTitle };
             } else if (kind === "closed-channel") {
-                payload = { closedChannelLink, channelTelegramId };
+                payload = { closedChannelLink, closedChannelTitle, channelTelegramId };
             } else if (kind === "closed-chat") {
-                payload = { closedChatLink, groupTelegramId };
+                payload = { closedChatLink, closedChatTitle, groupTelegramId };
             }
             const res = await api.put("/api/closed-club/settings", payload);
             if (res.data?.success) {
@@ -116,37 +124,77 @@ export const ClosedClubSectionForm = () => {
                 ) : (
                     <div className="bg-white rounded-lg shadow p-6 space-y-4">
                         {kind === "open-channel" && (
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Ссылка на открытый канал
-                                </label>
-                                <input
-                                    type="url"
-                                    value={openChannelLink}
-                                    onChange={(e) => setOpenChannelLink(e.target.value)}
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                                    placeholder="https://t.me/..."
-                                />
-                            </div>
+                            <>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Название ссылки
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={openChannelTitle}
+                                        onChange={(e) => setOpenChannelTitle(e.target.value)}
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                                        placeholder="Открытый канал"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Ссылка на открытый канал
+                                    </label>
+                                    <input
+                                        type="url"
+                                        value={openChannelLink}
+                                        onChange={(e) => setOpenChannelLink(e.target.value)}
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                                        placeholder="https://t.me/..."
+                                    />
+                                </div>
+                            </>
                         )}
 
                         {kind === "open-chat" && (
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Ссылка на открытый чат
-                                </label>
-                                <input
-                                    type="url"
-                                    value={openChatLink}
-                                    onChange={(e) => setOpenChatLink(e.target.value)}
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                                    placeholder="https://t.me/+..."
-                                />
-                            </div>
+                            <>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Название ссылки
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={openChatTitle}
+                                        onChange={(e) => setOpenChatTitle(e.target.value)}
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                                        placeholder="Открытый чат"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Ссылка на открытый чат
+                                    </label>
+                                    <input
+                                        type="url"
+                                        value={openChatLink}
+                                        onChange={(e) => setOpenChatLink(e.target.value)}
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                                        placeholder="https://t.me/+..."
+                                    />
+                                </div>
+                            </>
                         )}
 
                         {kind === "closed-channel" && (
                             <>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Название ссылки
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={closedChannelTitle}
+                                        onChange={(e) => setClosedChannelTitle(e.target.value)}
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                                        placeholder="Закрытый канал"
+                                    />
+                                </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Ссылка на бота (закрытый канал)
@@ -182,6 +230,18 @@ export const ClosedClubSectionForm = () => {
 
                         {kind === "closed-chat" && (
                             <>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Название ссылки
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={closedChatTitle}
+                                        onChange={(e) => setClosedChatTitle(e.target.value)}
+                                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                                        placeholder="Закрытый чат"
+                                    />
+                                </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Ссылка на бота (закрытый чат)

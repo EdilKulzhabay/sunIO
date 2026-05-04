@@ -120,7 +120,7 @@ export const ClientFAQ = () => {
                 <div 
                     className="flex flex-col justify-between mt-2 px-4 pb-4 flex-1 bg-[#031F23]"
                     style={{
-                        minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom + (isIosPwaStandalone() ? IOS_PWA_TOP_INSET_PX : 0))}px`,
+                        minHeight: `${screenHeight - (64 + safeAreaTop + safeAreaBottom + (isIosPwaStandalone() ? IOS_PWA_TOP_INSET_PX + 20 : 0))}px`,
                     }}
                 >
                     <div className="">

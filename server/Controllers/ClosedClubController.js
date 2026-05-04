@@ -7,9 +7,13 @@ const BOT_SERVER_URL = process.env.BOT_SERVER_URL || "http://localhost:5011";
 
 const ALLOWED_FIELDS = [
     "openChannelLink",
+    "openChannelTitle",
     "openChatLink",
+    "openChatTitle",
     "closedChannelLink",
+    "closedChannelTitle",
     "closedChatLink",
+    "closedChatTitle",
     "channelTelegramId",
     "groupTelegramId",
 ];
@@ -19,9 +23,13 @@ function serializeClosedClubForApi(doc) {
     const openChatLink = (doc.openChatLink || doc.chatLink || "").trim();
     return {
         openChannelLink,
+        openChannelTitle: (doc.openChannelTitle || "Открытый канал").trim(),
         openChatLink,
+        openChatTitle: (doc.openChatTitle || "Открытый чат").trim(),
         closedChannelLink: (doc.closedChannelLink || "").trim(),
+        closedChannelTitle: (doc.closedChannelTitle || "Закрытый канал").trim(),
         closedChatLink: (doc.closedChatLink || "").trim(),
+        closedChatTitle: (doc.closedChatTitle || "Закрытый чат").trim(),
         channelTelegramId: (doc.channelTelegramId || "").trim(),
         groupTelegramId: (doc.groupTelegramId || "").trim(),
     };
@@ -35,9 +43,13 @@ export const getPublicLinks = async (req, res) => {
             success: true,
             data: {
                 openChannelLink: s.openChannelLink,
+                openChannelTitle: s.openChannelTitle,
                 openChatLink: s.openChatLink,
+                openChatTitle: s.openChatTitle,
                 closedChannelLink: s.closedChannelLink,
+                closedChannelTitle: s.closedChannelTitle,
                 closedChatLink: s.closedChatLink,
+                closedChatTitle: s.closedChatTitle,
             },
         });
     } catch (error) {

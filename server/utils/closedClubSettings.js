@@ -31,7 +31,11 @@ export async function getClosedClubSettingsDoc() {
     if (!doc) {
         doc = await ClosedClubSettings.create({
             openChannelLink: DEFAULT_CHANNEL_LINK,
+            openChannelTitle: "Открытый канал",
             openChatLink: DEFAULT_CHAT_LINK,
+            openChatTitle: "Открытый чат",
+            closedChannelTitle: "Закрытый канал",
+            closedChatTitle: "Закрытый чат",
             channelLink: DEFAULT_CHANNEL_LINK,
             chatLink: DEFAULT_CHAT_LINK,
             channelTelegramId: process.env.CHANNEL_ID || "",

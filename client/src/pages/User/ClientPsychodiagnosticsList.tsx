@@ -328,6 +328,7 @@ export const ClientPsychodiagnosticsList = () => {
                     starsRequired={selectedULPsychodiagnostics.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     contentTitle={selectedULPsychodiagnostics.title}
+                    contentDescription={selectedULPsychodiagnostics.shortDescription || ''}
                 />
             )}
         </div>

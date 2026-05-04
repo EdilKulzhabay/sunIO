@@ -353,6 +353,7 @@ export const ClientHealthLabList = () => {
                     starsRequired={selectedHealthLab.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     contentTitle={selectedHealthLab.title}
+                    contentDescription={selectedHealthLab.shortDescription || ''}
                 />
             )}
         </div>

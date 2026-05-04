@@ -84,12 +84,6 @@ export const NAVIGATOR_LOCATION_INSTRUCTION_STEPS: NavigatorLocationSpotStep[] =
         originOffsetX: -16,
         originOffsetY: 14,
     },
-    {
-        targetId: 'navigator-instruction-spot-femininity-gazebo',
-        curveBend: 16,
-        originOffsetY: -2,
-        originOffsetX: -40,
-    },
 ];
 
 /** Удобный список id для привязок в разметке (дубликаты targetId из шагов). */

@@ -330,6 +330,7 @@ export const ClientMastersTowerList = () => {
                     starsRequired={selectedMastersTower.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     contentTitle={selectedMastersTower.title}
+                    contentDescription={selectedMastersTower.shortDescription || ''}
                 />
             )}
         </div>

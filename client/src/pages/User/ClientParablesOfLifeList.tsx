@@ -231,7 +231,7 @@ export const ClientParablesOfLifeList = () => {
             {selectedItem && (
                 <>
                     <ClientPurchaseConfirmModal isOpen={isPurchaseModalOpen} onClose={() => { setIsPurchaseModalOpen(false); setSelectedItem(null); }} contentId={selectedItem._id} contentType={CONTENT_TYPE} contentTitle={selectedItem.title} contentDescription={selectedItem.shortDescription || ''} starsRequired={selectedItem.starsRequired || 0} userBonus={userData?.bonus || 0} onPurchaseSuccess={async () => { await fetchUserData(); await fetchItems(); }} />
-                    <ClientInsufficientBonusModal isOpen={isInsufficientBonusModalOpen} onClose={() => { setIsInsufficientBonusModalOpen(false); setSelectedItem(null); }} starsRequired={selectedItem.starsRequired || 0} userBonus={userData?.bonus || 0} contentTitle={selectedItem.title} />
+                    <ClientInsufficientBonusModal isOpen={isInsufficientBonusModalOpen} onClose={() => { setIsInsufficientBonusModalOpen(false); setSelectedItem(null); }} starsRequired={selectedItem.starsRequired || 0} userBonus={userData?.bonus || 0} contentTitle={selectedItem.title} contentDescription={selectedItem.shortDescription || ''} />
                 </>
             )}
         </div>

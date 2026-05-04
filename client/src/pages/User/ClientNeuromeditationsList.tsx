@@ -298,6 +298,7 @@ export const ClientNeuromeditationsList = () => {
                         starsRequired={selectedItem.starsRequired || 0}
                         userBonus={userData?.bonus || 0}
                         contentTitle={selectedItem.title}
+                        contentDescription={selectedItem.shortDescription || ''}
                     />
                 </>
             )}

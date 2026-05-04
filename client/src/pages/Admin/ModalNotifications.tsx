@@ -299,6 +299,58 @@ export const ModalNotificationsAdmin = () => {
                     </button>
                 </div>
 
+                {/* Запланированные */}
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                        <CalendarClock size={18} />
+                        <h2 className="text-xl font-semibold text-gray-900">
+                            Запланированные модальные уведомления
+                        </h2>
+                    </div>
+                    {loadingScheduledRows && (
+                        <p className="text-gray-500 text-center py-4">Загрузка…</p>
+                    )}
+                    {!loadingScheduledRows && scheduledModalRows.length > 0 && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {scheduledModalRows.map((item) => (
+                                <div
+                                    key={item._id}
+                                    className="border border-amber-200 rounded-lg p-4 bg-amber-50/50 hover:bg-amber-50 transition-colors"
+                                >
+                                    {item.payload?.modalTitle && (
+                                        <div className="font-semibold text-gray-900 mb-1">
+                                            {item.payload.modalTitle}
+                                        </div>
+                                    )}
+                                    <div className="text-sm text-gray-700 line-clamp-2 mb-2">
+                                        {getDescriptionPreview(item.payload?.modalDescription)}
+                                    </div>
+                                    <div className="text-xs text-amber-700 font-medium mb-1">
+                                        {formatMsk(item.scheduledAt)}
+                                    </div>
+                                    {item.scheduledBy?.fullName && (
+                                        <div className="text-xs text-gray-500 mb-2">
+                                            Запланировал: {item.scheduledBy.fullName}
+                                        </div>
+                                    )}
+                                    <button
+                                        onClick={() => handleCancelScheduledModal(item._id)}
+                                        className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                                    >
+                                        <X size={16} />
+                                        Отменить
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {!loadingScheduledRows && scheduledModalRows.length === 0 && (
+                        <p className="text-gray-500 text-center py-4">
+                            Нет запланированных уведомлений
+                        </p>
+                    )}
+                </div>
+
                 {/* Сохранённые шаблоны */}
                 <div className="bg-white rounded-lg shadow-sm p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -357,58 +409,6 @@ export const ModalNotificationsAdmin = () => {
                     {!loadingSaved && savedTemplates.length === 0 && (
                         <p className="text-gray-500 text-center py-4">
                             Нет сохранённых шаблонов
-                        </p>
-                    )}
-                </div>
-
-                {/* Запланированные */}
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                    <div className="flex items-center gap-2 mb-4">
-                        <CalendarClock size={18} />
-                        <h2 className="text-xl font-semibold text-gray-900">
-                            Запланированные модальные уведомления
-                        </h2>
-                    </div>
-                    {loadingScheduledRows && (
-                        <p className="text-gray-500 text-center py-4">Загрузка…</p>
-                    )}
-                    {!loadingScheduledRows && scheduledModalRows.length > 0 && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            {scheduledModalRows.map((item) => (
-                                <div
-                                    key={item._id}
-                                    className="border border-amber-200 rounded-lg p-4 bg-amber-50/50 hover:bg-amber-50 transition-colors"
-                                >
-                                    {item.payload?.modalTitle && (
-                                        <div className="font-semibold text-gray-900 mb-1">
-                                            {item.payload.modalTitle}
-                                        </div>
-                                    )}
-                                    <div className="text-sm text-gray-700 line-clamp-2 mb-2">
-                                        {getDescriptionPreview(item.payload?.modalDescription)}
-                                    </div>
-                                    <div className="text-xs text-amber-700 font-medium mb-1">
-                                        {formatMsk(item.scheduledAt)}
-                                    </div>
-                                    {item.scheduledBy?.fullName && (
-                                        <div className="text-xs text-gray-500 mb-2">
-                                            Запланировал: {item.scheduledBy.fullName}
-                                        </div>
-                                    )}
-                                    <button
-                                        onClick={() => handleCancelScheduledModal(item._id)}
-                                        className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
-                                    >
-                                        <X size={16} />
-                                        Отменить
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                    {!loadingScheduledRows && scheduledModalRows.length === 0 && (
-                        <p className="text-gray-500 text-center py-4">
-                            Нет запланированных уведомлений
                         </p>
                     )}
                 </div>

@@ -327,6 +327,7 @@ export const ClientSpiritForgeList = () => {
                     starsRequired={selectedSpiritForge.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     contentTitle={selectedSpiritForge.title}
+                    contentDescription={selectedSpiritForge.shortDescription || ''}
                 />
             )}
         </div>

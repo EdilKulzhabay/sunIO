@@ -369,6 +369,7 @@ export const ClientPracticesList = () => {
                     starsRequired={selectedPractice.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     contentTitle={selectedPractice.title}
+                    contentDescription={selectedPractice.shortDescription || ''}
                 />
             )}
         </div>

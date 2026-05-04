@@ -328,6 +328,7 @@ export const ClientFemininityGazeboList = () => {
                     starsRequired={selectedFemininityGazebo.starsRequired || 0}
                     userBonus={userData?.bonus || 0}
                     contentTitle={selectedFemininityGazebo.title}
+                    contentDescription={selectedFemininityGazebo.shortDescription || ''}
                 />
             )}
         </div>

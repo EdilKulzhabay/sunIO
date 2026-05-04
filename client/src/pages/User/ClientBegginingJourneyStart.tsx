@@ -1,8 +1,10 @@
 import { UserLayout } from "../../components/User/UserLayout";
+import { BackNav } from "../../components/User/BackNav";
 import api from "../../api";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { RedButton } from "../../components/User/RedButton";
+import { useNavigate } from "react-router-dom";
 import { Switch } from "../../components/User/Switch";
-import { PwaBackButton } from "../../components/User/PwaBackButton";
 
 const toEmbedUrl = (url: string): string => {
     if (!url) return "";
@@ -38,8 +40,9 @@ const toEmbedUrl = (url: string): string => {
     return url;
 };
 
-export const ClientBegginingJourney = () => {
+export const ClientBegginingJourneyStart = () => {
     const [content, setContent] = useState<any>(null);
+    const navigate = useNavigate();
     const [locatedInRussia, setLocatedInRussia] = useState(true);
     const hasFetched = useRef(false);
 
@@ -105,10 +108,7 @@ export const ClientBegginingJourney = () => {
     return (
         <UserLayout>
             <div className="flex flex-col flex-1 min-h-screen">
-                <div className="flex items-center justify-between p-4">
-                    <h1 className="text-2xl font-semibold">Начало путешествия</h1>
-                    <PwaBackButton />
-                </div>
+                <BackNav title="Начало путешествия" />
                 <div className="px-4 mt-2 pb-10 bg-[#031F23] flex-1 flex flex-col justify-between">
                     <div>
                         <p dangerouslySetInnerHTML={{ __html: content?.title }}></p>
@@ -133,6 +133,13 @@ export const ClientBegginingJourney = () => {
                                 <Switch checked={locatedInRussia} onChange={handleLocatedInRussiaChange} />
                             </div>
                         )}
+                    </div>
+                    <div>
+                        <RedButton 
+                            text={'Далее'} 
+                            onClick={() => navigate('/client/ease-launch')} 
+                            className='w-full mt-4'
+                        />
                     </div>
                 </div>
             </div>

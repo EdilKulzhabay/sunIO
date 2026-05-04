@@ -140,7 +140,6 @@ import { ClientInvitedUsers } from "./pages/User/ClientInvitedUsers.tsx";
 import { ClientNavigator } from "./pages/User/ClientNavigator";
 import { ClientBegginingJourney } from "./pages/User/ClientBegginingJourney";
 import { ClientConnectError } from "./pages/User/ClientConnectError";
-import { ClientTasks } from "./pages/User/ClientTasks";
 import { ClientNewTask } from "./pages/User/ClientNewTask";
 import { ClientRegion } from "./pages/User/ClientRegion";
 import { ClientAppTemporarilyUnavailable } from "./pages/User/ClientAppTemporarilyUnavailable";
@@ -153,6 +152,7 @@ import { ClientContentSearch } from "./pages/User/ClientContentSearch";
 import { ClientChooseYourPath } from "./pages/User/ClientChooseYourPath";
 import { ClientHumanDesign } from "./pages/User/ClientHumanDesign";
 import { UserIosPwaTopInset } from "./components/UserIosPwaTopInset";
+import { ClientBegginingJourneyStart } from "./pages/User/ClientBegginingJourneyStart";
 
 // Компонент-обертка для всех маршрутов
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
@@ -387,8 +387,8 @@ export const routes = createBrowserRouter([
         element: <RootLayout><ProtectedRoute><ClientBegginingJourney /></ProtectedRoute></RootLayout>,
     },
     {
-        path: "/client/tasks",
-        element: <RootLayout><ProtectedRoute><ClientTasks /></ProtectedRoute></RootLayout>,
+        path: "/client/beggining-journey-start",
+        element: <RootLayout><ProtectedRoute><ClientBegginingJourneyStart /></ProtectedRoute></RootLayout>,
     },
     {
         path: "/client/new-task",

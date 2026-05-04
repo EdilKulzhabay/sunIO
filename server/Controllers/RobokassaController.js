@@ -4,6 +4,7 @@ import DepositLog from '../Models/DepositLog.js';
 import axios from 'axios';
 import 'dotenv/config';
 import { getClosedClubSettingsDoc } from '../utils/closedClubSettings.js';
+import { createRobokassaPaymentUrl, createRobokassaReceipt } from '../utils/robokassaPayment.js';
 
 export const handleResult = async (req, res) => {
     try {
@@ -149,40 +150,20 @@ export const createDeposit = async (req, res) => {
         const invId = Date.now();
         const description = 'Пополнение баланса приложения';
 
-        const receipt = {
-            sno: 'usn_income',
-            items: [
-                {
-                    name: 'Пополнение баланса приложения',
-                    quantity: 1,
-                    sum: parseFloat(outSum),
-                    tax: 'none',
-                    payment_method: 'prepayment_full',
-                    payment_object: 'service',
-                },
-            ],
-        };
+        const receipt = createRobokassaReceipt({
+            name: description,
+            sum: outSum,
+        });
 
-        const receiptJson = JSON.stringify(receipt);
-        const receiptEncoded = encodeURIComponent(receiptJson);
-
-        const signatureString =
-            `${MERCHANT_LOGIN}:${outSum}:${invId}:${receiptEncoded}:${PASSWORD_1}:Shp_userId=${userId}`;
-
-        const signature = crypto
-            .createHash('md5')
-            .update(signatureString)
-            .digest('hex');
-
-        const url =
-            `https://auth.robokassa.ru/Merchant/Index.aspx` +
-            `?MerchantLogin=${MERCHANT_LOGIN}` +
-            `&OutSum=${outSum}` +
-            `&InvId=${invId}` +
-            `&Description=${encodeURIComponent(description)}` +
-            `&Receipt=${encodeURIComponent(receiptEncoded)}` +
-            `&SignatureValue=${signature}` +
-            `&Shp_userId=${userId}`;
+        const url = createRobokassaPaymentUrl({
+            merchantLogin: MERCHANT_LOGIN,
+            password1: PASSWORD_1,
+            outSum,
+            invId,
+            description,
+            receipt,
+            userId,
+        });
 
         await DepositLog.create({
             userId,

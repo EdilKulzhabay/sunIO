@@ -87,7 +87,7 @@ const CATEGORY_RULES: Array<{ pattern: RegExp; objectType: string; category: str
     { pattern: /о клубе/i,                            objectType: 'Контент',       category: 'О клубе' },
     { pattern: /динамический контент/i,               objectType: 'Контент',       category: 'Динамический контент' },
     { pattern: /источник трафика бота/i,              objectType: 'Настройки',     category: 'Источники трафика' },
-    { pattern: /политику начисления баллов/i,         objectType: 'Настройки',     category: 'Политика начисления' },
+    { pattern: /политику начисления баллов/i,         objectType: 'Настройки',     category: 'Политика баллов' },
 ];
 
 function parseAction(raw: string): ParsedAction {

@@ -121,7 +121,7 @@ export const ClosedClubHub = () => {
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
                         <MessagesSquare className="text-indigo-600" size={32} />
-                        Закрытый клуб
+                        Чаты и каналы
                     </h1>
                     <p className="text-gray-600 mt-2">
                         Открытые ссылки ведут в Telegram напрямую. Закрытые — ссылки на бота: по подписке бот

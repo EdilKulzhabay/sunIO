@@ -50,7 +50,8 @@ import {
     LevelController,
     AssignmentController,
     ClientPageAnalyticsController,
-    ClosedClubController
+    ClosedClubController,
+    VkVideoController
 } from "./Controllers/index.js";
 import { authMiddleware, optionalAuthMiddleware, requireStaffAnalyticsMiddleware } from "./Middlewares/authMiddleware.js";
 import { requireRole } from "./Middlewares/roleMiddleware.js";
@@ -600,6 +601,9 @@ app.post("/api/video-progress/award-points-for-video", VideoProgressController.a
 app.get("/api/video-progress/:userId/:contentType/:contentId", VideoProgressController.getProgress);
 app.get("/api/video-progress/user/:userId/:contentType", VideoProgressController.getUserProgresses);
 app.post("/api/video-progress/batch/:userId/:contentType", VideoProgressController.getProgressesForContents);
+
+// ==================== VK Video ====================
+app.get("/api/vk-video/embed-url", VkVideoController.getEmbedUrl);
 
 // ==================== Subscription ====================
 // Ручной запуск проверки истекших подписок (для тестирования и администрирования)

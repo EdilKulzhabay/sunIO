@@ -36,7 +36,7 @@ export const ClientContentSearch = () => {
 
     useEffect(() => {
         const updateScreenHeight = () => {
-            setScreenHeight(window.innerHeight);
+            setScreenHeight(Math.round(window.visualViewport?.height || window.innerHeight));
             const root = document.documentElement;
             const computedStyle = getComputedStyle(root);
             const safeTop = computedStyle.getPropertyValue('--tg-safe-top') || '0px';
@@ -49,7 +49,13 @@ export const ClientContentSearch = () => {
         };
         updateScreenHeight();
         window.addEventListener('resize', updateScreenHeight);
-        return () => window.removeEventListener('resize', updateScreenHeight);
+        window.visualViewport?.addEventListener('resize', updateScreenHeight);
+        window.visualViewport?.addEventListener('scroll', updateScreenHeight);
+        return () => {
+            window.removeEventListener('resize', updateScreenHeight);
+            window.visualViewport?.removeEventListener('resize', updateScreenHeight);
+            window.visualViewport?.removeEventListener('scroll', updateScreenHeight);
+        };
     }, []);
 
     const handleSearch = async () => {
@@ -140,13 +146,20 @@ export const ClientContentSearch = () => {
                         </div>
                     </div>
 
-                    <button
-                        onClick={handleSearch}
-                        disabled={searchLoading}
-                        className="mt-4 w-full bg-[#C4841D] rounded-full py-2.5 text-center font-medium text-white disabled:opacity-50"
+                    <div
+                        className="sticky z-10 mt-4 bg-[#031F23] pt-2"
+                        style={{
+                            bottom: `calc(var(--app-keyboard-offset, 0px) + ${safeAreaBottom}px)`,
+                        }}
                     >
-                        {searchLoading ? 'Поиск...' : 'Найти'}
-                    </button>
+                        <button
+                            onClick={handleSearch}
+                            disabled={searchLoading}
+                            className="w-full bg-[#C4841D] rounded-full py-2.5 text-center font-medium text-white disabled:opacity-50"
+                        >
+                            {searchLoading ? 'Поиск...' : 'Найти'}
+                        </button>
+                    </div>
                 </div>
             </div>
         </UserLayout>

@@ -48,6 +48,23 @@ interface SentBroadcast {
 
 type SentSortKey = 'sentAt' | 'sent' | 'failed' | 'total';
 
+const getTitleScriptRank = (title: string) => {
+    const firstLetter = title.trim().match(/\p{L}/u)?.[0] || '';
+    if (/[\p{Script=Cyrillic}]/u.test(firstLetter)) return 0;
+    if (/[\p{Script=Latin}]/u.test(firstLetter)) return 1;
+    return 2;
+};
+
+const compareTitleCyrillicFirst = (a: string, b: string) => {
+    const rankDiff = getTitleScriptRank(a) - getTitleScriptRank(b);
+    if (rankDiff !== 0) return rankDiff;
+
+    return a.localeCompare(b, ['ru', 'en'], {
+        numeric: true,
+        sensitivity: 'base',
+    });
+};
+
 export const BroadcastAdmin = () => {
     const [savedBroadcasts, setSavedBroadcasts] = useState<SavedBroadcast[]>([]);
     const [scheduledBroadcasts, setScheduledBroadcasts] = useState<ScheduledBroadcast[]>([]);
@@ -170,6 +187,19 @@ export const BroadcastAdmin = () => {
         }
     };
 
+    const sortedScheduledBroadcasts = useMemo(
+        () => [...scheduledBroadcasts].sort((a, b) => compareTitleCyrillicFirst(
+            a.payload?.title || '',
+            b.payload?.title || ''
+        )),
+        [scheduledBroadcasts]
+    );
+
+    const sortedSavedBroadcasts = useMemo(
+        () => [...savedBroadcasts].sort((a, b) => compareTitleCyrillicFirst(a.title || '', b.title || '')),
+        [savedBroadcasts]
+    );
+
     const sortedSentBroadcasts = useMemo(() => {
         let list = [...sentBroadcasts];
 
@@ -231,7 +261,7 @@ export const BroadcastAdmin = () => {
         <AdminLayout>
             <div className="space-y-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Рассылка</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Рассылки</h1>
                     <p className="text-gray-600 mt-1">Отправка сообщений пользователям через Telegram бота</p>
                 </div>
 
@@ -252,9 +282,9 @@ export const BroadcastAdmin = () => {
                         <h2 className="text-xl font-semibold text-gray-900">Запланированные рассылки</h2>
                     </div>
                     {loadingScheduled && <p className="text-gray-500 text-center py-4">Загрузка...</p>}
-                    {!loadingScheduled && scheduledBroadcasts.length > 0 && (
+                    {!loadingScheduled && sortedScheduledBroadcasts.length > 0 && (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            {scheduledBroadcasts.map((item) => (
+                            {sortedScheduledBroadcasts.map((item) => (
                                 <div
                                     key={item._id}
                                     className="border border-amber-200 rounded-lg p-4 bg-amber-50/50 hover:bg-amber-50 transition-colors"
@@ -284,7 +314,7 @@ export const BroadcastAdmin = () => {
                             ))}
                         </div>
                     )}
-                    {!loadingScheduled && scheduledBroadcasts.length === 0 && (
+                    {!loadingScheduled && sortedScheduledBroadcasts.length === 0 && (
                         <p className="text-gray-500 text-center py-4">Нет запланированных рассылок</p>
                     )}
                 </div>
@@ -299,9 +329,9 @@ export const BroadcastAdmin = () => {
                         
                     </div>
                     {loading && <p className="text-gray-500 text-center py-4">Загрузка...</p>}
-                    {!loading && savedBroadcasts.length > 0 && (
+                    {!loading && sortedSavedBroadcasts.length > 0 && (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            {savedBroadcasts.map((broadcast) => (
+                            {sortedSavedBroadcasts.map((broadcast) => (
                                 <div
                                     key={broadcast._id}
                                     className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
@@ -334,7 +364,7 @@ export const BroadcastAdmin = () => {
                             ))}
                         </div>
                     )}
-                    {!loading && savedBroadcasts.length === 0 && (
+                    {!loading && sortedSavedBroadcasts.length === 0 && (
                         <p className="text-gray-500 text-center py-4">Нет сохраненных рассылок</p>
                     )}
                 </div>

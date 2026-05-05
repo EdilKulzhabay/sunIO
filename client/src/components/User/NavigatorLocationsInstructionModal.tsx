@@ -82,7 +82,7 @@ export const NAVIGATOR_LOCATION_INSTRUCTION_STEPS: NavigatorLocationSpotStep[] =
         targetId: 'navigator-instruction-spot-health-lab',
         curveBend: -40,
         originOffsetX: -16,
-        originOffsetY: 14,
+        originOffsetY: 18,
     },
 ];
 

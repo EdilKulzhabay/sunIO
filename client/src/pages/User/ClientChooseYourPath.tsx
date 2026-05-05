@@ -7,6 +7,7 @@ import api from "../../api";
 import { toast } from "react-toastify";
 import arrowDown from "../../assets/arrowDown.png";
 import { PathProgress, mapStepsFromApi, type StepRow } from "../../components/User/AssignmentPathMap";
+import { isIosPwaStandalone } from "../../utils/pwaEnv";
 
 const LS_KEY_SELECTED_ASSIGNMENT_ID = "clientNewTaskSelectedAssignmentId";
 
@@ -308,8 +309,14 @@ export const ClientChooseYourPath = () => {
                 ) : null}
             </div>
 
-            <div className="bg-[#031F23] rounded-t-2xl px-4 pt-3 pb-2 mt-4">
+            <div className={isIosPwaStandalone() ? 'pb-4' : 'bg-[#031F23] rounded-t-2xl px-4 pt-3 pb-2 mt-4'}>
                 <RedButton text="Далее" onClick={() => navigate("/main")} className="w-full" />
+                <button
+                    onClick={() => navigate(-1)}
+                    className="w-full block mt-4 bg-white/10 text-[#FFFFFF] py-2.5 text-center font-medium rounded-full cursor-pointer disabled:opacity-50"
+                >
+                    Назад
+                </button>
             </div>
         </div>
     );

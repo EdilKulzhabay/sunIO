@@ -237,7 +237,7 @@ export const AdminsAdmin = () => {
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {filteredAdmins.map((admin) => {
-                                        const isProtected = admin?.isSuperAdmin || false;
+                                        const isProtected = admin.fullName === 'admin';
                                         return (
                                             <tr key={admin._id} className={isProtected ? 'bg-yellow-50' : 'hover:bg-gray-50'}>
                                                 <td className="px-6 py-4 whitespace-nowrap">

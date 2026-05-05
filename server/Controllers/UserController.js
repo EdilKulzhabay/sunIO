@@ -2114,7 +2114,6 @@ export const updateAdmin = async (req, res) => {
         }
 
         // Удаляем поля, которые нельзя обновлять через этот метод
-        delete updateData.password;
         delete updateData.currentToken;
         delete updateData.refreshToken;
         delete updateData.refreshTokenWeb;
@@ -2124,6 +2123,13 @@ export const updateAdmin = async (req, res) => {
         delete updateData.clientDeviceIdMiniApp;
         delete updateData.browserWebSessions;
         delete updateData.miniAppWebSessions;
+
+        const newPassword = updateData.password;
+        if (newPassword && newPassword.trim() !== '') {
+            const salt = await bcrypt.genSalt(10);
+            const hash = await bcrypt.hash(newPassword, salt);
+            updateData.password = hash;
+        }
 
         // Валидация роли - если указана, должна быть одна из административных ролей
         const allowedRoles = ['admin', 'content_manager', 'client_manager'];

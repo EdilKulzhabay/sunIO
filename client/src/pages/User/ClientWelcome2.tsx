@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { UserLayout } from '../../components/User/UserLayout';
 import api from '../../api';
 import { openExternalLink } from '../../utils/telegramWebApp';
+import { isIosPwaStandalone } from '../../utils/pwaEnv';
+import { useNavigate } from 'react-router-dom';
 
 export const ClientWelcome2 = () => {
     const [content, setContent] = useState<any>(null);
     const [loading, setLoading] = useState(false);
-
+    const navigate = useNavigate();
     useEffect(() => {
         setLoading(true);
         const fetchContent = async () => {
@@ -79,6 +81,14 @@ export const ClientWelcome2 = () => {
                             >
                                 Официальный сайт
                             </button>
+                            {isIosPwaStandalone() ? (
+                                <button
+                                    onClick={() => navigate(-1)}
+                                    className="w-full block mt-4 bg-white/10 text-[#FFFFFF] py-2.5 text-center font-medium rounded-full cursor-pointer disabled:opacity-50"
+                                >
+                                    Назад
+                                </button>
+                            ) : null}
                         </div>
                     </div>
                 </div>

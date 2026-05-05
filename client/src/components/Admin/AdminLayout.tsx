@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -55,6 +55,8 @@ type MenuItem = {
     roles?: readonly string[];
 };
 
+const ADMIN_NAV_SCROLL_KEY = 'admin-layout-nav-scroll-top';
+
 const menuSections: { heading: string; items: MenuItem[] }[] = [
     {
         heading: 'Основные разделы',
@@ -76,20 +78,6 @@ const menuSections: { heading: string; items: MenuItem[] }[] = [
         ],
     },
     {
-        heading: 'Управление контентом',
-        items: [
-            { path: '/admin/dynamic-content', label: 'Динамический контент', icon: LayoutDashboard },
-            { path: '/admin/welcome', label: 'Приветствие', icon: Sparkles },
-            { path: '/admin/about-club', label: 'О клубе', icon: Info },
-            { path: '/admin/beggining-journey', label: 'Начало путешествия', icon: Compass },
-            { path: '/admin/points-awarding-policy', label: 'Политика начисления баллов', icon: Gift },
-            { path: '/admin/documents', label: 'Документы', icon: FileText },
-            { path: '/admin/navigator-descriptions', label: 'Описания навигатора', icon: Navigation },
-            { path: '/admin/activation-links', label: 'Ссылки активации', icon: Link2 },
-            { path: '/admin/levels', label: 'Уровни мастерства', icon: Layers },
-        ],
-    },
-    {
         heading: 'Контент страницы',
         items: [
             { path: '/admin/schedule', label: 'Расписание', icon: Calendar },
@@ -97,7 +85,6 @@ const menuSections: { heading: string; items: MenuItem[] }[] = [
             { path: '/admin/practice', label: 'Практики', icon: Dumbbell },
             { path: '/admin/faq', label: 'Частые вопросы', icon: HelpCircle },
             { path: '/admin/product-catalog', label: 'Платные продукты', icon: ShoppingBag },
-            { path: '/admin/about-club', label: 'О клубе', icon: Info },
             { path: '/admin/health-lab', label: 'Лаборатория здоровья', icon: Heart },
             { path: '/admin/analysis-health', label: 'Разборы - Здоровье', icon: Stethoscope },
             { path: '/admin/psychodiagnostics', label: 'Психодиагностика', icon: Brain },
@@ -114,6 +101,20 @@ const menuSections: { heading: string; items: MenuItem[] }[] = [
             { path: '/admin/masters-tower', label: 'Башня мастеров', icon: Castle },
         ],
     },
+    {
+        heading: 'Управление контентом',
+        items: [
+            { path: '/admin/dynamic-content', label: 'Динамический контент', icon: LayoutDashboard },
+            { path: '/admin/welcome', label: 'Приветствие', icon: Sparkles },
+            { path: '/admin/about-club', label: 'О клубе', icon: Info },
+            { path: '/admin/beggining-journey', label: 'Начало путешествия', icon: Compass },
+            { path: '/admin/points-awarding-policy', label: 'Политика баллов', icon: Gift },
+            { path: '/admin/documents', label: 'Документы', icon: FileText },
+            { path: '/admin/navigator-descriptions', label: 'Описания навигатора', icon: Navigation },
+            { path: '/admin/activation-links', label: 'Ссылки активации', icon: Link2 },
+            { path: '/admin/levels', label: 'Уровни мастерства', icon: Layers },
+        ],
+    },
 ];
 
 function visibleItems(items: MenuItem[], role: string | undefined) {
@@ -127,6 +128,19 @@ function visibleItems(items: MenuItem[], role: string | undefined) {
 export const AdminLayout = ({ children }: AdminLayoutProps) => {
     const location = useLocation();
     const { user, logout } = useAuth();
+    const navRef = useRef<HTMLElement>(null);
+
+    useEffect(() => {
+        const savedScrollTop = sessionStorage.getItem(ADMIN_NAV_SCROLL_KEY);
+        if (!savedScrollTop || !navRef.current) return;
+
+        navRef.current.scrollTop = Number(savedScrollTop);
+    }, []);
+
+    const handleNavScroll = () => {
+        if (!navRef.current) return;
+        sessionStorage.setItem(ADMIN_NAV_SCROLL_KEY, String(navRef.current.scrollTop));
+    };
 
     const isLinkActive = (path: string) =>
         location.pathname === path ||
@@ -145,7 +159,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
                     </Link>
                 </div>
 
-                <nav className="p-4 flex-1 overflow-y-auto">
+                <nav ref={navRef} onScroll={handleNavScroll} className="p-4 flex-1 overflow-y-auto">
                     <div className="space-y-6">
                         {menuSections.map((section) => {
                             const items = visibleItems(section.items, user?.role);

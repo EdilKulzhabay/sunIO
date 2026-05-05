@@ -159,10 +159,26 @@ async function sendPhotoResilient(chatId, fullImageUrl, photoOpts) {
 }
 
 /** HTML из редактора → подмножество Telegram HTML (иначе «Tag span must have class tg-spoiler» и т.п.). */
+function normalizeBroadcastWhitespace(raw) {
+  return raw
+    .replace(/&nbsp;|&#160;|&#xA0;/gi, ' ')
+    .replace(/\u00a0/g, ' ')
+    .split('\n')
+    .map((line) => line.replace(/[ \t\f\v]+/g, ' ').trim())
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 function broadcastHtmlToTelegramHtml(raw) {
   if (typeof raw !== 'string' || !raw) return '';
   let s = raw
+    .replace(/&nbsp;|&#160;|&#xA0;/gi, ' ')
+    .replace(/\u00a0/g, ' ')
     .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>\s*<p[^>]*>/gi, '\n\n')
+    .replace(/<p[^>]*>/gi, '')
+    .replace(/<\/p>/gi, '\n')
     .replace(/<\/div>\s*<div>/gi, '\n\n')
     .replace(/<\/?div>/gi, '')
     .trim();
@@ -181,7 +197,7 @@ function broadcastHtmlToTelegramHtml(raw) {
     s = next;
   }
 
-  return s;
+  return normalizeBroadcastWhitespace(s);
 }
 
 /**

@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { toast } from 'react-toastify';
 // import { Switch } from '../../components/User/Switch';
+import { isIosPwaStandalone } from '../../utils/pwaEnv';
 
 export const About = () => {
     const [content, setContent] = useState<any>(null);
@@ -140,6 +141,14 @@ export const About = () => {
                             Пропустить
                         </button> */}
                         <RedButton text="Вступить в Сообщество" onClick={handleJoinClub} className='w-full mt-4 cursor-pointer'/>
+                        {isIosPwaStandalone() ? (
+                            <button
+                                onClick={() => navigate(-1)}
+                                className="w-full block mt-4 bg-white/10 text-[#FFFFFF] py-2.5 text-center font-medium rounded-full cursor-pointer disabled:opacity-50"
+                            >
+                                Назад
+                            </button>
+                        ) : null}
                     </div>
                 </div>
                 {modalOpen && (

@@ -62,6 +62,23 @@ type EnrichedSentRow = ModalScheduleRow & { campaign: ModalCampaignRow | null };
 
 type SentRowsSortKey = 'sentAt' | 'count' | 'closed' | 'clicked';
 
+const getTitleScriptRank = (title: string) => {
+    const firstLetter = title.trim().match(/\p{L}/u)?.[0] || '';
+    if (/[\p{Script=Cyrillic}]/u.test(firstLetter)) return 0;
+    if (/[\p{Script=Latin}]/u.test(firstLetter)) return 1;
+    return 2;
+};
+
+const compareTitleCyrillicFirst = (a: string, b: string) => {
+    const rankDiff = getTitleScriptRank(a) - getTitleScriptRank(b);
+    if (rankDiff !== 0) return rankDiff;
+
+    return a.localeCompare(b, ['ru', 'en'], {
+        numeric: true,
+        sensitivity: 'base',
+    });
+};
+
 function formatMsk(iso?: string | null) {
     if (!iso) return '—';
     try {
@@ -225,6 +242,22 @@ export const ModalNotificationsAdmin = () => {
         }));
     }, [sentModalRows, campaigns]);
 
+    const sortedScheduledModalRows = useMemo(
+        () => [...scheduledModalRows].sort((a, b) => compareTitleCyrillicFirst(
+            a.payload?.modalTitle || '',
+            b.payload?.modalTitle || ''
+        )),
+        [scheduledModalRows]
+    );
+
+    const sortedSavedTemplates = useMemo(
+        () => [...savedTemplates].sort((a, b) => compareTitleCyrillicFirst(
+            a.title || a.modalTitle || '',
+            b.title || b.modalTitle || ''
+        )),
+        [savedTemplates]
+    );
+
     const sortedSentModalRows = useMemo(() => {
         let list = [...enrichedSentRows];
 
@@ -283,10 +316,6 @@ export const ModalNotificationsAdmin = () => {
             <div className="space-y-6">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Модальные уведомления</h1>
-                    <p className="text-gray-600 mt-1">
-                        Создание модальных уведомлений для пользователей (в режиме «Все» анонимы не
-                        включаются)
-                    </p>
                 </div>
 
                 <div className="flex justify-end -mt-3">
@@ -310,9 +339,9 @@ export const ModalNotificationsAdmin = () => {
                     {loadingScheduledRows && (
                         <p className="text-gray-500 text-center py-4">Загрузка…</p>
                     )}
-                    {!loadingScheduledRows && scheduledModalRows.length > 0 && (
+                    {!loadingScheduledRows && sortedScheduledModalRows.length > 0 && (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            {scheduledModalRows.map((item) => (
+                            {sortedScheduledModalRows.map((item) => (
                                 <div
                                     key={item._id}
                                     className="border border-amber-200 rounded-lg p-4 bg-amber-50/50 hover:bg-amber-50 transition-colors"
@@ -344,7 +373,7 @@ export const ModalNotificationsAdmin = () => {
                             ))}
                         </div>
                     )}
-                    {!loadingScheduledRows && scheduledModalRows.length === 0 && (
+                    {!loadingScheduledRows && sortedScheduledModalRows.length === 0 && (
                         <p className="text-gray-500 text-center py-4">
                             Нет запланированных уведомлений
                         </p>
@@ -364,9 +393,9 @@ export const ModalNotificationsAdmin = () => {
                     {loadingSaved && (
                         <p className="text-gray-500 text-center py-4">Загрузка…</p>
                     )}
-                    {!loadingSaved && savedTemplates.length > 0 && (
+                    {!loadingSaved && sortedSavedTemplates.length > 0 && (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            {savedTemplates.map((t) => (
+                            {sortedSavedTemplates.map((t) => (
                                 <div
                                     key={t._id}
                                     className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
@@ -406,7 +435,7 @@ export const ModalNotificationsAdmin = () => {
                             ))}
                         </div>
                     )}
-                    {!loadingSaved && savedTemplates.length === 0 && (
+                    {!loadingSaved && sortedSavedTemplates.length === 0 && (
                         <p className="text-gray-500 text-center py-4">
                             Нет сохранённых шаблонов
                         </p>

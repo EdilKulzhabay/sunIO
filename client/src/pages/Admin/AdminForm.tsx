@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AdminLayout } from '../../components/Admin/AdminLayout';
 import { MyInput } from '../../components/Admin/MyInput';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import api from '../../api';
 import { toast } from 'react-toastify';
 
@@ -20,6 +20,7 @@ export const AdminForm = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState<FormData>({
         fullName: '',
         mail: '',
@@ -181,13 +182,23 @@ export const AdminForm = () => {
                             <label className="block text-sm font-medium mb-2">
                                 Пароль
                             </label>
-                            <input
-                                type="password"
-                                value={formData.password}
-                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                placeholder={id ? "Оставьте пустым, чтобы не менять пароль" : "Оставьте пустым для автогенерации"}
-                                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={formData.password}
+                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    placeholder={id ? "Оставьте пустым, чтобы не менять пароль" : "Оставьте пустым для автогенерации"}
+                                    className="w-full p-2 pr-10 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword((prev) => !prev)}
+                                    className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700"
+                                    aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
                             {id && (
                                 <p className="mt-1 text-xs text-gray-500">
                                     Оставьте поле пустым, чтобы не изменять пароль

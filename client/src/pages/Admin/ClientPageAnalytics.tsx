@@ -18,6 +18,10 @@ interface PathRow {
     totalViews: number;
 }
 
+interface ContentPageRow {
+    path: string;
+}
+
 interface SummaryData {
     totalEvents: number;
     byPath: PathRow[];
@@ -59,12 +63,14 @@ export const ClientPageAnalytics = () => {
     } | null>(null);
 
     const [titleMap, setTitleMap] = useState<Map<string, string>>(new Map());
+    const [contentPages, setContentPages] = useState<ContentPageRow[]>([]);
 
     const sections = useMemo(() => getAllSections(), []);
 
     useEffect(() => {
         const load = async () => {
             const map = new Map<string, string>();
+            const pages: ContentPageRow[] = [];
             await Promise.all(
                 CONTENT_CATEGORY_OPTIONS.map(async (opt) => {
                     try {
@@ -74,7 +80,13 @@ export const ClientPageAnalytics = () => {
                             ? res.data.data
                             : [];
                         items.forEach((item) => {
-                            if (item.title) map.set(String(item._id).toLowerCase() as string, item.title);
+                            const id = String(item._id);
+                            const title = item.title?.trim();
+                            if (!id || !title) return;
+                            map.set(id.toLowerCase(), title);
+                            pages.push({
+                                path: `${opt.clientPath}/${id}`,
+                            });
                         });
                     } catch {
                         /* ignore */
@@ -82,10 +94,29 @@ export const ClientPageAnalytics = () => {
                 })
             );
             setTitleMap(map);
-            console.log("titleMap", map);
+            setContentPages(pages);
         };
         load();
     }, []);
+
+    const summaryPathsWithContent = useMemo(() => {
+        const byPath = new Map<string, PathRow>();
+
+        summary?.byPath.forEach((row) => {
+            byPath.set(row.path, row);
+        });
+
+        contentPages.forEach((page) => {
+            if (!byPath.has(page.path)) {
+                byPath.set(page.path, {
+                    path: page.path,
+                    totalViews: 0,
+                });
+            }
+        });
+
+        return Array.from(byPath.values());
+    }, [summary, contentPages]);
 
     const fetchSummaryAndTop = useCallback(async () => {
         setLoading(true);
@@ -110,11 +141,11 @@ export const ClientPageAnalytics = () => {
     }, [fetchSummaryAndTop]);
 
     const filteredSummaryPaths = useMemo(() => {
-        if (!summary) return [];
-        return summary.byPath
+        if (!summary && contentPages.length === 0) return [];
+        return summaryPathsWithContent
             .filter((row) => !isExcludedPath(row.path))
             .filter((row) => !sectionFilter || getClientPageSection(row.path) === sectionFilter);
-    }, [summary, sectionFilter]);
+    }, [summary, contentPages.length, summaryPathsWithContent, sectionFilter]);
 
     const filteredTotalViews = useMemo(
         () => filteredSummaryPaths.reduce((acc, r) => acc + r.totalViews, 0),

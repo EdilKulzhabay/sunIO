@@ -1,10 +1,10 @@
 import { UserLayout } from "../../components/User/UserLayout";
-import { BackNav } from "../../components/User/BackNav";
 import api from "../../api";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { RedButton } from "../../components/User/RedButton";
 import { useNavigate } from "react-router-dom";
 import { Switch } from "../../components/User/Switch";
+import { isIosPwaStandalone } from "../../utils/pwaEnv";
 
 const toEmbedUrl = (url: string): string => {
     if (!url) return "";
@@ -108,7 +108,9 @@ export const ClientBegginingJourneyStart = () => {
     return (
         <UserLayout>
             <div className="flex flex-col flex-1 min-h-screen">
-                <BackNav title="Начало путешествия" />
+                <div className="flex items-center justify-between gap-3 p-4">
+                    <h1 className="text-2xl font-semibold flex-1 min-w-0">Начало путешествия</h1>
+                </div>
                 <div className="px-4 mt-2 pb-10 bg-[#031F23] flex-1 flex flex-col justify-between">
                     <div>
                         <p dangerouslySetInnerHTML={{ __html: content?.title }}></p>
@@ -134,12 +136,18 @@ export const ClientBegginingJourneyStart = () => {
                             </div>
                         )}
                     </div>
-                    <div>
+                    <div className={isIosPwaStandalone() ? 'pb-4' : ''}>
                         <RedButton 
                             text={'Далее'} 
                             onClick={() => navigate('/client/ease-launch')} 
                             className='w-full mt-4'
                         />
+                        <button
+                            onClick={() => navigate(-1)}
+                            className="w-full block mt-4 bg-white/10 text-[#FFFFFF] py-2.5 text-center font-medium rounded-full cursor-pointer disabled:opacity-50"
+                        >
+                            Назад
+                        </button>
                     </div>
                 </div>
             </div>

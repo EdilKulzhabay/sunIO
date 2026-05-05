@@ -2,11 +2,11 @@ import crypto from 'crypto';
 
 const ROBOKASSA_PAYMENT_URL = 'https://auth.robokassa.ru/Merchant/Index.aspx';
 
-const encodeRobokassaParam = (value) => encodeURIComponent(String(value))
-    .replace(/[!'()*]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
+const encodeRobokassaParam = (value) => encodeURIComponent(String(value));
 
 const sanitizeReceiptName = (name) => String(name || '')
     .replace(/[\r\n\t]/g, ' ')
+    .replace(/[^\p{L}\p{N}\s.,№-]/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, 128);
@@ -41,32 +41,46 @@ export const createRobokassaPaymentUrl = ({
     description,
     receipt,
     userId,
+    isTest = false,
 }) => {
+    const login = String(merchantLogin || '').trim();
+    const password = String(password1 || '').trim();
+    const sum = String(outSum || '').trim();
+    const invoiceId = String(invId || '').trim();
     const receiptJson = JSON.stringify(receipt);
     const receiptEncoded = encodeRobokassaParam(receiptJson);
-    const shpUserId = userId ? `Shp_userId=${userId}` : null;
-    const signatureParts = [merchantLogin, outSum, invId, receiptEncoded, password1];
+    const shpParams = userId
+        ? [{ name: 'Shp_userId', value: String(userId) }]
+        : [];
+    const sortedShpParams = [...shpParams].sort((a, b) => a.name.localeCompare(b.name));
+    const signatureParts = [login, sum, invoiceId, receiptEncoded, password];
 
-    if (shpUserId) {
-        signatureParts.push(shpUserId);
-    }
+    sortedShpParams.forEach((param) => {
+        signatureParts.push(`${param.name}=${param.value}`);
+    });
 
     const signature = crypto
         .createHash('md5')
         .update(signatureParts.join(':'))
-        .digest('hex');
+        .digest('hex')
+        .toUpperCase();
 
     const params = [
-        `MerchantLogin=${encodeRobokassaParam(merchantLogin)}`,
-        `OutSum=${encodeRobokassaParam(outSum)}`,
-        `InvId=${encodeRobokassaParam(invId)}`,
+        `MerchantLogin=${encodeRobokassaParam(login)}`,
+        `OutSum=${encodeRobokassaParam(sum)}`,
+        `InvId=${encodeRobokassaParam(invoiceId)}`,
         `Description=${encodeRobokassaParam(description)}`,
         `Receipt=${receiptEncoded}`,
-        `SignatureValue=${encodeRobokassaParam(signature)}`,
     ];
 
-    if (userId) {
-        params.push(`Shp_userId=${encodeRobokassaParam(userId)}`);
+    sortedShpParams.forEach((param) => {
+        params.push(`${param.name}=${encodeRobokassaParam(param.value)}`);
+    });
+
+    params.push(`SignatureValue=${encodeRobokassaParam(signature)}`);
+
+    if (isTest) {
+        params.push('IsTest=1');
     }
 
     return `${ROBOKASSA_PAYMENT_URL}?${params.join('&')}`;

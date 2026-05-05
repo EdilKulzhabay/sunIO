@@ -6,6 +6,9 @@ import 'dotenv/config';
 import { getClosedClubSettingsDoc } from '../utils/closedClubSettings.js';
 import { createRobokassaPaymentUrl, createRobokassaReceipt } from '../utils/robokassaPayment.js';
 
+const isRobokassaTestMode = () =>
+    process.env.ROBOKASSA_TEST_MODE === '1' || process.env.ROBOKASSA_TEST_MODE === 'true';
+
 export const handleResult = async (req, res) => {
     try {
         console.log("handleResult req.body:", req.body);
@@ -17,7 +20,9 @@ export const handleResult = async (req, res) => {
             return res.status(400).send("ERROR: Missing required parameters");
         }
 
-        const password2 = process.env.ROBOKASSA_PASSWORD2;
+        const password2 = isRobokassaTestMode()
+            ? (process.env.ROBOKASSA_TEST_PASSWORD2 || process.env.ROBOKASSA_PASSWORD2)
+            : process.env.ROBOKASSA_PASSWORD2;
         
         let signatureString = `${OutSum}:${InvId}:${password2}`;
         if (Shp_userId) {
@@ -144,7 +149,10 @@ export const createDeposit = async (req, res) => {
         }
 
         const MERCHANT_LOGIN = process.env.ROBOKASSA_MERCHANT_LOGIN;
-        const PASSWORD_1 = process.env.ROBOKASSA_PASSWORD1;
+        const IS_TEST = isRobokassaTestMode();
+        const PASSWORD_1 = IS_TEST
+            ? (process.env.ROBOKASSA_TEST_PASSWORD1 || process.env.ROBOKASSA_PASSWORD1)
+            : process.env.ROBOKASSA_PASSWORD1;
 
         const outSum = parseFloat(amount).toFixed(2);
         const invId = Date.now();
@@ -163,6 +171,7 @@ export const createDeposit = async (req, res) => {
             description,
             receipt,
             userId,
+            isTest: IS_TEST,
         });
 
         await DepositLog.create({

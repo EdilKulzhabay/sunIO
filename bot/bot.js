@@ -170,6 +170,39 @@ function normalizeBroadcastWhitespace(raw) {
     .trim();
 }
 
+function getHtmlAttr(attrs, name) {
+  const re = new RegExp(`${name}\\s*=\\s*["']([^"']*)["']`, 'i');
+  return String(attrs || '').match(re)?.[1] || '';
+}
+
+function hasBoldFormatting(attrs) {
+  const s = String(attrs || '');
+  return /font-weight\s*:\s*(bold|[6-9]00)/i.test(s) ||
+    /class\s*=\s*["'][^"']*(font-bold|font-semibold|font-extrabold|bold)[^"']*["']/i.test(s);
+}
+
+function hasUnderlineFormatting(attrs) {
+  const s = String(attrs || '');
+  return /text-decoration(?:-line)?\s*:\s*[^;"']*underline/i.test(s) ||
+    /class\s*=\s*["'][^"']*(underline)[^"']*["']/i.test(s);
+}
+
+function wrapTelegramInline(inner, attrs) {
+  let out = inner;
+  if (hasUnderlineFormatting(attrs)) out = `<u>${out}</u>`;
+  if (hasBoldFormatting(attrs)) out = `<b>${out}</b>`;
+  return out;
+}
+
+function sanitizeTelegramLinks(html) {
+  return html.replace(/<a([^>]*)>([\s\S]*?)<\/a>/gi, (_full, attrs, inner) => {
+    const href = getHtmlAttr(attrs, 'href').trim();
+    if (!href) return inner;
+    const safeHref = href.replace(/"/g, '&quot;');
+    return `<a href="${safeHref}">${wrapTelegramInline(inner, attrs)}</a>`;
+  });
+}
+
 function broadcastHtmlToTelegramHtml(raw) {
   if (typeof raw !== 'string' || !raw) return '';
   let s = raw
@@ -183,19 +216,27 @@ function broadcastHtmlToTelegramHtml(raw) {
     .replace(/<\/?div>/gi, '')
     .trim();
 
-  s = s.replace(
-    /<span[^>]*(?:font-weight\s*:\s*bold|font-weight\s*:\s*"bold"|font-weight\s*:\s*700)[^>]*>([\s\S]*?)<\/span>/gi,
-    '<b>$1</b>'
-  );
+  s = s
+    .replace(/<(strong|b)(?:\s[^>]*)?>/gi, '<b>')
+    .replace(/<\/(strong|b)>/gi, '</b>')
+    .replace(/<(em|i)(?:\s[^>]*)?>/gi, '<i>')
+    .replace(/<\/(em|i)>/gi, '</i>')
+    .replace(/<(ins|u)(?:\s[^>]*)?>/gi, '<u>')
+    .replace(/<\/(ins|u)>/gi, '</u>');
 
   for (let i = 0; i < 24; i++) {
     const next = s.replace(/<span([^>]*)>([\s\S]*?)<\/span>/gi, (_full, attrs, inner) => {
-      if (/class\s*=\s*["'][^"']*tg-spoiler[^"']*["']/i.test(attrs)) return _full;
-      return inner;
+      const formattedInner = wrapTelegramInline(inner, attrs);
+      if (/class\s*=\s*["'][^"']*tg-spoiler[^"']*["']/i.test(attrs)) {
+        return `<span class="tg-spoiler">${formattedInner}</span>`;
+      }
+      return formattedInner;
     });
     if (next === s) break;
     s = next;
   }
+
+  s = sanitizeTelegramLinks(s);
 
   return normalizeBroadcastWhitespace(s);
 }

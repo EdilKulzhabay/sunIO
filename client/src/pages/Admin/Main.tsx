@@ -57,20 +57,6 @@ const cardSections = [
         ],
     },
     {
-        title: 'Управление контентом',
-        cards: [
-            { title: 'Динамический контент', icon: LayoutDashboard, path: '/admin/dynamic-content', color: 'bg-teal-500', description: 'Управление динамическим контентом' },
-            { title: 'Приветствие', icon: Sparkles, path: '/admin/welcome', color: 'bg-amber-500', description: 'Контент на странице Приветствие' },
-            { title: 'О клубе', icon: Info, path: '/admin/about-club', color: 'bg-cyan-600', description: 'Контент на странице О клубе' },
-            { title: 'Начало путешествия', icon: Compass, path: '/admin/beggining-journey', color: 'bg-sky-500', description: 'Контент начала путешествия' },
-            { title: 'Политика баллов', icon: Gift, path: '/admin/points-awarding-policy', color: 'bg-amber-600', description: 'Политика баллов' },
-            { title: 'Документы', icon: FileText, path: '/admin/documents', color: 'bg-stone-500', description: 'Управление документами' },
-            { title: 'Описания навигатора', icon: Navigation, path: '/admin/navigator-descriptions', color: 'bg-blue-600', description: 'Управление описаниями навигатора' },
-            { title: 'Ссылки активации', icon: Link2, path: '/admin/activation-links', color: 'bg-teal-600', description: 'Активация тела, здоровья, Рода, Духа' },
-            { title: 'Уровни мастерства', icon: Layers, path: '/admin/levels', color: 'bg-violet-600', description: 'Настройка уровней мастерства' },
-        ],
-    },
-    {
         title: 'Контент страницы',
         cards: [
             { title: 'Расписание', icon: Calendar, path: '/admin/schedule', color: 'bg-indigo-500', description: 'События и вебинары' },
@@ -92,6 +78,20 @@ const cardSections = [
             { title: 'Научные открытия', icon: FlaskConical, path: '/admin/scientific-discoveries', color: 'bg-cyan-600', description: 'Контент Научные открытия' },
             { title: 'Беседка женственности', icon: Flower2, path: '/admin/femininity-gazebo', color: 'bg-fuchsia-500', description: 'Контент Беседки женственности' },
             { title: 'Башня мастеров', icon: Castle, path: '/admin/masters-tower', color: 'bg-stone-600', description: 'Контент Башни мастеров' },
+        ],
+    },
+    {
+        title: 'Управление контентом',
+        cards: [
+            { title: 'Динамический контент', icon: LayoutDashboard, path: '/admin/dynamic-content', color: 'bg-teal-500', description: 'Управление динамическим контентом' },
+            { title: 'Приветствие', icon: Sparkles, path: '/admin/welcome', color: 'bg-amber-500', description: 'Контент на странице Приветствие' },
+            { title: 'О клубе', icon: Info, path: '/admin/about-club', color: 'bg-cyan-600', description: 'Контент на странице О клубе' },
+            { title: 'Начало путешествия', icon: Compass, path: '/admin/beggining-journey', color: 'bg-sky-500', description: 'Контент начала путешествия' },
+            { title: 'Политика баллов', icon: Gift, path: '/admin/points-awarding-policy', color: 'bg-amber-600', description: 'Политика баллов' },
+            { title: 'Документы', icon: FileText, path: '/admin/documents', color: 'bg-stone-500', description: 'Управление документами' },
+            { title: 'Описания навигатора', icon: Navigation, path: '/admin/navigator-descriptions', color: 'bg-blue-600', description: 'Управление описаниями навигатора' },
+            { title: 'Ссылки активации', icon: Link2, path: '/admin/activation-links', color: 'bg-teal-600', description: 'Активация тела, здоровья, Рода, Духа' },
+            { title: 'Уровни мастерства', icon: Layers, path: '/admin/levels', color: 'bg-violet-600', description: 'Настройка уровней мастерства' },
         ],
     },
 ];

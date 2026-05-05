@@ -26,6 +26,9 @@ import PurchaseLog from "../Models/PurchaseLog.js";
 import DepositLog from "../Models/DepositLog.js";
 import { createRobokassaPaymentUrl, createRobokassaReceipt } from "../utils/robokassaPayment.js";
 
+const isRobokassaTestMode = () =>
+    process.env.ROBOKASSA_TEST_MODE === '1' || process.env.ROBOKASSA_TEST_MODE === 'true';
+
 const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 465,
@@ -2283,7 +2286,10 @@ export const payment = async (req, res) => {
         }
 
         const MERCHANT_LOGIN = process.env.ROBOKASSA_MERCHANT_LOGIN;
-        const PASSWORD_1 = process.env.ROBOKASSA_PASSWORD1;
+        const IS_TEST = isRobokassaTestMode();
+        const PASSWORD_1 = IS_TEST
+            ? (process.env.ROBOKASSA_TEST_PASSWORD1 || process.env.ROBOKASSA_PASSWORD1)
+            : process.env.ROBOKASSA_PASSWORD1;
 
         const outSum = '500.00';
         const invId = Date.now();
@@ -2302,6 +2308,7 @@ export const payment = async (req, res) => {
             description,
             receipt,
             userId,
+            isTest: IS_TEST,
         });
 
         user.paymentLink = url;

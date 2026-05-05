@@ -79,6 +79,7 @@ export const ClosedClubHub = () => {
         url: string;
         configurePath: string;
         membersPath?: string;
+        isOpen: boolean;
     }) => (
         <div className="bg-white rounded-lg shadow p-6 border border-gray-100">
             <div className="flex items-start justify-between gap-4">
@@ -86,12 +87,14 @@ export const ClosedClubHub = () => {
                     <h2 className="text-lg font-semibold text-gray-900">{opts.title}</h2>
                     <p className="text-xs text-gray-500 mt-0.5">{opts.subtitle}</p>
                     <p className="text-sm text-gray-500 mt-2 break-all">{opts.url || "—"}</p>
-                    <div className="mt-3 text-sm text-gray-600 space-y-1">
-                        <div>
-                            С подпиской в приложении:{" "}
-                            <span className="font-medium">{overview?.appSubscribersWithTelegramCount ?? "—"}</span>
+                    {!opts.isOpen ? (
+                        <div className="mt-3 text-sm text-gray-600 space-y-1">
+                            <div>
+                                С подпиской в приложении:{" "}
+                                <span className="font-medium">{overview?.appSubscribersWithTelegramCount ?? "—"}</span>
+                            </div>
                         </div>
-                    </div>
+                    ) : null}
                 </div>
                 <div className="flex flex-col gap-2 shrink-0">
                     <Link
@@ -138,26 +141,30 @@ export const ClosedClubHub = () => {
                             subtitle: "Публичная ссылка в профиле пользователя",
                             url: links.openChannelLink,
                             configurePath: "/admin/closed-club/open-channel",
+                            isOpen: true,
                         })}
                         {card({
                             title: links.openChatTitle || "Открытый чат",
                             subtitle: "Публичная ссылка в профиле пользователя",
                             url: links.openChatLink,
                             configurePath: "/admin/closed-club/open-chat",
+                            isOpen: true,
                         })}
                         {card({
                             title: links.closedChannelTitle || "Закрытый канал",
-                            subtitle: "Ссылка на бота + ID канала для добавления по подписке",
+                            subtitle: "Ссылка на канал/чат",
                             url: links.closedChannelLink,
                             configurePath: "/admin/closed-club/closed-channel",
                             membersPath: "/admin/closed-club/members/channel",
+                            isOpen: false,
                         })}
                         {card({
                             title: links.closedChatTitle || "Закрытый чат",
-                            subtitle: "Ссылка на бота + ID чата для добавления по подписке",
+                            subtitle: "Ссылка на канал/чат",
                             url: links.closedChatLink,
                             configurePath: "/admin/closed-club/closed-chat",
                             membersPath: "/admin/closed-club/members/chat",
+                            isOpen: false,
                         })}
                     </div>
                 )}

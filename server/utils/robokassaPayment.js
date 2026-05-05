@@ -70,7 +70,7 @@ export const createRobokassaPaymentUrl = ({
         `OutSum=${encodeRobokassaParam(sum)}`,
         `InvId=${encodeRobokassaParam(invoiceId)}`,
         `Description=${encodeRobokassaParam(description)}`,
-        `Receipt=${receiptEncoded}`,
+        `Receipt=${encodeRobokassaParam(receiptEncoded)}`,
     ];
 
     sortedShpParams.forEach((param) => {

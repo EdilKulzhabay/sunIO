@@ -127,8 +127,9 @@ export const ClosedClubHub = () => {
                         Чаты и каналы
                     </h1>
                     <p className="text-gray-600 mt-2">
-                        Открытые ссылки ведут в Telegram напрямую. Закрытые — ссылки на бота: по подписке бот
-                        добавляет пользователей в канал и чат (ID ниже — для API бота).
+                        Открытые ссылки ведут в Telegram напрямую. Закрытые ссылки хранят адрес канала/чата для
+                        администраторов, а пользователям в профиле открывается бот: по подписке он выдаёт
+                        одноразовую ссылку для входа.
                     </p>
                 </div>
 
@@ -152,7 +153,7 @@ export const ClosedClubHub = () => {
                         })}
                         {card({
                             title: links.closedChannelTitle || "Закрытый канал",
-                            subtitle: "Ссылка на канал/чат",
+                            subtitle: "Закрытая ссылка на канал",
                             url: links.closedChannelLink,
                             configurePath: "/admin/closed-club/closed-channel",
                             membersPath: "/admin/closed-club/members/channel",
@@ -160,7 +161,7 @@ export const ClosedClubHub = () => {
                         })}
                         {card({
                             title: links.closedChatTitle || "Закрытый чат",
-                            subtitle: "Ссылка на канал/чат",
+                            subtitle: "Закрытая ссылка на чат",
                             url: links.closedChatLink,
                             configurePath: "/admin/closed-club/closed-chat",
                             membersPath: "/admin/closed-club/members/chat",

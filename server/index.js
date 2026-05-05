@@ -291,6 +291,7 @@ app.put("/api/bot-traffic-sources/:id", authMiddleware, BotTrafficSourceControll
 app.delete("/api/bot-traffic-sources/:id", authMiddleware, BotTrafficSourceController.remove);
 
 app.get("/api/closed-club/public-links", ClosedClubController.getPublicLinks);
+app.get("/api/closed-club/bot-settings", ClosedClubController.getBotSettings);
 app.get("/api/closed-club/settings", authMiddleware, requireClosedClubAccess, ClosedClubController.getSettings);
 app.put("/api/closed-club/settings", authMiddleware, requireClosedClubAccess, ClosedClubController.updateSettings);
 app.get("/api/closed-club/members", authMiddleware, requireClosedClubAccess, ClosedClubController.getMembers);

@@ -29,6 +29,8 @@ const pendingStartData = new Map();
 
 // Deep link из подсказки с restart.jpg — не реферал, только повторный /start
 const RESTART_HINT_START_PARAM = 'reopen';
+const CLOSED_CLUB_CHANNEL_START_PARAM = 'closed_channel';
+const CLOSED_CLUB_CHAT_START_PARAM = 'closed_chat';
 
 /** Публичный origin сайта (ссылки в приложении). */
 const SUN_PUBLIC_WEB_URL = (process.env.SUN_PUBLIC_WEB_URL || 'https://sun.psylife.io').replace(
@@ -344,6 +346,8 @@ function parseDeepLinkStart(startParam) {
   if (startParam == null || startParam === '') return {};
   const trimmed = String(startParam).trim();
   if (trimmed === RESTART_HINT_START_PARAM) return {};
+  if (trimmed === CLOSED_CLUB_CHANNEL_START_PARAM) return { closedClubTarget: 'channel' };
+  if (trimmed === CLOSED_CLUB_CHAT_START_PARAM) return { closedClubTarget: 'chat' };
   if (trimmed.startsWith('page_')) {
     const rest = trimmed.slice(5);
     if (!rest) return {};
@@ -418,6 +422,103 @@ function buildOpenSunWebAppUrl(telegramId, telegramUserName, pagePath) {
   return appendWebAppBootstrapSearchParams(u.toString(), telegramId);
 }
 
+async function fetchClosedClubBotSettings() {
+  const secret = process.env.BOT_API_SECRET;
+  if (!secret) return null;
+
+  try {
+    const { data } = await axios.get(`${process.env.API_URL}/api/closed-club/bot-settings`, {
+      headers: { 'X-Bot-Secret': secret },
+      timeout: 10000,
+    });
+    return data?.success ? data.data : null;
+  } catch (error) {
+    console.error('[closed-club] Не удалось загрузить настройки клуба:', error.message);
+    return null;
+  }
+}
+
+async function createClosedClubInviteLink(chatId, userId, title) {
+  await executeUserOperation(async () => {
+    return bot.telegram.unbanChatMember(chatId, userId, { only_if_banned: true });
+  }).catch(() => null);
+
+  const inviteLink = await executeUserOperation(async () => {
+    return bot.telegram.createChatInviteLink(chatId, {
+      member_limit: 1,
+      expire_date: Math.floor(Date.now() / 1000) + 60 * 60,
+    });
+  });
+
+  return {
+    title,
+    url: inviteLink.invite_link,
+  };
+}
+
+async function sendClosedClubAccess(ctx, target) {
+  const telegramId = ctx.from?.id;
+  const telegramUserName = ctx.from?.username;
+  if (telegramId == null) return true;
+
+  let user;
+  try {
+    const { data } = await axios.get(`${process.env.API_URL}/api/user/telegram/${telegramId}`);
+    user = data?.user;
+  } catch {
+    await ctx.reply('Сначала активируйте приложение «Солнце», затем повторите переход к закрытому клубу.');
+    return true;
+  }
+
+  const subscriptionEndDate = user?.subscriptionEndDate ? new Date(user.subscriptionEndDate) : null;
+  const hasActiveSubscription = Boolean(
+    user?.hasPaid &&
+    subscriptionEndDate &&
+    subscriptionEndDate.getTime() > Date.now()
+  );
+
+  if (!hasActiveSubscription) {
+    await ctx.reply('Доступ к закрытому клубу доступен только при активной подписке.', {
+      reply_markup: {
+        inline_keyboard: [[
+          {
+            text: '☀️ Открыть Солнце',
+            web_app: { url: buildOpenSunWebAppUrl(telegramId, telegramUserName, '/client/profile') },
+          },
+        ]],
+      },
+    });
+    return true;
+  }
+
+  const settings = await fetchClosedClubBotSettings();
+  const chatId = target === 'channel'
+    ? (settings?.channelTelegramId || process.env.CHANNEL_ID)
+    : (settings?.groupTelegramId || process.env.GROUP_ID);
+  const title = target === 'channel'
+    ? (settings?.closedChannelTitle || 'Закрытый канал')
+    : (settings?.closedChatTitle || 'Закрытый чат');
+
+  if (!chatId) {
+    await ctx.reply(`Доступ к разделу «${title}» пока не настроен. Напишите администратору.`);
+    return true;
+  }
+
+  try {
+    const invite = await createClosedClubInviteLink(chatId, telegramId, title);
+    await ctx.reply(`Вам открыт доступ: ${invite.title}\n\nСсылка действует 1 час.`, {
+      reply_markup: {
+        inline_keyboard: [[{ text: '🔗 Присоединиться', url: invite.url }]],
+      },
+    });
+  } catch (error) {
+    console.error(`[closed-club] Ошибка выдачи доступа ${target} пользователю ${telegramId}:`, error.message);
+    await ctx.reply('Не удалось создать ссылку доступа. Проверьте, что бот является администратором канала/чата.');
+  }
+
+  return true;
+}
+
 /**
  * Текст + картинка restart.jpg — подсказка «нажать /start и снова принять документы».
  * Используется: отложенное сообщение после активации, команда /help.
@@ -448,6 +549,10 @@ bot.start(async (ctx) => {
 
   const startParam = ctx.startParam || (ctx.message?.text?.split(' ')[1] || null);
   const parsed = parseDeepLinkStart(startParam);
+  if (parsed.closedClubTarget) {
+    await sendClosedClubAccess(ctx, parsed.closedClubTarget);
+    return;
+  }
   if (Object.keys(parsed).length > 0) {
     pendingStartData.set(String(telegramId), parsed);
   }

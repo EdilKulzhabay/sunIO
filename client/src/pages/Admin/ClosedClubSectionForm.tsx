@@ -108,10 +108,9 @@ export const ClosedClubSectionForm = () => {
                             <>Публичная ссылка для кнопки в профиле приложения (открывается в Telegram).</>
                         ) : (
                             <>
-                                Укажите ссылку на бота (например{" "}
-                                <code className="bg-gray-100 px-1 rounded text-xs">https://t.me/ВашБот?start=club</code>
-                                ), чтобы пользователь мог запросить доступ. ID канала или чата — тот же, что для
-                                добавления через бота при оплате подписки (как{" "}
+                                Укажите ссылку на закрытый канал/чат и его Telegram ID. Пользователи в приложении
+                                будут открывать бота, а бот по активной подписке выдаст одноразовую ссылку для входа.
+                                ID канала или чата — тот же, что для добавления через бота при оплате подписки (как{" "}
                                 <code className="bg-gray-100 px-1 rounded text-xs">CHANNEL_ID</code> /{" "}
                                 <code className="bg-gray-100 px-1 rounded text-xs">GROUP_ID</code>).
                             </>
@@ -197,17 +196,18 @@ export const ClosedClubSectionForm = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Ссылка на бота (закрытый канал)
+                                        Ссылка на закрытый канал
                                     </label>
                                     <input
                                         type="url"
                                         value={closedChannelLink}
                                         onChange={(e) => setClosedChannelLink(e.target.value)}
                                         className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                                        placeholder="https://t.me/io_sun_bot?start=..."
+                                        placeholder="https://t.me/+..."
                                     />
                                     <p className="text-sm text-gray-500 mt-1">
-                                        Пользователь откроет бота; дальше логика доступа к закрытому каналу — в боте.
+                                        Эта ссылка видна администраторам. Пользователям будет открываться бот, который
+                                        выдаст персональную invite-ссылку по активной подписке.
                                     </p>
                                 </div>
                                 <div>
@@ -244,14 +244,14 @@ export const ClosedClubSectionForm = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Ссылка на бота (закрытый чат)
+                                        Ссылка на закрытый чат
                                     </label>
                                     <input
                                         type="url"
                                         value={closedChatLink}
                                         onChange={(e) => setClosedChatLink(e.target.value)}
                                         className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                                        placeholder="https://t.me/io_sun_bot?start=..."
+                                        placeholder="https://t.me/+..."
                                     />
                                 </div>
                                 <div>

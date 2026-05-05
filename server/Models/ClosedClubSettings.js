@@ -24,7 +24,7 @@ const ClosedClubSettingsSchema = new mongoose.Schema(
             trim: true,
             default: "Открытый чат",
         },
-        /** Ссылка на бота для доступа к закрытому каналу (подписка) */
+        /** Админская ссылка на закрытый канал; пользователям отдаётся deep-link на бота */
         closedChannelLink: {
             type: String,
             trim: true,
@@ -35,7 +35,7 @@ const ClosedClubSettingsSchema = new mongoose.Schema(
             trim: true,
             default: "Закрытый канал",
         },
-        /** Ссылка на бота для доступа к закрытому чату */
+        /** Админская ссылка на закрытый чат; пользователям отдаётся deep-link на бота */
         closedChatLink: {
             type: String,
             trim: true,

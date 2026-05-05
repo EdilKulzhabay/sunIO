@@ -35,6 +35,17 @@ function serializeClosedClubForApi(doc) {
     };
 }
 
+function getBotDeepLink(startParam) {
+    const botUsername = (
+        process.env.BOT_USERNAME ||
+        process.env.TELEGRAM_BOT_USERNAME ||
+        process.env.CLOSED_CLUB_BOT_USERNAME ||
+        ""
+    ).replace(/^@/, "").trim();
+
+    return botUsername ? `https://t.me/${botUsername}?start=${startParam}` : "";
+}
+
 export const getPublicLinks = async (req, res) => {
     try {
         const doc = await getClosedClubSettingsDoc();
@@ -46,15 +57,44 @@ export const getPublicLinks = async (req, res) => {
                 openChannelTitle: s.openChannelTitle,
                 openChatLink: s.openChatLink,
                 openChatTitle: s.openChatTitle,
-                closedChannelLink: s.closedChannelLink,
+                closedChannelLink: getBotDeepLink("closed_channel"),
                 closedChannelTitle: s.closedChannelTitle,
-                closedChatLink: s.closedChatLink,
+                closedChatLink: getBotDeepLink("closed_chat"),
                 closedChatTitle: s.closedChatTitle,
             },
         });
     } catch (error) {
         console.error("ClosedClubController.getPublicLinks:", error);
         res.status(500).json({ success: false, message: "Ошибка при загрузке ссылок" });
+    }
+};
+
+export const getBotSettings = async (req, res) => {
+    try {
+        const secret = process.env.BOT_API_SECRET;
+        const receivedSecret = req.headers["x-bot-secret"];
+
+        if (!secret || receivedSecret !== secret) {
+            return res.status(403).json({ success: false, message: "Доступ запрещен" });
+        }
+
+        const doc = await getClosedClubSettingsDoc();
+        const s = serializeClosedClubForApi(doc);
+
+        res.json({
+            success: true,
+            data: {
+                closedChannelLink: s.closedChannelLink,
+                closedChannelTitle: s.closedChannelTitle,
+                closedChatLink: s.closedChatLink,
+                closedChatTitle: s.closedChatTitle,
+                channelTelegramId: s.channelTelegramId,
+                groupTelegramId: s.groupTelegramId,
+            },
+        });
+    } catch (error) {
+        console.error("ClosedClubController.getBotSettings:", error);
+        res.status(500).json({ success: false, message: "Ошибка при загрузке настроек для бота" });
     }
 };
 
